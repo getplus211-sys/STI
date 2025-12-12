@@ -142,7 +142,7 @@
               // જો યુઝર લોગ-ઇન હોય
               const userName = user.email.split('@')[0]; // ઇમેઇલમાંથી યુઝરનું નામ મેળવો
               loginButtonDiv.innerHTML = `
-              <span class="nav-link" style="color:white; margin-left:20px;">Welcome, ${userName}</span>
+              <span class="nav-link" style="color:white; margin-left:20px;">${userName}</span>
               <a href="#" onclick="netlifyIdentity.logout(); return false;" class="nav-link" style="color:white; text-decoration:none; margin-left:20px; font-weight:bold;">
                   LOGOUT
               </a>
@@ -194,4 +194,5 @@
 
 </body>
 </html>
+
 
