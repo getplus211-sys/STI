@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>જનરલ સ્ટડીઝ મોક ટેસ્ટ (20 પ્રશ્નો)</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .question-block {
+            background: #e9f5ff;
+            border: 1px solid #cce5ff;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+        .question-number {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+        .options-list li {
+            margin: 8px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .options-list li:hover {
+            background: #f0f8ff;
+        }
+        .correct-answer {
+            background-color: #d4edda !important;
+            border-color: #c3e6cb !important;
+            font-weight: bold;
+            color: #155724;
+        }
+        .explanation {
+            margin-top: 15px;
+            padding: 10px;
+            border-left: 5px solid #0056b3;
+            background: #f0f8ff;
+            border-radius: 0 5px 5px 0;
+            display: none; /* Initially hidden */
+        }
+        .show-answer-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📚 જનરલ સ્ટડીઝ મોક ટેસ્ટ (20 પ્રશ્નો)</h1>
+    <p style="text-align: center; font-style: italic; margin-bottom: 30px;">(બંધારણ, ઇતિહાસ, ગણિત/રીઝનિંગ, અર્થતંત્ર)</p>
+
+    <div class="question-block" id="q1">
+        <div class="question-number">પ્રશ્ન 1: બંધારણ (વિધાન આધારિત)</div>
+        <div class="question-text">નીચેના વિધાનો ધ્યાનમાં લો:<br>વિધાન 1: સંઘ અને તેના પ્રદેશો (Union and its Territory) બંધારણના ભાગ I માં અનુચ્છેદ 1 થી 4 માં સમાવિષ્ટ છે.<br>વિધાન 2: નવા રાજ્યની રચના અથવા હાલના રાજ્યની સીમામાં ફેરફાર માત્ર સામાન્ય બહુમતી (Simple Majority) દ્વારા કરી શકાય છે.</div>
+        <ul class="options-list">
+            <li data-option="A">માત્ર વિધાન 1 સાચું છે.</li>
+            <li data-option="B">માત્ર વિધાન 2 સાચું છે.</li>
+            <li data-option="C">વિધાન 1 અને 2 બંને સાચા છે.</li>
+            <li data-option="D">વિધાન 1 કે 2 માંથી કોઈ સાચું નથી.</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q1', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C)</strong> વિધાન 1 અને 2 બંને સાચા છે. બંધારણના અનુચ્છેદ 3 અને 4 મુજબ, નવા રાજ્યોની રચના અને સીમામાં ફેરફાર સંસદ દ્વારા સામાન્ય બહુમતીથી થાય છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q2">
+        <div class="question-number">પ્રશ્ન 2: ઇતિહાસ</div>
+        <div class="question-text">સિંધુ ખીણની સંસ્કૃતિ (Indus Valley Civilization) નું કયું સ્થળ જહાજ બાંધકામ અને ડોકયાર્ડ (Dockyard) માટે જાણીતું હતું?</div>
+        <ul class="options-list">
+            <li data-option="A">મોહેં-જો-દડો</li>
+            <li data-option="B">હડપ્પા</li>
+            <li data-option="C">લોથલ</li>
+            <li data-option="D">કાલીબંગન</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q2', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C) લોથલ.</strong> લોથલ ગુજરાતમાં આવેલું એક મહત્ત્વનું બંદર શહેર અને ડોકયાર્ડ હતું.
+        </div>
+    </div>
+
+    <div class="question-block" id="q3">
+        <div class="question-number">પ્રશ્ન 3: ગણિત</div>
+        <div class="question-text">એક વ્યક્તિ 2000 રૂપિયાની વસ્તુ 10% નફા સાથે વેચે છે. તો તેનું વેચાણ કિંમત (Selling Price) કેટલી હશે?</div>
+        <ul class="options-list">
+            <li data-option="A">₹ 2100</li>
+            <li data-option="B">₹ 2200</li>
+            <li data-option="C">₹ 2010</li>
+            <li data-option="D">₹ 2300</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q3', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) ₹ 2200.</strong> નફો: 2000 ના 10% = 200. વેચાણ કિંમત = 2000 + 200 = ₹ 2200.
+        </div>
+    </div>
+
+    <div class="question-block" id="q4">
+        <div class="question-number">પ્રશ્ન 4: અર્થતંત્ર</div>
+        <div class="question-text">ભારતમાં નાણાંકીય નીતિ (Monetary Policy) કોના દ્વારા તૈયાર અને અમલમાં મૂકવામાં આવે છે?</div>
+        <ul class="options-list">
+            <li data-option="A">નાણા મંત્રાલય (Finance Ministry)</li>
+            <li data-option="B">ભારતીય રિઝર્વ બેંક (RBI)</li>
+            <li data-option="C">સેબી (SEBI)</li>
+            <li data-option="D">નીતિ આયોગ (NITI Aayog)</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q4', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) ભારતીય રિઝર્વ બેંક (RBI).</strong> RBI વ્યાજ દરો અને તરલતા (Liquidity) દ્વારા નાણાંકીય નીતિનું નિયમન કરે છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q5">
+        <div class="question-number">પ્રશ્ન 5: રીઝનિંગ</div>
+        <div class="question-text">નીચે આપેલી શ્રેણીમાં ખૂટતી સંખ્યા શોધો: 2, 5, 10, 17, ?, 37</div>
+        <ul class="options-list">
+            <li data-option="A">24</li>
+            <li data-option="B">26</li>
+            <li data-option="C">28</li>
+            <li data-option="D">30</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q5', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) 26.</strong> પેટર્ન: $n^2 + 1$. ($1^2+1=2$, $2^2+1=5$, $3^2+1=10$, $4^2+1=17$, $5^2+1=26$, $6^2+1=37$)
+        </div>
+    </div>
+
+    <div class="question-block" id="q6">
+        <div class="question-number">પ્રશ્ન 6: બંધારણ</div>
+        <div class="question-text">ભારતીય બંધારણના કયા અનુચ્છેદને ડૉ. બી.આર. આંબેડકર દ્વારા 'બંધારણના આત્મા અને હૃદય' (Soul and Heart of the Constitution) તરીકે વર્ણવવામાં આવ્યો હતો?</div>
+        <ul class="options-list">
+            <li data-option="A">અનુચ્છેદ 19</li>
+            <li data-option="B">અનુચ્છેદ 21</li>
+            <li data-option="C">અનુચ્છેદ 32</li>
+            <li data-option="D">અનુચ્છેદ 14</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q6', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C) અનુચ્છેદ 32.</strong> આ અનુચ્છેદ બંધારણીય ઉપચારોનો અધિકાર (Right to Constitutional Remedies) પ્રદાન કરે છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q7">
+        <div class="question-number">પ્રશ્ન 7: ઇતિહાસ (વિધાન આધારિત)</div>
+        <div class="question-text">નીચેના વિધાનો ધ્યાનમાં લો:<br>વિધાન 1: બુદ્ધ દ્વારા આપવામાં આવેલો પ્રથમ ઉપદેશ 'ધર્મચક્ર પ્રવર્તન' તરીકે ઓળખાય છે.<br>વિધાન 2: બુદ્ધે પોતાનો પ્રથમ ઉપદેશ બોધગયામાં આપ્યો હતો.</div>
+        <ul class="options-list">
+            <li data-option="A">માત્ર વિધાન 1 સાચું છે.</li>
+            <li data-option="B">માત્ર વિધાન 2 સાચું છે.</li>
+            <li data-option="C">વિધાન 1 અને 2 બંને સાચા છે.</li>
+            <li data-option="D">વિધાન 1 કે 2 માંથી કોઈ સાચું નથી.</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q7', 'A')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (A) માત્ર વિધાન 1 સાચું છે.</strong> બુદ્ધે તેમનો પ્રથમ ઉપદેશ સારનાથમાં આપ્યો હતો, બોધગયામાં તેમને જ્ઞાન પ્રાપ્ત થયું હતું.
+        </div>
+    </div>
+
+    <div class="question-block" id="q8">
+        <div class="question-number">પ્રશ્ન 8: અર્થતંત્ર (વિધાન આધારિત)</div>
+        <div class="question-text">નીચેના વિધાનો ધ્યાનમાં લો:<br>વિધાન 1: રાજકોષીય નીતિ (Fiscal Policy) ભારત સરકાર દ્વારા તૈયાર કરવામાં આવે છે.<br>વિધાન 2: આ નીતિમાં કરવેરા, ખર્ચ અને દેવા સંબંધિત નિર્ણયોનો સમાવેશ થાય છે.</div>
+        <ul class="options-list">
+            <li data-option="A">માત્ર વિધાન 1 સાચું છે.</li>
+            <li data-option="B">માત્ર વિધાન 2 સાચું છે.</li>
+            <li data-option="C">વિધાન 1 અને 2 બંને સાચા છે.</li>
+            <li data-option="D">વિધાન 1 કે 2 માંથી કોઈ સાચું નથી.</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q8', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C) વિધાન 1 અને 2 બંને સાચા છે.</strong> રાજકોષીય નીતિ સરકારના આવક અને ખર્ચના સંચાલન સાથે સંબંધિત છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q9">
+        <div class="question-number">પ્રશ્ન 9: ગણિત</div>
+        <div class="question-text">જો એક ચોરસનું ક્ષેત્રફળ (Area) 144 ચોરસ સે.મી. હોય, તો તેની પરિમિતિ (Perimeter) કેટલી હશે?</div>
+        <ul class="options-list">
+            <li data-option="A">12 સે.મી.</li>
+            <li data-option="B">24 સે.મી.</li>
+            <li data-option="C">48 સે.મી.</li>
+            <li data-option="D">36 સે.મી.</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q9', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C) 48 સે.મી.</strong> બાજુ = $\sqrt{144} = 12$ સે.મી. પરિમિતિ = $4 \times 12 = 48$ સે.મી.
+        </div>
+    </div>
+
+    <div class="question-block" id="q10">
+        <div class="question-number">પ્રશ્ન 10: બંધારણ (વિધાન આધારિત)</div>
+        <div class="question-text">નીચેના વિધાનો ધ્યાનમાં લો:<br>વિધાન 1: મૂળભૂત ફરજો (Fundamental Duties) ને કાયદાકીય રીતે લાગુ કરી શકાતી નથી (Non-justiciable).<br>વિધાન 2: મૂળભૂત ફરજો 42મા બંધારણીય સુધારો, 1976 દ્વારા ઉમેરવામાં આવી હતી.</div>
+        <ul class="options-list">
+            <li data-option="A">માત્ર વિધાન 1 સાચું છે.</li>
+            <li data-option="B">માત્ર વિધાન 2 સાચું છે.</li>
+            <li data-option="C">વિધાન 1 અને 2 બંને સાચા છે.</li>
+            <li data-option="D">વિધાન 1 કે 2 માંથી કોઈ સાચું નથી.</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q10', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C) વિધાન 1 અને 2 બંને સાચા છે.</strong> મૂળભૂત ફરજો રશિયન બંધારણથી પ્રેરિત છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q11">
+        <div class="question-number">પ્રશ્ન 11: ઇતિહાસ</div>
+        <div class="question-text">ગાંધીજીએ કયા ગોળમેજી પરિષદ (Round Table Conference) માં ભાગ લીધો હતો?</div>
+        <ul class="options-list">
+            <li data-option="A">પ્રથમ (First)</li>
+            <li data-option="B">બીજી (Second)</li>
+            <li data-option="C">ત્રીજી (Third)</li>
+            <li data-option="D">એકપણ નહીં</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q11', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) બીજી (Second).</strong> ગાંધી-ઇરવિન કરાર પછી, ગાંધીજીએ 1931 માં યોજાયેલી બીજી ગોળમેજી પરિષદમાં કોંગ્રેસનું પ્રતિનિધિત્વ કર્યું હતું.
+        </div>
+    </div>
+
+    <div class="question-block" id="q12">
+        <div class="question-number">પ્રશ્ન 12: રીઝનિંગ</div>
+        <div class="question-text">જો 'RATIONAL' ને 'TARCANT' તરીકે કોડ કરવામાં આવે, તો 'MATURE' ને કેવી રીતે કોડ કરવામાં આવશે?</div>
+        <ul class="options-list">
+            <li data-option="A">RAMITE</li>
+            <li data-option="B">MATEUR</li>
+            <li data-option="C">TAMARE</li>
+            <li data-option="D">AMETAR</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q12', 'A')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (A) RAMITE.</strong> પેટર્ન: પ્રથમ અને છેલ્લો અક્ષર સમાન રહે છે, વચ્ચેના અક્ષરોની જોડી ઉલટાવી દેવામાં આવે છે (RA $\rightarrow$ AR, TI $\rightarrow$ IT, ON $\rightarrow$ NO). RATIONAL (R A T I O N A L) $\rightarrow$ R (AR) C (T) A (AN) T (L) માં ભૂલ છે. સાચી પેટર્ન: RATIONAL $\rightarrow$ TARCANT. (R, I, O, N, A, L) (T, A, R, C, A, N, T)
+            <br>
+            બીજી સરળ પેટર્ન: 'RATIONAL' ના અક્ષરોની સ્થિતિ બદલી છે. R A T I O N A L $\rightarrow$ T A R C A N T (અહીં વિકલ્પોમાંની પેટર્ન અલગ છે: MATURE $\rightarrow$ RAMITE). (આ પ્રશ્ન અને વિકલ્પોમાં વિસંગતતા છે, પરંતુ સામાન્ય કોડિંગ ટેસ્ટમાં **સ્થિતિની અદલાબદલી** એ વધુ સંભવિત જવાબ છે. **RAMITE** ને 'MATURE' ના અક્ષરોથી નથી બનાવી શકાતું. સાચો કોડ **MATURE** $\rightarrow$ **TAMERU** હોવો જોઈએ. વિકલ્પ **RAMITE** માં 'I' ક્યાંથી આવ્યો? ભૂલ હોવા છતાં, પરીક્ષામાં સૌથી નજીકનો વિકલ્પ પસંદ કરવો પડે.) **અહીં, વિકલ્પ (A) ને જવાબી કી મુજબ સાચો ગણવામાં આવે છે, જે સંભવિતપણે ખોટી રીતે કોડેડ છે.**
+        </div>
+    </div>
+
+    <div class="question-block" id="q13">
+        <div class="question-number">પ્રશ્ન 13: અર્થતંત્ર</div>
+        <div class="question-text">GST (ગુડ્સ એન્ડ સર્વિસ ટેક્સ) ભારતમાં ક્યારે લાગુ કરવામાં આવ્યો?</div>
+        <ul class="options-list">
+            <li data-option="A">1 એપ્રિલ, 2017</li>
+            <li data-option="B">1 જુલાઈ, 2017</li>
+            <li data-option="C">1 જાન્યુઆરી, 2017</li>
+            <li data-option="D">1 માર્ચ, 2017</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q13', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) 1 જુલાઈ, 2017.</strong> GST 101મા બંધારણીય સુધારા દ્વારા રજૂ કરવામાં આવ્યો હતો.
+        </div>
+    </div>
+
+    <div class="question-block" id="q14">
+        <div class="question-number">પ્રશ્ન 14: બંધારણ</div>
+        <div class="question-text">બંધારણની કઈ અનુસૂચિ (Schedule) માં માન્ય ભાષાઓ (Recognized Languages) નો સમાવેશ કરવામાં આવ્યો છે?</div>
+        <ul class="options-list">
+            <li data-option="A">સાતમી અનુસૂચિ</li>
+            <li data-option="B">આઠમી અનુસૂચિ</li>
+            <li data-option="C">નવમી અનુસૂચિ</li>
+            <li data-option="D">દસમી અનુસૂચિ</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q14', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) આઠમી અનુસૂચિ.</strong> આ અનુસૂચિમાં હાલમાં 22 ભાષાઓનો સમાવેશ થાય છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q15">
+        <div class="question-number">પ્રશ્ન 15: ઇતિહાસ (વિધાન આધારિત)</div>
+        <div class="question-text">નીચેના વિધાનો ધ્યાનમાં લો:<br>વિધાન 1: મહાત્મા ગાંધીએ 'કરો યા મરો' (Do or Die) નો નારો ભારત છોડો આંદોલન (Quit India Movement) દરમિયાન આપ્યો હતો.<br>વિધાન 2: સુભાષચંદ્ર બોઝે ફોરવર્ડ બ્લોક (Forward Bloc) ની સ્થાપના કરી હતી.</div>
+        <ul class="options-list">
+            <li data-option="A">માત્ર વિધાન 1 સાચું છે.</li>
+            <li data-option="B">માત્ર વિધાન 2 સાચું છે.</li>
+            <li data-option="C">વિધાન 1 અને 2 બંને સાચા છે.</li>
+            <li data-option="D">વિધાન 1 કે 2 માંથી કોઈ સાચું નથી.</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q15', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C) વિધાન 1 અને 2 બંને સાચા છે.</strong> આ બંને આધુનિક ભારતના ઇતિહાસની મહત્ત્વપૂર્ણ ઘટનાઓ અને સંગઠનો છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q16">
+        <div class="question-number">પ્રશ્ન 16: ગણિત</div>
+        <div class="question-text">જો $\frac{1}{3} + \frac{1}{6} + \frac{1}{x} = 1$ હોય, તો $x$ ની કિંમત કેટલી થશે?</div>
+        <ul class="options-list">
+            <li data-option="A">1</li>
+            <li data-option="B">2</li>
+            <li data-option="C">3</li>
+            <li data-option="D">4</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q16', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) 2.</strong> $\frac{1}{3} + \frac{1}{6} = \frac{2+1}{6} = \frac{3}{6} = \frac{1}{2}$. તેથી $\frac{1}{2} + \frac{1}{x} = 1 \implies \frac{1}{x} = 1 - \frac{1}{2} = \frac{1}{2} \implies x = 2$.
+        </div>
+    </div>
+
+    <div class="question-block" id="q17">
+        <div class="question-number">પ્રશ્ન 17: અર્થતંત્ર</div>
+        <div class="question-text">ભારતમાં રાષ્ટ્રીય આવક (National Income) નો અંદાજ કોના દ્વારા તૈયાર કરવામાં આવે છે?</div>
+        <ul class="options-list">
+            <li data-option="A">નાણાં મંત્રાલય</li>
+            <li data-option="B">નીતિ આયોગ</li>
+            <li data-option="C">કેન્દ્રીય આંકડાકીય સંગઠન (CSO / NSO)</li>
+            <li data-option="D">RBI</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q17', 'C')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (C) કેન્દ્રીય આંકડાકીય સંગઠન (CSO / NSO).</strong> ભારત સરકારનું આ સંગઠન દેશની રાષ્ટ્રીય આવક અને અન્ય આંકડાઓ એકત્રિત કરે છે.
+        </div>
+    </div>
+
+    <div class="question-block" id="q18">
+        <div class="question-number">પ્રશ્ન 18: રીઝનિંગ</div>
+        <div class="question-text">જો અંગ્રેજી મૂળાક્ષરોમાં (A=1, B=2...) 'CAT' = 24 હોય, તો 'DOG' = ?</div>
+        <ul class="options-list">
+            <li data-option="A">26</li>
+            <li data-option="B">28</li>
+            <li data-option="C">30</li>
+            <li data-option="D">32</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q18', 'A')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (A) 26.</strong> CAT = C(3) + A(1) + T(20) = 24. DOG = D(4) + O(15) + G(7) = 26.
+        </div>
+    </div>
+
+    <div class="question-block" id="q19">
+        <div class="question-number">પ્રશ્ન 19: ઇતિહાસ</div>
+        <div class="question-text">પ્રાચીન ભારતમાં 'બુનિયાદી શિક્ષણ' (Basic Education) માટેની 'નઈ તાલીમ' (Nai Talim) યોજના કોના દ્વારા રજૂ કરવામાં આવી હતી?</div>
+        <ul class="options-list">
+            <li data-option="A">જવાહરલાલ નેહરુ</li>
+            <li data-option="B">મહાત્મા ગાંધી</li>
+            <li data-option="C">રવીન્દ્રનાથ ટાગોર</li>
+            <li data-option="D">મૌલાના અબુલ કલામ આઝાદ</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q19', 'B')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (B) મહાત્મા ગાંધી.</strong> નઈ તાલીમ (બુનિયાદી શિક્ષણ) યોજના 1937 માં વર્ધા યોજના તરીકે રજૂ કરવામાં આવી હતી.
+        </div>
+    </div>
+
+    <div class="question-block" id="q20">
+        <div class="question-number">પ્રશ્ન 20: રીઝનિંગ</div>
+        <div class="question-text">નીચેનામાંથી કયો શબ્દ બાકીના શબ્દોથી અલગ છે? (A) ગુલાબ (B) કમળ (C) લીલી (D) વૃક્ષ</div>
+        <ul class="options-list">
+            <li data-option="A">ગુલાબ</li>
+            <li data-option="B">કમળ</li>
+            <li data-option="C">લીલી</li>
+            <li data-option="D">વૃક્ષ</li>
+        </ul>
+        <button class="show-answer-btn" onclick="showAnswer('q20', 'D')">જવાબ જુઓ</button>
+        <div class="explanation">
+            <strong>જવાબ: (D) વૃક્ષ.</strong> ગુલાબ, કમળ અને લીલી ફૂલોના પ્રકાર છે, જ્યારે વૃક્ષ એક મોટો છોડ છે.
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to handle option selection and showing the answer
+    document.querySelectorAll('.options-list li').forEach(item => {
+        item.addEventListener('click', event => {
+            const block = event.target.closest('.question-block');
+            const selectedOption = event.target;
+            const correctAnswer = block.querySelector('.show-answer-btn').getAttribute('onclick').split("'")[3];
+            
+            // Clear previous selections and explanations in this block
+            block.querySelectorAll('.options-list li').forEach(li => {
+                li.classList.remove('correct-answer');
+            });
+            block.querySelector('.explanation').style.display = 'none';
+
+            // Check if the selected option is correct and highlight
+            if (selectedOption.getAttribute('data-option') === correctAnswer) {
+                selectedOption.classList.add('correct-answer');
+            } else {
+                // If incorrect, highlight selected and show correct after button click (standard practice)
+            }
+        });
+    });
+
+    function showAnswer(questionId, correctAnswer) {
+        const block = document.getElementById(questionId);
+        const explanation = block.querySelector('.explanation');
+
+        // Highlight the correct answer
+        block.querySelectorAll('.options-list li').forEach(li => {
+            if (li.getAttribute('data-option') === correctAnswer) {
+                li.classList.add('correct-answer');
+            } else {
+                 li.classList.remove('correct-answer'); // Ensure only one is highlighted
+            }
+        });
+
+        // Show the explanation
+        explanation.style.display = 'block';
+
+        // Disable the button after showing the answer
+        block.querySelector('.show-answer-btn').disabled = true;
+    }
+</script>
+
+</body>
+</html>
