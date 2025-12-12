@@ -192,7 +192,23 @@
             </div>
         </div>
     </div>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
+<script>
+    // જો યુઝર લોગ-ઇન થાય અથવા લોગ-આઉટ થાય તો શું કરવું
+    netlifyIdentity.on("init", user => {
+      if (!user) {
+        // જો યુઝર લોગ-આઉટ હોય તો, 'LOGIN' બટન બતાવો
+        document.getElementById('login-button').innerHTML = '<a href="#" onclick="netlifyIdentity.open(); return false;" class="nav-link">LOGIN</a>';
+      } else {
+        // જો યુઝર લોગ-ઇન હોય, તો 'LOGOUT' અને યુઝરનું નામ બતાવો
+        document.getElementById('login-button').innerHTML = `
+            <span class="nav-link">${user.email.split('@')[0]}</span> 
+            <a href="#" onclick="netlifyIdentity.logout(); return false;" class="nav-link">LOGOUT</a>
+        `;
+      }
+    });
+</script>
 <script>
 /*
   Custom Netlify Identity flow using netlify-identity-widget's JS API methods
@@ -365,3 +381,4 @@ if (window.netlifyIdentity) {
 
 </body>
 </html>
+
