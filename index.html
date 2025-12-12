@@ -1,292 +1,212 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>STI Mock Test</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STI Mock Test</title>
 
-    <!-- Netlify Identity Widget -->
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<!-- Netlify Identity Widget -->
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
-    <style>
-        :root {
-            --primary: #004d99;
-            --accent: #ff6600;
-            --success: #00a000;
-            --bg: #f4f6f9;
-        }
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg);
-            font-family: Arial, sans-serif;
-        }
+<style>
+    body { margin: 0; font-family: Arial; background: #f2f6ff; }
 
-        /* HEADER */
-        .header {
-            background: var(--primary);
-            color: white;
-            padding: 12px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 22px;
-            font-weight: bold;
-        }
-        .nav-link {
-            color: white;
-            margin-left: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            text-decoration: none;
-        }
+    /* HEADER */
+    .header {
+        background: #004d99;
+        padding: 15px 20px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .header h1 { margin: 0; font-size: 22px; }
+    .nav-btn {
+        background: white;
+        color: #004d99;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-weight: bold;
+        border: none;
+        margin-left: 8px;
+        cursor: pointer;
+    }
 
-        #user-name {
-            font-weight: bold;
-            color: #ffd966;
-            margin-right: 10px;
-        }
+    /* CONTAINER */
+    .container {
+        padding: 15px;
+    }
 
-        /* POPUP */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        .modal-content {
-            background: white;
-            padding: 22px;
-            width: 92%;
-            max-width: 330px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-        }
-        .modal-content h2 {
-            margin-top: 0;
-            color: var(--primary);
-        }
-        .modal-content input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-        .modal-content button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 12px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        .close-btn {
-            float: right;
-            cursor: pointer;
-            font-size: 20px;
-        }
+    .test-block {
+        background: white;
+        margin-bottom: 20px;
+        padding: 18px;
+        border-radius: 10px;
+        box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+    }
+    .test-block h2 { color: #004d99; margin-top: 0; }
+    .btn {
+        background: #ff6600;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+    }
 
-        /* CONTENT */
-        .container {
-            width: 92%;
-            max-width: 650px;
-            margin: 20px auto;
-            flex: 1;
-        }
-        .test-block {
-            background: white;
-            padding: 18px;
-            margin-bottom: 18px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-        .test-block h2 {
-            margin-top: 0;
-            color: var(--primary);
-            font-size: 19px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 16px;
-            border-radius: 6px;
-            background: var(--accent);
-            color: white;
-            font-size: 15px;
-            text-decoration: none;
-        }
-        .btn-success {
-            background: var(--success);
-        }
+    /* FOOTER FIXED */
+    .footer {
+        background: #222;
+        color: white;
+        text-align: center;
+        padding: 12px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
 
-        /* FOOTER */
-        .footer {
-            background: linear-gradient(135deg, #003b7a, #0074d9);
-            text-align: center;
-            color: #ecf5ff;
-            padding: 20px 10px;
-        }
-        .footer a {
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-        }
-    </style>
+    /* CENTER POPUP FIX FIXED */
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        width: 85%;
+        max-width: 350px;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.3);
+        display: none;
+        z-index: 99999;
+    }
+    .popup h3 { margin-top: 0; }
+    .close-btn {
+        background: red;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        float: right;
+    }
+</style>
 </head>
 
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <h1>STI Mock Test</h1>
 
-        <div>
-            <span id="user-name"></span>
-            <a id="login-btn" class="nav-link" href="#">LOGIN</a>
-            <a id="signup-btn" class="nav-link" href="#">REGISTER</a>
-            <a id="logout-btn" class="nav-link" href="#" style="display: none">LOGOUT</a>
-        </div>
+<!-- HEADER -->
+<div class="header">
+    <h1>STI Mock Test</h1>
+    <div id="authArea">
+        <button class="nav-btn" onclick="openPopup('login')">Login</button>
+        <button class="nav-btn" onclick="openPopup('register')">Register</button>
+    </div>
+</div>
+
+
+<!-- POPUP BOX -->
+<div id="popupBox" class="popup">
+    <button class="close-btn" onclick="closePopup()">X</button>
+    <h3 id="popupTitle">Login</h3>
+    <div id="popupContent"></div>
+</div>
+
+
+
+
+<div class="container">
+
+    <!-- DEMO TEST -->
+    <div class="test-block">
+        <h2>⭐ Demo Test</h2>
+        <p>મફતમાં ડેમો ટેસ્ટ આપી શકો છો.</p>
+        <a href="#" class="btn" style="background:#00a000;">Start Demo</a>
     </div>
 
-    <!-- LOGIN POPUP -->
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeLogin()">×</span>
-            <h2>Login</h2>
-
-            <input id="login-email" type="email" placeholder="Email" />
-            <input id="login-pass" type="password" placeholder="Password" />
-
-            <button onclick="loginUser()">Login</button>
-        </div>
+    <!-- PAID TEST -->
+    <div class="test-block">
+        <h2>Paper 1 – PSI/ASI</h2>
+        <p>કિંમત ₹99/-</p>
+        <a class="btn" href="#">Buy Now</a>
     </div>
 
-    <!-- REGISTER POPUP -->
-    <div id="signup-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeSignup()">×</span>
-            <h2>Register</h2>
+</div>
 
-            <input id="signup-name" type="text" placeholder="Full Name" />
-            <input id="signup-email" type="email" placeholder="Email" />
-            <input id="signup-pass" type="password" placeholder="Password" />
+<!-- FOOTER -->
+<div class="footer">
+    © 2025 STI Mock Test | Contact: 6353511804
+</div>
 
-            <button onclick="registerUser()">Create Account</button>
-        </div>
-    </div>
 
-    <!-- PAGE CONTENT -->
-    <div class="container">
-        <div class="test-block">
-            <h2>⭐ Demo Test - Free Access</h2>
-            <p>Try Demo Test before buying the full series.</p>
-            <a class="btn btn-success" href="demo-test-page.html">Start Demo</a>
-        </div>
 
-        <div class="test-block">
-            <h2>PSI / ASI Test Paper – ₹99</h2>
-            <p>Latest syllabus based premium paper.</p>
-            <a class="btn" href="#">Buy Now ₹99</a>
-        </div>
-    </div>
+<script>
+// -------------------------
+// OPEN POPUP
+// -------------------------
+function openPopup(type) {
+    const box = document.getElementById("popupBox");
+    const title = document.getElementById("popupTitle");
+    const content = document.getElementById("popupContent");
 
-    <!-- FOOTER -->
-    <div class="footer">
-        <p>© 2025 STI Mock Test</p>
-        <p>
-            <a href="https://wa.me/916353511804">WhatsApp</a> |
-            <a href="tel:+916353511804">Call</a>
-        </p>
-    </div>
+    if (type === "login") {
+        title.textContent = "Login";
+        content.innerHTML = `
+            <button onclick="netlifyIdentity.open('login')" class="btn" style="width:100%;text-align:center;">
+                Login with Email
+            </button>
+        `;
+    } else {
+        title.textContent = "Register";
+        content.innerHTML = `
+            <button onclick="netlifyIdentity.open('signup')" class="btn" style="width:100%;text-align:center;">
+                Create New Account
+            </button>
+        `;
+    }
 
-    <script>
-        /* Open Popups */
-        document.getElementById("login-btn").onclick = () =>
-            (document.getElementById("login-modal").style.display = "flex");
+    box.style.display = "block";
+}
 
-        document.getElementById("signup-btn").onclick = () =>
-            (document.getElementById("signup-modal").style.display = "flex");
+// CLOSE POPUP
+function closePopup() {
+    document.getElementById("popupBox").style.display = "none";
+}
 
-        /* Close Popups */
-        function closeLogin() {
-            document.getElementById("login-modal").style.display = "none";
-        }
-        function closeSignup() {
-            document.getElementById("signup-modal").style.display = "none";
-        }
 
-        /* LOGIN FUNCTION */
-        function loginUser() {
-            let email = document.getElementById("login-email").value;
-            let pass = document.getElementById("login-pass").value;
+// ---------------------
+// NETLIFY LOGIN SYSTEM
+// ---------------------
+netlifyIdentity.on("login", user => {
+    updateUI(user);
+    closePopup();
+});
 
-            netlifyIdentity
-                .login({ email: email, password: pass, remember: true })
-                .then((user) => {
-                    closeLogin();
-                })
-                .catch((err) => alert("Login Failed: " + err.message));
-        }
+netlifyIdentity.on("logout", () => {
+    updateUI(null);
+});
 
-        /* REGISTER FUNCTION */
-        function registerUser() {
-            let name = document.getElementById("signup-name").value;
-            let email = document.getElementById("signup-email").value;
-            let pass = document.getElementById("signup-pass").value;
+// When page loads, keep user logged in
+document.addEventListener("DOMContentLoaded", () => {
+    updateUI(netlifyIdentity.currentUser());
+});
 
-            netlifyIdentity
-                .signup({
-                    email: email,
-                    password: pass,
-                    user_metadata: { full_name: name },
-                })
-                .then((user) => {
-                    closeSignup();
-                })
-                .catch((err) => alert("Signup Failed: " + err.message));
-        }
 
-        /* INIT + AUTO LOGIN SESSION */
-        netlifyIdentity.on("init", (user) => updateUI(user));
-        netlifyIdentity.init();
+// UI UPDATE
+function updateUI(user) {
+    const area = document.getElementById("authArea");
 
-        netlifyIdentity.on("login", (user) => updateUI(user));
-        netlifyIdentity.on("signup", (user) => updateUI(user));
-        netlifyIdentity.on("logout", () => updateUI(null));
+    if (user) {
+        area.innerHTML = `
+            <span style="color:white; font-weight:bold;">${user.user_metadata.full_name || "User"}</span>
+            <button class="nav-btn" onclick="netlifyIdentity.logout()">Logout</button>
+        `;
+    } else {
+        area.innerHTML = `
+            <button class="nav-btn" onclick="openPopup('login')">Login</button>
+            <button class="nav-btn" onclick="openPopup('register')">Register</button>
+        `;
+    }
+}
+</script>
 
-        /* UPDATE HEADER UI */
-        function updateUI(user) {
-            let username = document.getElementById("user-name");
-            let loginBtn = document.getElementById("login-btn");
-            let signupBtn = document.getElementById("signup-btn");
-            let logoutBtn = document.getElementById("logout-btn");
-
-            if (user) {
-                username.textContent =
-                    user.user_metadata.full_name || user.email;
-                loginBtn.style.display = "none";
-                signupBtn.style.display = "none";
-                logoutBtn.style.display = "inline-block";
-            } else {
-                username.textContent = "";
-                loginBtn.style.display = "inline-block";
-                signupBtn.style.display = "inline-block";
-                logoutBtn.style.display = "none";
-            }
-        }
-
-        document.getElementById("logout-btn").onclick = () =>
-            netlifyIdentity.logout();
-    </script>
 </body>
 </html>
