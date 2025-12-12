@@ -1,157 +1,160 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>STI Mock Test</title>
 
     <!-- Netlify Identity Widget -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
-        :root{
-            --primary:#004d99;
-            --accent:#ff6600;
-            --success:#00a000;
-            --bg:#f4f6f9;
+        :root {
+            --primary: #004d99;
+            --accent: #ff6600;
+            --success: #00a000;
+            --bg: #f4f6f9;
         }
-        body{
-            margin:0;
-            min-height:100vh;
-            display:flex;
-            flex-direction:column;
-            font-family:Arial, sans-serif;
-            background:var(--bg);
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            font-family: Arial, sans-serif;
         }
 
         /* HEADER */
-        .header{
-            background:var(--primary);
-            color:#fff;
-            padding:12px 18px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .header h1{
-            margin:0;
-            font-size:20px;
-            font-weight:700;
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: bold;
         }
-        .nav-link{
-            color:#fff;
-            text-decoration:none;
-            margin-left:15px;
-            font-size:15px;
-            font-weight:bold;
-        }
-
-        #user-name{
-            font-weight:bold;
-            margin-right:10px;
-            color:#ffeb99;
+        .nav-link {
+            color: white;
+            margin-left: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            text-decoration: none;
         }
 
-        /* Popup Modal */
-        .modal{
-            display:none;
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,0.55);
-            justify-content:center;
-            align-items:center;
-            z-index:9999;
-        }
-        .modal-content{
-            background:#fff;
-            padding:22px;
-            width:92%;
-            max-width:330px;
-            border-radius:10px;
-            text-align:center;
-            box-shadow:0 4px 15px rgba(0,0,0,0.3);
-        }
-        .modal-content h2{
-            margin-top:0;
-            color:var(--primary);
-        }
-        .modal-content button{
-            width:100%;
-            padding:10px;
-            margin-top:10px;
-            background:var(--primary);
-            color:#fff;
-            border:none;
-            border-radius:6px;
-            font-size:16px;
+        #user-name {
+            font-weight: bold;
+            color: #ffd966;
+            margin-right: 10px;
         }
 
-        .close-btn{
-            float:right;
-            font-size:20px;
-            cursor:pointer;
+        /* POPUP */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal-content {
+            background: white;
+            padding: 22px;
+            width: 92%;
+            max-width: 330px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
         }
 
-        .container{
-            width:92%;
-            max-width:650px;
-            margin:18px auto;
-            flex:1;
+        /* CONTENT */
+        .container {
+            width: 92%;
+            max-width: 650px;
+            margin: 20px auto;
+            flex: 1;
+        }
+        .test-block {
+            background: white;
+            padding: 18px;
+            margin-bottom: 18px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .test-block h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 19px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 6px;
+            background: var(--accent);
+            color: white;
+            font-size: 15px;
+            text-decoration: none;
+        }
+        .btn-success {
+            background: var(--success);
         }
 
-        .test-block{
-            background:#fff;
-            padding:18px;
-            border-radius:10px;
-            margin-bottom:18px;
-            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        /* FOOTER */
+        .footer {
+            background: linear-gradient(135deg, #003b7a, #0074d9);
+            text-align: center;
+            color: #ecf5ff;
+            padding: 20px 10px;
         }
-        .test-block h2{
-            margin-top:0;
-            color:var(--primary);
-            font-size:19px;
+        .footer a {
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
         }
-
-        .btn{
-            display:inline-block;
-            padding:10px 16px;
-            border-radius:6px;
-            border:none;
-            cursor:pointer;
-            font-size:15px;
-            font-weight:bold;
-            text-decoration:none;
-        }
-        .btn-success{ background:var(--success); color:white; }
-        .btn-accent{ background:var(--accent); color:white; }
-
-        .footer{
-            background:linear-gradient(135deg, #003b7a, #0074d9);
-            padding:20px 10px;
-            text-align:center;
-            color:#e8f3ff;
-        }
-        .footer a{
-            color:#fff;
-            text-decoration:none;
-            font-weight:bold;
-        }
-
     </style>
 </head>
 
 <body>
-
     <!-- HEADER -->
     <div class="header">
         <h1>STI Mock Test</h1>
 
         <div>
             <span id="user-name"></span>
-
-            <a href="#" id="login-btn" class="nav-link">LOGIN</a>
-            <a href="#" id="signup-btn" class="nav-link">REGISTER</a>
-            <a href="#" id="logout-btn" class="nav-link" style="display:none;">LOGOUT</a>
+            <a id="login-btn" class="nav-link" href="#">LOGIN</a>
+            <a id="signup-btn" class="nav-link" href="#">REGISTER</a>
+            <a id="logout-btn" class="nav-link" href="#" style="display: none">LOGOUT</a>
         </div>
     </div>
 
@@ -160,98 +163,130 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeLogin()">×</span>
             <h2>Login</h2>
-            <button onclick="netlifyIdentity.open('login')">Login with Email</button>
+
+            <input id="login-email" type="email" placeholder="Email" />
+            <input id="login-pass" type="password" placeholder="Password" />
+
+            <button onclick="loginUser()">Login</button>
         </div>
     </div>
 
-    <!-- SIGNUP POPUP -->
+    <!-- REGISTER POPUP -->
     <div id="signup-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeSignup()">×</span>
             <h2>Register</h2>
-            <button onclick="netlifyIdentity.open('signup')">Register with Email</button>
+
+            <input id="signup-name" type="text" placeholder="Full Name" />
+            <input id="signup-email" type="email" placeholder="Email" />
+            <input id="signup-pass" type="password" placeholder="Password" />
+
+            <button onclick="registerUser()">Create Account</button>
         </div>
     </div>
 
-
-    <!-- CONTENT -->
+    <!-- PAGE CONTENT -->
     <div class="container">
-
-        <div id="demo" class="test-block">
+        <div class="test-block">
             <h2>⭐ Demo Test - Free Access</h2>
-            <p>Demo test is free. Try before you buy.</p>
-            <a href="demo-test-page.html" class="btn btn-success">Start Demo</a>
+            <p>Try Demo Test before buying the full series.</p>
+            <a class="btn btn-success" href="demo-test-page.html">Start Demo</a>
         </div>
 
         <div class="test-block">
-            <h2>Paper 1: PSI/ASI</h2>
-            <p>Latest syllabus-based paper. Price: ₹99/-</p>
-            <button class="btn btn-accent">Buy Now ₹99</button>
+            <h2>PSI / ASI Test Paper – ₹99</h2>
+            <p>Latest syllabus based premium paper.</p>
+            <a class="btn" href="#">Buy Now ₹99</a>
         </div>
-
     </div>
 
     <!-- FOOTER -->
     <div class="footer">
         <p>© 2025 STI Mock Test</p>
-        <p><a href="https://wa.me/916353511804">WhatsApp</a> | <a href="tel:+916353511804">Call</a></p>
+        <p>
+            <a href="https://wa.me/916353511804">WhatsApp</a> |
+            <a href="tel:+916353511804">Call</a>
+        </p>
     </div>
 
-<script>
-/* Open popup */
-document.getElementById("login-btn").onclick = () => document.getElementById("login-modal").style.display = "flex";
-document.getElementById("signup-btn").onclick = () => document.getElementById("signup-modal").style.display = "flex";
+    <script>
+        /* Open Popups */
+        document.getElementById("login-btn").onclick = () =>
+            (document.getElementById("login-modal").style.display = "flex");
 
-/* Close popup */
-function closeLogin(){ document.getElementById("login-modal").style.display = "none"; }
-function closeSignup(){ document.getElementById("signup-modal").style.display = "none"; }
+        document.getElementById("signup-btn").onclick = () =>
+            (document.getElementById("signup-modal").style.display = "flex");
 
-/* Netlify Identity Auto Session Restore */
-netlifyIdentity.on('init', user => updateUI(user));
-netlifyIdentity.init();
+        /* Close Popups */
+        function closeLogin() {
+            document.getElementById("login-modal").style.display = "none";
+        }
+        function closeSignup() {
+            document.getElementById("signup-modal").style.display = "none";
+        }
 
-/* After Login */
-netlifyIdentity.on('login', user => {
-    updateUI(user);
-    closeLogin();
-    closeSignup();
-});
+        /* LOGIN FUNCTION */
+        function loginUser() {
+            let email = document.getElementById("login-email").value;
+            let pass = document.getElementById("login-pass").value;
 
-/* After Signup */
-netlifyIdentity.on('signup', user => {
-    updateUI(user);
-    closeSignup();
-});
+            netlifyIdentity
+                .login({ email: email, password: pass, remember: true })
+                .then((user) => {
+                    closeLogin();
+                })
+                .catch((err) => alert("Login Failed: " + err.message));
+        }
 
-/* After Logout */
-netlifyIdentity.on('logout', () => {
-    updateUI(null);
-});
+        /* REGISTER FUNCTION */
+        function registerUser() {
+            let name = document.getElementById("signup-name").value;
+            let email = document.getElementById("signup-email").value;
+            let pass = document.getElementById("signup-pass").value;
 
-/* Update Header UI */
-function updateUI(user){
-    const username = document.getElementById("user-name");
-    const loginBtn = document.getElementById("login-btn");
-    const signupBtn = document.getElementById("signup-btn");
-    const logoutBtn = document.getElementById("logout-btn");
+            netlifyIdentity
+                .signup({
+                    email: email,
+                    password: pass,
+                    user_metadata: { full_name: name },
+                })
+                .then((user) => {
+                    closeSignup();
+                })
+                .catch((err) => alert("Signup Failed: " + err.message));
+        }
 
-    if(user){
-        username.textContent = user.user_metadata.full_name || user.email;
-        loginBtn.style.display = "none";
-        signupBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-    } else {
-        username.textContent = "";
-        loginBtn.style.display = "inline-block";
-        signupBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-    }
-}
+        /* INIT + AUTO LOGIN SESSION */
+        netlifyIdentity.on("init", (user) => updateUI(user));
+        netlifyIdentity.init();
 
-/* Logout */
-document.getElementById("logout-btn").onclick = () => netlifyIdentity.logout();
+        netlifyIdentity.on("login", (user) => updateUI(user));
+        netlifyIdentity.on("signup", (user) => updateUI(user));
+        netlifyIdentity.on("logout", () => updateUI(null));
 
-</script>
+        /* UPDATE HEADER UI */
+        function updateUI(user) {
+            let username = document.getElementById("user-name");
+            let loginBtn = document.getElementById("login-btn");
+            let signupBtn = document.getElementById("signup-btn");
+            let logoutBtn = document.getElementById("logout-btn");
 
+            if (user) {
+                username.textContent =
+                    user.user_metadata.full_name || user.email;
+                loginBtn.style.display = "none";
+                signupBtn.style.display = "none";
+                logoutBtn.style.display = "inline-block";
+            } else {
+                username.textContent = "";
+                loginBtn.style.display = "inline-block";
+                signupBtn.style.display = "inline-block";
+                logoutBtn.style.display = "none";
+            }
+        }
+
+        document.getElementById("logout-btn").onclick = () =>
+            netlifyIdentity.logout();
+    </script>
 </body>
 </html>
