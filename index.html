@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>STI Mock Test</title>
 
-<!-- Netlify Identity Widget (we load it only to use its JS API; we DO NOT call widget.open) -->
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
 <style>
@@ -150,17 +149,14 @@
 </head>
 <body>
 
-    <!-- HEADER -->
     <header class="header">
         <div class="brand">STI Mock Test</div>
         <div class="auth-area" id="authArea">
-            <!-- Filled by JS: login/register buttons OR username + logout -->
             <button class="btn" id="loginOpenBtn">Login</button>
             <button class="btn" id="signupOpenBtn">Register</button>
         </div>
     </header>
 
-    <!-- MAIN -->
     <main class="container">
         <div class="card">
             <h2>⭐ Demo Test - મફત</h2>
@@ -175,40 +171,20 @@
         </div>
     </main>
 
-    <!-- FOOTER (deep blue to match header) -->
     <footer class="footer">
         <div>© 2025 STI Mock Test</div>
         <div style="margin-top:8px"><a href="https://wa.me/916353511804" target="_blank">WhatsApp</a> &nbsp; | &nbsp; <a href="tel:+916353511804">6353511804</a></div>
     </footer>
 
-    <!-- OVERLAY + MODAL -->
     <div id="overlay" class="overlay" aria-hidden="true">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
             <button class="close-x" id="closeModalBtn">&times;</button>
 
-            <!-- We'll swap inner content for login or register -->
             <div id="modalInner">
-                <!-- default placeholder -->
-            </div>
+                </div>
         </div>
     </div>
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
-<script>
-    // જો યુઝર લોગ-ઇન થાય અથવા લોગ-આઉટ થાય તો શું કરવું
-    netlifyIdentity.on("init", user => {
-      if (!user) {
-        // જો યુઝર લોગ-આઉટ હોય તો, 'LOGIN' બટન બતાવો
-        document.getElementById('login-button').innerHTML = '<a href="#" onclick="netlifyIdentity.open(); return false;" class="nav-link">LOGIN</a>';
-      } else {
-        // જો યુઝર લોગ-ઇન હોય, તો 'LOGOUT' અને યુઝરનું નામ બતાવો
-        document.getElementById('login-button').innerHTML = `
-            <span class="nav-link">${user.email.split('@')[0]}</span> 
-            <a href="#" onclick="netlifyIdentity.logout(); return false;" class="nav-link">LOGOUT</a>
-        `;
-      }
-    });
-</script>
 <script>
 /*
   Custom Netlify Identity flow using netlify-identity-widget's JS API methods
@@ -229,8 +205,18 @@ const modalInner = document.getElementById('modalInner');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const authArea = document.getElementById('authArea');
 
-document.getElementById('loginOpenBtn').addEventListener('click', () => openModal('login'));
-document.getElementById('signupOpenBtn').addEventListener('click', () => openModal('register'));
+// 💡 Event listeners for opening modal - We use 'load' listeners now
+// These will be reattached in updateAuthUI if user is logged out
+function attachAuthListeners(){
+    const loginOpenBtn = document.getElementById('loginOpenBtn');
+    const signupOpenBtn = document.getElementById('signupOpenBtn');
+
+    // Check if elements exist before attaching listener
+    if(loginOpenBtn) loginOpenBtn.addEventListener('click', () => openModal('login'));
+    if(signupOpenBtn) signupOpenBtn.addEventListener('click', () => openModal('register'));
+}
+
+
 closeModalBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
 
@@ -275,7 +261,7 @@ function closeModal(){
 
 /* show a small alert style message (simple) */
 function showMsg(msg){
-    // simple alert is fine for now (or you can implement toast)
+    // simple alert is fine for now
     alert(msg);
 }
 
@@ -291,7 +277,7 @@ function doLogin(){
     netlifyIdentity.login({ email, password, remember: true })
     .then(user => {
         closeModal();
-        updateAuthUI(user);
+        // UI update will happen via netlifyIdentity.on('login') listener
     })
     .catch(err => {
         // err might be an Error object or response; show message
@@ -315,10 +301,9 @@ function doSignup(){
         user_metadata: { full_name: name }
     })
     .then(user => {
-        // After signup, Netlify may require email confirmation (depending on settings).
         // If immediate login is available, user will be logged in; otherwise they may need to confirm.
         closeModal();
-        updateAuthUI(user);
+        // UI update will happen via netlifyIdentity.on('login') if logged in immediately
         showMsg('બધું થઈ ગયું. જો જરૂર હોય તો Email માંથી confirm કરો.');
     })
     .catch(err => {
@@ -329,18 +314,20 @@ function doSignup(){
 
 /* Logout */
 function doLogout(){
-    netlifyIdentity.logout(); // will trigger 'logout' event
+    // netlifyIdentity.logout() will trigger 'logout' event
+    netlifyIdentity.logout();
 }
 
 /* Update header/auth UI */
 function updateAuthUI(user){
     if (user && user.email){
         // Show name + logout
-        const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
+        const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email.split('@')[0];
         authArea.innerHTML = `
             <span id="user-name">${escapeHtml(name)}</span>
             <button class="btn btn-ghost" id="logoutBtn">Logout</button>
         `;
+        // Attach Logout listener
         document.getElementById('logoutBtn').addEventListener('click', doLogout);
     } else {
         // Show login/register buttons
@@ -348,9 +335,8 @@ function updateAuthUI(user){
             <button class="btn" id="loginOpenBtn">Login</button>
             <button class="btn" id="signupOpenBtn">Register</button>
         `;
-        // Reattach event listeners
-        document.getElementById('loginOpenBtn').addEventListener('click', ()=>openModal('login'));
-        document.getElementById('signupOpenBtn').addEventListener('click', ()=>openModal('register'));
+        // Reattach Login/Register event listeners
+        attachAuthListeners();
     }
 }
 
@@ -361,24 +347,27 @@ function escapeHtml(s){
 
 /* Hook netlifyIdentity events to keep UI in sync */
 if (window.netlifyIdentity) {
+    // 💡 LOGIN: Fired when a user successfully logs in, OR if a session is restored at init
     netlifyIdentity.on('login', (user) => {
-        // user is a GOTRUE user object
         updateAuthUI(user);
     });
+    // 💡 LOGOUT: Fired when a user successfully logs out
     netlifyIdentity.on('logout', () => {
         updateAuthUI(null);
     });
+    // 💡 INIT: Fired when netlifyIdentity.init() is done, good place to check initial status
+    netlifyIdentity.on('init', (user) => {
+        updateAuthUI(user);
+    });
 
-    // When page loads, init() already called above; get currentUser() to restore session
-    const current = netlifyIdentity.currentUser();
-    if (current) updateAuthUI(current);
-    else updateAuthUI(null);
+    // We don't need to manually check currentUser() here, as it's handled by 'init' event.
+    // Ensure initial listeners are attached for the buttons present on page load (before init completes)
+    attachAuthListeners();
 } else {
-    // If widget not available, show basic buttons (but login won't work)
+    // Fallback if widget not available
     updateAuthUI(null);
 }
 </script>
 
 </body>
 </html>
-
