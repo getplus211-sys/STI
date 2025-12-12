@@ -1,386 +1,515 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>STI Mock Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STI Mock Test - હોમ પેજ</title>
+    
+    <style>
+        /* ==================================== */
+        /* 1. Global / Base Styles */
+        /* ==================================== */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f6f8fa;
+            color: #24292e;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+        /* ==================================== */
+        /* 2. Header (ટોચનો ભાગ) */
+        /* ==================================== */
+        .header {
+            background-color: #24292e; /* ઘેરો ગ્રે/કાળો */
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header .logo a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
 
-<style>
-    :root{
-        --primary: #004d99; /* deep blue */
-        --accent: #ff6600;
-        --success: #00a000;
-        --bg: #f4f6fb;
-    }
-    *{box-sizing:border-box}
-    body{
-        margin:0;
-        font-family: Arial, sans-serif;
-        background:var(--bg);
-        min-height:100vh;
-        display:flex;
-        flex-direction:column;
-    }
+        .nav-links button {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 8px 15px;
+            margin-left: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-    /* HEADER */
-    .header{
-        background:var(--primary);
-        color:#fff;
-        padding:14px 16px;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-    }
-    .brand{ font-size:20px; font-weight:700; }
-    .auth-area { display:flex; align-items:center; gap:8px; }
+        .nav-links button:hover {
+            background-color: #3b4249;
+        }
 
-    .btn {
-        background:#fff;
-        color:var(--primary);
-        border-radius:8px;
-        padding:8px 12px;
-        border:none;
-        font-weight:700;
-        cursor:pointer;
-    }
-    .btn-ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.15); }
+        /* લોગિન થયેલ યુઝર માટે ડિસ્પ્લે */
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+            font-size: 0.9em;
+        }
 
-    #user-name { color:#ffeb99; font-weight:700; margin-right:8px; }
+        /* ==================================== */
+        /* 3. Main Content (વચલો ભાગ) */
+        /* ==================================== */
+        .container {
+            flex: 1;
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
 
-    /* MAIN */
-    .container{
-        width:92%;
-        max-width:720px;
-        margin:18px auto;
-        flex:1;
-    }
-    .card{
-        background:#fff;
-        padding:18px;
-        border-radius:12px;
-        box-shadow:0 6px 18px rgba(10,20,40,0.06);
-        margin-bottom:16px;
-    }
-    .card h2{ color:var(--primary); margin-top:0; }
+        .test-block {
+            background-color: white;
+            border: 1px solid #d1ddff;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
 
-    .buy-btn{
-        background:var(--accent);
-        color:#fff;
-        border:none;
-        padding:10px 14px;
-        border-radius:8px;
-        font-weight:800;
-        cursor:pointer;
-    }
+        .test-block h2 {
+            color: #0366d6;
+            margin-top: 0;
+        }
 
-    /* FOOTER */
-    .footer{
-        background:var(--primary);
-        color:#fff;
-        text-align:center;
-        padding:16px;
-        margin-top:18px;
-    }
-    .footer a{ color:#fff; text-decoration:none; font-weight:700; }
+        .test-block p {
+            font-size: 1.1em;
+            color: #586069;
+        }
 
-    /* POPUP (center) */
-    .overlay{
-        display:none;
-        position:fixed;
-        inset:0;
-        background:rgba(0,0,0,0.45);
-        z-index:9999;
-        justify-content:center;
-        align-items:center;
-        padding:20px;
-    }
-    .modal{
-        width:100%;
-        max-width:380px;
-        background:#fff;
-        border-radius:12px;
-        padding:18px;
-        box-shadow:0 12px 40px rgba(2,6,23,0.35);
-        position:relative;
-    }
-    .modal h3{ margin:0 0 12px 0; color:var(--primary); }
-    .close-x{
-        position:absolute;
-        right:12px;
-        top:10px;
-        border:none;
-        background:transparent;
-        font-size:18px;
-        cursor:pointer;
-    }
-    .field{
-        width:100%;
-        margin-top:10px;
-    }
-    input[type="text"], input[type="email"], input[type="password"]{
-        width:100%;
-        padding:10px 12px;
-        border-radius:8px;
-        border:1px solid #d6d9e6;
-        outline:none;
-        font-size:14px;
-    }
-    .primary-btn{
-        width:100%;
-        margin-top:14px;
-        padding:10px;
-        border-radius:8px;
-        border:none;
-        background:var(--primary);
-        color:#fff;
-        font-weight:800;
-        cursor:pointer;
-    }
-    .muted{ font-size:13px; color:#667; margin-top:8px; text-align:center; }
+        .test-block .btn {
+            background-color: #2da44e; /* લીલો રંગ */
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
 
-    /* responsive smaller */
-    @media(max-width:420px){
-        .brand{ font-size:18px; }
-        .modal{ padding:14px; }
-    }
-</style>
+        .test-block .btn:hover {
+            background-color: #2c974b;
+        }
+
+        /* ==================================== */
+        /* 4. Footer (નીચેનો ભાગ) */
+        /* ==================================== */
+        .footer {
+            background-color: #24292e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .footer-contact a {
+            color: #2da44e;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .footer-contact a:hover {
+            text-decoration: underline;
+        }
+
+        /* આઇકોન સ્ટાઇલ (તમે Font Awesome વાપરી શકો છો, અહીં સરળતા માટે ટેક્સ્ટ/ઇમોજી નો ઉપયોગ) */
+        .footer-contact a::before {
+            content: '📞'; 
+            margin-right: 5px;
+        }
+        .footer-contact .whatsapp::before {
+            content: '💬';
+        }
+
+        /* ==================================== */
+        /* 5. Auth Modal (લોગિન/રજીસ્ટ્રેશન પોપઅપ) */
+        /* ==================================== */
+        .modal {
+            display: none; /* શરૂઆતમાં છુપાયેલું */
+            position: fixed;
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .auth-form button {
+            width: 100%;
+            background-color: #0366d6;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        .auth-form button:hover {
+            background-color: #0056b3;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .register-link button {
+            background: none;
+            border: none;
+            color: #2da44e; /* લીલો રંગ */
+            text-decoration: underline;
+            padding: 5px;
+            cursor: pointer;
+            width: auto;
+        }
+
+        /* ==================================== */
+        /* 6. Mobile Responsiveness */
+        /* ==================================== */
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .nav-links {
+                margin-top: 10px;
+            }
+            
+            .user-info {
+                margin-bottom: 10px;
+            }
+
+            .nav-links button {
+                margin: 5px 5px 0 0;
+                padding: 6px 10px;
+                font-size: 0.9em;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .test-block {
+                padding: 20px;
+            }
+            
+            .footer-contact a {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
 </head>
 <body>
 
     <header class="header">
-        <div class="brand">STI Mock Test</div>
-        <div class="auth-area" id="authArea">
-            <button class="btn" id="loginOpenBtn">Login</button>
-            <button class="btn" id="signupOpenBtn">Register</button>
+        <div class="logo">
+            <a href="index.html">STI Mock Test</a>
         </div>
+        <nav class="nav-links">
+            <div id="auth-buttons-unauthenticated">
+                <button onclick="openModal('login')">🔒 લોગિન</button>
+                <button onclick="openModal('register')">📝 રજીસ્ટ્રેશન</button>
+            </div>
+            <div class="user-info" id="auth-buttons-authenticated" style="display: none;">
+                <span id="user-display"></span>
+                <button id="logout-btn" onclick="signOut()">👋 લોગઆઉટ</button>
+            </div>
+        </nav>
     </header>
 
-    <main class="container">
-        <div class="card">
-            <h2>⭐ Demo Test - મફત</h2>
-            <p>આ ડેમો ટેસ્ટ ફ્રી છે. પહેલેથી જ તમારા માર્ક અને ગતિશીલતા તપાસો.</p>
-            <a class="buy-btn" href="demo-test-page.html">Start Demo</a>
+    <div class="container">
+        
+        <h2>Mock Test Portal</h2>
+
+        <div class="test-block">
+            <h2>STI Style Demo Test (20 Marks)</h2>
+            <p>આ ડેમો ટેસ્ટ તમને પરીક્ષાના બંધારણનો ખ્યાલ આપવા માટે છે. તે સંપૂર્ણપણે મફત છે.</p>
+            <a href="demo-test-page.html" class="btn">ડેમો ટેસ્ટ આપો</a>
         </div>
 
-        <div class="card">
-            <h2>PSI / ASI Test Paper</h2>
-            <p>નવું સિલેબસ આધારિત પ્રેક્ટિસ પેપર — ₹99</p>
-            <button class="buy-btn">Buy Now ₹99</button>
+        <div class="test-block">
+            <h2>5 સંપૂર્ણ Mock Tests (Premium)</h2>
+            <p>સફળતા માટેની સંપૂર્ણ તૈયારી! 5 પૂર્ણ-લંબાઈની મોક ટેસ્ટ, જે સુનિશ્ચિત રીતે STI પરીક્ષાના અભ્યાસક્રમ પર આધારિત છે.</p>
+            <button class="btn" onclick="checkAuthAndNavigate('mock-test-page.html')">5 મોક ટેસ્ટ શરૂ કરો</button>
+            <p style="font-size: 0.9em; margin-top: 10px; color: #d63384;">(આ સુવિધા પેમેન્ટ કર્યા પછી જ ઉપલબ્ધ થશે.)</p>
         </div>
-    </main>
+
+    </div>
 
     <footer class="footer">
-        <div>© 2025 STI Mock Test</div>
-        <div style="margin-top:8px"><a href="https://wa.me/916353511804" target="_blank">WhatsApp</a> &nbsp; | &nbsp; <a href="tel:+916353511804">6353511804</a></div>
+        <div class="footer-contact">
+            <a href="https://wa.me/916353511804" target="_blank" class="whatsapp">વોટ્સએપ કરો</a>
+            <a href="tel:+916353511804">Call: +91 63535 11804</a>
+        </div>
+        <p>&copy; 2025 STI Mock Test. All rights reserved.</p>
     </footer>
 
-    <div id="overlay" class="overlay" aria-hidden="true">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <button class="close-x" id="closeModalBtn">&times;</button>
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
 
-            <div id="modalInner">
+            <div id="login-view">
+                <h2>🔒 લોગિન</h2>
+                <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+                    <label for="login-email">ઈમેઈલ:</label>
+                    <input type="email" id="login-email" required>
+                    
+                    <label for="login-password">પાસવર્ડ:</label>
+                    <input type="password" id="login-password" required>
+                    
+                    <button type="submit">લોગિન કરો</button>
+                </form>
+                <div class="register-link">
+                    નવા યુઝર છો? <button onclick="switchToRegister()">અહીં રજીસ્ટર કરો</button>
                 </div>
+            </div>
+
+            <div id="register-view" style="display: none;">
+                <h2>📝 રજીસ્ટ્રેશન</h2>
+                <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+                    <label for="reg-email">ઈમેઈલ:</label>
+                    <input type="email" id="reg-email" required>
+                    
+                    <label for="reg-password">પાસવર્ડ:</label>
+                    <input type="password" id="reg-password" required>
+                    
+                    <label for="reg-mobile">મોબાઇલ નંબર (+91):</label>
+                    <input type="text" id="reg-mobile" required pattern="\+91\d{10}">
+                    
+                    <button type="submit">રજીસ્ટર કરો</button>
+                </form>
+                <div class="register-link">
+                    પહેલેથી એકાઉન્ટ છે? <button onclick="switchToLogin()">લોગિન કરો</button>
+                </div>
+            </div>
         </div>
     </div>
 
-<script>
-/*
-  Custom Netlify Identity flow using netlify-identity-widget's JS API methods
-  We use netlifyIdentity.login() and netlifyIdentity.signup() methods directly from our forms.
-  The core issue was ensuring event listeners are reattached when authArea.innerHTML changes.
-*/
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ====================================
+        // 1. SUPABASE કન્ફિગરેશન (તમારે આ બદલવું પડશે!)
+        // ====================================
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; 
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        
+        // Supabase ક્લાયન્ટ શરૂ કરો
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* Wait for widget to be available, then init */
-if (window.netlifyIdentity) {
-    netlifyIdentity.init(); // initializes and restores session if present
-} else {
-    console.warn("Netlify Identity script not loaded.");
-}
+        // ====================================
+        // 2. MODAL (POPUP) ફંક્શન્સ
+        // ====================================
+        const modal = document.getElementById('authModal');
+        const loginView = document.getElementById('login-view');
+        const registerView = document.getElementById('register-view');
 
-/* DOM refs */
-const overlay = document.getElementById('overlay');
-const modalInner = document.getElementById('modalInner');
-const closeModalBtn = document.getElementById('closeModalBtn');
-const authArea = document.getElementById('authArea');
-
-// 💡 Handler function for opening modal
-function openModalHandler(e) {
-    // Determine type based on button ID
-    const type = e.currentTarget.id === 'loginOpenBtn' ? 'login' : 'register';
-    openModal(type);
-}
-
-// 💡 ફંક્શન જે Login અને Register બટન પર લિસ્ટનર જોડે છે
-// આ ફંક્શન દર વખતે authArea.innerHTML અપડેટ થાય પછી કોલ થશે.
-function attachAuthListeners(){
-    // થોડો વિલંબ (zero timeout) ખાતરી કરે છે કે DOM અપડેટ થઈ ગયું છે.
-    setTimeout(() => {
-        const loginOpenBtn = document.getElementById('loginOpenBtn');
-        const signupOpenBtn = document.getElementById('signupOpenBtn');
-
-        if(loginOpenBtn) {
-            loginOpenBtn.addEventListener('click', openModalHandler);
+        function openModal(view) {
+            modal.style.display = 'flex';
+            if (view === 'login') {
+                switchToLogin();
+            } else if (view === 'register') {
+                switchToRegister();
+            }
         }
-        if(signupOpenBtn) {
-            signupOpenBtn.addEventListener('click', openModalHandler);
+
+        function closeModal() {
+            modal.style.display = 'none';
         }
-    }, 0);
-}
+
+        function switchToRegister() {
+            loginView.style.display = 'none';
+            registerView.style.display = 'block';
+        }
+
+        function switchToLogin() {
+            loginView.style.display = 'block';
+            registerView.style.display = 'none';
+        }
+
+        // ====================================
+        // 3. AUTHENTICATION ફંક્શન્સ
+        // ====================================
+
+        // A. લોગિન હેન્ડલર
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                alert('લોગિન નિષ્ફળ: ' + error.message);
+            } else {
+                alert('લોગિન સફળ! સ્વાગત છે.');
+                closeModal();
+                checkUserStatus(); // હેડર અપડેટ કરો
+            }
+        }
+
+        // B. રજીસ્ટ્રેશન હેન્ડલર
+        async function handleRegister(event) {
+            event.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const mobile_number = document.getElementById('reg-mobile').value;
+
+            // 1. Supabase Authentication (ઈમેઈલ/પાસવર્ડ)
+            const { data: authData, error: authError } = await supabase.auth.signUp({ 
+                email, 
+                password 
+            });
+
+            if (authError) {
+                alert('રજીસ્ટ્રેશન નિષ્ફળ: ' + authError.message);
+                return;
+            }
+
+            // 2. Profile Table (મોબાઇલ નંબર સેવ કરવો)
+            if (authData.user) {
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert({ 
+                        id: authData.user.id, 
+                        email: email, 
+                        mobile_number: mobile_number 
+                    });
+
+                if (profileError) {
+                    console.error('Mobile number save error:', profileError);
+                    alert('રજીસ્ટ્રેશન સફળ, પરંતુ મોબાઇલ નંબર સેવ કરવામાં ભૂલ થઈ.');
+                } else {
+                    alert('રજીસ્ટ્રેશન સફળ! કૃપા કરીને તમારો ઈમેઈલ ચેક કરો અને લોગિન કરો.');
+                    closeModal();
+                    switchToLogin();
+                }
+            }
+        }
+
+        // C. લોગઆઉટ ફંક્શન
+        async function signOut() {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                alert('લોગઆઉટ નિષ્ફળ: ' + error.message);
+            } else {
+                alert('લોગઆઉટ સફળ!');
+                checkUserStatus(); 
+            }
+        }
+
+        // D. હેડર અપડેટ ફંક્શન
+        async function checkUserStatus() {
+            const { data: { user } } = await supabase.auth.getUser();
+            const authenticatedDiv = document.getElementById('auth-buttons-authenticated');
+            const unauthenticatedDiv = document.getElementById('auth-buttons-unauthenticated');
+            const userDisplay = document.getElementById('user-display');
+            
+            if (user) {
+                // લોગિન થયેલ છે
+                userDisplay.textContent = `${user.email}`; 
+                authenticatedDiv.style.display = 'flex';
+                unauthenticatedDiv.style.display = 'none';
+            } else {
+                // લોગિન થયેલ નથી
+                authenticatedDiv.style.display = 'none';
+                unauthenticatedDiv.style.display = 'block';
+            }
+        }
+
+        // E. Mock Test પર જતા પહેલા Auth Check
+        async function checkAuthAndNavigate(targetPage) {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (user) {
+                // જો યુઝર લોગિન હોય, તો તેને Payment/Mock Test page પર જવા દો
+                window.location.href = targetPage;
+            } else {
+                alert('Mock Tests શરૂ કરવા માટે કૃપા કરીને પહેલા લોગિન કરો.');
+                openModal('login'); // લોગિન પોપઅપ ખોલો
+            }
+        }
 
 
-// મોડલ બંધ કરવાના સામાન્ય લિસ્ટનર (આ સ્થિર છે)
-closeModalBtn.addEventListener('click', closeModal);
-overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+        // ====================================
+        // 4. Initialization
+        // ====================================
+        // વેબસાઈટ લોડ થાય ત્યારે યુઝર સ્ટેટસ ચેક કરો
+        checkUserStatus();
 
-
-/* open modal with type = 'login' or 'register' */
-function openModal(type){
-    // Build content
-    if (type === 'login'){
-        modalInner.innerHTML = `
-            <h3 id="modalTitle">Login</h3>
-            <div class="field"><input id="loginEmail" type="email" placeholder="Email" /></div>
-            <div class="field"><input id="loginPass" type="password" placeholder="Password" /></div>
-            <button class="primary-btn" id="doLoginBtn">Login</button>
-            <div class="muted">Forgot password? Use password reset from Netlify admin or contact support.</div>
-        `;
-        // attach handler to new button in DOM (doLoginBtn)
-        setTimeout(()=> {
-            document.getElementById('doLoginBtn').addEventListener('click', doLogin);
-        },0);
-    } else {
-        modalInner.innerHTML = `
-            <h3 id="modalTitle">Register</h3>
-            <div class="field"><input id="signupName" type="text" placeholder="Full name" /></div>
-            <div class="field"><input id="signupEmail" type="email" placeholder="Email" /></div>
-            <div class="field"><input id="signupPass" type="password" placeholder="Password (6+ chars)" /></div>
-            <button class="primary-btn" id="doSignupBtn">Create Account</button>
-            <div class="muted">By creating account you agree to our terms.</div>
-        `;
-        // attach handler to new button in DOM (doSignupBtn)
-        setTimeout(()=> {
-            document.getElementById('doSignupBtn').addEventListener('click', doSignup);
-        },0);
-    }
-
-    overlay.style.display = 'flex';
-    overlay.setAttribute('aria-hidden','false');
-}
-
-/* close modal */
-function closeModal(){
-    overlay.style.display = 'none';
-    overlay.setAttribute('aria-hidden','true');
-}
-
-/* show a small alert style message (simple) */
-function showMsg(msg){
-    alert(msg);
-}
-
-/* Perform login using netlifyIdentity.login() */
-function doLogin(){
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPass').value;
-
-    if (!email || !password) { showMsg('Email અને Password ભરો'); return; }
-
-    netlifyIdentity.login({ email, password, remember: true })
-    .then(user => {
-        closeModal();
-        // UI update will happen via netlifyIdentity.on('login') listener
-    })
-    .catch(err => {
-        const msg = err && err.message ? err.message : JSON.stringify(err);
-        showMsg('Login નિષ્ફળ: ' + msg);
-    });
-}
-
-/* Perform signup using netlifyIdentity.signup() */
-function doSignup(){
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPass').value;
-
-    if (!name || !email || !password) { showMsg('તમામ ફીલ્ડ ભરો'); return; }
-    if (password.length < 6) { showMsg('Password ઓછામાં ઓછા 6 અક્ષર હોવો જોઈએ'); return; }
-
-    netlifyIdentity.signup({
-        email,
-        password,
-        user_metadata: { full_name: name }
-    })
-    .then(user => {
-        closeModal();
-        // UI update will happen via netlifyIdentity.on('login') if logged in immediately
-        showMsg('બધું થઈ ગયું. જો જરૂર હોય તો Email માંથી confirm કરો.');
-    })
-    .catch(err => {
-        const msg = err && err.message ? err.message : JSON.stringify(err);
-        showMsg('Registration નિષ્ફળ: ' + msg);
-    });
-}
-
-/* Logout */
-function doLogout(){
-    // netlifyIdentity.logout() will trigger 'logout' event
-    netlifyIdentity.logout();
-}
-
-/* Update header/auth UI */
-function updateAuthUI(user){
-    if (user && user.email){
-        // Show name + logout
-        const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email.split('@')[0];
-        authArea.innerHTML = `
-            <span id="user-name">${escapeHtml(name)}</span>
-            <button class="btn btn-ghost" id="logoutBtn">Logout</button>
-        `;
-        // Attach Logout listener
-        document.getElementById('logoutBtn').addEventListener('click', doLogout);
-    } else {
-        // Show login/register buttons
-        authArea.innerHTML = `
-            <button class="btn" id="loginOpenBtn">Login</button>
-            <button class="btn" id="signupOpenBtn">Register</button>
-        `;
-        // Reattach Login/Register event listeners to newly created buttons
-        attachAuthListeners();
-    }
-}
-
-/* Util: escape html for name display */
-function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
-}
-
-/* Hook netlifyIdentity events to keep UI in sync */
-if (window.netlifyIdentity) {
-    
-    // જ્યારે યુઝર લોગિન કરે અથવા સેશન રિસ્ટોર થાય ત્યારે UI અપડેટ કરો
-    netlifyIdentity.on('login', (user) => {
-        updateAuthUI(user);
-    });
-    
-    // જ્યારે યુઝર લોગઆઉટ કરે ત્યારે UI અપડેટ કરો
-    netlifyIdentity.on('logout', () => {
-        updateAuthUI(null);
-    });
-    
-    // પેજ લોડ થયા પછી તરત જ પ્રારંભિક સ્ટેટસ અપડેટ કરો
-    netlifyIdentity.on('init', (user) => {
-        updateAuthUI(user);
-    });
-
-    // પ્રથમ વખત પેજ લોડ થાય ત્યારે લિસ્ટનર જોડો (આ HTML માં પહેલેથી હાજર બટનો માટે છે)
-    attachAuthListeners();
-} else {
-    // Fallback જો widget ઉપલબ્ધ ન હોય
-    updateAuthUI(null);
-}
-</script>
+        // ક્લિક કરવાથી પોપઅપ બંધ થાય
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
 
 </body>
 </html>
