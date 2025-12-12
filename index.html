@@ -121,15 +121,40 @@
 </head>
 
 <body>
-
+ <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+ <script>
+    // Netlify Identity Widget જ્યારે તૈયાર થઈ જાય, ત્યારે આ ફંક્શન ચાલે છે
+    netlifyIdentity.on("init", user => {
+        const loginButtonDiv = document.getElementById('login-button');
+        
+        if (!loginButtonDiv) return; // જો 'login-button' element ન મળે તો ભૂલ અટકાવો
+        
+        if (!user) {
+            // જો યુઝર લોગ-આઉટ હોય
+            loginButtonDiv.innerHTML = `
+            <a href="#" onclick="netlifyIdentity.open(); return false;" class="nav-link" style="color:white; text-decoration:none; margin-left:20px; font-weight:bold;">
+                LOGIN / REGISTER
+            </a>
+        `;
+        } else {
+            // જો યુઝર લોગ-ઇન હોય
+            const userName = user.email.split('@')[0]; // ઇમેઇલમાંથી યુઝરનું નામ મેળવો
+            loginButtonDiv.innerHTML = `
+            <span class="nav-link" style="color:white; margin-left:20px;">Welcome, ${userName}</span>
+            <a href="#" onclick="netlifyIdentity.logout(); return false;" class="nav-link" style="color:white; text-decoration:none; margin-left:20px; font-weight:bold;">
+                LOGOUT
+            </a>
+        `;
+        }
+    });
+</script>
     <div class="header">
-        <h1>STI Mock Test</h1>
-        <div>
-            <a href="#demo" class="nav-link">DEMO</a>
-            <a href="#" class="nav-link">LOGIN</a>
-        </div>
+     <h1>STI Mock Test</h1>
+      <div id="login-button">
+        <a href="#" class="nav-link" style="color:white; text-decoration:none; margin-left:20px; font-weight:bold;">LOGIN</a>
+      </div>
     </div>
-
+    
     <div class="container">
 
         <div id="demo" class="test-block">
