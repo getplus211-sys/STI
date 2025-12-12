@@ -1,210 +1,365 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>STI Mock Test</title>
 
-<!-- Netlify Identity Widget -->
+<!-- Netlify Identity Widget (we load it only to use its JS API; we DO NOT call widget.open) -->
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
 <style>
-    body { margin: 0; font-family: Arial; background: #f2f6ff; }
+    :root{
+        --primary: #004d99; /* deep blue */
+        --accent: #ff6600;
+        --success: #00a000;
+        --bg: #f4f6fb;
+    }
+    *{box-sizing:border-box}
+    body{
+        margin:0;
+        font-family: Arial, sans-serif;
+        background:var(--bg);
+        min-height:100vh;
+        display:flex;
+        flex-direction:column;
+    }
 
     /* HEADER */
-    .header {
-        background: #004d99;
-        padding: 15px 20px;
-        color: white;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .header{
+        background:var(--primary);
+        color:#fff;
+        padding:14px 16px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
     }
-    .header h1 { margin: 0; font-size: 22px; }
-    .nav-btn {
-        background: white;
-        color: #004d99;
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-weight: bold;
-        border: none;
-        margin-left: 8px;
-        cursor: pointer;
-    }
+    .brand{ font-size:20px; font-weight:700; }
+    .auth-area { display:flex; align-items:center; gap:8px; }
 
-    /* CONTAINER */
-    .container {
-        padding: 15px;
-    }
-
-    .test-block {
-        background: white;
-        margin-bottom: 20px;
-        padding: 18px;
-        border-radius: 10px;
-        box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
-    }
-    .test-block h2 { color: #004d99; margin-top: 0; }
     .btn {
-        background: #ff6600;
-        color: white;
-        padding: 10px 14px;
-        border-radius: 6px;
-        text-decoration: none;
-        display: inline-block;
+        background:#fff;
+        color:var(--primary);
+        border-radius:8px;
+        padding:8px 12px;
+        border:none;
+        font-weight:700;
+        cursor:pointer;
+    }
+    .btn-ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.15); }
+
+    #user-name { color:#ffeb99; font-weight:700; margin-right:8px; }
+
+    /* MAIN */
+    .container{
+        width:92%;
+        max-width:720px;
+        margin:18px auto;
+        flex:1;
+    }
+    .card{
+        background:#fff;
+        padding:18px;
+        border-radius:12px;
+        box-shadow:0 6px 18px rgba(10,20,40,0.06);
+        margin-bottom:16px;
+    }
+    .card h2{ color:var(--primary); margin-top:0; }
+
+    .buy-btn{
+        background:var(--accent);
+        color:#fff;
+        border:none;
+        padding:10px 14px;
+        border-radius:8px;
+        font-weight:800;
+        cursor:pointer;
     }
 
-    /* FOOTER FIXED */
-    .footer {
-        background: #222;
-        color: white;
-        text-align: center;
-        padding: 12px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
+    /* FOOTER */
+    .footer{
+        background:var(--primary);
+        color:#fff;
+        text-align:center;
+        padding:16px;
+        margin-top:18px;
     }
+    .footer a{ color:#fff; text-decoration:none; font-weight:700; }
 
-    /* CENTER POPUP FIX FIXED */
-    .popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        width: 85%;
-        max-width: 350px;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.3);
-        display: none;
-        z-index: 99999;
+    /* POPUP (center) */
+    .overlay{
+        display:none;
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,0.45);
+        z-index:9999;
+        justify-content:center;
+        align-items:center;
+        padding:20px;
     }
-    .popup h3 { margin-top: 0; }
-    .close-btn {
-        background: red;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 6px;
-        float: right;
+    .modal{
+        width:100%;
+        max-width:380px;
+        background:#fff;
+        border-radius:12px;
+        padding:18px;
+        box-shadow:0 12px 40px rgba(2,6,23,0.35);
+        position:relative;
+    }
+    .modal h3{ margin:0 0 12px 0; color:var(--primary); }
+    .close-x{
+        position:absolute;
+        right:12px;
+        top:10px;
+        border:none;
+        background:transparent;
+        font-size:18px;
+        cursor:pointer;
+    }
+    .field{
+        width:100%;
+        margin-top:10px;
+    }
+    input[type="text"], input[type="email"], input[type="password"]{
+        width:100%;
+        padding:10px 12px;
+        border-radius:8px;
+        border:1px solid #d6d9e6;
+        outline:none;
+        font-size:14px;
+    }
+    .primary-btn{
+        width:100%;
+        margin-top:14px;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        background:var(--primary);
+        color:#fff;
+        font-weight:800;
+        cursor:pointer;
+    }
+    .muted{ font-size:13px; color:#667; margin-top:8px; text-align:center; }
+
+    /* responsive smaller */
+    @media(max-width:420px){
+        .brand{ font-size:18px; }
+        .modal{ padding:14px; }
     }
 </style>
 </head>
-
 <body>
 
-<!-- HEADER -->
-<div class="header">
-    <h1>STI Mock Test</h1>
-    <div id="authArea">
-        <button class="nav-btn" onclick="openPopup('login')">Login</button>
-        <button class="nav-btn" onclick="openPopup('register')">Register</button>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="brand">STI Mock Test</div>
+        <div class="auth-area" id="authArea">
+            <!-- Filled by JS: login/register buttons OR username + logout -->
+            <button class="btn" id="loginOpenBtn">Login</button>
+            <button class="btn" id="signupOpenBtn">Register</button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="container">
+        <div class="card">
+            <h2>⭐ Demo Test - મફત</h2>
+            <p>આ ડેમો ટેસ્ટ ફ્રી છે. પહેલેથી જ તમારા માર્ક અને ગતિશીલતા તપાસો.</p>
+            <a class="buy-btn" href="demo-test-page.html">Start Demo</a>
+        </div>
+
+        <div class="card">
+            <h2>PSI / ASI Test Paper</h2>
+            <p>નવું સિલેબસ આધારિત પ્રેક્ટિસ પેપર — ₹99</p>
+            <button class="buy-btn">Buy Now ₹99</button>
+        </div>
+    </main>
+
+    <!-- FOOTER (deep blue to match header) -->
+    <footer class="footer">
+        <div>© 2025 STI Mock Test</div>
+        <div style="margin-top:8px"><a href="https://wa.me/916353511804" target="_blank">WhatsApp</a> &nbsp; | &nbsp; <a href="tel:+916353511804">6353511804</a></div>
+    </footer>
+
+    <!-- OVERLAY + MODAL -->
+    <div id="overlay" class="overlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="close-x" id="closeModalBtn">&times;</button>
+
+            <!-- We'll swap inner content for login or register -->
+            <div id="modalInner">
+                <!-- default placeholder -->
+            </div>
+        </div>
     </div>
-</div>
-
-
-<!-- POPUP BOX -->
-<div id="popupBox" class="popup">
-    <button class="close-btn" onclick="closePopup()">X</button>
-    <h3 id="popupTitle">Login</h3>
-    <div id="popupContent"></div>
-</div>
-
-
-
-
-<div class="container">
-
-    <!-- DEMO TEST -->
-    <div class="test-block">
-        <h2>⭐ Demo Test</h2>
-        <p>મફતમાં ડેમો ટેસ્ટ આપી શકો છો.</p>
-        <a href="#" class="btn" style="background:#00a000;">Start Demo</a>
-    </div>
-
-    <!-- PAID TEST -->
-    <div class="test-block">
-        <h2>Paper 1 – PSI/ASI</h2>
-        <p>કિંમત ₹99/-</p>
-        <a class="btn" href="#">Buy Now</a>
-    </div>
-
-</div>
-
-<!-- FOOTER -->
-<div class="footer">
-    © 2025 STI Mock Test | Contact: 6353511804
-</div>
-
-
 
 <script>
-// -------------------------
-// OPEN POPUP
-// -------------------------
-function openPopup(type) {
-    const box = document.getElementById("popupBox");
-    const title = document.getElementById("popupTitle");
-    const content = document.getElementById("popupContent");
+/*
+  Custom Netlify Identity flow using netlify-identity-widget's JS API methods
+  BUT we DO NOT call netlifyIdentity.open() anywhere — so default UI never appears.
+  Instead we use netlifyIdentity.login() and netlifyIdentity.signup() methods directly from our forms.
+*/
 
-    if (type === "login") {
-        title.textContent = "Login";
-        content.innerHTML = `
-            <button onclick="netlifyIdentity.open('login')" class="btn" style="width:100%;text-align:center;">
-                Login with Email
-            </button>
-        `;
-    } else {
-        title.textContent = "Register";
-        content.innerHTML = `
-            <button onclick="netlifyIdentity.open('signup')" class="btn" style="width:100%;text-align:center;">
-                Create New Account
-            </button>
-        `;
-    }
-
-    box.style.display = "block";
+/* Wait for widget to be available, then init */
+if (window.netlifyIdentity) {
+    netlifyIdentity.init(); // initializes and restores session if present
+} else {
+    console.warn("Netlify Identity script not loaded.");
 }
 
-// CLOSE POPUP
-function closePopup() {
-    document.getElementById("popupBox").style.display = "none";
+/* DOM refs */
+const overlay = document.getElementById('overlay');
+const modalInner = document.getElementById('modalInner');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const authArea = document.getElementById('authArea');
+
+document.getElementById('loginOpenBtn').addEventListener('click', () => openModal('login'));
+document.getElementById('signupOpenBtn').addEventListener('click', () => openModal('register'));
+closeModalBtn.addEventListener('click', closeModal);
+overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+/* open modal with type = 'login' or 'register' */
+function openModal(type){
+    // Build content
+    if (type === 'login'){
+        modalInner.innerHTML = `
+            <h3 id="modalTitle">Login</h3>
+            <div class="field"><input id="loginEmail" type="email" placeholder="Email" /></div>
+            <div class="field"><input id="loginPass" type="password" placeholder="Password" /></div>
+            <button class="primary-btn" id="doLoginBtn">Login</button>
+            <div class="muted">Forgot password? Use password reset from Netlify admin or contact support.</div>
+        `;
+        // attach handler
+        setTimeout(()=> {
+            document.getElementById('doLoginBtn').addEventListener('click', doLogin);
+        },0);
+    } else {
+        modalInner.innerHTML = `
+            <h3 id="modalTitle">Register</h3>
+            <div class="field"><input id="signupName" type="text" placeholder="Full name" /></div>
+            <div class="field"><input id="signupEmail" type="email" placeholder="Email" /></div>
+            <div class="field"><input id="signupPass" type="password" placeholder="Password (6+ chars)" /></div>
+            <button class="primary-btn" id="doSignupBtn">Create Account</button>
+            <div class="muted">By creating account you agree to our terms.</div>
+        `;
+        setTimeout(()=> {
+            document.getElementById('doSignupBtn').addEventListener('click', doSignup);
+        },0);
+    }
+
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden','false');
 }
 
+/* close modal */
+function closeModal(){
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden','true');
+}
 
-// ---------------------
-// NETLIFY LOGIN SYSTEM
-// ---------------------
-netlifyIdentity.on("login", user => {
-    updateUI(user);
-    closePopup();
-});
+/* show a small alert style message (simple) */
+function showMsg(msg){
+    // simple alert is fine for now (or you can implement toast)
+    alert(msg);
+}
 
-netlifyIdentity.on("logout", () => {
-    updateUI(null);
-});
+/* Perform login using netlifyIdentity.login() (no widget UI) */
+function doLogin(){
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPass').value;
 
-// When page loads, keep user logged in
-document.addEventListener("DOMContentLoaded", () => {
-    updateUI(netlifyIdentity.currentUser());
-});
+    if (!email || !password) { showMsg('Email અને Password ભરો'); return; }
 
+    // netlifyIdentity.login accepts credentials and returns a Promise
+    // This will sign in and set currentUser; widget will store token
+    netlifyIdentity.login({ email, password, remember: true })
+    .then(user => {
+        closeModal();
+        updateAuthUI(user);
+    })
+    .catch(err => {
+        // err might be an Error object or response; show message
+        const msg = err && err.message ? err.message : JSON.stringify(err);
+        showMsg('Login નિષ્ફળ: ' + msg);
+    });
+}
 
-// UI UPDATE
-function updateUI(user) {
-    const area = document.getElementById("authArea");
+/* Perform signup using netlifyIdentity.signup() */
+function doSignup(){
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPass').value;
 
-    if (user) {
-        area.innerHTML = `
-            <span style="color:white; font-weight:bold;">${user.user_metadata.full_name || "User"}</span>
-            <button class="nav-btn" onclick="netlifyIdentity.logout()">Logout</button>
+    if (!name || !email || !password) { showMsg('તમામ ફીલ્ડ ભરો'); return; }
+    if (password.length < 6) { showMsg('Password ઓછામાં ઓછા 6 અક્ષર હોવો જોઈએ'); return; }
+
+    netlifyIdentity.signup({
+        email,
+        password,
+        user_metadata: { full_name: name }
+    })
+    .then(user => {
+        // After signup, Netlify may require email confirmation (depending on settings).
+        // If immediate login is available, user will be logged in; otherwise they may need to confirm.
+        closeModal();
+        updateAuthUI(user);
+        showMsg('બધું થઈ ગયું. જો જરૂર હોય તો Email માંથી confirm કરો.');
+    })
+    .catch(err => {
+        const msg = err && err.message ? err.message : JSON.stringify(err);
+        showMsg('Registration નિષ્ફળ: ' + msg);
+    });
+}
+
+/* Logout */
+function doLogout(){
+    netlifyIdentity.logout(); // will trigger 'logout' event
+}
+
+/* Update header/auth UI */
+function updateAuthUI(user){
+    if (user && user.email){
+        // Show name + logout
+        const name = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
+        authArea.innerHTML = `
+            <span id="user-name">${escapeHtml(name)}</span>
+            <button class="btn btn-ghost" id="logoutBtn">Logout</button>
         `;
+        document.getElementById('logoutBtn').addEventListener('click', doLogout);
     } else {
-        area.innerHTML = `
-            <button class="nav-btn" onclick="openPopup('login')">Login</button>
-            <button class="nav-btn" onclick="openPopup('register')">Register</button>
+        // Show login/register buttons
+        authArea.innerHTML = `
+            <button class="btn" id="loginOpenBtn">Login</button>
+            <button class="btn" id="signupOpenBtn">Register</button>
         `;
+        // Reattach event listeners
+        document.getElementById('loginOpenBtn').addEventListener('click', ()=>openModal('login'));
+        document.getElementById('signupOpenBtn').addEventListener('click', ()=>openModal('register'));
     }
+}
+
+/* Util: escape html for name display */
+function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+}
+
+/* Hook netlifyIdentity events to keep UI in sync */
+if (window.netlifyIdentity) {
+    netlifyIdentity.on('login', (user) => {
+        // user is a GOTRUE user object
+        updateAuthUI(user);
+    });
+    netlifyIdentity.on('logout', () => {
+        updateAuthUI(null);
+    });
+
+    // When page loads, init() already called above; get currentUser() to restore session
+    const current = netlifyIdentity.currentUser();
+    if (current) updateAuthUI(current);
+    else updateAuthUI(null);
+} else {
+    // If widget not available, show basic buttons (but login won't work)
+    updateAuthUI(null);
 }
 </script>
 
