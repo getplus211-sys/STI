@@ -6,15 +6,18 @@
     <title>STI Mock Test - Test Series</title>
 
     <style>
-         /* Netlify Identity Widget ના પોપઅપનો z-index વધારવો */
-         .netlify-identity-widget {
-            /* z-index ને એક મોટી કિંમત આપો (મોટા ભાગના હેડર/મેનુ કરતા વધારે) */
+        /* ======================================= */
+        /* Q1 FIX: Netlify Widget Z-Index Override */
+        /* ======================================= */
+        /* Widget ને હંમેશા ટોચ પર રાખવા માટે */
+        .netlify-identity-widget {
+            /* 99999 એ ઉચ્ચતમ કિંમત છે */
             z-index: 99999 !important; 
-         }
-        /* જો પોપઅપની નીચેની બેકગ્રાઉન્ડ ઓવરલે પણ દેખાતી ન હોય, તો આ ઉમેરો */
+        }
         .netlify-identity-widget dialog::backdrop {
             z-index: 99998 !important; 
         }
+
         :root{
             --primary:#004d99;
             --accent:#ff6600;
@@ -41,7 +44,8 @@
             align-items:center;
             position:sticky;
             top:0;
-            z-index:100;
+            /* Q1 FIX: હેડરનો z-index 99999 કરતા ઓછો રાખો */
+            z-index: 1000; 
         }
         .header h1{
             margin:0;
@@ -125,7 +129,6 @@
                 margin-left:10px;
             }
         }
-
     </style>
 </head>
 
@@ -133,37 +136,65 @@
 
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
-     <script>
-       // Netlify Identity Widget જ્યારે તૈયાર થઈ જાય, ત્યારે આ ફંક્શન ચાલે છે
-        netlifyIdentity.on("init", user => {
+    <script>
         const loginButtonDiv = document.getElementById('login-button');
+
+        // Header ના UI ને અપડેટ કરવા માટેનું ફંક્શન
+        function updateHeader(user) {
+            if (!loginButtonDiv) return;
+
+            if (!user) {
+                // લોગ-આઉટ સ્ટેટ (LOGIN / REGISTER બટન બતાવો)
+                loginButtonDiv.innerHTML = `
+                    <a href="#" onclick="netlifyIdentity.open(); return false;" class="nav-link">
+                        LOGIN / REGISTER
+                    </a>
+                `;
+            } else {
+                // લોગ-ઇન સ્ટેટ (નામ અને LOGOUT બટન બતાવો)
+                const userName = user.email.split('@')[0];
+                loginButtonDiv.innerHTML = `
+                    <span class="nav-link" style="margin-left:0;">${userName}</span>
+                    <a href="#" onclick="netlifyIdentity.logout(); return false;" class="nav-link">
+                        LOGOUT
+                    </a>
+                `;
+            }
+        }
+
+        // Q2 FIX: પેજ લોડ થવા પર યુઝરનું સત્ર (Session) ચેક કરો
+        // આ ખાતરી કરે છે કે રિફ્રેશ પછી યુઝર લોગ-આઉટ ન થાય.
+        netlifyIdentity.on("init", user => {
+            updateHeader(user);
+        });
+
+        // યુઝર સફળતાપૂર્વક લોગ-ઇન થાય ત્યારે હેડર અપડેટ કરો
+        netlifyIdentity.on("login", user => {
+            updateHeader(user);
+            // જો તમે પોપઅપ બંધ કરવા માંગતા હો તો:
+            // netlifyIdentity.close(); 
+        });
+
+        // Q3 FIX: યુઝર લોગ-આઉટ બટન ક્લિક કરે ત્યારે હેડર અપડેટ કરો
+        netlifyIdentity.on("logout", () => {
+            updateHeader(null);
+        });
         
-        if (!loginButtonDiv) return; // જો 'login-button' element ન મળે તો ભૂલ અટકાવો
-        
-        if (!user) {
-            // જો યુઝર લોગ-આઉટ હોય
-            loginButtonDiv.innerHTML = `
-            <a href="#" onclick="netlifyIdentity.open(); return false;" class="nav-link" style="color:white; text-decoration:none; margin-left:20px; font-weight:bold;">
-                LOGIN / REGISTER
-          </a>
-          `;
-          } else {
-              // જો યુઝર લોગ-ઇન હોય
-              const userName = user.email.split('@')[0]; // ઇમેઇલમાંથી યુઝરનું નામ મેળવો
-              loginButtonDiv.innerHTML = `
-              <span class="nav-link" style="color:white; margin-left:20px;">${userName}</span>
-              <a href="#" onclick="netlifyIdentity.logout(); return false;" class="nav-link" style="color:white; text-decoration:none; margin-left:20px; font-weight:bold;">
-                  LOGOUT
-              </a>
-          `;
-          }
-      });
-   </script>
+        // જો init ઇવેન્ટ ન ચાલે (જેમ કે જ્યારે DOM લોડ થાય), તો પણ શરૂઆતનું બટન બતાવો
+        if (loginButtonDiv && !netlifyIdentity.currentUser()) {
+             loginButtonDiv.innerHTML = `
+                <a href="#" onclick="netlifyIdentity.open(); return false;" class="nav-link">
+                    LOGIN / REGISTER
+                </a>
+            `;
+        }
+    </script>
+    
     <div class="header">
-     <h1>STI Mock Test</h1>
-      <div id="login-button">
-        <a href="#" class="nav-link" style="color:white; text-decoration:none; margin-left:20px; font-weight:bold;">LOGIN</a>
-      </div>
+        <h1>STI Mock Test</h1>
+        <div id="login-button">
+            <a href="#" class="nav-link">LOGIN</a> 
+        </div>
     </div>
     
     <div class="container">
@@ -183,9 +214,6 @@
             </button>
         </div>
 
-    </div>
-
-    <!-- Improved Footer -->
     <div class="footer">
         <p><strong>© 2025 STI Mock Test</strong></p>
         <p>All rights reserved.</p>
@@ -203,7 +231,3 @@
 
 </body>
 </html>
-
-
-
-
