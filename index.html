@@ -475,7 +475,7 @@
         <button class="modal-close" id="auth-modal-close">&times;</button>
       </div>
       <p class="modal-subtitle" id="auth-modal-subtitle">
-        તમારા મોબાઈલ નંબર અને پاسવર્ડથી લોગિન કરો.
+        તમારા મોબાઈલ નંબર અને પાસવર્ડથી લોગિન કરો.
       </p>
 
       <p class="error-text" id="auth-error-text">Invalid details. કૃપા કરી ફરીથી તપાસો.</p>
@@ -485,11 +485,11 @@
         <div class="form-group">
           <label class="form-label" for="login-mobile">Mobile Number</label>
           <input
-            type="tel"
+            type="email"
             id="login-mobile"
             class="form-input"
-            placeholder="10 digit mobile"
-            autocomplete="tel"
+            placeholder="10 digit mobile (as email)"
+            autocomplete="email"
           />
         </div>
         <div class="form-group">
@@ -558,7 +558,16 @@
     </div>
   </div>
 
+  <!-- Supabase JS SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
+    // ====== SUPABASE INIT ======
+    const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     // ====== HEADER STATE ======
     const navLoggedOut = document.getElementById("nav-logged-out");
     const navLoggedIn = document.getElementById("nav-logged-in");
@@ -592,7 +601,7 @@
       } else {
         authModalTitle.textContent = "Register";
         authModalSubtitle.textContent =
-          "નવી એકાઉન્ટ 만드는 માટે નીચે વિગતો भरो.";
+          "નવી એકાઉન્ટ બનાવવા માટે નીચે વિગતો भरो.";
         loginForm.style.display = "none";
         registerForm.style.display = "block";
       }
@@ -630,12 +639,11 @@
       openAuthModal("login");
     });
 
-    // ====== SIMPLE LOCAL AUTH (placeholder) ======
+    // ====== UI HELPERS ======
     function setLoggedInUI(name) {
       studentNameLabel.textContent = name || "વિદ્યાર્થી";
-      navLoggedOut.style.display = "flex";
-      navLoggedIn.style.display = "flex";
       navLoggedOut.style.display = "none";
+      navLoggedIn.style.display = "flex";
     }
 
     function setLoggedOutUI() {
@@ -644,43 +652,43 @@
       studentNameLabel.textContent = "વિદ્યાર્થી";
     }
 
-    // check localStorage
-    const storedUser = localStorage.getItem("sti_user");
-    if (storedUser) {
+    // get profile name (optional – if profiles table બનાવ્યું હોય)
+    async function fetchProfileAndSetName(user) {
       try {
-        const user = JSON.parse(storedUser);
-        setLoggedInUI(user.name);
-      } catch (e) {
-        setLoggedOutUI();
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+
+        if (!error && data && data.full_name) {
+          setLoggedInUI(data.full_name);
+        } else {
+          setLoggedInUI("STI Student");
+        }
+      } catch {
+        setLoggedInUI("STI Student");
       }
-    } else {
-      setLoggedOutUI();
     }
 
-    // Login submit
-    loginForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const mobile = document.getElementById("login-mobile").value.trim();
-      const password = document.getElementById("login-password").value.trim();
+    // ====== AUTH STATE ON LOAD ======
+    (async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      if (!mobile || !password) {
-        authErrorText.textContent = "બધા field ભરો.";
-        authErrorText.style.display = "block";
-        return;
+      if (session && session.user) {
+        await fetchProfileAndSetName(session.user);
+      } else {
+        setLoggedOutUI();
       }
+    })();
 
-      const dummyUser = {
-        name: "STI Student",
-        mobile,
-      };
-      localStorage.setItem("sti_user", JSON.stringify(dummyUser));
-      setLoggedInUI(dummyUser.name);
-      closeAuthModal();
-    });
-
-    // Register submit
-    registerForm.addEventListener("submit", function (e) {
+    // ====== REGISTER ======
+    registerForm.addEventListener("submit", async function (e) {
       e.preventDefault();
+      authErrorText.style.display = "none";
+
       const name = document.getElementById("reg-name").value.trim();
       const mobile = document.getElementById("reg-mobile").value.trim();
       const password = document.getElementById("reg-password").value.trim();
@@ -691,15 +699,83 @@
         return;
       }
 
-      const newUser = { name, mobile };
-      localStorage.setItem("sti_user", JSON.stringify(newUser));
-      setLoggedInUI(newUser.name);
+      // મોબાઈલ ને email જેમ use કરીશું (simple pattern)
+      const email = mobile + "@sti.local";
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            mobile: mobile,
+          },
+        },
+      });
+
+      if (error) {
+        authErrorText.textContent = error.message || "Registration નિષ્ફળ ગયું.";
+        authErrorText.style.display = "block";
+        return;
+      }
+
+      const user = data.user;
+
+      // profiles table માં name / mobile insert (જો અલગ table રાખ્યું હોય તો)
+      if (user) {
+        await supabase.from("profiles").upsert({
+          id: user.id,
+          full_name: name,
+          mobile: mobile,
+        });
+        setLoggedInUI(name);
+      } else {
+        setLoggedInUI("STI Student");
+      }
+
       closeAuthModal();
     });
 
-    // Logout
-    logoutBtn.addEventListener("click", function () {
-      localStorage.removeItem("sti_user");
+    // ====== LOGIN ======
+    loginForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      authErrorText.style.display = "none";
+
+      const mobile = document.getElementById("login-mobile").value.trim();
+      const password = document.getElementById("login-password").value.trim();
+
+      if (!mobile || !password) {
+        authErrorText.textContent = "બધા field ભરો.";
+        authErrorText.style.display = "block";
+        return;
+      }
+
+      const email = mobile + "@sti.local";
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        authErrorText.textContent = "Login fail. Mobile / Password તપાસો.";
+        authErrorText.style.display = "block";
+        return;
+      }
+
+      const user = data.user;
+      if (user) {
+        await fetchProfileAndSetName(user);
+      } else {
+        setLoggedInUI("STI Student");
+      }
+
+      closeAuthModal();
+    });
+
+    // ====== LOGOUT ======
+    logoutBtn.addEventListener("click", async function () {
+      await supabase.auth.signOut();
       setLoggedOutUI();
     });
   </script>
