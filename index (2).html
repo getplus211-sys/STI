@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STI Mock Test - Test Series</title>
+    <style>
+        /* અહીં બેઝિક CSS છે. તમે Bootstrap/Tailwind નો ઉપયોગ કરી શકો છો. */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .header { background-color: #004d99; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .nav-link { color: white; text-decoration: none; margin-left: 20px; font-weight: bold; }
+        .container { width: 80%; margin: 20px auto; padding: 20px; }
+        .test-block { background-color: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .test-block h2 { color: #004d99; margin-top: 0; }
+        .buy-button { background-color: #ff6600; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .footer { background-color: #333; color: white; text-align: center; padding: 15px; position: fixed; bottom: 0; width: 100%; }
+        .footer a { color: #f4f4f4; margin: 0 10px; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>STI Mock Test</h1>
+        <div>
+            <a href="#demo" class="nav-link">DEMO</a>
+            <a href="#" class="nav-link">LOGIN</a> </div>
+    </div>
+
+    <div class="container">
+        
+        <div id="demo" class="test-block">
+            <h2>⭐ Demo Test - ફ્રી એક્સેસ</h2>
+            <div id="demo-content">
+                <p>આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં ટેસ્ટ આપી શકો છો અને સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.</p>
+                <a href="demo-test-page.html" class="buy-button" style="background-color: #00a000;">DEMO Test શરુ કરો</a>
+            </div>
+        </div>
+
+        <div id="test-1" class="test-block">
+            <h2>Test Series Paper 1: PSI/ASI</h2>
+            <div id="paper-1-html">
+                <p>આ પેપર PSI/ASI પરીક્ષાના નવીનતમ અભ્યાસક્રમ મુજબ તૈયાર કરાયેલું છે. કિંમત: ₹99/-</p>
+                <button class="buy-button" onclick="openCashfreePayment('Paper 1', 99)">Buy Now (₹99)</button>
+            </div>
+        </div>
+
+        <div id="test-2" class="test-block">
+            <h2>Test Series Paper 2: GPSC Class 1/2</h2>
+            <div id="paper-2-html">
+                <p>GPSC ની તૈયારી માટે આદર્શ. 200 પ્રશ્નો. કિંમત: ₹149/-</p>
+                <button class="buy-button" onclick="openCashfreePayment('Paper 2', 149)">Buy Now (₹149)</button>
+            </div>
+        </div>
+
+        <div id="test-3" class="test-block">
+            <h2>Test Series Paper 3: Talati Mock</h2>
+            <div id="paper-3-html">
+                <p>તલાટી પરીક્ષા માટે 100 માર્ક્સનો સંપૂર્ણ મોક ટેસ્ટ. કિંમત: ₹75/-</p>
+                <button class="buy-button" onclick="openCashfreePayment('Paper 3', 75)">Buy Now (₹75)</button>
+            </div>
+        </div>
+
+        <div id="test-4" class="test-block">
+            <h2>Test Series Paper 4: Constable Full Test</h2>
+            <div id="paper-4-html">
+                <p>કોન્સ્ટેબલ ભરતી માટે 5 નવા પેપર. કિંમત: ₹199/-</p>
+                <button class="buy-button" onclick="openCashfreePayment('Paper 4', 199)">Buy Now (₹199)</button>
+            </div>
+        </div>
+        
+        <div id="test-5" class="test-block">
+            <h2>Test Series Paper 5: Head Clerk Combo</h2>
+            <div id="paper-5-html">
+                <p>હેડ ક્લાર્ક માટે 5 મોક ટેસ્ટનું કોમ્બો પેક. કિંમત: ₹250/-</p>
+                <button class="buy-button" onclick="openCashfreePayment('Paper 5', 250)">Buy Now (₹250)</button>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2025 STI Mock Test. All rights reserved.</p>
+        <div>
+            <a href="https://wa.me/916353511804" target="_blank">Contact Us (WhatsApp)</a> | 
+            <a href="tel:+916353511804">+916353511804</a>
+        </div>
+    </div>
+    
+    <script>
+        function openCashfreePayment(item_name, item_price) {
+            alert(`તમે ${item_name} ખરીદવા માટે ₹${item_price}/- ની ચુકવણી કરી રહ્યા છો. \n\n આગળના પગલાં માટે અહીં Cashfree Checkout Integration કોડ આવશે.`);
+            
+            // ### Cashfree Integration Logic ###
+            /*
+            * અહીં Cashfree નો JavaScript/SDK કોડ આવશે.
+            * આ કોડ Payment Link/Order ID (સર્વરથી જનરેટ થયેલ) નો ઉપયોગ કરીને પેમેન્ટ પોપઅપ ખોલશે.
+            * સ્ટેટિક સાઇટ હોવાથી, તમારે Cashfree Payment Link નો ઉપયોગ કરવો પડશે, અથવા Netlify Functions (Serverless) દ્વારા Order ID જનરેટ કરવો પડશે.
+            *
+            * સરળ ઉકેલ: તમારા Cashfree ડેશબોર્ડમાંથી Payment Link બનાવીને, બટનને સીધો તે લિંક પર રીડાયરેક્ટ કરો.
+            
+            // Example for redirecting to a pre-generated Cashfree Payment Link
+            // window.location.href = "YOUR_CASHFREE_PAYMENT_LINK_FOR_THIS_ITEM";
+            */
+        }
+        
+        // જો તમે Demo Test Pages બનાવો છો, તો તમારે 'demo-test-page.html' પણ બનાવવું પડશે.
+    </script>
+
+</body>
+</html>
