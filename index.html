@@ -4,74 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STI Mock Test - Test Series</title>
+
     <style>
-        /* અહીં બેઝિક CSS છે. તમે Bootstrap/Tailwind નો ઉપયોગ કરી શકો છો. */
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
-        .header { background-color: #004d99; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .nav-link { color: white; text-decoration: none; margin-left: 20px; font-weight: bold; }
-        .container { width: 80%; margin: 20px auto; padding: 20px; }
-        .test-block { background-color: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        .test-block h2 { color: #004d99; margin-top: 0; }
-        .buy-button { background-color: #ff6600; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
-        .footer { background-color: #333; color: white; text-align: center; padding: 15px; position: fixed; bottom: 0; width: 100%; }
-        .footer a { color: #f4f4f4; margin: 0 10px; text-decoration: none; }
+        :root{
+            --primary:#004d99;
+            --accent:#ff6600;
+            --success:#00a000;
+            --bg:#f4f6f9;
+        }
+
+        body{
+            margin:0;
+            font-family:Arial, sans-serif;
+            background:var(--bg);
+        }
+
+        /* HEADER */
+        .header{
+            background:var(--primary);
+            color:#fff;
+            padding:12px 18px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:sticky;
+            top:0;
+            z-index:100;
+        }
+        .header h1{
+            margin:0;
+            font-size:20px;
+            font-weight:700;
+        }
+        .nav-link{
+            color:#fff;
+            text-decoration:none;
+            margin-left:15px;
+            font-size:15px;
+            font-weight:bold;
+        }
+
+        /* CONTAINER */
+        .container{
+            width:92%;
+            max-width:650px;
+            margin:18px auto;
+        }
+
+        /* TEST BLOCK CARD */
+        .test-block{
+            background:#fff;
+            padding:18px;
+            border-radius:10px;
+            margin-bottom:18px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.08);
+        }
+        .test-block h2{
+            margin-top:0;
+            color:var(--primary);
+            font-size:19px;
+        }
+        .test-block p{
+            line-height:1.55;
+        }
+
+        /* BUTTONS */
+        .btn{
+            display:inline-block;
+            padding:10px 16px;
+            border-radius:6px;
+            border:none;
+            cursor:pointer;
+            font-size:15px;
+            font-weight:bold;
+            text-align:center;
+            text-decoration:none;
+        }
+        .btn-accent{ background:var(--accent); color:#fff; }
+        .btn-success{ background:var(--success); color:#fff; }
+
+        /* FOOTER */
+        .footer{
+            background:#222;
+            padding:18px 10px;
+            text-align:center;
+            color:#ccc;
+            margin-top:30px;
+        }
+        .footer p{
+            margin:0;
+            font-size:14px;
+        }
+        .footer a{
+            color:#fff;
+            text-decoration:none;
+            margin:0 6px;
+            font-size:15px;
+        }
+
+        /* MOBILE */
+        @media(max-width:480px){
+            .header h1{
+                font-size:18px;
+            }
+            .nav-link{
+                font-size:13px;
+                margin-left:10px;
+            }
+        }
+
     </style>
 </head>
+
 <body>
 
+    <!-- HEADER -->
     <div class="header">
         <h1>STI Mock Test</h1>
         <div>
             <a href="#demo" class="nav-link">DEMO</a>
-            <a href="#" class="nav-link">LOGIN</a> </div>
+            <a href="#" class="nav-link">LOGIN</a>
+        </div>
     </div>
 
+    <!-- CONTENT -->
     <div class="container">
-        
+
+        <!-- DEMO BLOCK -->
         <div id="demo" class="test-block">
             <h2>⭐ Demo Test - ફ્રી એક્સેસ</h2>
-            <div id="demo-content">
-                <p>આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં ટેસ્ટ આપી શકો છો અને સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.</p>
-                <a href="demo-test-page.html" class="buy-button" style="background-color: #00a000;">DEMO Test શરુ કરો</a>
-            </div>
+            <p>આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં ટેસ્ટ આપી શકો છો અને સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.</p>
+            <a href="demo-test-page.html" class="btn btn-success">DEMO Test શરુ કરો</a>
         </div>
 
+        <!-- PAPER 1 -->
         <div id="test-1" class="test-block">
             <h2>Test Series Paper 1: PSI/ASI</h2>
-            <div id="paper-1-html">
-                <p>આ પેપર PSI/ASI પરીક્ષાના નવીનતમ અભ્યાસક્રમ મુજબ તૈયાર કરાયેલું છે. કિંમત: ₹99/-</p>
-                <button class="buy-button" onclick="openCashfreePayment('Paper 1', 99)">Buy Now (₹99)</button>
-            </div>
-        </div>        
-        <div class="footer">
-        <p>&copy; 2025 STI Mock Test. All rights reserved.</p>
-        <div>
-            <a href="https://wa.me/916353511804" target="_blank">Contact Us (WhatsApp)</a> | 
-            <a href="tel:+916353511804">+916353511804</a>
+            <p>આ પેપર PSI/ASI પરીક્ષાના નવીનતમ અભ્યાસક્રમ મુજબ છે. કિંમત: ₹99/-</p>
+
+            <button class="btn btn-accent" onclick="openCashfreePayment('Paper 1', 99)">
+                Buy Now (₹99)
+            </button>
         </div>
+
     </div>
-    
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p>&copy; 2025 STI Mock Test. All rights reserved.</p>
+        <p>
+            <a href="https://wa.me/916353511804" target="_blank">WhatsApp</a> | 
+            <a href="tel:+916353511804">Call: 6353511804</a>
+        </p>
+    </div>
+
     <script>
         function openCashfreePayment(item_name, item_price) {
-            alert(`તમે ${item_name} ખરીદવા માટે ₹${item_price}/- ની ચુકવણી કરી રહ્યા છો. \n\n આગળના પગલાં માટે અહીં Cashfree Checkout Integration કોડ આવશે.`);
-            
-            // ### Cashfree Integration Logic ###
-            /*
-            * અહીં Cashfree નો JavaScript/SDK કોડ આવશે.
-            * આ કોડ Payment Link/Order ID (સર્વરથી જનરેટ થયેલ) નો ઉપયોગ કરીને પેમેન્ટ પોપઅપ ખોલશે.
-            * સ્ટેટિક સાઇટ હોવાથી, તમારે Cashfree Payment Link નો ઉપયોગ કરવો પડશે, અથવા Netlify Functions (Serverless) દ્વારા Order ID જનરેટ કરવો પડશે.
-            *
-            * સરળ ઉકેલ: તમારા Cashfree ડેશબોર્ડમાંથી Payment Link બનાવીને, બટનને સીધો તે લિંક પર રીડાયરેક્ટ કરો.
-            
-            // Example for redirecting to a pre-generated Cashfree Payment Link
-            // window.location.href = "YOUR_CASHFREE_PAYMENT_LINK_FOR_THIS_ITEM";
-            */
+            alert(`તમે ${item_name} માટે ₹${item_price}/- ચૂકવણી કરી રહ્યા છો.\n\nઅહીં Cashfree Payment Integration આવશે.`);
         }
-        
-        // જો તમે Demo Test Pages બનાવો છો, તો તમારે 'demo-test-page.html' પણ બનાવવું પડશે.
     </script>
 
 </body>
-
 </html>
