@@ -189,6 +189,7 @@
 /*
   Custom Netlify Identity flow using netlify-identity-widget's JS API methods
   We use netlifyIdentity.login() and netlifyIdentity.signup() methods directly from our forms.
+  The core issue was ensuring event listeners are reattached when authArea.innerHTML changes.
 */
 
 /* Wait for widget to be available, then init */
@@ -204,31 +205,32 @@ const modalInner = document.getElementById('modalInner');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const authArea = document.getElementById('authArea');
 
-// 💡 ફંક્શન જે Login અને Register બટન પર લિસ્ટનર જોડે છે
-function attachAuthListeners(){
-    const loginOpenBtn = document.getElementById('loginOpenBtn');
-    const signupOpenBtn = document.getElementById('signupOpenBtn');
-
-    // ખાતરી કરો કે બટન DOM માં હાજર છે
-    if(loginOpenBtn) {
-        // પહેલાથી જોડાયેલું હોય તો દૂર કરો (ડુપ્લિકેશન ટાળવા માટે)
-        loginOpenBtn.removeEventListener('click', openModalHandler);
-        loginOpenBtn.addEventListener('click', openModalHandler);
-    }
-    if(signupOpenBtn) {
-        signupOpenBtn.removeEventListener('click', openModalHandler);
-        signupOpenBtn.addEventListener('click', openModalHandler);
-    }
-}
-
 // 💡 Handler function for opening modal
 function openModalHandler(e) {
+    // Determine type based on button ID
     const type = e.currentTarget.id === 'loginOpenBtn' ? 'login' : 'register';
     openModal(type);
 }
 
+// 💡 ફંક્શન જે Login અને Register બટન પર લિસ્ટનર જોડે છે
+// આ ફંક્શન દર વખતે authArea.innerHTML અપડેટ થાય પછી કોલ થશે.
+function attachAuthListeners(){
+    // થોડો વિલંબ (zero timeout) ખાતરી કરે છે કે DOM અપડેટ થઈ ગયું છે.
+    setTimeout(() => {
+        const loginOpenBtn = document.getElementById('loginOpenBtn');
+        const signupOpenBtn = document.getElementById('signupOpenBtn');
 
-// મોડલ બંધ કરવાના સામાન્ય લિસ્ટનર
+        if(loginOpenBtn) {
+            loginOpenBtn.addEventListener('click', openModalHandler);
+        }
+        if(signupOpenBtn) {
+            signupOpenBtn.addEventListener('click', openModalHandler);
+        }
+    }, 0);
+}
+
+
+// મોડલ બંધ કરવાના સામાન્ય લિસ્ટનર (આ સ્થિર છે)
 closeModalBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
 
@@ -244,8 +246,7 @@ function openModal(type){
             <button class="primary-btn" id="doLoginBtn">Login</button>
             <div class="muted">Forgot password? Use password reset from Netlify admin or contact support.</div>
         `;
-        // attach handler to new button in DOM
-        // યુઝરનેમ અને પાસવર્ડ ઇનપુટ પછી લોગિન બટન પર લિસ્ટનર જોડો
+        // attach handler to new button in DOM (doLoginBtn)
         setTimeout(()=> {
             document.getElementById('doLoginBtn').addEventListener('click', doLogin);
         },0);
@@ -258,8 +259,7 @@ function openModal(type){
             <button class="primary-btn" id="doSignupBtn">Create Account</button>
             <div class="muted">By creating account you agree to our terms.</div>
         `;
-        // attach handler to new button in DOM
-        // રજીસ્ટર બટન પર લિસ્ટનર જોડો
+        // attach handler to new button in DOM (doSignupBtn)
         setTimeout(()=> {
             document.getElementById('doSignupBtn').addEventListener('click', doSignup);
         },0);
@@ -374,8 +374,7 @@ if (window.netlifyIdentity) {
         updateAuthUI(user);
     });
 
-    // પ્રથમ વખત પેજ લોડ થાય ત્યારે લિસ્ટનર જોડો
-    // આ ખાતરી કરે છે કે જો Netlify Identity script લોડ ન થાય તો પણ બટનો કામ કરે.
+    // પ્રથમ વખત પેજ લોડ થાય ત્યારે લિસ્ટનર જોડો (આ HTML માં પહેલેથી હાજર બટનો માટે છે)
     attachAuthListeners();
 } else {
     // Fallback જો widget ઉપલબ્ધ ન હોય
