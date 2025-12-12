@@ -188,8 +188,7 @@
 <script>
 /*
   Custom Netlify Identity flow using netlify-identity-widget's JS API methods
-  BUT we DO NOT call netlifyIdentity.open() anywhere — so default UI never appears.
-  Instead we use netlifyIdentity.login() and netlifyIdentity.signup() methods directly from our forms.
+  We use netlifyIdentity.login() and netlifyIdentity.signup() methods directly from our forms.
 */
 
 /* Wait for widget to be available, then init */
@@ -205,20 +204,34 @@ const modalInner = document.getElementById('modalInner');
 const closeModalBtn = document.getElementById('closeModalBtn');
 const authArea = document.getElementById('authArea');
 
-// 💡 Event listeners for opening modal - We use 'load' listeners now
-// These will be reattached in updateAuthUI if user is logged out
+// 💡 ફંક્શન જે Login અને Register બટન પર લિસ્ટનર જોડે છે
 function attachAuthListeners(){
     const loginOpenBtn = document.getElementById('loginOpenBtn');
     const signupOpenBtn = document.getElementById('signupOpenBtn');
 
-    // Check if elements exist before attaching listener
-    if(loginOpenBtn) loginOpenBtn.addEventListener('click', () => openModal('login'));
-    if(signupOpenBtn) signupOpenBtn.addEventListener('click', () => openModal('register'));
+    // ખાતરી કરો કે બટન DOM માં હાજર છે
+    if(loginOpenBtn) {
+        // પહેલાથી જોડાયેલું હોય તો દૂર કરો (ડુપ્લિકેશન ટાળવા માટે)
+        loginOpenBtn.removeEventListener('click', openModalHandler);
+        loginOpenBtn.addEventListener('click', openModalHandler);
+    }
+    if(signupOpenBtn) {
+        signupOpenBtn.removeEventListener('click', openModalHandler);
+        signupOpenBtn.addEventListener('click', openModalHandler);
+    }
+}
+
+// 💡 Handler function for opening modal
+function openModalHandler(e) {
+    const type = e.currentTarget.id === 'loginOpenBtn' ? 'login' : 'register';
+    openModal(type);
 }
 
 
+// મોડલ બંધ કરવાના સામાન્ય લિસ્ટનર
 closeModalBtn.addEventListener('click', closeModal);
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
 
 /* open modal with type = 'login' or 'register' */
 function openModal(type){
@@ -231,7 +244,8 @@ function openModal(type){
             <button class="primary-btn" id="doLoginBtn">Login</button>
             <div class="muted">Forgot password? Use password reset from Netlify admin or contact support.</div>
         `;
-        // attach handler
+        // attach handler to new button in DOM
+        // યુઝરનેમ અને પાસવર્ડ ઇનપુટ પછી લોગિન બટન પર લિસ્ટનર જોડો
         setTimeout(()=> {
             document.getElementById('doLoginBtn').addEventListener('click', doLogin);
         },0);
@@ -244,6 +258,8 @@ function openModal(type){
             <button class="primary-btn" id="doSignupBtn">Create Account</button>
             <div class="muted">By creating account you agree to our terms.</div>
         `;
+        // attach handler to new button in DOM
+        // રજીસ્ટર બટન પર લિસ્ટનર જોડો
         setTimeout(()=> {
             document.getElementById('doSignupBtn').addEventListener('click', doSignup);
         },0);
@@ -261,26 +277,22 @@ function closeModal(){
 
 /* show a small alert style message (simple) */
 function showMsg(msg){
-    // simple alert is fine for now
     alert(msg);
 }
 
-/* Perform login using netlifyIdentity.login() (no widget UI) */
+/* Perform login using netlifyIdentity.login() */
 function doLogin(){
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPass').value;
 
     if (!email || !password) { showMsg('Email અને Password ભરો'); return; }
 
-    // netlifyIdentity.login accepts credentials and returns a Promise
-    // This will sign in and set currentUser; widget will store token
     netlifyIdentity.login({ email, password, remember: true })
     .then(user => {
         closeModal();
         // UI update will happen via netlifyIdentity.on('login') listener
     })
     .catch(err => {
-        // err might be an Error object or response; show message
         const msg = err && err.message ? err.message : JSON.stringify(err);
         showMsg('Login નિષ્ફળ: ' + msg);
     });
@@ -301,7 +313,6 @@ function doSignup(){
         user_metadata: { full_name: name }
     })
     .then(user => {
-        // If immediate login is available, user will be logged in; otherwise they may need to confirm.
         closeModal();
         // UI update will happen via netlifyIdentity.on('login') if logged in immediately
         showMsg('બધું થઈ ગયું. જો જરૂર હોય તો Email માંથી confirm કરો.');
@@ -335,7 +346,7 @@ function updateAuthUI(user){
             <button class="btn" id="loginOpenBtn">Login</button>
             <button class="btn" id="signupOpenBtn">Register</button>
         `;
-        // Reattach Login/Register event listeners
+        // Reattach Login/Register event listeners to newly created buttons
         attachAuthListeners();
     }
 }
@@ -347,24 +358,27 @@ function escapeHtml(s){
 
 /* Hook netlifyIdentity events to keep UI in sync */
 if (window.netlifyIdentity) {
-    // 💡 LOGIN: Fired when a user successfully logs in, OR if a session is restored at init
+    
+    // જ્યારે યુઝર લોગિન કરે અથવા સેશન રિસ્ટોર થાય ત્યારે UI અપડેટ કરો
     netlifyIdentity.on('login', (user) => {
         updateAuthUI(user);
     });
-    // 💡 LOGOUT: Fired when a user successfully logs out
+    
+    // જ્યારે યુઝર લોગઆઉટ કરે ત્યારે UI અપડેટ કરો
     netlifyIdentity.on('logout', () => {
         updateAuthUI(null);
     });
-    // 💡 INIT: Fired when netlifyIdentity.init() is done, good place to check initial status
+    
+    // પેજ લોડ થયા પછી તરત જ પ્રારંભિક સ્ટેટસ અપડેટ કરો
     netlifyIdentity.on('init', (user) => {
         updateAuthUI(user);
     });
 
-    // We don't need to manually check currentUser() here, as it's handled by 'init' event.
-    // Ensure initial listeners are attached for the buttons present on page load (before init completes)
+    // પ્રથમ વખત પેજ લોડ થાય ત્યારે લિસ્ટનર જોડો
+    // આ ખાતરી કરે છે કે જો Netlify Identity script લોડ ન થાય તો પણ બટનો કામ કરે.
     attachAuthListeners();
 } else {
-    // Fallback if widget not available
+    // Fallback જો widget ઉપલબ્ધ ન હોય
     updateAuthUI(null);
 }
 </script>
