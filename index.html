@@ -475,7 +475,7 @@
         <button class="modal-close" id="auth-modal-close">&times;</button>
       </div>
       <p class="modal-subtitle" id="auth-modal-subtitle">
-        તમારા મોબાઈલ નંબર અને પાસવર્ડથી લોગિન કરો.
+        તમારા Email અને Password થી Login કરો.
       </p>
 
       <p class="error-text" id="auth-error-text">Invalid details. કૃપા કરી ફરીથી તપાસો.</p>
@@ -483,15 +483,16 @@
       <!-- Login form -->
       <form id="login-form">
         <div class="form-group">
-          <label class="form-label" for="login-mobile">Mobile Number</label>
+          <label class="form-label" for="login-email">Email</label>
           <input
             type="email"
-            id="login-mobile"
+            id="login-email"
             class="form-input"
-            placeholder="10 digit mobile (as email)"
+            placeholder="Enter your email"
             autocomplete="email"
           />
         </div>
+
         <div class="form-group">
           <label class="form-label" for="login-password">Password</label>
           <input
@@ -504,7 +505,7 @@
         </div>
 
         <div class="form-footer-row">
-          <span class="small-note">Forgot password? (later)</span>
+          <span></span>
           <span class="link-text" id="to-register-link">New user? Register now</span>
         </div>
 
@@ -523,6 +524,18 @@
             autocomplete="name"
           />
         </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email</label>
+          <input
+            type="email"
+            id="reg-email"
+            class="form-input"
+            placeholder="Enter your email"
+            autocomplete="email"
+          />
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="reg-mobile">Mobile Number</label>
           <input
@@ -533,6 +546,7 @@
             autocomplete="tel"
           />
         </div>
+
         <div class="form-group">
           <label class="form-label" for="reg-password">Password</label>
           <input
@@ -543,10 +557,6 @@
             autocomplete="new-password"
           />
         </div>
-
-        <p class="small-note">
-          એક જ મોબાઈલ નંબરથી એક જ એકાઉન્ટ બનાવી શકાય.
-        </p>
 
         <div class="form-footer-row">
           <span></span>
@@ -595,7 +605,7 @@
       if (mode === "login") {
         authModalTitle.textContent = "Login";
         authModalSubtitle.textContent =
-          "તમારા મોબાઈલ નંબર અને પાસવર્ડથી લોગિન કરો.";
+          "તમારા Email અને Password થી Login કરો.";
         loginForm.style.display = "block";
         registerForm.style.display = "none";
       } else {
@@ -652,7 +662,6 @@
       studentNameLabel.textContent = "વિદ્યાર્થી";
     }
 
-    // get profile name (optional – if profiles table બનાવ્યું હોય)
     async function fetchProfileAndSetName(user) {
       try {
         const { data, error } = await supabase
@@ -666,7 +675,7 @@
         } else {
           setLoggedInUI("STI Student");
         }
-      } catch {
+      } catch (e) {
         setLoggedInUI("STI Student");
       }
     }
@@ -675,9 +684,10 @@
     (async () => {
       const {
         data: { session },
+        error
       } = await supabase.auth.getSession();
 
-      if (session && session.user) {
+      if (!error && session && session.user) {
         await fetchProfileAndSetName(session.user);
       } else {
         setLoggedOutUI();
@@ -690,17 +700,15 @@
       authErrorText.style.display = "none";
 
       const name = document.getElementById("reg-name").value.trim();
+      const email = document.getElementById("reg-email").value.trim();
       const mobile = document.getElementById("reg-mobile").value.trim();
       const password = document.getElementById("reg-password").value.trim();
 
-      if (!name || !mobile || !password) {
+      if (!name || !email || !mobile || !password) {
         authErrorText.textContent = "બધા field ભરો.";
         authErrorText.style.display = "block";
         return;
       }
-
-      // મોબાઈલ ને email જેમ use કરીશું (simple pattern)
-      const email = mobile + "@sti.local";
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -708,9 +716,9 @@
         options: {
           data: {
             full_name: name,
-            mobile: mobile,
-          },
-        },
+            mobile: mobile
+          }
+        }
       });
 
       if (error) {
@@ -721,12 +729,12 @@
 
       const user = data.user;
 
-      // profiles table માં name / mobile insert (જો અલગ table રાખ્યું હોય તો)
       if (user) {
         await supabase.from("profiles").upsert({
           id: user.id,
           full_name: name,
-          mobile: mobile,
+          email: email,
+          mobile: mobile
         });
         setLoggedInUI(name);
       } else {
@@ -741,24 +749,22 @@
       e.preventDefault();
       authErrorText.style.display = "none";
 
-      const mobile = document.getElementById("login-mobile").value.trim();
+      const email = document.getElementById("login-email").value.trim();
       const password = document.getElementById("login-password").value.trim();
 
-      if (!mobile || !password) {
+      if (!email || !password) {
         authErrorText.textContent = "બધા field ભરો.";
         authErrorText.style.display = "block";
         return;
       }
 
-      const email = mobile + "@sti.local";
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       });
 
       if (error) {
-        authErrorText.textContent = "Login fail. Mobile / Password તપાસો.";
+        authErrorText.textContent = "Login fail. Email / Password તપાસો.";
         authErrorText.style.display = "block";
         return;
       }
