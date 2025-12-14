@@ -36,7 +36,7 @@ async function initPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    window.location.href = "/STI/index.html";
+    window.location.href = "/STI/login.html";
     return;
   }
 
