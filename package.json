@@ -1,0 +1,9 @@
+{
+  "name": "vercel-supabase-premium",
+  "version": "1.0.0",
+  "description": "Vercel Serverless function for checking Supabase payment status.",
+  "main": "api/check-payment.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.5"
+  }
+}
