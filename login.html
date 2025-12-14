@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login / Register</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+    button {
+      background: #4a90e2;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover { background: #357ABD; }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 350px;
+    }
+    .popup input {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Login For STI Mock Test</h2>
+    <button id="githubLogin">Login</button>
+    <br>
+    <button id="openRegister">Register</button>
+  </div>
+
+  <!-- Registration Popup -->
+  <div class="overlay" id="overlay"></div>
+  <div class="popup" id="registerPopup">
+    <h2>Register</h2>
+    <input type="text" id="fullName" placeholder="Full Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="text" id="mobile" placeholder="Mobile">
+    <button id="registerBtn">Submit</button>
+    <button onclick="closePopup()">Close</button>
+  </div>
+
+  <script>
+    const supabase = supabase.createClient(
+      "https://bhmycvrbucmbbrpzeane.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
+    );
+
+    // GitHub Login
+    document.getElementById("githubLogin").onclick = async () => {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github'
+      });
+      if (error) alert(error.message);
+    };
+
+    // Open Registration Popup
+    document.getElementById("openRegister").onclick = () => {
+      document.getElementById("overlay").style.display = "block";
+      document.getElementById("registerPopup").style.display = "block";
+    };
+
+    function closePopup() {
+      document.getElementById("overlay").style.display = "none";
+      document.getElementById("registerPopup").style.display = "none";
+    }
+
+    // Register User
+    document.getElementById("registerBtn").onclick = async () => {
+      const fullName = document.getElementById("fullName").value;
+      const email = document.getElementById("email").value;
+      const mobile = document.getElementById("mobile").value;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .insert([{ full_name: fullName, email: email, mobile: mobile }]);
+
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        alert("Registered successfully!");
+        closePopup();
+      }
+    };
+  </script>
+</body>
+</html>
