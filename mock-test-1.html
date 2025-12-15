@@ -32,11 +32,13 @@
     // તમારી Supabase URL અને ANON KEY નો ઉપયોગ કરો
     const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-   const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // ભૂલ સુધારવા માટે વેરીએબલનું નામ બદલીને 'sbClient' કર્યું છે.
+    const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function checkAccess() {
         // 1. ચેક કરો કે યુઝર લોગિન છે
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await sbClient.auth.getSession();
         
         if (!session) {
             alert("કૃપા કરીને પહેલા લોગિન કરો.");
@@ -46,7 +48,7 @@
         }
 
         // 2. 'user_access' ટેબલમાં 'STI_MOCK_TEST' એક્સેસ ચેક કરો
-        const { data: accessData } = await supabase
+        const { data: accessData } = await sbClient
             .from('user_access')
             .select('is_active')
             .eq('user_id', session.user.id)
@@ -74,7 +76,6 @@
     <p>અભિનંદન! તમારો એક્સેસ સફળ છે. તમે આ કન્ટેન્ટ જોઈ શકો છો.</p>
     
     <p>આ પેજમાં, આ લાઇન પછી તમારી મોક ટેસ્ટનું સંપૂર્ણ HTML કન્ટેન્ટ આવશે.</p>
-    <p>જો યુઝરે પેમેન્ટ નહીં કર્યું હોય, તો આ Div દેખાશે નહીં.</p>
     
     </div>
 
