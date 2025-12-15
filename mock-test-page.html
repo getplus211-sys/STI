@@ -17,18 +17,18 @@
     body {
       margin: 0;
       padding: 0;
-      background: #020617;
-      color: #e5e7eb;
+      background: #ffffff;
+      color: #1e293b;
       font-family: system-ui, sans-serif;
     }
 
     header {
-      background: #020617;
+      background: #2563eb;
+      color: white;
       padding: 16px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1f2937;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -41,17 +41,18 @@
 
     .student-name {
       font-size: 13px;
-      color: #9ca3af;
+      opacity: 0.9;
     }
 
     .home-btn {
-      background: #1f2937;
-      color: #e5e7eb;
+      background: white;
+      color: #2563eb;
       padding: 8px 14px;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 13px;
       text-decoration: none;
-      border: 1px solid #374151;
+      border: 1px solid #ffffff;
+      font-weight: 600;
     }
 
     .container {
@@ -61,9 +62,9 @@
     }
 
     .card {
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
       padding: 16px;
       margin-bottom: 20px;
     }
@@ -71,13 +72,13 @@
     .price {
       font-size: 22px;
       font-weight: 700;
-      color: #22c55e;
+      color: #2563eb;
     }
 
     .btn {
       width: 100%;
       padding: 12px;
-      border-radius: 999px;
+      border-radius: 8px;
       border: none;
       font-size: 15px;
       font-weight: 600;
@@ -86,13 +87,13 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #020617;
+      background: #2563eb;
+      color: white;
     }
 
     .btn-disabled {
-      background: #111827;
-      color: #6b7280;
+      background: #cbd5e1;
+      color: #64748b;
       cursor: default;
     }
 
@@ -109,9 +110,9 @@
     }
 
     .test-card {
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
       padding: 14px;
     }
 
@@ -123,13 +124,13 @@
 
     .test-link {
       font-size: 13px;
-      color: #22c55e;
+      color: #2563eb;
       text-decoration: none;
       font-weight: 600;
     }
 
     .test-link.disabled {
-      color: #6b7280;
+      color: #94a3b8;
       pointer-events: none;
     }
 
@@ -137,7 +138,7 @@
       padding: 16px;
       text-align: center;
       font-size: 13px;
-      color: #6b7280;
+      color: #64748b;
       margin-top: 40px;
     }
   </style>
@@ -162,7 +163,7 @@
       <div style="display:flex;justify-content:space-between;">
         <div>
           <div style="font-size:16px;font-weight:600;">Full Mock Test Pack</div>
-          <div style="font-size:13px;color:#9ca3af;">Access to all 5 tests</div>
+          <div style="font-size:13px;color:#64748b;">Access to all 5 tests</div>
         </div>
         <div class="price">₹1</div>
       </div>
@@ -171,7 +172,7 @@
         Buy Full Pack
       </button>
 
-      <div id="payment-status" style="margin-top:10px;font-size:13px;color:#9ca3af;"></div>
+      <div id="payment-status" style="margin-top:10px;font-size:13px;color:#64748b;"></div>
     </div>
 
     <!-- ✅ TEST LIST -->
@@ -213,6 +214,9 @@
     const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
 
+    const CREATE_ORDER_URL =
+      "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order";
+
     const { createClient } = window.supabase;
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -225,8 +229,6 @@
     const ACCESS_TYPE = "mock_tests_all";
     const AMOUNT_PAISE = 100;
 
-    const CREATE_ORDER_URL = "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order";
-
     let currentUser = null;
     let hasAccess = false;
 
@@ -238,7 +240,18 @@
         return;
       }
       currentUser = user;
-      studentNameEl.textContent = user.email;
+
+      // ✅ Clean student name
+      let rawName = user.user_metadata?.full_name;
+      if (!rawName || rawName.trim() === "") {
+        const email = user.email || "";
+        rawName = email.split("@")[0].replace(/[._]/g, " ");
+        rawName = rawName
+          .split(" ")
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
+      }
+      studentNameEl.textContent = rawName;
     }
 
     async function checkAccess() {
@@ -291,6 +304,12 @@
 
       const data = await resp.json();
 
+      if (!resp.ok) {
+        paymentStatusEl.textContent = "Order creation failed.";
+        payBtn.disabled = false;
+        return;
+      }
+
       const options = {
         key: data.key_id,
         amount: data.amount,
@@ -313,7 +332,7 @@
           plan_name: PLAN_NAME,
           access_type: ACCESS_TYPE,
         },
-        theme: { color: "#22c55e" },
+        theme: { color: "#2563eb" },
       };
 
       new Razorpay(options).open();
