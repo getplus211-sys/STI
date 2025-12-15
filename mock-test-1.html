@@ -32,7 +32,7 @@
     // તમારી Supabase URL અને ANON KEY નો ઉપયોગ કરો
     const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+   const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function checkAccess() {
         // 1. ચેક કરો કે યુઝર લોગિન છે
