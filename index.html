@@ -443,64 +443,7 @@
           <span class="price-tag">કિંમત: ₹99/-</span>
           <span class="tag">5 Mock Test Bundle</span>
         </div>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-<script>
-    // તમારી Supabase URL અને ANON KEY નો ઉપયોગ કરો
-    const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // 🛑 IMPORTANT: અહીં તમારી LIVE Key ID નાખો 🛑
-    const RAZORPAY_KEY_ID = 'rzp_live_RrlYub6HRqZ8MD'; // <<< અહીં તમારી LIVE Key ID નાખો
-
-    // --- પેમેન્ટ શરૂ કરવા માટેનું ફંક્શન ---
-    async function startPayment() {
-        const { data: { session }, error: authError } = await supabase.auth.getSession();
-        
-        if (authError || !session) {
-            alert("કૃપા કરીને પહેલા લોગિન કરો.");
-            return;
-        }
-
-        const user_id = session.user.id;
-        const amount_in_paise = 9900; // ₹99 = 9900 paise
-
-        var options = {
-            "key": RAZORPAY_KEY_ID, 
-            "amount": amount_in_paise, 
-            "currency": "INR",
-            "name": "Kapil Institute",
-            "description": "STI 5 Mock Test Series Access",
-            "handler": function (response){
-                // આ કોડ પેમેન્ટ સફળ થયા પછી ચાલશે
-                alert("પેમેન્ટ સફળ! તમને ટૂંક સમયમાં એક્સેસ મળી જશે.");
-                // યુઝરને પેઇડ પેજ પર રીડાયરેક્ટ કરો
-                window.location.href = '/STI-5-mock-test.html'; 
-            },
-            "prefill": {
-                "name": session.user.user_metadata.full_name || "",
-                "email": session.user.email,
-                "contact": session.user.user_metadata.mobile || ""
-            },
-            "notes": {
-                // આ 'user_id' વેબહૂક દ્વારા Edge Function ને મળશે. આ સૌથી મહત્વપૂર્ણ ભાગ છે.
-                "receipt": user_id 
-            },
-            "theme": {
-                "color": "#3399cc"
-            }
-        };
-
-        var rzp1 = new Razorpay(options);
-        rzp1.open();
-    }
-
-    // બટન પર ક્લિક કરવાથી પેમેન્ટ શરૂ કરો (તમારા HTML માં આ ID નું બટન હોવું જોઈએ)
-    document.getElementById('rzp-button').onclick = startPayment;
-</script>
-
-<button id="rzp-button" style="padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer;">₹99 માં STI 5 Mock Test ખરીદો</button>
         <a href="mock-test-page.html">
           <div class="btn-outline">Buy Now (₹99)</div>
         </a>
@@ -844,4 +787,5 @@
   </script>
 </body>
 </html>
+
 
