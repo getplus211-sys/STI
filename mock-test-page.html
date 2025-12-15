@@ -1,30 +1,319 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="gu">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Test Dashboard | Kapil Institute</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header .user-info {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border: 1px solid white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        header a:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h3 {
+            color: #007bff;
+            margin-top: 0;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        /* પેમેન્ટ કાર્ડ માટે ખાસ સ્ટાઇલ */
+        #payment-card {
+            background-color: #fff3cd; /* પીળો બેકગ્રાઉન્ડ */
+            border: 1px solid #ffeeba;
+            grid-column: 1 / -1; /* આ કાર્ડને આખી રો પર ફેલાવો */
+            text-align: center;
+            padding: 30px;
+        }
+        #rzp-button {
+            background-color: #28a745; /* લીલું બટન */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #rzp-button:hover {
+            background-color: #218838;
+        }
+        /* ટેસ્ટ એક્સેસ કાર્ડ્સ */
+        .test-card-content button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .test-card-content button:hover {
+            background-color: #0056b3;
+        }
+        .test-card-content .locked {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 40px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            z-index: 1000;
+        }
+    </style>
 </head>
-
 <body>
-<div id="buy-section" style="display:none;">
-  <h3>Buy Full Test Series</h3>
-  <button onclick="startPayment()">Buy Now ₹199</button>
+
+<div id="loading-overlay" class="loading-overlay">
+    ડેટા લોડ થઈ રહ્યો છે... કૃપા કરીને રાહ જુઓ.
 </div>
 
-<div id="tests" style="display:none;">
-  <h3>Your Test Series</h3>
-  <button onclick="startTest('mock','TEST1')">Test 1</button>
-  <button onclick="startTest('mock','TEST2')">Test 2</button>
-  <button onclick="startTest('mock','TEST3')">Test 3</button>
-  <button onclick="startTest('mock','TEST4')">Test 4</button>
-  <button onclick="startTest('mock','TEST5')">Test 5</button>
+<header id="main-header" style="display:none;">
+    <div class="user-info">
+        સ્વાગત છે, <span id="user-display-name">Guest</span>!
+    </div>
+    <a href="/index.html">Go to Home</a>
+</header>
+
+<div class="container" id="main-content" style="display:none;">
+    <h2>Mock Test Series Dashboard</h2>
+    <p>અહીં તમે STI 5 Mock Test Series ખરીદી શકો છો અને એક્સેસ કર્યા પછી ટેસ્ટ આપી શકો છો.</p>
+
+    <div class="card-grid">
+        <div id="payment-card">
+            <h3>STI 5 Mock Test Series - ખરીદી કરો</h3>
+            <p>પાંચેય મોક ટેસ્ટનો સંપૂર્ણ એક્સેસ મેળવો.</p>
+            <p style="font-size:1.5em; font-weight:bold; color:#dc3545;">ફક્ત ₹99/-</p>
+            <button id="rzp-button">₹99 માં હમણાં ખરીદો</button>
+            <p style="margin-top:10px; font-size:0.9em; color:#856404;">ખરીદી કર્યા પછી, નીચેના કાર્ડ્સ તમને આપમેળે એક્સેસ આપશે.</p>
+        </div>
+    </div>
+    
+    <h3 style="margin-top: 40px;">તમારા મોક ટેસ્ટ્સ</h3>
+    <div class="card-grid" id="test-cards-container">
+        </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="https://sdk.cashfree.com/js/ui/2.0.0/cashfree.js"></script>
-<script src="mock-test.js"></script>
+<footer>
+    Contact Us: <a href="tel:+916353511804" style="color: #ffc107; text-decoration: none;">+91 63535 11804</a>
+</footer>
+
+<script>
+    // ===============================================
+    // Supabase અને Razorpay સેટિંગ્સ
+    // ===============================================
+    const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+    
+    // 🛑 IMPORTANT: અહીં તમારી LIVE Razorpay Key ID નાખો 🛑
+    const RAZORPAY_KEY_ID = 'YOUR_RAZORPAY_KEY_ID_HERE'; 
+
+    const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const mockTests = [
+        { name: "STI Mock Test - 1", file: "STI-mock-test-1.html" },
+        { name: "STI Mock Test - 2", file: "STI-mock-test-2.html" },
+        { name: "STI Mock Test - 3", file: "STI-mock-test-3.html" },
+        { name: "STI Mock Test - 4", file: "STI-mock-test-4.html" },
+        { name: "STI Mock Test - 5", file: "STI-mock-test-5.html" }
+    ];
+
+    let currentUserSession = null;
+    let hasPaidAccess = false;
+    
+    // ===============================================
+    // લોગિન અને એક્સેસ ચેક
+    // ===============================================
+    async function checkLoginAndAccess() {
+        // લોડિંગ ઓવરલે બતાવો
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        const { data: { session }, error: authError } = await sbClient.auth.getSession();
+        
+        if (authError || !session) {
+            // લોગિન નથી: હોમ પેજ પર મોકલો
+            alert("કૃપા કરીને Mock Test Dashboard જોવા માટે પહેલા લોગિન કરો.");
+            window.location.href = '/index.html'; 
+            return;
+        }
+
+        currentUserSession = session;
+        const userId = session.user.id;
+        const userName = session.user.user_metadata.full_name || session.user.email;
+
+        // હેડર અપડેટ કરો
+        document.getElementById('user-display-name').textContent = userName;
+        document.getElementById('main-header').style.display = 'flex';
+
+
+        // એક્સેસ ચેક કરો
+        const { data: accessData } = await sbClient
+            .from('user_access')
+            .select('is_active')
+            .eq('user_id', userId)
+            .eq('access_type', 'STI_MOCK_TEST') 
+            .maybeSingle(); 
+
+        if (accessData && accessData.is_active === true) {
+            hasPaidAccess = true;
+            // જો એક્સેસ હોય, તો પેમેન્ટ કાર્ડ છુપાવો
+            document.getElementById('payment-card').style.display = 'none';
+        }
+
+        // કન્ટેન્ટ બતાવો અને લોડિંગ છુપાવો
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('loading-overlay').style.display = 'none';
+
+        // કાર્ડ્સ જનરેટ કરો
+        renderTestCards();
+    }
+    
+    // ===============================================
+    // કાર્ડ્સ રેન્ડર કરવા (એક્સેસના આધારે)
+    // ===============================================
+    function renderTestCards() {
+        const container = document.getElementById('test-cards-container');
+        container.innerHTML = ''; // જૂના કાર્ડ્સ સાફ કરો
+
+        mockTests.forEach(test => {
+            const card = document.createElement('div');
+            card.className = 'card test-card-content';
+            
+            let cardContent = `
+                <h3>${test.name}</h3>
+                <p>આ મોક ટેસ્ટમાં 100 પ્રશ્નો છે અને તે 2 કલાકનો સમય લેશે.</p>
+            `;
+            
+            if (hasPaidAccess) {
+                // એક્સેસ હોય તો બટન બતાવો
+                cardContent += `<button onclick="window.location.href='/${test.file}'">ટેસ્ટ આપો</button>`;
+            } else {
+                // એક્સેસ ન હોય તો લોક કરેલો મેસેજ બતાવો
+                cardContent += `<p class="locked">🔐 ખરીદીની જરૂર છે (₹99)</p>`;
+            }
+
+            card.innerHTML = cardContent;
+            container.appendChild(card);
+        });
+    }
+
+    // ===============================================
+    // Razorpay પેમેન્ટ લોજિક
+    // ===============================================
+    async function startPayment() {
+        if (!currentUserSession) {
+            alert("કૃપા કરીને પેમેન્ટ શરૂ કરતા પહેલા ફરીથી લોગિન કરો.");
+            window.location.reload();
+            return;
+        }
+
+        const userId = currentUserSession.user.id;
+        const amount_in_paise = 9900; // ₹99 = 9900 paise
+
+        var options = {
+            "key": RAZORPAY_KEY_ID, 
+            "amount": amount_in_paise, 
+            "currency": "INR",
+            "name": "Kapil Institute",
+            "description": "STI 5 Mock Test Series Access",
+            "handler": function (response){
+                alert("પેમેન્ટ સફળ! હવે તમને મોક ટેસ્ટનો એક્સેસ મળી ગયો છે.");
+                // પેમેન્ટ સફળ થયા પછી ડેશબોર્ડ અપડેટ કરો
+                checkLoginAndAccess();
+            },
+            "prefill": {
+                "name": currentUserSession.user.user_metadata.full_name || "",
+                "email": currentUserSession.user.email,
+                "contact": currentUserSession.user.user_metadata.mobile || ""
+            },
+            "notes": {
+                // આ 'user_id' વેબહૂક દ્વારા Edge Function ને મળશે.
+                "receipt": userId 
+            },
+            "theme": {
+                "color": "#007bff"
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+    }
+
+    // ઇવેન્ટ લિસનર્સ
+    document.addEventListener('DOMContentLoaded', () => {
+        checkLoginAndAccess();
+        const rzpButton = document.getElementById('rzp-button');
+        if (rzpButton) {
+            rzpButton.onclick = startPayment;
+        }
+    });
+
+</script>
+
 </body>
-
 </html>
