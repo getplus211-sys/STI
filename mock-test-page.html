@@ -2,431 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>STI Mock Test – Full Pack</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Razorpay Checkout -->
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-  <!-- Supabase JS -->
-  <script type="module"
-    src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js">
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STI Mock Test</title>
 
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #ffffff;
-      color: #1e293b;
-      font-family: system-ui, sans-serif;
+      background: #f3f4f6;
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
-
-    header {
-      background: #2563eb;
-      color: white;
-      padding: 16px 20px;
+    .container {
+      max-width: 420px;
+      margin: auto;
+      background: white;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      margin-bottom: 16px;
     }
-
-    .title {
+    .header h1 {
       font-size: 20px;
-      font-weight: 700;
+      margin: 0;
     }
-
-    .student-name {
-      font-size: 13px;
-      opacity: 0.9;
+    .header small {
+      color: #666;
     }
-
-    .home-btn {
-      background: white;
+    .btn-home {
+      font-size: 12px;
       color: #2563eb;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      text-decoration: none;
-      border: 1px solid #ffffff;
-      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
     }
-
-    .container {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-
     .card {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .price {
-      font-size: 22px;
-      font-weight: 700;
-      color: #2563eb;
-    }
-
-    .btn {
-      width: 100%;
+      border: 1px solid #ddd;
       padding: 12px;
       border-radius: 8px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 12px;
+      margin-bottom: 16px;
     }
-
-    .btn-primary {
+    .price {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .btn {
       background: #2563eb;
       color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
     }
-
-    .btn-disabled {
-      background: #cbd5e1;
-      color: #64748b;
-      cursor: default;
+    .btn:disabled {
+      background: #9ca3af;
     }
-
-    .tests-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+    .msg-success {
+      color: green;
+      font-size: 14px;
+      margin-top: 8px;
     }
-
-    @media (min-width: 640px) {
-      .tests-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    .msg-failed {
+      color: red;
+      font-size: 14px;
+      margin-top: 8px;
     }
-
-    .test-card {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 14px;
+    .test-item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
     }
-
-    .test-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .test-link {
-      font-size: 13px;
+    .open-btn {
       color: #2563eb;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .test-link.disabled {
-      color: #94a3b8;
-      pointer-events: none;
-    }
-
-    footer {
-      padding: 16px;
-      text-align: center;
-      font-size: 13px;
-      color: #64748b;
-      margin-top: 40px;
+      font-size: 12px;
+      cursor: pointer;
     }
   </style>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 
 <body>
 
-  <header>
-    <div>
-      <div class="title">STI Mock Test</div>
-      <div class="student-name" id="student-name">Loading...</div>
-    </div>
-
-    <a href="index.html" class="home-btn">Go to Home</a>
-  </header>
-
   <div class="container">
 
-    <div class="card" id="payment-card">
-      <div style="display:flex;justify-content:space-between;">
-        <div>
-          <div style="font-size:16px;font-weight:600;">Full Mock Test Pack</div>
-          <div style="font-size:13px;color:#64748b;">Access to all 5 tests</div>
-        </div>
-        <div class="price">₹1</div>
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <h1>STI Mock Test</h1>
+        <small>Devendra</small>
       </div>
-
-      <button id="pay-button" class="btn btn-primary">
-        Buy Full Pack
-      </button>
-
-      <div id="payment-status" style="margin-top:10px;font-size:13px;color:#64748b;"></div>
+      <div class="btn-home" onclick="window.location.href='/'">Go to Home</div>
     </div>
 
-    <div class="tests-grid" id="tests-grid">
-      <div class="test-card">
-        <div class="test-title">Mock Test 1</div>
-        <a href="mock-test-1.html" class="test-link disabled" data-test="1">Open Test</a>
+    <!-- FULL PACK CARD -->
+    <div class="card">
+      <h3>Full Mock Test Pack</h3>
+      <small>Access to all 5 tests</small>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+        <span class="price">₹1</span>
+        <button id="buyBtn" class="btn" onclick="startPayment()">Buy Full Pack</button>
       </div>
 
-      <div class="test-card">
-        <div class="test-title">Mock Test 2</div>
-        <a href="mock-test-2.html" class="test-link disabled" data-test="2">Open Test</a>
-      </div>
+      <p id="paymentMsg"></p>
+    </div>
 
-      <div class="test-card">
-        <div class="test-title">Mock Test 3</div>
-        <a href="mock-test-3.html" class="test-link disabled" data-test="3">Open Test</a>
-      </div>
+    <!-- TEST LIST -->
+    <div class="test-item">
+      <span>Mock Test 1</span>
+      <span class="open-btn">Open Test</span>
+    </div>
 
-      <div class="test-card">
-        <div class="test-title">Mock Test 4</div>
-        <a href="mock-test-4.html" class="test-link disabled" data-test="4">Open Test</a>
-      </div>
+    <div class="test-item">
+      <span>Mock Test 2</span>
+      <span class="open-btn">Open Test</span>
+    </div>
 
-      <div class="test-card">
-        <div class="test-title">Mock Test 5</div>
-        <a href="mock-test-5.html" class="test-link disabled" data-test="5">Open Test</a>
-      </div>
+    <div class="test-item">
+      <span>Mock Test 3</span>
+      <span class="open-btn">Open Test</span>
+    </div>
+
+    <div class="test-item">
+      <span>Mock Test 4</span>
+      <span class="open-btn">Open Test</span>
     </div>
 
   </div>
 
-  <footer>
-    Need help? WhatsApp: +91 63535 11804
-  </footer>
+  <script>
+    async function startPayment() {
+      const btn = document.getElementById("buyBtn");
+      const msg = document.getElementById("paymentMsg");
 
-  <script type="module">
-    // Supabase અને API કીઝ
-    const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-    const CREATE_ORDER_URL = "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order";
-
-    const { createClient } = window.supabase;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // DOM Elements
-    const payBtn = document.getElementById("pay-button");
-    const paymentStatusEl = document.getElementById("payment-status");
-    const testsGrid = document.getElementById("tests-grid");
-    const studentNameEl = document.getElementById("student-name");
-
-    // Constants
-    const PLAN_NAME = "prelims-mock-pack";
-    const ACCESS_TYPE = "mock_tests_all";
-    const AMOUNT_PAISE = 100; // ₹1 (testing)
-
-    // State Variables
-    let currentUser = null;
-    let hasAccess = false;
-
-    // 1. લોગિન ચેક અને યુઝર માહિતી મેળવવી
-    async function checkLogin() {
-      const { data, error } = await supabase.auth.getUser();
-
-      if (error) {
-        console.error("Auth getUser error:", error);
-      }
-
-      const user = data?.user;
-      if (!user) {
-        // જો યુઝર લોગિન ન હોય, તો તેમને લોગિન પેજ પર મોકલી દો
-        window.location.href = "login.html";
-        return;
-      }
-      currentUser = user;
-
-      // વિદ્યાર્થીનું નામ ડિસ્પ્લે કરવું
-      let rawName = user.user_metadata?.full_name || user.email.split("@")[0].replace(/[._]/g, " ");
-      rawName = rawName
-        .split(" ")
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
-      studentNameEl.textContent = rawName;
-    }
-
-    // 2. એક્સેસ ચેક કરવી (user_access ટેબલમાંથી)
-    async function checkAccess() {
-      if (!currentUser) return;
-
-      const { data, error } = await supabase
-        .from("user_access")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .eq("plan_name", PLAN_NAME)
-        .eq("access_type", ACCESS_TYPE)
-        .eq("is_active", true)
-        .limit(1);
-
-      if (error) {
-        console.error("Access Check Error:", error);
-      }
-
-      hasAccess = !!(data && data.length > 0);
-    }
-
-    // 3. UI અપડેટ કરવી (બટન અને લિંક્સ)
-    function updateUI() {
-      const links = testsGrid.querySelectorAll(".test-link");
-
-      if (hasAccess) {
-        // એક્સેસ હોય તો બટન ડિસેબલ કરો
-        payBtn.classList.add("btn-disabled");
-        payBtn.classList.remove("btn-primary");
-        payBtn.disabled = true;
-        payBtn.textContent = "✅ Already Purchased — Access Granted";
-
-        paymentStatusEl.textContent = "You can open any mock test.";
-
-        // લિંક્સ પરથી 'disabled' ક્લાસ હટાવો જેથી તે ખૂલે
-        links.forEach(link => link.classList.remove("disabled"));
-      } else {
-        // એક્સેસ ન હોય તો લિંક્સ ડિસેબલ રાખો
-        links.forEach(link => link.classList.add("disabled"));
-        payBtn.disabled = false;
-        payBtn.classList.remove("btn-disabled");
-        payBtn.classList.add("btn-primary");
-        payBtn.textContent = "Buy Full Pack";
-        if (!paymentStatusEl.textContent) {
-          paymentStatusEl.textContent = "Purchase the full pack to unlock all tests.";
-        }
-      }
-    }
-
-    // 4. Razorpay પેમેન્ટ બટન પર ક્લિક ઇવેન્ટ
-    payBtn.addEventListener("click", async () => {
-      if (hasAccess) return;
+      btn.disabled = true;
+      msg.innerHTML = "";
 
       try {
-        paymentStatusEl.textContent = "Creating order...";
-        payBtn.disabled = true;
-
-        // હાલની સેશનમાંથી JWT લેવું (ANON KEY નહિ, real user token)
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-        }
-
-        const session = sessionData?.session;
-        if (!session) {
-          paymentStatusEl.textContent = "Session expired. Please login again.";
-          window.location.href = "login.html";
-          return;
-        }
-
-        // ઓર્ડર ક્રિએટ કરવા માટે Supabase Edge Function ને કોલ કરવો
-        const resp = await fetch(CREATE_ORDER_URL, {
+        // 1) Create order from backend
+        const orderRes = await fetch("/api/create-razorpay-order", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            // અહીં હવે ANON key નહિ,પણ real user access_token use કર્યો છે
-            "Authorization": `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            user_id: currentUser.id,
-            amount: AMOUNT_PAISE,
-            currency: "INR",
-            plan_name: PLAN_NAME,
-            access_type: ACCESS_TYPE,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: 1 })
         });
 
-        const data = await resp.json();
+        const order = await orderRes.json();
 
-        if (!resp.ok) {
-          console.error("Order creation failed:", data);
-          paymentStatusEl.textContent = "Order creation failed. Please try again.";
-          payBtn.disabled = false;
+        if (!order.id) {
+          msg.innerHTML = "<span class='msg-failed'>Order creation failed.</span>";
+          btn.disabled = false;
           return;
         }
 
-        // Razorpay Options
+        // 2) Razorpay checkout
         const options = {
-          key: data.key_id,
-          amount: data.amount,
-          currency: data.currency,
-          name: "STI Mock Test",
-          description: "Full mock test pack",
-          order_id: data.order_id,
-
-          // પેમેન્ટ સફળ થયા પછીનું handler ફંક્શન
+          key: "RAZORPAY_KEY_ID_HERE",  // replace this
+          amount: order.amount,
+          currency: "INR",
+          name: "Kapila Institute",
+          description: "Full Mock Test Pack",
+          order_id: order.id,
           handler: function (response) {
-            // IMPORTANT:
-            // અહી frontend user_access insert નહિ કરે.
-            // Webhook user_access insert કરશે.
-            console.log("Razorpay success response:", response);
-            paymentStatusEl.textContent = "Payment successful! Waiting for access confirmation...";
-
-            // Webhook D.B. માં entry કરેએ સુધી થોડી વાર poll કરીએ.
-            let attempts = 0;
-            const maxAttempts = 10;     // max ~30 seconds (10 * 3s)
-            const intervalMs = 3000;
-
-            const intervalId = setInterval(async () => {
-              attempts++;
-              await checkAccess();
-
-              if (hasAccess) {
-                clearInterval(intervalId);
-                paymentStatusEl.textContent = "✅ Access granted! You can open all mock tests.";
-                updateUI();
-              } else if (attempts >= maxAttempts) {
-                clearInterval(intervalId);
-                paymentStatusEl.textContent =
-                  "Payment done. Access may take a moment. Please refresh this page after 1–2 minutes.";
-                payBtn.disabled = true; // Payment already done
-              }
-            }, intervalMs);
+            msg.innerHTML = "<span class='msg-success'>Payment successful!</span>";
+            btn.disabled = false;
           },
-
-          prefill: {
-            email: currentUser.email,
-          },
-
-          // Notes: Razorpay payment/webhookમાં પણ આ જ notes જશે
-          notes: {
-            user_id: currentUser.id,
-            plan_name: PLAN_NAME,
-            access_type: ACCESS_TYPE,
-          },
-
-          theme: { color: "#2563eb" },
+          modal: {
+            ondismiss: function () {
+              msg.innerHTML = "<span class='msg-failed'>Payment cancelled.</span>";
+              btn.disabled = false;
+            }
+          }
         };
 
         const rzp = new Razorpay(options);
-        rzp.open();
 
-        rzp.on("payment.failed", function (response) {
-          console.error("Payment failed:", response.error);
-          paymentStatusEl.textContent = "Payment failed. Please try again.";
-          payBtn.disabled = false;
+        rzp.on("payment.failed", function () {
+          msg.innerHTML = "<span class='msg-failed'>Payment failed. Try again.</span>";
+          btn.disabled = false;
         });
 
-      } catch (err) {
-        console.error("Payment init error:", err);
-        paymentStatusEl.textContent = "Unexpected error. Please try again.";
-        payBtn.disabled = false;
-      }
-    });
+        rzp.open();
 
-    // ✅ INIT: પેજ શરૂ કરવા માટેનું ફંક્શન
-    (async () => {
-      await checkLogin();
-      if (currentUser) {
-        await checkAccess();
-        updateUI();
+      } catch (err) {
+        msg.innerHTML = "<span class='msg-failed'>Something went wrong.</span>";
+        btn.disabled = false;
       }
-    })();
+    }
   </script>
 
 </body>
