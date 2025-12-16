@@ -8,7 +8,7 @@
     body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
     header, footer { background:#222; color:#fff; padding:15px; text-align:center; }
     header h1 { margin:0; }
-    .home-btn { background:#4CAF50; color:#fff; padding:8px 15px; border:none; cursor:pointer; }
+    .home-btn { background:#4CAF50; color:#fff; padding:8px 15px; border:none; cursor:pointer; border-radius:5px; }
     main { padding:20px; }
     .card-container { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
     .card { background:#fff; border:1px solid #ddd; border-radius:8px; width:250px; padding:15px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
@@ -32,7 +32,7 @@
     <p>Mock test એક યુઝર માત્ર એક વખત જ ખરીદી શકે છે. એકવાર ખરીદેલ હોય તો બીજવાર મેસેજ આવશે.</p>
     
     <div class="card-container" id="testCards">
-      <!-- Cards will be injected by JS -->
+      <!-- Cards injected by JS -->
     </div>
   </main>
 
@@ -51,37 +51,53 @@
 
     let currentUser = null;
 
-    // Dummy: fetch logged-in user profile (replace with your auth flow)
+    // Load logged-in user profile (replace with your auth flow)
     async function loadProfile() {
-      // Example: get first profile for demo
       const { data, error } = await supabase.from("profiles").select("*").limit(1);
       if (error) { console.error(error); return; }
       if (data.length > 0) {
         currentUser = data[0];
         document.getElementById("studentName").innerText = "Student: " + currentUser.full_name;
+        checkPurchaseStatus();
       }
     }
 
     // Render 5 mock test cards
-    function renderCards() {
+    function renderCards(purchased) {
       const container = document.getElementById("testCards");
+      container.innerHTML = "";
       for (let i = 1; i <= 5; i++) {
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
           <h3>Mock Test ${i}</h3>
           <p>200 Marks | 2 Hrs | -0.33 Negative</p>
-          <button class="buy-btn" onclick="buyTest(${i})">Buy & Start</button>
+          <button class="buy-btn" ${purchased ? "disabled" : ""} onclick="buyTest(${i})">
+            ${purchased ? "Already Purchased" : "Buy & Start"}
+          </button>
         `;
         container.appendChild(card);
       }
+    }
+
+    // Check purchase status
+    async function checkPurchaseStatus() {
+      if (!currentUser) return;
+      const { data, error } = await supabase
+        .from("user_access")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .eq("plan_name", "mock-test")
+        .eq("is_active", true);
+
+      if (error) { console.error(error); return; }
+      renderCards(data.length > 0);
     }
 
     // Buy test logic
     async function buyTest(testNumber) {
       if (!currentUser) { alert("User not loaded"); return; }
 
-      // Check if already purchased
       const { data, error } = await supabase
         .from("user_access")
         .select("*")
@@ -96,7 +112,6 @@
         return;
       }
 
-      // Insert purchase record
       const { error: insertError } = await supabase.from("user_access").insert({
         user_id: currentUser.id,
         plan_name: "mock-test",
@@ -107,7 +122,6 @@
 
       if (insertError) { console.error(insertError); return; }
 
-      // Redirect to mock-test page
       window.location.href = `mock-test-${testNumber}.html`;
     }
 
@@ -123,7 +137,6 @@
 
     // Init
     loadProfile();
-    renderCards();
   </script>
 </body>
 </html>
