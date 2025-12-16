@@ -5,10 +5,8 @@
   <title>STI Mock Test – Full Pack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Razorpay -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-  <!-- Supabase -->
   <script type="module"
     src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js">
   </script>
@@ -146,7 +144,6 @@
 
 <body>
 
-  <!-- ✅ HEADER -->
   <header>
     <div>
       <div class="title">STI Mock Test</div>
@@ -158,7 +155,6 @@
 
   <div class="container">
 
-    <!-- ✅ PAYMENT CARD -->
     <div class="card" id="payment-card">
       <div style="display:flex;justify-content:space-between;">
         <div>
@@ -175,7 +171,6 @@
       <div id="payment-status" style="margin-top:10px;font-size:13px;color:#64748b;"></div>
     </div>
 
-    <!-- ✅ TEST LIST -->
     <div class="tests-grid" id="tests-grid">
       <div class="test-card">
         <div class="test-title">Mock Test 1</div>
@@ -209,7 +204,6 @@
     Need help? WhatsApp: +91 63535 11804
   </footer>
 
-  <!-- ✅ SCRIPT -->
   <script type="module">
     const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
@@ -365,12 +359,14 @@
       };
 
       new Razorpay(options).open();
+    }); // <-- CORRECTED: Closing the payBtn.addEventListener block
+
     // ✅ INIT
     (async () => {
       await checkLogin();
       await checkAccess();
       updateUI();
-    })();//
+    })(); // <-- CORRECTED: Closing the IIFE block
   </script>
 
 </body>
