@@ -8,9 +8,8 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
     <style>
-        /* ------------------------------------- */
-        /* ૧. ગ્લોબલ અને રિસેટ સ્ટાઇલ્સ */
-        /* ------------------------------------- */
+        /* ... (અહીંયા પહેલા આપેલું આખું CSS સ્ટાઇલિંગ એ જ રહેશે) ... */
+        /* અહીંયા તમને અગાઉ આપેલું CSS પેસ્ટ કરો */
         :root {
             --primary-blue: #007BFF;
             --light-blue: #E9F5FF;
@@ -31,10 +30,9 @@
             flex-direction: column;
         }
 
-        /* ફક્ત મોબાઇલ-રિસ્પોન્સિવ (સૌથી પહેલા મોબાઇલ) */
         .container {
             width: 95%;
-            max-width: 450px; /* મોબાઇલ ડિવાઇસની મહત્તમ પહોળાઈ */
+            max-width: 450px; 
             margin: 10px auto;
             padding: 15px;
             background-color: var(--white);
@@ -43,9 +41,6 @@
             flex-grow: 1;
         }
 
-        /* ------------------------------------- */
-        /* ૨. હેડર સ્ટાઇલ્સ */
-        /* ------------------------------------- */
         header {
             background-color: var(--primary-blue);
             color: var(--white);
@@ -85,9 +80,6 @@
             font-weight: bold;
         }
 
-        /* ------------------------------------- */
-        /* ૩. મુખ્ય કન્ટેન્ટ સ્ટાઇલ્સ */
-        /* ------------------------------------- */
         .loading-screen {
             text-align: center;
             padding: 40px 0;
@@ -135,7 +127,6 @@
             color: var(--white);
         }
 
-        /* Buy Now Button */
         #buy-now-btn {
             background-color: var(--success-green);
             color: var(--white);
@@ -153,7 +144,6 @@
             background-color: #1e7e34;
         }
 
-        /* Purchased Status */
         .purchased-status {
             color: var(--success-green);
             font-size: 1.5rem;
@@ -161,11 +151,8 @@
             margin-bottom: 20px;
         }
 
-        /* ------------------------------------- */
-        /* ૪. ફૂટર સ્ટાઇલ્સ */
-        /* ------------------------------------- */
         footer {
-            margin-top: auto; /* ફૂટરને હંમેશા નીચે ધકેલશે */
+            margin-top: auto; 
             padding: 10px 0;
             text-align: center;
             background-color: var(--primary-blue);
@@ -178,7 +165,6 @@
             display: inline-block;
         }
 
-        /* આઇકન માટે ફૉન્ટ ઓસમ CDN (આઇકન દેખાડવા માટે જરૂરી છે) */
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
     </style>
 </head>
@@ -209,24 +195,23 @@
 
     <script>
         // ----------------------------------------------------
-        // JavaScript લૉજિક
+        // JavaScript લૉજિક (સુરક્ષિત કીઝ સાથે)
         // ----------------------------------------------------
 
-        // Supabase સેટઅપ
+        // 🎯 માત્ર બે પબ્લિક URL ની જરૂર છે
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        // Anon Key: આ key ફ્રન્ટ-એન્ડમાં વપરાય છે અને તે સુરક્ષિત છે
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTU5OTg4MDAsImV4cCI6MTk3MTU4NDQwMH0.XXXXXX'; // કૃપા કરીને તમારી અસલી Anon Key અહીં મૂકો
-
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Razorpay Live Key ID
-        const RAZORPAY_KEY_ID = 'rzp_live_RrlYub6HRqZ8MD'; 
-
-        // Vercel Serverless Function URLs (તબક્કો ૨ માં બનાવેલ)
-        const API_ORDER_URL = 'https://kapilainstitute.vercel.app/api/create-order';
         const ACCESS_GRANTED_DAYS = 45;
         
-        let currentUserId = null; // હાલના યુઝરનો ID
+        // 🚨 અહીંયા તમારી અસલી Anon Key મૂકો (પબ્લિક હોવાથી, તે Edge Function માં રાખવાની જરૂર નથી)
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4'; 
+
+        // 🎯 Edge Function URL (જે Razorpay Key ID પરત મોકલશે)
+        const API_ORDER_URL = `${SUPABASE_URL}/functions/v1/create-order`;
+
+        // Supabase Client
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let currentUserId = null; 
         
         /**
          * ૧. Supabase Auth દ્વારા યુઝરનું સ્ટેટસ ચેક કરવું
@@ -242,7 +227,6 @@
 
                 if (!user) {
                     alert('તમે લૉગિન નથી. કૃપા કરીને પહેલા લૉગિન કરો.');
-                    // અહીંયા લૉગિન પેજ પર રીડાયરેક્ટ કરી શકાય
                     window.location.href = 'https://kapilainstitute.vercel.app/login'; 
                     return;
                 }
@@ -251,19 +235,20 @@
                 userNameSpan.textContent = user.user_metadata?.full_name || user.email || 'User';
 
                 // એક્સેસ ચેક (user_access ટેબલમાંથી)
+                // RLS Policy દ્વારા માત્ર આ યુઝરનો ડેટા મળશે
                 const { data: accessData, error: accessError } = await supabase
                     .from('user_access')
                     .select('expires_at')
                     .eq('user_id', currentUserId)
                     .eq('plan_name', 'Mock_Test_45_Days')
                     .eq('is_active', true)
-                    .gt('expires_at', new Date().toISOString()) // એક્સપાયરી ડેટ ચેક કરો
+                    .gt('expires_at', new Date().toISOString()) 
                     .maybeSingle(); 
 
                 loadingDiv.style.display = 'none';
                 contentDiv.style.display = 'block';
 
-                if (accessError && accessError.code !== 'PGRST116') { // PGRST116 એટલે 'કોઈ ડેટા નથી મળ્યો'
+                if (accessError && accessError.code !== 'PGRST116') { 
                     console.error('Access Fetch Error:', accessError);
                     contentDiv.innerHTML = '<p style="color: red;">એક્સેસ ચેક કરવામાં ભૂલ આવી. ફરી પ્રયાસ કરો.</p>';
                 } else if (accessData) {
@@ -282,9 +267,7 @@
             }
         }
 
-        /**
-         * ૨. એક્સેસ મળ્યા પછીનું UI રેન્ડર કરવું
-         */
+        // ... (renderAccessGranted અને renderPaymentRequired Functions એ જ રહેશે) ...
         function renderAccessGranted(expiryDate) {
             const contentDiv = document.getElementById('content-div');
             contentDiv.innerHTML = `
@@ -302,9 +285,6 @@
             `;
         }
 
-        /**
-         * ૩. પેમેન્ટ જરૂરી હોય ત્યારેનું UI રેન્ડર કરવું
-         */
         function renderPaymentRequired() {
             const contentDiv = document.getElementById('content-div');
             contentDiv.innerHTML = `
@@ -330,7 +310,7 @@
             btn.textContent = 'ઓર્ડર બની રહ્યો છે...';
 
             try {
-                // Vercel Serverless Function ને કૉલ કરીને ઓર્ડર બનાવો (પગલું ૨.૨)
+                // Supabase Edge Function ને કૉલ કરીને Order ID અને Key ID મેળવો
                 const response = await fetch(API_ORDER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -339,8 +319,9 @@
 
                 const data = await response.json();
 
-                if (data.error) {
-                    alert('ઓર્ડર બનાવવામાં ભૂલ: ' + data.error);
+                if (data.error || !data.orderId || !data.keyId) {
+                    alert('ઓર્ડર બનાવવામાં ભૂલ આવી.');
+                    console.error('Edge Function Error:', data.error);
                     btn.textContent = 'ખરીદો (₹1)';
                     btn.disabled = false;
                     return;
@@ -348,27 +329,23 @@
 
                 // Razorpay Options
                 const options = {
-                    key: data.keyId, // rzp_live_RrlYub6HRqZ8MD
-                    amount: data.amount, // ₹1 (100 પૈસા)
+                    key: data.keyId, // 🔑 Key ID Edge Function માંથી સુરક્ષિત રીતે આવ્યું
+                    amount: data.amount, 
                     order_id: data.orderId, 
                     currency: 'INR',
                     name: 'STI Mock Test Access',
                     description: '45 Days Mock Test Plan',
-                    // પેમેન્ટ સફળ થયા પછીનું હેન્ડલિંગ (Client side callback)
                     handler: function (response) {
-                        // પેમેન્ટ સક્સેસ પછી, અહીંયા આપણે UI ને અપડેટ કરી શકીએ
-                        // પરંતુ Webhook દ્વારા કન્ફર્મેશન સુરક્ષિત છે.
                         alert('પેમેન્ટ સફળ! તમારો એક્સેસ થોડીવારમાં અપડેટ થઈ જશે.');
                         btn.textContent = 'કન્ફર્મેશન બાકી છે...';
                         
-                        // DB અપડેટ Webhook દ્વારા થતું હોવાથી, થોડી સેકન્ડ પછી પેજ રીલોડ કરો
+                        // Webhook દ્વારા DB અપડેટ થયા પછી રીલોડ કરો
                         setTimeout(() => {
                             window.location.reload(); 
                         }, 5000); 
                     },
                     prefill: {
                         email: (await supabase.auth.getUser()).data.user.email,
-                        // mobile: user.user_metadata.mobile || '' // જો તમે મોબાઇલ નંબર સ્ટોર કર્યો હોય તો
                     },
                     modal: {
                         ondismiss: function() {
@@ -390,7 +367,6 @@
             }
         }
 
-        // પેજ લોડ થતાં જ Auth અને Access ચેક કરવાનું શરૂ કરો
         document.addEventListener('DOMContentLoaded', checkAuthAndAccess);
     </script>
 
