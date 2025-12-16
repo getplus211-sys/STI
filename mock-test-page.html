@@ -1,374 +1,129 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STI Mock Test - Access</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    
-    <style>
-        /* ... (અહીંયા પહેલા આપેલું આખું CSS સ્ટાઇલિંગ એ જ રહેશે) ... */
-        /* અહીંયા તમને અગાઉ આપેલું CSS પેસ્ટ કરો */
-        :root {
-            --primary-blue: #007BFF;
-            --light-blue: #E9F5FF;
-            --white: #FFFFFF;
-            --text-dark: #333;
-            --text-light: #666;
-            --success-green: #28a745;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--light-blue);
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .container {
-            width: 95%;
-            max-width: 450px; 
-            margin: 10px auto;
-            padding: 15px;
-            background-color: var(--white);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            flex-grow: 1;
-        }
-
-        header {
-            background-color: var(--primary-blue);
-            color: var(--white);
-            padding: 15px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-size: 1.2rem;
-            margin: 0;
-            flex-grow: 1;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-        }
-
-        #user-name {
-            font-weight: bold;
-            margin-right: 10px;
-            font-size: 0.9rem;
-        }
-
-        #home-button {
-            background-color: var(--light-blue);
-            color: var(--primary-blue);
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .loading-screen {
-            text-align: center;
-            padding: 40px 0;
-            font-size: 1.1rem;
-            color: var(--text-light);
-        }
-
-        .action-card {
-            text-align: center;
-            padding: 30px 10px;
-        }
-
-        .action-card h2 {
-            color: var(--primary-blue);
-            font-size: 1.4rem;
-            margin-top: 0;
-        }
-
-        .action-card p {
-            margin-bottom: 25px;
-            color: var(--text-light);
-        }
-
-        .mock-test-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .mock-test-list a {
-            background-color: var(--light-blue);
-            color: var(--primary-blue);
-            text-decoration: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: background-color 0.2s;
-            text-align: left;
-            border-left: 5px solid var(--primary-blue);
-        }
-
-        .mock-test-list a:hover {
-            background-color: var(--primary-blue);
-            color: var(--white);
-        }
-
-        #buy-now-btn {
-            background-color: var(--success-green);
-            color: var(--white);
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-
-        #buy-now-btn:hover {
-            background-color: #1e7e34;
-        }
-
-        .purchased-status {
-            color: var(--success-green);
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        footer {
-            margin-top: auto; 
-            padding: 10px 0;
-            text-align: center;
-            background-color: var(--primary-blue);
-        }
-
-        #whatsapp-icon {
-            font-size: 2.0rem;
-            color: var(--white);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STI Mock Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
+    header, footer { background:#222; color:#fff; padding:15px; text-align:center; }
+    header h1 { margin:0; }
+    .home-btn { background:#4CAF50; color:#fff; padding:8px 15px; border:none; cursor:pointer; }
+    main { padding:20px; }
+    .card-container { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
+    .card { background:#fff; border:1px solid #ddd; border-radius:8px; width:250px; padding:15px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    .card h3 { margin:10px 0; }
+    .buy-btn { background:#007BFF; color:#fff; padding:10px 20px; border:none; cursor:pointer; border-radius:5px; }
+    .buy-btn:disabled { background:#aaa; cursor:not-allowed; }
+    footer button { background:#25D366; color:#fff; padding:10px 20px; border:none; cursor:pointer; border-radius:5px; }
+  </style>
 </head>
 <body>
+  <!-- Header -->
+  <header>
+    <h1>STI Mock Test</h1>
+    <p id="studentName">Student: Loading...</p>
+    <button class="home-btn" onclick="goHome()">🏠 Go to Home</button>
+  </header>
 
-    <header>
-        <h1>STI Mock Test</h1>
-        <div class="header-controls">
-            <span id="user-name">Guest</span>
-            <a id="home-button" href="https://kapilainstitute.vercel.app/">Home</a>
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="loading-screen" id="loading-div">
-            <i class="fas fa-spinner fa-spin"></i> કૃપા કરીને રાહ જુઓ... એક્સેસ ચેક થઈ રહ્યો છે.
-        </div>
-
-        <div class="action-card" id="content-div" style="display: none;">
-            </div>
+  <!-- Main Content -->
+  <main>
+    <h2>STI ના 5 Mock Test ખરીદવા માટેનું કાર્ડ</h2>
+    <p>Mock test એક યુઝર માત્ર એક વખત જ ખરીદી શકે છે. એકવાર ખરીદેલ હોય તો બીજવાર મેસેજ આવશે.</p>
+    
+    <div class="card-container" id="testCards">
+      <!-- Cards will be injected by JS -->
     </div>
+  </main>
 
-    <footer>
-        <a id="whatsapp-icon" href="https://wa.me/919925858057" target="_blank" aria-label="WhatsApp Support">
-            <i class="fab fa-whatsapp"></i>
-        </a>
-    </footer>
+  <!-- Footer -->
+  <footer>
+    <button onclick="openWhatsapp()">📱 Whatsapp Contact Us</button>
+  </footer>
 
-    <script>
-        // ----------------------------------------------------
-        // JavaScript લૉજિક (સુરક્ષિત કીઝ સાથે)
-        // ----------------------------------------------------
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase client init
+    const supabaseUrl = "https://bhmycvrbucmbbrpzeane.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // 🎯 માત્ર બે પબ્લિક URL ની જરૂર છે
-        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const ACCESS_GRANTED_DAYS = 45;
-        
-        // 🚨 અહીંયા તમારી અસલી Anon Key મૂકો (પબ્લિક હોવાથી, તે Edge Function માં રાખવાની જરૂર નથી)
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4'; 
+    let currentUser = null;
 
-        // 🎯 Edge Function URL (જે Razorpay Key ID પરત મોકલશે)
-        const API_ORDER_URL = `${SUPABASE_URL}/functions/v1/create-order`;
+    // Dummy: fetch logged-in user profile (replace with your auth flow)
+    async function loadProfile() {
+      // Example: get first profile for demo
+      const { data, error } = await supabase.from("profiles").select("*").limit(1);
+      if (error) { console.error(error); return; }
+      if (data.length > 0) {
+        currentUser = data[0];
+        document.getElementById("studentName").innerText = "Student: " + currentUser.full_name;
+      }
+    }
 
-        // Supabase Client
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        let currentUserId = null; 
-        
-        /**
-         * ૧. Supabase Auth દ્વારા યુઝરનું સ્ટેટસ ચેક કરવું
-         */
-        async function checkAuthAndAccess() {
-            const loadingDiv = document.getElementById('loading-div');
-            const contentDiv = document.getElementById('content-div');
-            const userNameSpan = document.getElementById('user-name');
+    // Render 5 mock test cards
+    function renderCards() {
+      const container = document.getElementById("testCards");
+      for (let i = 1; i <= 5; i++) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>Mock Test ${i}</h3>
+          <p>200 Marks | 2 Hrs | -0.33 Negative</p>
+          <button class="buy-btn" onclick="buyTest(${i})">Buy & Start</button>
+        `;
+        container.appendChild(card);
+      }
+    }
 
-            try {
-                // Auth ચેક
-                const { data: { user } } = await supabase.auth.getUser();
+    // Buy test logic
+    async function buyTest(testNumber) {
+      if (!currentUser) { alert("User not loaded"); return; }
 
-                if (!user) {
-                    alert('તમે લૉગિન નથી. કૃપા કરીને પહેલા લૉગિન કરો.');
-                    window.location.href = 'https://kapilainstitute.vercel.app/login'; 
-                    return;
-                }
+      // Check if already purchased
+      const { data, error } = await supabase
+        .from("user_access")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .eq("plan_name", "mock-test")
+        .eq("is_active", true);
 
-                currentUserId = user.id;
-                userNameSpan.textContent = user.user_metadata?.full_name || user.email || 'User';
+      if (error) { console.error(error); return; }
 
-                // એક્સેસ ચેક (user_access ટેબલમાંથી)
-                // RLS Policy દ્વારા માત્ર આ યુઝરનો ડેટા મળશે
-                const { data: accessData, error: accessError } = await supabase
-                    .from('user_access')
-                    .select('expires_at')
-                    .eq('user_id', currentUserId)
-                    .eq('plan_name', 'Mock_Test_45_Days')
-                    .eq('is_active', true)
-                    .gt('expires_at', new Date().toISOString()) 
-                    .maybeSingle(); 
+      if (data.length > 0) {
+        alert("તમે પહેલેથી જ Mock Test ખરીદી લીધું છે!");
+        return;
+      }
 
-                loadingDiv.style.display = 'none';
-                contentDiv.style.display = 'block';
+      // Insert purchase record
+      const { error: insertError } = await supabase.from("user_access").insert({
+        user_id: currentUser.id,
+        plan_name: "mock-test",
+        is_active: true,
+        access_type: "paid",
+        created_at: new Date().toISOString()
+      });
 
-                if (accessError && accessError.code !== 'PGRST116') { 
-                    console.error('Access Fetch Error:', accessError);
-                    contentDiv.innerHTML = '<p style="color: red;">એક્સેસ ચેક કરવામાં ભૂલ આવી. ફરી પ્રયાસ કરો.</p>';
-                } else if (accessData) {
-                    // ✅ એક્સેસ છે
-                    const expiryDate = new Date(accessData.expires_at).toLocaleDateString('gu-IN');
-                    renderAccessGranted(expiryDate);
-                } else {
-                    // ❌ એક્સેસ નથી
-                    renderPaymentRequired();
-                }
+      if (insertError) { console.error(insertError); return; }
 
-            } catch (error) {
-                console.error('System Error:', error);
-                loadingDiv.style.display = 'none';
-                contentDiv.innerHTML = '<p style="color: red;">સિસ્ટમ લોડ કરવામાં ભૂલ આવી. નેટવર્ક ચેક કરો.</p>';
-            }
-        }
+      // Redirect to mock-test page
+      window.location.href = `mock-test-${testNumber}.html`;
+    }
 
-        // ... (renderAccessGranted અને renderPaymentRequired Functions એ જ રહેશે) ...
-        function renderAccessGranted(expiryDate) {
-            const contentDiv = document.getElementById('content-div');
-            contentDiv.innerHTML = `
-                <div class="purchased-status">✅ Access Purchased!</div>
-                <p>તમારી એક્સેસની મુદત: <strong>${expiryDate}</strong> સુધી છે.</p>
-                <hr>
-                <h2>Mock Test લિંક્સ</h2>
-                <div class="mock-test-list">
-                    <a href="/mock-test-1.html">Mock Test 1</a>
-                    <a href="/mock-test-2.html">Mock Test 2</a>
-                    <a href="/mock-test-3.html">Mock Test 3</a>
-                    <a href="/mock-test-4.html">Mock Test 4</a>
-                    <a href="/mock-test-5.html">Mock Test 5</a>
-                </div>
-            `;
-        }
+    // Go Home
+    function goHome() {
+      window.location.href = "index.html";
+    }
 
-        function renderPaymentRequired() {
-            const contentDiv = document.getElementById('content-div');
-            contentDiv.innerHTML = `
-                <h2>Mock Test Access</h2>
-                <p>₹1 માં ${ACCESS_GRANTED_DAYS} દિવસ માટે Mock Test Access મેળવો.</p>
-                <p>આ એક વન-ટાઇમ પેમેન્ટ છે.</p>
-                <button id="buy-now-btn">ખરીદો (₹1)</button>
-            `;
-            document.getElementById('buy-now-btn').addEventListener('click', startPayment);
-        }
+    // Whatsapp redirect
+    function openWhatsapp() {
+      window.location.href = "https://wa.me/919925858057";
+    }
 
-        /**
-         * ૪. Razorpay પેમેન્ટ શરૂ કરવું
-         */
-        async function startPayment() {
-            if (!currentUserId) {
-                alert('કૃપા કરીને પહેલા લૉગિન કરો.');
-                return;
-            }
-
-            const btn = document.getElementById('buy-now-btn');
-            btn.disabled = true;
-            btn.textContent = 'ઓર્ડર બની રહ્યો છે...';
-
-            try {
-                // Supabase Edge Function ને કૉલ કરીને Order ID અને Key ID મેળવો
-                const response = await fetch(API_ORDER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUserId }) // યુઝર ID બેકએન્ડને મોકલો
-                });
-
-                const data = await response.json();
-
-                if (data.error || !data.orderId || !data.keyId) {
-                    alert('ઓર્ડર બનાવવામાં ભૂલ આવી.');
-                    console.error('Edge Function Error:', data.error);
-                    btn.textContent = 'ખરીદો (₹1)';
-                    btn.disabled = false;
-                    return;
-                }
-
-                // Razorpay Options
-                const options = {
-                    key: data.keyId, // 🔑 Key ID Edge Function માંથી સુરક્ષિત રીતે આવ્યું
-                    amount: data.amount, 
-                    order_id: data.orderId, 
-                    currency: 'INR',
-                    name: 'STI Mock Test Access',
-                    description: '45 Days Mock Test Plan',
-                    handler: function (response) {
-                        alert('પેમેન્ટ સફળ! તમારો એક્સેસ થોડીવારમાં અપડેટ થઈ જશે.');
-                        btn.textContent = 'કન્ફર્મેશન બાકી છે...';
-                        
-                        // Webhook દ્વારા DB અપડેટ થયા પછી રીલોડ કરો
-                        setTimeout(() => {
-                            window.location.reload(); 
-                        }, 5000); 
-                    },
-                    prefill: {
-                        email: (await supabase.auth.getUser()).data.user.email,
-                    },
-                    modal: {
-                        ondismiss: function() {
-                            alert('પેમેન્ટ રદ કરવામાં આવ્યું.');
-                            btn.textContent = 'ખરીદો (₹1)';
-                            btn.disabled = false;
-                        }
-                    }
-                };
-                
-                const rzp = new Razorpay(options);
-                rzp.open();
-
-            } catch (error) {
-                console.error('Payment initiation failed:', error);
-                alert('પેમેન્ટ શરૂ કરવામાં ભૂલ આવી.');
-                btn.textContent = 'ખરીદો (₹1)';
-                btn.disabled = false;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', checkAuthAndAccess);
-    </script>
-
+    // Init
+    loadProfile();
+    renderCards();
+  </script>
 </body>
 </html>
