@@ -1,142 +1,227 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>STI Mock Test</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
-    header, footer { background:#222; color:#fff; padding:15px; text-align:center; }
-    header h1 { margin:0; }
-    .home-btn { background:#4CAF50; color:#fff; padding:8px 15px; border:none; cursor:pointer; border-radius:5px; }
-    main { padding:20px; }
-    .card-container { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
-    .card { background:#fff; border:1px solid #ddd; border-radius:8px; width:250px; padding:15px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    .card h3 { margin:10px 0; }
-    .buy-btn { background:#007BFF; color:#fff; padding:10px 20px; border:none; cursor:pointer; border-radius:5px; }
-    .buy-btn:disabled { background:#aaa; cursor:not-allowed; }
-    footer button { background:#25D366; color:#fff; padding:10px 20px; border:none; cursor:pointer; border-radius:5px; }
-  </style>
-</head>
-<body>
-  <!-- Header -->
-  <header>
-    <h1>STI Mock Test</h1>
-    <p id="studentName">Student: Loading...</p>
-    <button class="home-btn" onclick="goHome()">🏠 Go to Home</button>
-  </header>
-
-  <!-- Main Content -->
-  <main>
-    <h2>STI ના 5 Mock Test ખરીદવા માટેનું કાર્ડ</h2>
-    <p>Mock test એક યુઝર માત્ર એક વખત જ ખરીદી શકે છે. એકવાર ખરીદેલ હોય તો બીજવાર મેસેજ આવશે.</p>
-    
-    <div class="card-container" id="testCards">
-      <!-- Cards injected by JS -->
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    <button onclick="openWhatsapp()">📱 Whatsapp Contact Us</button>
-  </footer>
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // Supabase client init
-    const supabaseUrl = "https://bhmycvrbucmbbrpzeane.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    let currentUser = null;
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f9ff;
+      color: #222;
+    }
 
-    // Load logged-in user profile (replace with your auth flow)
-    async function loadProfile() {
-      const { data, error } = await supabase.from("profiles").select("*").limit(1);
-      if (error) { console.error(error); return; }
-      if (data.length > 0) {
-        currentUser = data[0];
-        document.getElementById("studentName").innerText = "Student: " + currentUser.full_name;
-        checkPurchaseStatus();
+    header {
+      background: #0d6efd;
+      color: #fff;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .student-name {
+      font-size: 14px;
+    }
+
+    .home-btn {
+      background: #fff;
+      color: #0d6efd;
+      padding: 6px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    main {
+      padding: 15px;
+    }
+
+    .info {
+      background: #e7f1ff;
+      border-left: 4px solid #0d6efd;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #0d6efd;
+    }
+
+    .card ul {
+      padding-left: 18px;
+      font-size: 14px;
+    }
+
+    .card button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #0d6efd;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .card button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    footer {
+      background: #0d6efd;
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    footer a {
+      color: #fff;
+      font-weight: bold;
+      text-decoration: none;
+      background: #25D366;
+      padding: 8px 15px;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>STI Mock Test</h1>
+  <div class="student-name" id="studentName">Student</div>
+  <a href="index.html" class="home-btn">Go to Home</a>
+</header>
+
+<main>
+  <div class="info">
+    STI ના 5 Mock Test ખરીદી શકાય છે.  
+    👉 એક user માત્ર એક જ વાર ખરીદી શકે છે.
+  </div>
+
+  <div class="cards" id="testCards"></div>
+</main>
+
+<footer>
+  <a href="https://wa.me/919925858057" target="_blank">Contact Us - Whatsapp</a>
+</footer>
+
+<script>
+  // ===============================
+  // Supabase Init
+  // ===============================
+  const supabaseUrl = "https://bhmycvrbucmbbrpzeane.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  const testCardsDiv = document.getElementById("testCards");
+
+  const tests = [
+    "STI Mock Test 1",
+    "STI Mock Test 2",
+    "STI Mock Test 3",
+    "STI Mock Test 4",
+    "STI Mock Test 5"
+  ];
+
+  async function loadPage() {
+    // Logged in user
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("પહેલાં Login કરો");
+      window.location.href = "login.html";
+      return;
+    }
+
+    // Profile data
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) {
+      document.getElementById("studentName").innerText = profile.full_name || "Student";
+    }
+
+    // Check access
+    const { data: access } = await supabase
+      .from("user_access")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("plan_name", "STI_MOCK_TEST")
+      .eq("is_active", true)
+      .single();
+
+    tests.forEach((testName, index) => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const alreadyBought = access ? true : false;
+
+      card.innerHTML = `
+        <h3>${testName}</h3>
+        <ul>
+          <li>200 Marks</li>
+          <li>2 Hours Time</li>
+          <li>-0.33 Negative Marking</li>
+        </ul>
+        <button ${alreadyBought ? "disabled" : ""}>
+          ${alreadyBought ? "Already Purchased" : "Start / Buy Test"}
+        </button>
+      `;
+
+      const btn = card.querySelector("button");
+
+      if (!alreadyBought) {
+        btn.addEventListener("click", () => {
+          window.location.href = "mock-test-1.html";
+        });
+      } else {
+        btn.addEventListener("click", () => {
+          alert("તમે આ Mock Test પહેલેથી ખરીદી ચૂક્યા છો.");
+        });
       }
-    }
 
-    // Render 5 mock test cards
-    function renderCards(purchased) {
-      const container = document.getElementById("testCards");
-      container.innerHTML = "";
-      for (let i = 1; i <= 5; i++) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3>Mock Test ${i}</h3>
-          <p>200 Marks | 2 Hrs | -0.33 Negative</p>
-          <button class="buy-btn" ${purchased ? "disabled" : ""} onclick="buyTest(${i})">
-            ${purchased ? "Already Purchased" : "Buy & Start"}
-          </button>
-        `;
-        container.appendChild(card);
-      }
-    }
+      testCardsDiv.appendChild(card);
+    });
+  }
 
-    // Check purchase status
-    async function checkPurchaseStatus() {
-      if (!currentUser) return;
-      const { data, error } = await supabase
-        .from("user_access")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .eq("plan_name", "mock-test")
-        .eq("is_active", true);
+  loadPage();
+</script>
 
-      if (error) { console.error(error); return; }
-      renderCards(data.length > 0);
-    }
-
-    // Buy test logic
-    async function buyTest(testNumber) {
-      if (!currentUser) { alert("User not loaded"); return; }
-
-      const { data, error } = await supabase
-        .from("user_access")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .eq("plan_name", "mock-test")
-        .eq("is_active", true);
-
-      if (error) { console.error(error); return; }
-
-      if (data.length > 0) {
-        alert("તમે પહેલેથી જ Mock Test ખરીદી લીધું છે!");
-        return;
-      }
-
-      const { error: insertError } = await supabase.from("user_access").insert({
-        user_id: currentUser.id,
-        plan_name: "mock-test",
-        is_active: true,
-        access_type: "paid",
-        created_at: new Date().toISOString()
-      });
-
-      if (insertError) { console.error(insertError); return; }
-
-      window.location.href = `mock-test-${testNumber}.html`;
-    }
-
-    // Go Home
-    function goHome() {
-      window.location.href = "index.html";
-    }
-
-    // Whatsapp redirect
-    function openWhatsapp() {
-      window.location.href = "https://wa.me/919925858057";
-    }
-
-    // Init
-    loadProfile();
-  </script>
 </body>
 </html>
