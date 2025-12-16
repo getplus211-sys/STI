@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -205,51 +206,51 @@
   </footer>
 
   <script type="module">
+    // Supabase અને API કીઝ
     const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-
-    const CREATE_ORDER_URL =
-      "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order";
+    const CREATE_ORDER_URL = "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order";
 
     const { createClient } = window.supabase;
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // DOM Elements
     const payBtn = document.getElementById("pay-button");
     const paymentStatusEl = document.getElementById("payment-status");
     const testsGrid = document.getElementById("tests-grid");
     const studentNameEl = document.getElementById("student-name");
 
+    // Constants
     const PLAN_NAME = "prelims-mock-pack";
     const ACCESS_TYPE = "mock_tests_all";
-    const AMOUNT_PAISE = 100;
+    const AMOUNT_PAISE = 100; // ₹1
 
+    // State Variables
     let currentUser = null;
     let hasAccess = false;
 
-    // ✅ PAGE MUST NOT OPEN WITHOUT LOGIN
+    // 1. લોગિન ચેક અને યુઝર માહિતી મેળવવી
     async function checkLogin() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        // જો યુઝર લોગિન ન હોય, તો તેમને લોગિન પેજ પર મોકલી દો
         window.location.href = "login.html";
         return;
       }
       currentUser = user;
 
-      // ✅ Clean student name
-      let rawName = user.user_metadata?.full_name;
-      if (!rawName || rawName.trim() === "") {
-        const email = user.email || "";
-        rawName = email.split("@")[0].replace(/[._]/g, " ");
-        rawName = rawName
-          .split(" ")
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" ");
-      }
+      // વિદ્યાર્થીનું નામ ડિસ્પ્લે કરવું
+      let rawName = user.user_metadata?.full_name || user.email.split("@")[0].replace(/[._]/g, " ");
+      rawName = rawName
+        .split(" ")
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
       studentNameEl.textContent = rawName;
     }
 
+    // 2. એક્સેસ ચેક કરવી (user_access ટેબલમાંથી)
     async function checkAccess() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("user_access")
         .select("*")
         .eq("user_id", currentUser.id)
@@ -257,14 +258,21 @@
         .eq("access_type", ACCESS_TYPE)
         .eq("is_active", true)
         .limit(1);
+      
+      if (error) {
+        console.error("Access Check Error:", error);
+        // જો RLS નીતિમાં ભૂલ હોય તો અહીં એરર આવશે
+      }
 
       hasAccess = data && data.length > 0;
     }
 
+    // 3. UI અપડેટ કરવી (બટન અને લિંક્સ)
     function updateUI() {
       const links = testsGrid.querySelectorAll(".test-link");
 
       if (hasAccess) {
+        // એક્સેસ હોય તો બટન ડિસેબલ કરો
         payBtn.classList.add("btn-disabled");
         payBtn.classList.remove("btn-primary");
         payBtn.disabled = true;
@@ -272,42 +280,49 @@
 
         paymentStatusEl.textContent = "You can open any mock test.";
 
-        // લિંક્સમાંથી 'disabled' ક્લાસ હટાવવો
+        // લિંક્સ પરથી 'disabled' ક્લાસ હટાવો જેથી તે ખૂલે
         links.forEach(link => link.classList.remove("disabled"));
       } else {
+        // એક્સેસ ન હોય તો લિંક્સ ડિસેબલ રાખો
         links.forEach(link => link.classList.add("disabled"));
+        payBtn.disabled = false;
+        payBtn.textContent = "Buy Full Pack"; // ખાતરી કરો કે જો એક્સેસ ન હોય તો Buy Full Pack દેખાય
       }
     }
 
+    // 4. પેમેન્ટ બટન પર ક્લિક ઇવેન્ટ
     payBtn.addEventListener("click", async () => {
       if (hasAccess) return;
 
       paymentStatusEl.textContent = "Creating order...";
       payBtn.disabled = true;
 
+      // ઓર્ડર ક્રિએટ કરવા માટે Supabase Edge Function ને કોલ કરવો
       const resp = await fetch(CREATE_ORDER_URL, {
-  method: "POST",
-  headers: { 
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-  },
-  body: JSON.stringify({
-    user_id: currentUser.id,
-    amount: AMOUNT_PAISE,
-    currency: "INR",
-    plan_name: PLAN_NAME,
-    access_type: ACCESS_TYPE,
-  }),
-});
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          amount: AMOUNT_PAISE,
+          currency: "INR",
+          plan_name: PLAN_NAME,
+          access_type: ACCESS_TYPE,
+        }),
+      });
 
       const data = await resp.json();
 
       if (!resp.ok) {
-        paymentStatusEl.textContent = "Order creation failed.";
+        console.error("Order creation failed:", data);
+        paymentStatusEl.textContent = "Order creation failed. Please try again.";
         payBtn.disabled = false;
         return;
       }
 
+      // Razorpay Options
       const options = {
         key: data.key_id,
         amount: data.amount,
@@ -315,36 +330,39 @@
         name: "STI Mock Test",
         description: "Full mock test pack",
         order_id: data.order_id,
+        
+        // પેમેન્ટ સફળ થયા પછીનું handler ફંક્શન
         handler: async function (response) {
-          paymentStatusEl.textContent = "Payment successful! Granting access...";
+          paymentStatusEl.textContent = "Payment successful! Attempting to grant access...";
           
           try {
-            // Grant access in user_access table (તમારા exact fields મુજબ)
-            const { data: accessData, error } = await supabase
+            // ✅ સુધારો: user_access ટેબલમાં ડેટા ઇન્સર્ટ કરવો (અહીં .select() દૂર કર્યું છે)
+            const { error } = await supabase
               .from("user_access")
               .insert({
-                user_id: currentUser.id,  // UUID
-                access_type: ACCESS_TYPE,  // text
-                plan_name: PLAN_NAME,      // text
-                is_active: true,           // boolean
-                // created_at automatically filled by default NOW()
-              })
-              .select();
+                user_id: currentUser.id,      // UUID/Text
+                access_type: ACCESS_TYPE,     // Text
+                plan_name: PLAN_NAME,         // Text
+                is_active: true,              // Boolean
+                razorpay_payment_id: response.razorpay_payment_id, // Payment ID સાચવવો
+              });
 
             if (error) {
-              console.error("Access grant error:", error);
-              paymentStatusEl.textContent = "Payment done but access grant failed!";
-              alert("Please contact support. Payment ID: " + response.razorpay_payment_id);
-            } else {
-              console.log("Access granted:", accessData);
-              paymentStatusEl.textContent = "✅ Access granted successfully!";
+              // જો ડેટા ઇન્સર્ટ ન થાય, તો અહીં ચોક્કસ ભૂલ મળશે.
+              console.error("SUPABASE ACCESS GRANT ERROR:", error); 
+              paymentStatusEl.textContent = "Payment done but access grant failed due to D.B. Error!";
+              alert("DB Error. Please contact support. Payment ID: " + response.razorpay_payment_id + ". Check Console for details.");
               
-              // Refresh UI
+            } else {
+              console.log("Access granted successfully to user_access table.");
+              paymentStatusEl.textContent = "✅ Access granted successfully! UI refreshing...";
+              
+              // UI રિફ્રેશ કરો
               await checkAccess();
               updateUI();
             }
           } catch (err) {
-            console.error("Error:", err);
+            console.error("GENERAL ERROR in handler:", err);
             paymentStatusEl.textContent = "Error granting access!";
           }
         },
@@ -359,15 +377,19 @@
         theme: { color: "#2563eb" },
       };
 
+      // Razorpay ખોલો
       new Razorpay(options).open();
-    }); // <-- સુધારો: payBtn.addEventListener બ્લોક અહીં બંધ થાય છે.
+    }); // <-- payBtn.addEventListener અહીં બંધ થાય છે.
 
-    // ✅ INIT
+    // ✅ INIT: પેજ શરૂ કરવા માટેનું ફંક્શન (બટન ક્લિકની બહાર)
     (async () => {
       await checkLogin();
-      await checkAccess();
-      updateUI();
-    })(); // <-- સુધારો: Initialization ફંક્શન બ્લોક અહીં બંધ થાય છે.
+      // checkLogin() પૂર્ણ થયા પછી જ આગળ વધશે
+      if (currentUser) {
+        await checkAccess();
+        updateUI();
+      }
+    })(); // <-- INIT બ્લોક અહીં બંધ થાય છે.
   </script>
 
 </body>
