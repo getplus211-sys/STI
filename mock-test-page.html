@@ -320,12 +320,38 @@
         name: "STI Mock Test",
         description: "Full mock test pack",
         order_id: data.order_id,
-        handler: async function () {
-          paymentStatusEl.textContent = "Processing...";
-          setTimeout(async () => {
-            await checkAccess();
-            updateUI();
-          }, 5000);
+        handler: async function (response) {
+          paymentStatusEl.textContent = "Payment successful! Granting access...";
+          
+          try {
+            // Grant access in user_access table (તમારા exact fields મુજબ)
+            const { data: accessData, error } = await supabase
+              .from("user_access")
+              .insert({
+                user_id: currentUser.id,  // UUID
+                access_type: ACCESS_TYPE,  // text
+                plan_name: PLAN_NAME,      // text
+                is_active: true,           // boolean
+                // created_at automatically filled by default NOW()
+              })
+              .select();
+
+            if (error) {
+              console.error("Access grant error:", error);
+              paymentStatusEl.textContent = "Payment done but access grant failed!";
+              alert("Please contact support. Payment ID: " + response.razorpay_payment_id);
+            } else {
+              console.log("Access granted:", accessData);
+              paymentStatusEl.textContent = "✅ Access granted successfully!";
+              
+              // Refresh UI
+              await checkAccess();
+              updateUI();
+            }
+          } catch (err) {
+            console.error("Error:", err);
+            paymentStatusEl.textContent = "Error granting access!";
+          }
         },
         prefill: {
           email: currentUser.email,
@@ -339,8 +365,6 @@
       };
 
       new Razorpay(options).open();
-    });
-
     // ✅ INIT
     (async () => {
       await checkLogin();
