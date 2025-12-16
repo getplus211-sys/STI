@@ -272,6 +272,7 @@
 
         paymentStatusEl.textContent = "You can open any mock test.";
 
+        // લિંક્સમાંથી 'disabled' ક્લાસ હટાવવો
         links.forEach(link => link.classList.remove("disabled"));
       } else {
         links.forEach(link => link.classList.add("disabled"));
@@ -359,14 +360,14 @@
       };
 
       new Razorpay(options).open();
-    }); // <-- CORRECTED: Closing the payBtn.addEventListener block
+    }); // <-- સુધારો: payBtn.addEventListener બ્લોક અહીં બંધ થાય છે.
 
     // ✅ INIT
     (async () => {
       await checkLogin();
       await checkAccess();
       updateUI();
-    })(); // <-- CORRECTED: Closing the IIFE block
+    })(); // <-- સુધારો: Initialization ફંક્શન બ્લોક અહીં બંધ થાય છે.
   </script>
 
 </body>
