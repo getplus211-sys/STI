@@ -291,16 +291,19 @@
       payBtn.disabled = true;
 
       const resp = await fetch(CREATE_ORDER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: currentUser.id,
-          amount: AMOUNT_PAISE,
-          currency: "INR",
-          plan_name: PLAN_NAME,
-          access_type: ACCESS_TYPE,
-        }),
-      });
+  method: "POST",
+  headers: { 
+    "Content-Type": "application/json",
+    "Authorization": Bearer ${SUPABASE_ANON_KEY}
+  },
+  body: JSON.stringify({
+    user_id: currentUser.id,
+    amount: AMOUNT_PAISE,
+    currency: "INR",
+    plan_name: PLAN_NAME,
+    access_type: ACCESS_TYPE,
+  }),
+});
 
       const data = await resp.json();
 
