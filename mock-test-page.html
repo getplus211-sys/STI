@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,8 +5,10 @@
   <title>STI Mock Test – Full Pack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- Razorpay Checkout -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+  <!-- Supabase JS -->
   <script type="module"
     src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js">
   </script>
@@ -223,7 +224,7 @@
     // Constants
     const PLAN_NAME = "prelims-mock-pack";
     const ACCESS_TYPE = "mock_tests_all";
-    const AMOUNT_PAISE = 100; // ₹1
+    const AMOUNT_PAISE = 100; // ₹1 (testing)
 
     // State Variables
     let currentUser = null;
@@ -231,7 +232,13 @@
 
     // 1. લોગિન ચેક અને યુઝર માહિતી મેળવવી
     async function checkLogin() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error("Auth getUser error:", error);
+      }
+
+      const user = data?.user;
       if (!user) {
         // જો યુઝર લોગિન ન હોય, તો તેમને લોગિન પેજ પર મોકલી દો
         window.location.href = "login.html";
@@ -250,6 +257,8 @@
 
     // 2. એક્સેસ ચેક કરવી (user_access ટેબલમાંથી)
     async function checkAccess() {
+      if (!currentUser) return;
+
       const { data, error } = await supabase
         .from("user_access")
         .select("*")
@@ -258,13 +267,12 @@
         .eq("access_type", ACCESS_TYPE)
         .eq("is_active", true)
         .limit(1);
-      
+
       if (error) {
         console.error("Access Check Error:", error);
-        // જો RLS નીતિમાં ભૂલ હોય તો અહીં એરર આવશે
       }
 
-      hasAccess = data && data.length > 0;
+      hasAccess = !!(data && data.length > 0);
     }
 
     // 3. UI અપડેટ કરવી (બટન અને લિંક્સ)
@@ -286,110 +294,139 @@
         // એક્સેસ ન હોય તો લિંક્સ ડિસેબલ રાખો
         links.forEach(link => link.classList.add("disabled"));
         payBtn.disabled = false;
-        payBtn.textContent = "Buy Full Pack"; // ખાતરી કરો કે જો એક્સેસ ન હોય તો Buy Full Pack દેખાય
+        payBtn.classList.remove("btn-disabled");
+        payBtn.classList.add("btn-primary");
+        payBtn.textContent = "Buy Full Pack";
+        if (!paymentStatusEl.textContent) {
+          paymentStatusEl.textContent = "Purchase the full pack to unlock all tests.";
+        }
       }
     }
 
-    // 4. પેમેન્ટ બટન પર ક્લિક ઇવેન્ટ
+    // 4. Razorpay પેમેન્ટ બટન પર ક્લિક ઇવેન્ટ
     payBtn.addEventListener("click", async () => {
       if (hasAccess) return;
 
-      paymentStatusEl.textContent = "Creating order...";
-      payBtn.disabled = true;
+      try {
+        paymentStatusEl.textContent = "Creating order...";
+        payBtn.disabled = true;
 
-      // ઓર્ડર ક્રિએટ કરવા માટે Supabase Edge Function ને કોલ કરવો
-      const resp = await fetch(CREATE_ORDER_URL, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          user_id: currentUser.id,
-          amount: AMOUNT_PAISE,
-          currency: "INR",
-          plan_name: PLAN_NAME,
-          access_type: ACCESS_TYPE,
-        }),
-      });
+        // હાલની સેશનમાંથી JWT લેવું (ANON KEY નહિ, real user token)
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+        }
 
-      const data = await resp.json();
+        const session = sessionData?.session;
+        if (!session) {
+          paymentStatusEl.textContent = "Session expired. Please login again.";
+          window.location.href = "login.html";
+          return;
+        }
 
-      if (!resp.ok) {
-        console.error("Order creation failed:", data);
-        paymentStatusEl.textContent = "Order creation failed. Please try again.";
-        payBtn.disabled = false;
-        return;
-      }
+        // ઓર્ડર ક્રિએટ કરવા માટે Supabase Edge Function ને કોલ કરવો
+        const resp = await fetch(CREATE_ORDER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // અહીં હવે ANON key નહિ,પણ real user access_token use કર્યો છે
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            amount: AMOUNT_PAISE,
+            currency: "INR",
+            plan_name: PLAN_NAME,
+            access_type: ACCESS_TYPE,
+          }),
+        });
 
-      // Razorpay Options
-      const options = {
-        key: data.key_id,
-        amount: data.amount,
-        currency: data.currency,
-        name: "STI Mock Test",
-        description: "Full mock test pack",
-        order_id: data.order_id,
-        
-        // પેમેન્ટ સફળ થયા પછીનું handler ફંક્શન
-        handler: async function (response) {
-          paymentStatusEl.textContent = "Payment successful! Attempting to grant access...";
-          
-          try {
-            // ✅ સુધારો: user_access ટેબલમાં ડેટા ઇન્સર્ટ કરવો (અહીં .select() દૂર કર્યું છે)
-            const { error } = await supabase
-              .from("user_access")
-              .insert({
-                user_id: currentUser.id,      // UUID/Text
-                access_type: ACCESS_TYPE,     // Text
-                plan_name: PLAN_NAME,         // Text
-                is_active: true,              // Boolean
-                razorpay_payment_id: response.razorpay_payment_id, // Payment ID સાચવવો
-              });
+        const data = await resp.json();
 
-            if (error) {
-              // જો ડેટા ઇન્સર્ટ ન થાય, તો અહીં ચોક્કસ ભૂલ મળશે.
-              console.error("SUPABASE ACCESS GRANT ERROR:", error); 
-              paymentStatusEl.textContent = "Payment done but access grant failed due to D.B. Error!";
-              alert("DB Error. Please contact support. Payment ID: " + response.razorpay_payment_id + ". Check Console for details.");
-              
-            } else {
-              console.log("Access granted successfully to user_access table.");
-              paymentStatusEl.textContent = "✅ Access granted successfully! UI refreshing...";
-              
-              // UI રિફ્રેશ કરો
+        if (!resp.ok) {
+          console.error("Order creation failed:", data);
+          paymentStatusEl.textContent = "Order creation failed. Please try again.";
+          payBtn.disabled = false;
+          return;
+        }
+
+        // Razorpay Options
+        const options = {
+          key: data.key_id,
+          amount: data.amount,
+          currency: data.currency,
+          name: "STI Mock Test",
+          description: "Full mock test pack",
+          order_id: data.order_id,
+
+          // પેમેન્ટ સફળ થયા પછીનું handler ફંક્શન
+          handler: function (response) {
+            // IMPORTANT:
+            // અહી frontend user_access insert નહિ કરે.
+            // Webhook user_access insert કરશે.
+            console.log("Razorpay success response:", response);
+            paymentStatusEl.textContent = "Payment successful! Waiting for access confirmation...";
+
+            // Webhook D.B. માં entry કરેએ સુધી થોડી વાર poll કરીએ.
+            let attempts = 0;
+            const maxAttempts = 10;     // max ~30 seconds (10 * 3s)
+            const intervalMs = 3000;
+
+            const intervalId = setInterval(async () => {
+              attempts++;
               await checkAccess();
-              updateUI();
-            }
-          } catch (err) {
-            console.error("GENERAL ERROR in handler:", err);
-            paymentStatusEl.textContent = "Error granting access!";
-          }
-        },
-        prefill: {
-          email: currentUser.email,
-        },
-        notes: {
-          user_id: currentUser.id,
-          plan_name: PLAN_NAME,
-          access_type: ACCESS_TYPE,
-        },
-        theme: { color: "#2563eb" },
-      };
 
-      // Razorpay ખોલો
-      new Razorpay(options).open();
-    }); // <-- payBtn.addEventListener અહીં બંધ થાય છે.
+              if (hasAccess) {
+                clearInterval(intervalId);
+                paymentStatusEl.textContent = "✅ Access granted! You can open all mock tests.";
+                updateUI();
+              } else if (attempts >= maxAttempts) {
+                clearInterval(intervalId);
+                paymentStatusEl.textContent =
+                  "Payment done. Access may take a moment. Please refresh this page after 1–2 minutes.";
+                payBtn.disabled = true; // Payment already done
+              }
+            }, intervalMs);
+          },
 
-    // ✅ INIT: પેજ શરૂ કરવા માટેનું ફંક્શન (બટન ક્લિકની બહાર)
+          prefill: {
+            email: currentUser.email,
+          },
+
+          // Notes: Razorpay payment/webhookમાં પણ આ જ notes જશે
+          notes: {
+            user_id: currentUser.id,
+            plan_name: PLAN_NAME,
+            access_type: ACCESS_TYPE,
+          },
+
+          theme: { color: "#2563eb" },
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+        rzp.on("payment.failed", function (response) {
+          console.error("Payment failed:", response.error);
+          paymentStatusEl.textContent = "Payment failed. Please try again.";
+          payBtn.disabled = false;
+        });
+
+      } catch (err) {
+        console.error("Payment init error:", err);
+        paymentStatusEl.textContent = "Unexpected error. Please try again.";
+        payBtn.disabled = false;
+      }
+    });
+
+    // ✅ INIT: પેજ શરૂ કરવા માટેનું ફંક્શન
     (async () => {
       await checkLogin();
-      // checkLogin() પૂર્ણ થયા પછી જ આગળ વધશે
       if (currentUser) {
         await checkAccess();
         updateUI();
       }
-    })(); // <-- INIT બ્લોક અહીં બંધ થાય છે.
+    })();
   </script>
 
 </body>
