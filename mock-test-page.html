@@ -306,20 +306,26 @@
             );
 
             const v = await verify.json();
-            if (v.success) {
-              alert("પેમેન્ટ સફળ! તમારી બધી ટેસ્ટ અનલોક થઈ ગઈ છે.");
-              window.location.href = "mock-test-page.html" // પ્રોબ્લેમ 2: પેજ રિફ્રેશ કરીને રિડાયરેક્ટ જેવું કામ કરશે
-            } else {
-              alert("વેરિફિકેશનમાં ભૂલ આવી: " + v.message);
-            }
-          },
-          modal: {
-            ondismiss: function() {
-              buyBtn.disabled = false;
-              buyBtn.textContent = "Buy Full Series (₹49)";
-            }
-          }
-        };
+if (v.success) {
+  // 1. Razorpay ની વિન્ડો ફોર્સફુલી બંધ થશે
+  if (typeof rzp !== 'undefined') rzp.close();
+  
+  // 2. 0.5 સેકન્ડના ટાઈમર પછી પેજ રિડાયરેક્ટ થશે
+  setTimeout(function() {
+    window.location.replace("mock-test-page.html");
+  }, 500);
+  
+} else {
+  alert("વેરિફિકેશનમાં ભૂલ આવી: " + v.message);
+}
+},
+modal: {
+  ondismiss: function() {
+    buyBtn.disabled = false;
+    buyBtn.textContent = "Buy Full Series (₹49)";
+  }
+}
+};
 
         const rzp = new Razorpay(options);
         rzp.open();
