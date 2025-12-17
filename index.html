@@ -7,11 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        /* Modal Style */
+        body { background-color: #f3f4f6; font-family: sans-serif; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
-        .modal-content { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; position: relative; }
     </style>
 </head>
 <body class="p-4 pb-24">
@@ -29,76 +27,58 @@
             <span class="text-yellow-400 text-xl">⭐</span>
             <h2 class="text-lg font-bold text-gray-800">Demo Test - ફ્રી એક્સેસ</h2>
         </div>
-        <p class="text-sm text-gray-400 mb-2">20 માર્કની ક્વિઝ | શરૂઆત માટે યોગ્ય</p>
-        <p class="text-gray-600 text-[15px] mb-4 leading-relaxed">આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો અને સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.</p>
-        <div class="inline-block bg-blue-50 text-blue-700 text-xs px-3 py-1.5 rounded-full font-semibold mb-6">
-            Duration: 20 min • Negative marking નથી
-        </div>
-        <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3.5 rounded-full font-bold shadow-lg shadow-blue-200 active:scale-95 transition">DEMO Test શરૂ કરો</button>
+        <p class="text-gray-600 text-[15px] mb-4">આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો.</p>
+        <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3.5 rounded-full font-bold shadow-lg shadow-blue-200">DEMO Test શરૂ કરો</button>
     </div>
 
     <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
         <h2 class="text-lg font-bold text-gray-800">Test Series: PSI/ASI - 5 Mock Tests</h2>
-        <p class="text-sm text-gray-400 mb-3">નવીનતમ અભ્યાસક્રમ મુજબ • પૂર્ણ સિલેબસ કવર</p>
-        <p class="text-gray-600 text-[15px] mb-4 leading-relaxed">આ સીરિઝમાં PSI/ASI પરીક્ષાના ધોરણ મુજબ 5 કુલ લંબાઈના મોક ટેસ્ટ સામેલ છે. દરેક પેપર પછી વિગતવાર રીઝલ્ટ અને એનાલિસિસ મળશે.</p>
-        
-        <div class="flex justify-between items-center mb-6">
-            <span class="text-green-600 font-bold text-xl">કિંમત: ₹99/-</span>
-            <span class="bg-orange-50 text-orange-600 text-[11px] px-3 py-1.5 rounded-full font-bold uppercase border border-orange-100">5 Mock Test Bundle</span>
+        <div class="flex justify-between items-center my-4">
+            <span class="text-green-600 font-bold text-xl">₹99/-</span>
+            <span class="bg-orange-50 text-orange-600 text-[11px] px-3 py-1 rounded-full font-bold">5 Mock Test Bundle</span>
         </div>
-        <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold active:bg-blue-50 transition">Buy Now (₹99)</button>
+        <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Buy Now (₹99)</button>
     </div>
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 flex justify-between items-center">
-        <div class="text-[10px] text-gray-400 leading-tight">
-            © 2025 STI Mock Test<br>All rights reserved.
-        </div>
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
+        <div class="text-[10px] text-gray-400">© 2025 STI Mock Test</div>
         <div class="flex gap-2">
-            <button class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1">
-                WhatsApp
-            </button>
+            <button class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">WhatsApp</button>
             <button class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">Call</button>
         </div>
     </footer>
 
     <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <button onclick="toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-400 text-2xl font-light">&times;</button>
-            <h3 class="text-xl font-bold mb-6 text-gray-800">નવું રજિસ્ટ્રેશન</h3>
-            
-            <input type="text" id="regName" placeholder="તમારું પૂરું નામ" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl mb-3 outline-none focus:border-blue-500 transition">
-            <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl mb-3 outline-none focus:border-blue-500 transition">
-            <input type="email" id="regEmail" placeholder="ઈમેલ એડ્રેસ" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl mb-3 outline-none focus:border-blue-500 transition">
-            <input type="password" id="regPass" placeholder="પાસવર્ડ સેટ કરો" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl mb-5 outline-none focus:border-blue-500 transition">
-            
-            <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-100">રજીસ્ટર કરો</button>
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-6">નવું રજિસ્ટ્રેશન</h3>
+            <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
+            <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold">રજીસ્ટર કરો</button>
         </div>
     </div>
 
     <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 text-2xl font-light">&times;</button>
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
             <h3 class="text-xl font-bold mb-6 text-gray-800">લોગિન</h3>
-            
-            <input type="email" id="loginEmail" placeholder="તમારો ઈમેલ" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl mb-3 outline-none focus:border-blue-500 transition">
-            <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl mb-5 outline-none focus:border-blue-500 transition">
-            
-            <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-100">લોગિન કરો</button>
+            <input type="email" id="loginEmail" placeholder="તમારો ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
+            <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold">લોગિન કરો</button>
         </div>
     </div>
 
     <script>
-        // --- Supabase Config ---
         const supabaseUrl = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // UI Functions
         function toggleModal(id) {
             document.getElementById(id).classList.toggle('active');
         }
 
-        // --- Register Logic (Targeting Profiles Table Fields) ---
         async function handleRegister() {
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPass').value;
@@ -107,44 +87,39 @@
             const btn = document.getElementById('regBtn');
 
             if(!email || !password || !fullName || !mobile) {
-                alert("બધી વિગતો ભરવી ફરજિયાત છે.");
+                alert("બધી વિગતો ભરો.");
                 return;
             }
 
             btn.disabled = true;
             btn.innerText = "સેવ થઈ રહ્યું છે...";
 
-            // Step 1: Create Auth User
-            const { data, error } = await _supabase.auth.signUp({
-                email: email,
-                password: password,
-            });
+            // 1. Sign Up
+            const { data, error: authError } = await _supabase.auth.signUp({ email, password });
 
-            if (error) {
-                alert("ભૂલ: " + error.message);
+            if (authError) {
+                alert("Auth Error: " + authError.message);
                 btn.disabled = false;
                 btn.innerText = "રજીસ્ટર કરો";
                 return;
             }
 
-            // Step 2: Insert into 'profiles' table with your specific fields
+            // 2. Profile Upsert (This prevents the 'duplicate key' error)
             if (data.user) {
                 const { error: profileError } = await _supabase
                     .from('profiles')
-                    .insert([
-                        { 
-                            id: data.user.id, 
-                            email: email,
-                            full_name: fullName, 
-                            mobile: mobile 
-                        }
-                    ]);
+                    .upsert({ 
+                        id: data.user.id, 
+                        email: email,
+                        full_name: fullName, 
+                        mobile: mobile,
+                        updated_at: new Date()
+                    });
                 
                 if (profileError) {
-                    alert("પ્રોફાઈલ ટેબલ ભૂલ: " + profileError.message);
-                    console.error(profileError);
+                    alert("પ્રોફાઈલ ભૂલ: " + profileError.message);
                 } else {
-                    alert("રજિસ્ટ્રેશન સફળતાપૂર્વક થઈ ગયું છે!");
+                    alert("રજિસ્ટ્રેશન સફળ!");
                     toggleModal('registerModal');
                 }
             }
@@ -152,30 +127,18 @@
             btn.innerText = "રજીસ્ટર કરો";
         }
 
-        // --- Login Logic ---
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
             const btn = document.getElementById('loginBtn');
 
-            if(!email || !password) {
-                alert("ઈમેલ અને પાસવર્ડ લખો.");
-                return;
-            }
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
 
-            btn.disabled = true;
-            btn.innerText = "તપાસી રહ્યા છીએ...";
-
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                alert("લોગિનમાં ભૂલ: " + error.message);
-            } else {
+            if (error) alert("લોગિન ભૂલ: " + error.message);
+            else {
                 alert("લોગિન સફળ!");
-                location.reload(); // પેજ રિફ્રેશ કરો
+                location.reload();
             }
-            btn.disabled = false;
-            btn.innerText = "લોગિન કરો";
         }
     </script>
 </body>
