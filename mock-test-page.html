@@ -1,42 +1,226 @@
-<script>
-    // 1. SUPABASE CLIENT
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STI Mock Test – Test Series</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: system-ui, sans-serif;
+      background: #f4f4f4; color: #222;
+    }
+    header {
+      position: sticky; top: 0; z-index: 20;
+      background: #fff; border-bottom: 1px solid #ddd;
+      padding: 10px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .header-left { font-size: 18px; font-weight: 700; }
+    .header-center {
+      flex: 1; text-align: center; font-size: 14px; color: #444;
+      max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .btn {
+      border: none; border-radius: 6px;
+      padding: 8px 14px; background: #007bff; color: #fff;
+      font-size: 14px; cursor: pointer;
+    }
+    .btn.small { padding: 6px 10px; font-size: 13px; }
+    .btn.ghost { background: transparent; border: 1px solid #007bff; color: #007bff; }
+
+    .page-wrapper { max-width: 650px; margin: 0 auto; padding: 16px; }
+    .card {
+      background: #fff; border-radius: 12px;
+      padding: 16px; margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card-title { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+    .card-sub { margin: 0 0 8px; font-size: 14px; color: #444; }
+    .card-text { margin: 4px 0; font-size: 14px; line-height: 1.5; }
+    .card-meta { margin-top: 8px; font-size: 13px; color: #555; }
+    .price-tag { font-weight: 700; color: #1b7d28; }
+
+    .tests-grid { display: flex; flex-direction: column; gap: 10px; }
+    .test-card {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; border-radius: 10px;
+      background: #fafafa; border: 1px solid #e0e0e0;
+    }
+    .test-title { font-size: 14px; font-weight: 600; }
+    .test-sub { font-size: 12px; color: #666; }
+
+    .badge-lock {
+      font-size: 11px; padding: 2px 6px; border-radius: 999px;
+      background: #ffe4e4; color: #b71c1c; border: 1px solid #ffb3b3;
+    }
+    .badge-unlock {
+      font-size: 11px; padding: 2px 6px; border-radius: 999px;
+      background: #e6ffea; color: #1b5e20; border: 1px solid #9ee2ad;
+    }
+
+    footer {
+      margin-top: 32px; background: #fff; border-top: 1px solid #ddd;
+      padding: 14px 16px; text-align: center; font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-left">STI Mock Test</div>
+    <div class="header-center" id="user-name-display">Loading...</div>
+    <button class="btn small ghost" onclick="window.location.href='index.html'">Go to Home</button>
+  </header>
+
+  <main class="page-wrapper">
+
+    <section class="card">
+      <h2 class="card-title">PSI/ASI Test Series – 5 Mock Tests</h2>
+      <p class="card-sub">નવীনતમ અભ્યાસક્રમ મુજબ • પૂર્ણ સિલેબસ કવર</p>
+
+      <p class="card-text">
+        આ સીરીઝમાં PSI/ASI પરીક્ષાના ધોરણ મુજબ 5 કુલ લંબાઈના મોક ટેસ્ટ સામેલ છે.
+        દરેક પેપર પછી વિગતવાર રિઝલ્ટ અને એનાલિસિસ મળશે.
+      </p>
+
+      <p class="card-meta">
+        કિંમત: <span class="price-tag">₹49/-</span> • 5 Mock Test Bundle
+      </p>
+
+      <button class="btn" id="buy-btn" onclick="startPurchase()">Buy Full Series (₹49)</button>
+
+      <div id="access-status" style="margin-top:10px;font-size:13px;color:#444;"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">તમારા Mock Tests</h2>
+
+      <div class="tests-grid" id="tests-grid">
+        <div class="test-card">
+          <div>
+            <div class="test-title">Mock Test 1</div>
+            <div class="test-sub">PSI/ASI Standard • Full Length</div>
+          </div>
+          <div>
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn onclick="openTest('test-1.html')" disabled>Start</button>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <div>
+            <div class="test-title">Mock Test 2</div>
+            <div class="test-sub">PSI/ASI Standard • Full Length</div>
+          </div>
+          <div>
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn onclick="openTest('test-2.html')" disabled>Start</button>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <div>
+            <div class="test-title">Mock Test 3</div>
+            <div class="test-sub">PSI/ASI Standard • Full Length</div>
+          </div>
+          <div>
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn onclick="openTest('test-3.html')" disabled>Start</button>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <div>
+            <div class="test-title">Mock Test 4</div>
+            <div class="test-sub">PSI/ASI Standard • Full Length</div>
+          </div>
+          <div>
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn onclick="openTest('test-4.html')" disabled>Start</button>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <div>
+            <div class="test-title">Mock Test 5</div>
+            <div class="test-sub">PSI/ASI Standard • Full Length</div>
+          </div>
+          <div>
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn onclick="openTest('test-5.html')" disabled>Start</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <a href="https://wa.me/916353511804">
+      <button class="btn small">WhatsApp</button>
+    </a>
+    <div>© 2025 STI Mock Test</div>
+  </footer>
+
+  <script>
+    // Supabase ક્લાયંટ કનેક્શન
     const sb = supabase.createClient(
       "https://bhmycvrbucmbbrpzeane.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
     );
 
     let currentUser = null;
+
     const nameBox = document.getElementById("user-name-display");
     const accessBox = document.getElementById("access-status");
     const buyBtn = document.getElementById("buy-btn");
 
-    // INIT - પેજ લોડ થાય ત્યારે યુઝર ચેક કરો
+    // INIT - પેજ લોડ થતાં જ ચાલશે
     (async () => {
-      const { data } = await sb.auth.getSession();
-      if (!data.session) {
-        nameBox.textContent = "લોગિન નથી";
+      const { data, error } = await sb.auth.getSession();
+      
+      if (error || !data.session) {
+        nameBox.textContent = "લોગિન કરો";
         buyBtn.disabled = true;
         return;
       }
+
       currentUser = data.session.user;
-      await loadUserName(); // નામ ફેચ કરશે
-      await checkAccess();  // એક્સેસ ચેક કરશે
+      await loadUserName(); // પ્રોબ્લેમ 3: નામ ફેચ કરવું
+      await checkAccess();  // ડેટાબેઝમાંથી એક્સેસ ચેક કરવો
     })();
 
-    // પ્રોબ્લેમ 3: નામ ફેચ કરવું
+    // નામ ફેચ કરવાનું ફંક્શન
     async function loadUserName() {
-      const { data, error } = await sb
-        .from("profiles")
-        .select("full_name")
-        .eq("id", currentUser.id)
-        .single();
-      if (data) nameBox.textContent = data.full_name;
+      try {
+        const { data, error } = await sb
+          .from("profiles")
+          .select("full_name")
+          .eq("id", currentUser.id)
+          .single();
+
+        if (data && data.full_name) {
+          nameBox.textContent = data.full_name;
+        } else {
+          nameBox.textContent = "યુઝર";
+        }
+      } catch (e) {
+        nameBox.textContent = "Error";
+      }
     }
 
+    // એક્સેસ ચેક કરવાનું ફંક્શન
     async function checkAccess() {
-      const { data } = await sb
+      const { data, error } = await sb
         .from("user_access")
-        .select("*")
+        .select("id, plan_name, is_active")
         .eq("user_id", currentUser.id)
         .eq("is_active", true)
         .limit(1);
@@ -45,71 +229,19 @@
         unlockTests();
         buyBtn.textContent = "Already Purchased";
         buyBtn.disabled = true;
-        accessBox.innerHTML = `<span style="color:#1b5e20;">Access Active — All tests unlocked</span>`;
+        accessBox.innerHTML = `<span style="color:#1b5e20;">Access Active — All 5 tests unlocked</span>`;
       } else {
         lockTests();
-      }
-    }
-
-    // પ્રોબ્લેમ 1 અને 2: પેમેન્ટ અને ડેટા ઇન્સર્ટ
-    async function startPurchase() {
-      buyBtn.disabled = true;
-      buyBtn.textContent = "ઓર્ડર બની રહ્યો છે...";
-
-      try {
-        // A. ઓર્ડર ક્રિએટ કરો
-        const res = await fetch("https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: currentUser.id,
-            amount: 4900, // ₹49
-            plan_name: "PSI-ASI-Series"
-          })
-        });
-
-        const order = await res.json();
-
-        // B. Razorpay ઓપન કરો
-        const options = {
-          key: "rzp_test_RscLDjVDOh4bTb",
-          amount: order.amount,
-          currency: order.currency,
-          name: "STI Mock Test",
-          order_id: order.order_id,
-          handler: async function (response) {
-            // પેમેન્ટ પછી વેરિફિકેશન અને ડેટા ઇન્સર્ટ
-            const verify = await fetch("https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify_payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                user_id: currentUser.id, // આ સૌથી જરૂરી છે
-                plan_name: "PSI-ASI-Series",
-                razorpay_payment_id: response.razorpay_payment_id
-              })
-            });
-
-            const v = await verify.json();
-            if (v.success) {
-              alert("પેમેન્ટ સફળ! હવે તમે ટેસ્ટ આપી શકશો.");
-              window.location.reload(); // આનાથી પ્રોબ્લેમ 2 સોલ્વ થશે (રિડાયરેક્ટ/રિફ્રેશ)
-            }
-          },
-          modal: {
-            ondismiss: function() { buyBtn.disabled = false; buyBtn.textContent = "Buy Full Series (₹49)"; }
-          }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.open();
-      } catch (err) {
-        alert("કાંઈક ભૂલ થઈ છે. ફરી ટ્રાય કરો.");
-        buyBtn.disabled = false;
+        accessBox.innerHTML = `<span style="color:#b71c1c;">Access નથી — Buy કરો પછી unlock થશે</span>`;
       }
     }
 
     function lockTests() {
       document.querySelectorAll("[data-test-btn]").forEach(btn => btn.disabled = true);
+      document.querySelectorAll("[data-lock-badge]").forEach(b => {
+        b.textContent = "Locked";
+        b.className = "badge-lock";
+      });
     }
 
     function unlockTests() {
@@ -120,5 +252,86 @@
       });
     }
 
-    function openTest(url) { window.location.href = url; }
-</script>
+    function openTest(url) {
+      window.location.href = url;
+    }
+
+    // પેમેન્ટ પ્રોસેસ - પ્રોબ્લેમ 1 અને 2 નું સોલ્યુશન અહીં છે
+    async function startPurchase() {
+      if (!currentUser) return alert("મહેરબાની કરીને લોગિન કરો.");
+
+      buyBtn.disabled = true;
+      buyBtn.textContent = "Creating order...";
+
+      try {
+        // 1. ઓર્ડર ક્રિએટ કરવો
+        const res = await fetch(
+          "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order",
+          { 
+            method: "POST", 
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: currentUser.id,
+              amount: 4900, // પૈસામાં (₹49)
+              plan_name: "PSI-ASI-Test-Series"
+            })
+          }
+        );
+
+        const order = await res.json();
+
+        // 2. Razorpay પેમેન્ટ ગેટવે ઓપન કરવો
+        const options = {
+          key: "rzp_live_RrlYub6HRqZ8MD",
+          amount: order.amount,
+          currency: order.currency,
+          name: "STI Mock Test",
+          description: "PSI/ASI Test Series",
+          order_id: order.order_id,
+          handler: async function (response) {
+            // પેમેન્ટ સક્સેસ થયા પછી વેરિફિકેશન ફંક્શનને કોલ કરવો
+            const verify = await fetch(
+              "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify_payment",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  user_id: currentUser.id,      // ડેટાબેઝમાં એન્ટ્રી માટે જરૂરી
+                  plan_name: "PSI-ASI-Test-Series",
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature
+                })
+              }
+            );
+
+            const v = await verify.json();
+            if (v.success) {
+              alert("પેમેન્ટ સફળ! તમારી બધી ટેસ્ટ અનલોક થઈ ગઈ છે.");
+              window.location.reload(); // પ્રોબ્લેમ 2: પેજ રિફ્રેશ કરીને રિડાયરેક્ટ જેવું કામ કરશે
+            } else {
+              alert("વેરિફિકેશનમાં ભૂલ આવી: " + v.message);
+            }
+          },
+          modal: {
+            ondismiss: function() {
+              buyBtn.disabled = false;
+              buyBtn.textContent = "Buy Full Series (₹49)";
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+      } catch (err) {
+        console.error(err);
+        alert("ઓર્ડર બનાવવામાં કોઈ ભૂલ થઈ.");
+        buyBtn.disabled = false;
+        buyBtn.textContent = "Buy Full Series (₹49)";
+      }
+    }
+  </script>
+
+</body>
+</html>
