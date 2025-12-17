@@ -1,519 +1,93 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>STI Mock Test</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mock Test Page</title>
   <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
-
-    header {
-      background: #1f2937;
-      color: #f9fafb;
-      padding: 16px;
-      text-align: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .header-sub {
-      margin-top: 6px;
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .home-btn {
-      margin-top: 10px;
-      display: inline-block;
-      padding: 6px 12px;
-      background: #f9fafb;
-      color: #1f2937;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .container {
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 14px 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      margin-bottom: 16px;
-    }
-
-    .card-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .card-sub {
-      font-size: 13px;
-      color: #4b5563;
-      margin-bottom: 8px;
-    }
-
-    .info-row {
-      font-size: 14px;
-      color: #374151;
-    }
-
-    .info-row span {
-      display: inline-block;
-      margin-right: 8px;
-    }
-
-    .btn {
-      width: 100%;
-      margin-top: 12px;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: #1d4ed8;
-      color: #ffffff;
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.7;
-      cursor: default;
-    }
-
-    .btn-success {
-      background: #16a34a;
-      color: #ffffff;
-    }
-
-    .btn-outline {
-      background: #ffffff;
-      color: #1f2937;
-      border: 1px solid #d1d5db;
-    }
-
-    .status-text {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #16a34a;
-    }
-
-    .status-text-error {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #dc2626;
-    }
-
-    .section-title {
-      margin: 18px 0 8px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px 16px 24px;
-      margin-top: 10px;
-    }
-
-    .wa-btn {
-      display: inline-block;
-      padding: 10px 18px;
-      background: #25d366;
-      color: #ffffff;
-      border-radius: 999px;
-      text-decoration: none;
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .small-note {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 6px;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .card-container { display: flex; gap: 15px; flex-wrap: wrap; }
+    .card { border: 1px solid #ccc; padding: 20px; width: 180px; text-align: center; border-radius: 8px; }
+    .btn { display: inline-block; padding: 10px 15px; background: #007bff; color: #fff; text-decoration: none; border-radius: 5px; cursor: pointer; }
+    .btn:hover { background: #0056b3; }
+    .locked { opacity: 0.5; pointer-events: none; }
   </style>
 </head>
 <body>
+  <header>
+    <h2>Welcome, User</h2>
+    <a href="index.html" class="btn">Go Home</a>
+  </header>
 
-<header>
-  <h1>STI Mock Test</h1>
-  <div class="header-sub" id="studentName">Student Name</div>
-  <a href="index.html" class="home-btn">Go to Home</a>
-</header>
-
-<div class="container">
-  <!-- PAYMENT CARD (ONLY ONE) -->
-  <div class="card" id="paymentCard">
-    <div class="card-title">STI ના 5 Mock Test ખરીદવા માટેનું કાર્ડ</div>
-    <div class="card-sub">
-      એક વખત payment કર્યા પછી તમામ 5 STI Mock Test માટે lifetime access મળશે.
-      એક જ user માત્ર એક વાર ખરીદી શકે.
-    </div>
-    <div class="info-row">
-      <span>• 5 Mock Test bundle</span>
-      <span>• Online attempt</span>
-    </div>
-
-    <button class="btn btn-primary" id="buyButton">
-      STI ના 5 Mock Test ખરીદો
-    </button>
-
-    <div id="paymentStatus" class="status-text" style="display:none;"></div>
-    <div id="paymentError" class="status-text-error" style="display:none;"></div>
+  <!-- Payment Card -->
+  <div class="card">
+    <h3>Unlock Mock Tests</h3>
+    <p>Pay ₹99 to access all tests for 45 days.</p>
+    <button id="payBtn" class="btn">Pay Now</button>
   </div>
 
-  <!-- TEST CARDS SECTION TITLE -->
-  <div class="section-title">STI Mock Tests</div>
-
-  <!-- 5 TEST CARDS -->
-  <div id="testsContainer">
-    <!-- JS will inject cards -->
+  <!-- Mock Test Cards -->
+  <div class="card-container">
+    <div class="card locked" id="test1"><h3>Mock Test 1</h3><a href="mock-test-1.html" class="btn">Start</a></div>
+    <div class="card locked" id="test2"><h3>Mock Test 2</h3><a href="mock-test-2.html" class="btn">Start</a></div>
+    <div class="card locked" id="test3"><h3>Mock Test 3</h3><a href="mock-test-3.html" class="btn">Start</a></div>
+    <div class="card locked" id="test4"><h3>Mock Test 4</h3><a href="mock-test-4.html" class="btn">Start</a></div>
+    <div class="card locked" id="test5"><h3>Mock Test 5</h3><a href="mock-test-5.html" class="btn">Start</a></div>
   </div>
-</div>
 
-<footer>
-  <a class="wa-btn" href="https://wa.me/919925858057" target="_blank">Whatsapp</a>
-  <div class="small-note">કોઈ problem હોય તો direct Whatsapp પર contact કરો.</div>
-</footer>
+  <!-- Razorpay Script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    const userId = "USER_UUID"; // Replace with actual logged-in user UUID
+    const payBtn = document.getElementById("payBtn");
 
-<!-- Razorpay & Supabase -->
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    payBtn.addEventListener("click", async () => {
+      // Step 1: Create Razorpay order via Supabase Edge Function
+      const orderRes = await fetch(
+        "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-razorpay-order",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: 9900, currency: "INR", user_id: userId }),
+        }
+      );
+      const order = await orderRes.json();
 
-<script>
-  // =========================
-  // CONFIG
-  // =========================
-  const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-
-  const CREATE_ORDER_URL = "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order";
-  const VERIFY_PAYMENT_URL = "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify-payment"; // placeholder, તમે બદલી દેશો
-
-  const RAZORPAY_KEY_ID = "rzp_live_RrlYub6HRqZ8MD"; // TODO: તમારા Razorpay key થી બદલો
-
-  // plan name (bundle access)
-  const PLAN_NAME_BUNDLE = "sti_mock_5_tests";
-
-  // GitHub test pages
-  const TEST_PAGES = [
-    "mock-test-1.html",
-    "mock-test-2.html",
-    "mock-test-3.html",
-    "mock-test-4.html",
-    "mock-test-5.html"
-  ];
-
-  const TEST_TITLES = [
-    "STI Mock Test 1",
-    "STI Mock Test 2",
-    "STI Mock Test 3",
-    "STI Mock Test 4",
-    "STI Mock Test 5"
-  ];
-
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  let CURRENT_USER = null;
-  let HAS_ACCESS = false;
-
-  const studentNameEl = document.getElementById("studentName");
-  const buyButton = document.getElementById("buyButton");
-  const paymentStatus = document.getElementById("paymentStatus");
-  const paymentError = document.getElementById("paymentError");
-  const testsContainer = document.getElementById("testsContainer");
-
-  // =========================
-  // HELPER FUNCTIONS
-  // =========================
-  function setBuyButtonLoading(isLoading) {
-    if (isLoading) {
-      buyButton.disabled = true;
-      buyButton.textContent = "Processing...";
-    } else {
-      buyButton.disabled = false;
-      buyButton.textContent = "STI ના 5 Mock Test ખરીદો";
-    }
-  }
-
-  function showPaymentStatus(message) {
-    paymentStatus.style.display = "block";
-    paymentStatus.textContent = message;
-    paymentError.style.display = "none";
-  }
-
-  function showPaymentError(message) {
-    paymentError.style.display = "block";
-    paymentError.textContent = message;
-    paymentStatus.style.display = "none";
-  }
-
-  // =========================
-  // LOAD USER & ACCESS
-  // =========================
-  async function loadUserAndAccess() {
-    const { data, error } = await supabaseClient.auth.getUser();
-
-    if (error) {
-      console.error(error);
-      alert("User load કરવામાં problem આવ્યો.");
-      return;
-    }
-
-    if (!data.user) {
-      alert("કૃપા કરીને પહેલા login કરો.");
-      buyButton.disabled = true;
-      buyButton.textContent = "Login required";
-      return;
-    }
-
-    CURRENT_USER = data.user;
-
-    // Student name: profiles.full_name / email
-    try {
-      const { data: profile } = await supabaseClient
-        .from("profiles")
-        .select("full_name")
-        .eq("id", CURRENT_USER.id)
-        .maybeSingle();
-
-      if (profile && profile.full_name) {
-        studentNameEl.textContent = profile.full_name;
-      } else {
-        studentNameEl.textContent = CURRENT_USER.email || "Student";
-      }
-    } catch (e) {
-      console.error(e);
-      studentNameEl.textContent = CURRENT_USER.email || "Student";
-    }
-
-    // Check access (user_access)
-    const { data: accessRow, error: accessError } = await supabaseClient
-      .from("user_access")
-      .select("*")
-      .eq("user_id", CURRENT_USER.id)
-      .eq("plan_name", PLAN_NAME_BUNDLE)
-      .eq("is_active", true)
-      .maybeSingle();
-
-    if (accessError) {
-      console.error(accessError);
-    }
-
-    HAS_ACCESS = !!accessRow;
-
-    if (HAS_ACCESS) {
-      buyButton.disabled = true;
-      buyButton.textContent = "પહેલેથી ખરીદી લીધું છે";
-      showPaymentStatus("તમે પહેલેથી STI ના 5 Mock Test ખરીદી લીધા છે.");
-    }
-
-    renderTestCards();
-  }
-
-  // =========================
-  // RENDER 5 TEST CARDS
-  // =========================
-  function renderTestCards() {
-    testsContainer.innerHTML = "";
-
-    for (let i = 0; i < 5; i++) {
-      const card = document.createElement("div");
-      card.className = "card";
-
-      const title = document.createElement("div");
-      title.className = "card-title";
-      title.textContent = TEST_TITLES[i];
-      card.appendChild(title);
-
-      const sub = document.createElement("div");
-      sub.className = "card-sub";
-      sub.textContent = "STI Mock Test – Online attempt માટે.";
-      card.appendChild(sub);
-
-      const info = document.createElement("div");
-      info.className = "info-row";
-      info.innerHTML = `
-        <span>200 Marks</span>
-        <span>2 Hours</span>
-        <span>Negative Marking -0.33</span>
-      `;
-      card.appendChild(info);
-
-      const btn = document.createElement("button");
-      btn.className = HAS_ACCESS ? "btn btn-success" : "btn btn-outline";
-
-      if (HAS_ACCESS) {
-        btn.textContent = "Start Test";
-        btn.onclick = () => {
-          window.location.href = TEST_PAGES[i];
-        };
-      } else {
-        btn.textContent = "પહેલે Mock Test ખરીદો";
-        btn.onclick = () => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          alert("પહેલા ઉપરનું STI Mock Test bundle કાર્ડ purchase કરો, પછી બધા test open થશે.");
-        };
-      }
-
-      card.appendChild(btn);
-      testsContainer.appendChild(card);
-    }
-  }
-
-  // =========================
-  // PAYMENT FLOW
-  // =========================
-  async function createOrder() {
-    const payload = {
-      amount: 49900, // example: ₹499 * 100 (paise)
-      currency: "INR",
-      user_id: CURRENT_USER.id,
-      plan_name: PLAN_NAME_BUNDLE
-    };
-
-    const res = await fetch(CREATE_ORDER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error("Create order failed: " + text);
-    }
-
-    return res.json(); // expected: { order_id, amount, currency, ... }
-  }
-
-  async function verifyPayment(razorpayResponse, orderMeta) {
-    const res = await fetch(VERIFY_PAYMENT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        razorpay_payment_id: razorpayResponse.razorpay_payment_id,
-        razorpay_order_id: razorpayResponse.razorpay_order_id,
-        razorpay_signature: razorpayResponse.razorpay_signature,
-        user_id: CURRENT_USER.id,
-        plan_name: PLAN_NAME_BUNDLE,
-        order_meta: orderMeta
-      })
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error("Verify payment failed: " + text);
-    }
-
-    return res.json(); // તમે backend માંથી { success: true, ... } return કરશો
-  }
-
-  async function handleBuyClick() {
-    if (!CURRENT_USER) {
-      alert("કૃપા કરીને પહેલા login કરો.");
-      return;
-    }
-    if (HAS_ACCESS) {
-      alert("તમે પહેલેથી STI Mock Test bundle ખરીદી લીધું છે.");
-      return;
-    }
-
-    try {
-      setBuyButtonLoading(true);
-      showPaymentStatus("Order create થઈ રહ્યું છે...");
-      paymentError.style.display = "none";
-
-      const order = await createOrder();
-
-      showPaymentStatus("Razorpay checkout open થઈ રહ્યું છે...");
-
+      // Step 2: Razorpay Checkout
       const options = {
-        key: RAZORPAY_KEY_ID,
+        key: "YOUR_RAZORPAY_KEY_ID", // Replace with your Razorpay Key ID
         amount: order.amount,
         currency: order.currency,
-        name: "STI Mock Test",
-        description: "STI Mock 5 Tests Bundle",
-        order_id: order.order_id,
-        prefill: {
-          email: CURRENT_USER.email || "",
-        },
-        theme: {
-          color: "#1d4ed8"
-        },
+        order_id: order.id,
+        name: "Kapila Institute",
+        description: "Mock Test Series",
         handler: async function (response) {
-          try {
-            showPaymentStatus("Payment verify થઈ રહ્યું છે...");
-            const verifyResult = await verifyPayment(response, {
-              order_id: order.order_id,
-              amount: order.amount
-            });
-
-            if (verifyResult && verifyResult.success) {
-              showPaymentStatus("Payment successful. હવે બધા 5 Mock Test unlock થઈ ગયા.");
-              HAS_ACCESS = true;
-              buyButton.disabled = true;
-              buyButton.textContent = "પહેલેથી ખરીદી લીધું છે";
-              renderTestCards();
-            } else {
-              showPaymentError(
-                (verifyResult && verifyResult.message) ||
-                "Payment capture થઈ ગયું હશે, પણ verification સફળ નથી. કૃપા કરીને support contact કરો."
-              );
+          // Step 3: Verify payment via Supabase Edge Function
+          await fetch(
+            "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify_payment",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                payment_id: response.razorpay_payment_id,
+                user_id: userId,
+              }),
             }
-          } catch (err) {
-            console.error(err);
-            showPaymentError(err.message || "Payment verify કરતી વખતે problem આવ્યો.");
-          } finally {
-            setBuyButtonLoading(false);
-          }
+          );
+
+          // Step 4: Unlock mock test cards
+          document.querySelectorAll(".card.locked").forEach(card => {
+            card.classList.remove("locked");
+          });
+          alert("Payment successful! Mock tests unlocked for 45 days.");
         },
-        modal: {
-          ondismiss: function () {
-            setBuyButtonLoading(false);
-            showPaymentError("Payment cancel કરી દેવામાં આવ્યું.");
-          }
-        }
+        prefill: { email: "user@example.com" }, // Replace with actual user email
       };
 
       const rzp = new Razorpay(options);
       rzp.open();
-    } catch (err) {
-      console.error(err);
-      showPaymentError(err.message || "Payment શરૂ કરતી વખતે problem આવ્યો.");
-      setBuyButtonLoading(false);
-    }
-  }
-
-  buyButton.addEventListener("click", handleBuyClick);
-
-  // Start
-  loadUserAndAccess();
-</script>
-
+    });
+  </script>
 </body>
 </html>
