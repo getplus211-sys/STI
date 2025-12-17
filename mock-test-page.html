@@ -308,7 +308,7 @@
             const v = await verify.json();
             if (v.success) {
               alert("પેમેન્ટ સફળ! તમારી બધી ટેસ્ટ અનલોક થઈ ગઈ છે.");
-              window.location.reload(); // પ્રોબ્લેમ 2: પેજ રિફ્રેશ કરીને રિડાયરેક્ટ જેવું કામ કરશે
+              window.location.href = "mock-test-page.html" // પ્રોબ્લેમ 2: પેજ રિફ્રેશ કરીને રિડાયરેક્ટ જેવું કામ કરશે
             } else {
               alert("વેરિફિકેશનમાં ભૂલ આવી: " + v.message);
             }
