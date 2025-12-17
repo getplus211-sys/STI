@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mock Test Page</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .card-container { display: flex; gap: 15px; flex-wrap: wrap; }
-    .card { border: 1px solid #ccc; padding: 20px; width: 180px; text-align: center; border-radius: 8px; }
-    .btn { display: inline-block; padding: 10px 15px; background: #007bff; color: #fff; text-decoration: none; border-radius: 5px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; margin: 10px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .card-container { display: flex; flex-wrap: wrap; gap: 10px; }
+    .card { flex: 1 1 calc(50% - 10px); border: 1px solid #ccc; padding: 15px; text-align: center; border-radius: 8px; }
+    .btn { display: inline-block; padding: 10px; background: #007bff; color: #fff; text-decoration: none; border-radius: 5px; cursor: pointer; }
     .btn:hover { background: #0056b3; }
     .locked { opacity: 0.5; pointer-events: none; }
+    @media (max-width: 600px) {
+      .card { flex: 1 1 100%; }
+    }
   </style>
 </head>
 <body>
@@ -20,16 +23,8 @@
     <a href="index.html" class="btn">Go Home</a>
   </header>
 
-  <!-- Login Form -->
-  <div class="card">
-    <h3>Login</h3>
-    <input id="email" type="email" placeholder="Email" /><br/><br/>
-    <input id="password" type="password" placeholder="Password" /><br/><br/>
-    <button id="loginBtn" class="btn">Login</button>
-  </div>
-
-  <!-- Payment Card -->
-  <div class="card">
+  <!-- Buy/Payment Card -->
+  <div class="card" id="buyCard">
     <h3>Unlock Mock Tests</h3>
     <p>Pay ₹99 to access all tests for 45 days.</p>
     <button id="payBtn" class="btn">Pay Now</button>
@@ -44,33 +39,28 @@
     <div class="card locked"><h3>Mock Test 5</h3><a href="mock-test-5.html" class="btn">Start</a></div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Razorpay Script -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // Supabase client (use 'sb' to avoid conflicts)
+    // Supabase client already loaded in index.html
     const sb = window.supabase.createClient("https://bhmycvrbucmbbrpzeane.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4");
 
-    let currentUserId = null;
-
-    // Login handler
-    document.getElementById("loginBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) {
-        alert("Login failed: " + error.message);
+    // ✅ Check login before showing page
+    (async () => {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) {
+        alert("You must be logged in to access this page!");
+        window.location.href = "index.html";
       } else {
-        currentUserId = data.user.id;
-        document.getElementById("welcome").innerText = "Welcome, " + (data.user.email || "User");
-        alert("Login successful!");
+        document.getElementById("welcome").innerText = "Welcome, " + (user.email || "User");
       }
-    });
+    })();
 
     // Payment handler
     document.getElementById("payBtn").addEventListener("click", async () => {
-      if (!currentUserId) {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) {
         alert("Please log in first!");
         return;
       }
@@ -81,14 +71,14 @@
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: 9900, currency: "INR", user_id: currentUserId }),
+          body: JSON.stringify({ amount: 9900, currency: "INR", user_id: user.id }),
         }
       );
       const order = await orderRes.json();
 
       // Step 2: Razorpay Checkout
       const options = {
-        key: "rzp_live_RrlYub6HRqZ8MD", // Replace with your Razorpay Key ID
+        key: "rzp_live_RrlYub6HRqZ8MD",
         amount: order.amount,
         currency: order.currency,
         order_id: order.id,
@@ -103,14 +93,17 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 payment_id: response.razorpay_payment_id,
-                user_id: currentUserId,
+                user_id: user.id,
               }),
             }
           );
 
           // Step 4: Unlock tests
           document.querySelectorAll(".card.locked").forEach(card => card.classList.remove("locked"));
-          alert("Payment successful! Mock tests unlocked for 45 days.");
+
+          // Step 5: Replace Buy card with purchased message
+          const buyCard = document.getElementById("buyCard");
+          buyCard.innerHTML = "<h3>You are already purchased this course</h3>";
         },
         prefill: { email: "user@example.com" },
       };
