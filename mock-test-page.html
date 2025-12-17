@@ -282,16 +282,27 @@
         name: "STI Mock Test",
         description: "PSI/ASI Test Series",
         order_id: order.order_id,
-        handler: async function (response) {
-          const verify = await fetch(
-            "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify_payment",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response)
-            }
-          );
-
+        handler: async function(response) {
+  // આ ભાગમાં ફેરફાર કરવાનો છે
+  const verify = await fetch(
+    "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify_payment",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: currentUser.id, // આ લાઈન ખાસ ઉમેરવાની છે
+        plan_name: "PSI/ASI Test Series", // આ પણ જરૂરી છે
+        razorpay_payment_id: response.razorpay_payment_id
+      })
+    }
+  );
+  
+  const v = await verify.json();
+  if (v.success) {
+    alert("પેમેન્ટ સફળ! ટેસ્ટ અનલોક થઈ ગઈ છે.");
+    await checkAccess();
+  }
+}
           const v = await verify.json();
           if (v.success) {
             await checkAccess();
