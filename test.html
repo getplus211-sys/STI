@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSI/ASI Mock Test Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { user-select: none; -webkit-user-select: none; background-color: #f8fafc; }
+        .option-btn { transition: all 0.2s; border: 2px solid #e2e8f0; }
+        .option-btn.selected { border-color: #2563eb; background-color: #eff6ff; font-weight: 600; }
+        .palette-btn { width: 40px; height: 40px; font-size: 12px; font-weight: bold; border-radius: 8px; transition: 0.3s; }
+        .palette-active { border: 2px solid #2563eb; transform: scale(1.1); }
+        .palette-answered { background-color: #2563eb !important; color: white; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
+            <div class="flex items-center gap-2">
+                <span class="bg-blue-600 text-white p-2 rounded-lg font-bold">PSI</span>
+                <h1 class="font-bold text-gray-800 hidden md:block">Full Mock Test #1</h1>
+            </div>
+            <div id="timer-box" class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-500 uppercase font-bold">Time Left</p>
+                    <p id="timer" class="text-xl font-mono font-bold text-red-600 leading-none">120:00</p>
+                </div>
+                <button onclick="confirmSubmit()" class="bg-red-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200">Finish</button>
+            </div>
+        </header>
+
+        <main class="flex-grow flex flex-col md:flex-row h-[calc(100vh-80px)] overflow-hidden">
+            <div class="flex-grow overflow-y-auto p-4 md:p-8">
+                <div id="question-card" class="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-10">
+                    <div class="flex justify-between mb-6">
+                        <span id="q-index-label" class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">Question 1/200</span>
+                        <span class="text-gray-400 text-sm italic">Negative: 0.33</span>
+                    </div>
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-800 mb-8 leading-relaxed">Loading questions...</h2>
+                    
+                    <div id="options-container" class="space-y-4">
+                        </div>
+
+                    <div class="flex justify-between mt-12 pt-6 border-t border-gray-50">
+                        <button onclick="prevQ()" class="text-gray-600 font-bold px-4 py-2 hover:bg-gray-100 rounded-lg">← Previous</button>
+                        <button onclick="nextQ()" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100">Save & Next →</button>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="w-full md:w-80 bg-white border-l border-gray-100 flex flex-col">
+                <div class="p-4 border-b font-bold text-gray-700">Question Palette</div>
+                <div id="palette" class="flex-grow overflow-y-auto p-4 grid grid-cols-5 md:grid-cols-4 gap-2 content-start">
+                    </div>
+                <div class="p-4 bg-gray-50 text-[11px] grid grid-cols-2 gap-2">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-blue-600 rounded"></span> Answered</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 bg-gray-200 rounded"></span> Unvisited</div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <div id="result-screen" class="hidden fixed inset-0 bg-gray-100 z-[100] overflow-y-auto p-4 md:p-10">
+        <div class="max-w-4xl mx-auto bg-white rounded-[40px] shadow-2xl overflow-hidden">
+            <div class="bg-blue-600 p-10 text-center text-white">
+                <h2 class="text-3xl font-bold">Test Performance Report</h2>
+                <p class="mt-2 opacity-80">PSI/ASI Prelims Mock Test</p>
+            </div>
+            
+            <div class="p-8 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <canvas id="resultChart"></canvas>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 p-6 rounded-3xl text-center">
+                            <p class="text-gray-500 font-bold uppercase text-xs tracking-wider">Your Final Score</p>
+                            <h3 id="final-score" class="text-6xl font-black text-blue-600 mt-2">0.00</h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 border border-gray-100 rounded-2xl text-center">
+                                <p class="text-green-600 font-bold text-xl" id="res-correct">0</p>
+                                <p class="text-gray-400 text-xs uppercase mt-1">Correct</p>
+                            </div>
+                            <div class="p-4 border border-gray-100 rounded-2xl text-center">
+                                <p class="text-red-600 font-bold text-xl" id="res-wrong">0</p>
+                                <p class="text-gray-400 text-xs uppercase mt-1">Wrong</p>
+                            </div>
+                            <div class="p-4 border border-gray-100 rounded-2xl text-center">
+                                <p class="text-orange-500 font-bold text-xl" id="res-e">0</p>
+                                <p class="text-gray-400 text-xs uppercase mt-1">Attempted E</p>
+                            </div>
+                            <div class="p-4 border border-gray-100 rounded-2xl text-center">
+                                <p class="text-gray-400 font-bold text-xl" id="res-skipped">0</p>
+                                <p class="text-gray-400 text-xs uppercase mt-1">Skipped</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. SUPABASE CONFIG
+        const _url = "YOUR_SUPABASE_URL";
+        const _key = "YOUR_SUPABASE_KEY";
+        const supabase = supabase.createClient(_url, _key);
+
+        let questions = [];
+        let userAnswers = {}; // { qIndex: selectedOptionIndex }
+        let currentIndex = 0;
+        let timer = 120 * 60; // 2 Hours
+        let timerInterval;
+
+        // 2. LOAD DATA
+        async function loadTest() {
+            const { data, error } = await supabase
+                .from('questions')
+                .select('*')
+                .eq('test_id', 'mock_test_1')
+                .order('id', { ascending: true });
+
+            if (error) { alert("Error loading questions!"); return; }
+            questions = data;
+            renderPalette();
+            displayQuestion();
+            startTimer();
+        }
+
+        // 3. RENDER UI
+        function displayQuestion() {
+            const q = questions[currentIndex];
+            document.getElementById('q-index-label').innerText = `Question ${currentIndex + 1}/${questions.length}`;
+            document.getElementById('question-text').innerText = q.question_text;
+            
+            const options = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e];
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full text-left p-4 rounded-2xl hover:bg-gray-50 flex items-center gap-4 ${userAnswers[currentIndex] === i ? 'selected' : ''}`;
+                btn.innerHTML = `<span class="w-8 h-8 rounded-full bg-white border flex items-center justify-center text-sm font-bold">${String.fromCharCode(65+i)}</span> ${opt}`;
+                btn.onclick = () => selectOption(i);
+                container.appendChild(btn);
+            });
+            updatePaletteUI();
+        }
+
+        function renderPalette() {
+            const pal = document.getElementById('palette');
+            questions.forEach((_, i) => {
+                const b = document.createElement('button');
+                b.id = `pal-${i}`;
+                b.className = "palette-btn bg-gray-100 text-gray-500 border border-gray-200";
+                b.innerText = i + 1;
+                b.onclick = () => { currentIndex = i; displayQuestion(); };
+                pal.appendChild(b);
+            });
+        }
+
+        function updatePaletteUI() {
+            questions.forEach((_, i) => {
+                const b = document.getElementById(`pal-${i}`);
+                b.classList.remove('palette-active');
+                if(i === currentIndex) b.classList.add('palette-active');
+                if(userAnswers[i] !== undefined) b.classList.add('palette-answered');
+            });
+        }
+
+        // 4. TEST LOGIC
+        function selectOption(idx) {
+            userAnswers[currentIndex] = idx;
+            displayQuestion();
+        }
+
+        function nextQ() { if(currentIndex < questions.length - 1) { currentIndex++; displayQuestion(); } }
+        function prevQ() { if(currentIndex > 0) { currentIndex--; displayQuestion(); } }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timer--;
+                let h = Math.floor(timer / 3600);
+                let m = Math.floor((timer % 3600) / 60);
+                let s = timer % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                if(timer <= 0) submitTest();
+            }, 1000);
+        }
+
+        // 5. CALCULATION & RESULT
+        function confirmSubmit() { if(confirm("Are you sure you want to finish the test?")) submitTest(); }
+
+        async function submitTest() {
+            clearInterval(timerInterval);
+            let correct = 0, wrong = 0, eCount = 0, skipped = 0;
+
+            questions.forEach((q, i) => {
+                const ans = userAnswers[i];
+                if (ans === undefined) skipped++;
+                else if (ans === 4) eCount++;
+                else if (ans === q.correct_option) correct++;
+                else wrong++;
+            });
+
+            const score = (correct * 1) - (wrong * 0.33); // Normal negative marking
+            
+            // Show Result UI
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score.toFixed(2);
+            document.getElementById('res-correct').innerText = correct;
+            document.getElementById('res-wrong').innerText = wrong;
+            document.getElementById('res-e').innerText = eCount;
+            document.getElementById('res-skipped').innerText = skipped;
+
+            renderChart(correct, wrong, eCount, skipped);
+        }
+
+        function renderChart(c, w, e, s) {
+            new Chart(document.getElementById('resultChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correct', 'Wrong', 'Option E', 'Skipped'],
+                    datasets: [{
+                        data: [c, w, e, s],
+                        backgroundColor: ['#22c55e', '#ef4444', '#f97316', '#cbd5e1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        loadTest();
+    </script>
+</body>
+</html>
