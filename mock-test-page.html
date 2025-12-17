@@ -16,9 +16,17 @@
 </head>
 <body>
   <header>
-    <h2>Welcome, User</h2>
+    <h2 id="welcome">Welcome</h2>
     <a href="index.html" class="btn">Go Home</a>
   </header>
+
+  <!-- Login Form -->
+  <div class="card">
+    <h3>Login</h3>
+    <input id="email" type="email" placeholder="Email" /><br/><br/>
+    <input id="password" type="password" placeholder="Password" /><br/><br/>
+    <button id="loginBtn" class="btn">Login</button>
+  </div>
 
   <!-- Payment Card -->
   <div class="card">
@@ -29,43 +37,51 @@
 
   <!-- Mock Test Cards -->
   <div class="card-container">
-    <div class="card locked" id="test1"><h3>Mock Test 1</h3><a href="mock-test-1.html" class="btn">Start</a></div>
-    <div class="card locked" id="test2"><h3>Mock Test 2</h3><a href="mock-test-2.html" class="btn">Start</a></div>
-    <div class="card locked" id="test3"><h3>Mock Test 3</h3><a href="mock-test-3.html" class="btn">Start</a></div>
-    <div class="card locked" id="test4"><h3>Mock Test 4</h3><a href="mock-test-4.html" class="btn">Start</a></div>
-    <div class="card locked" id="test5"><h3>Mock Test 5</h3><a href="mock-test-5.html" class="btn">Start</a></div>
+    <div class="card locked"><h3>Mock Test 1</h3><a href="mock-test-1.html" class="btn">Start</a></div>
+    <div class="card locked"><h3>Mock Test 2</h3><a href="mock-test-2.html" class="btn">Start</a></div>
+    <div class="card locked"><h3>Mock Test 3</h3><a href="mock-test-3.html" class="btn">Start</a></div>
+    <div class="card locked"><h3>Mock Test 4</h3><a href="mock-test-4.html" class="btn">Start</a></div>
+    <div class="card locked"><h3>Mock Test 5</h3><a href="mock-test-5.html" class="btn">Start</a></div>
   </div>
 
-  <!-- Razorpay Script -->
+  <!-- Scripts -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <!-- Supabase Script -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // Supabase client (use 'sb' instead of 'supabase' to avoid conflicts)
-    const sb = supabase.createClient("https://bhmycvrbucmbbrpzeane.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4");
+    // Supabase client (use 'sb' to avoid conflicts)
+    const sb = window.supabase.createClient("https://bhmycvrbucmbbrpzeane.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4");
 
-    async function getUserId() {
-      const { data: { user } } = await sb.auth.getUser();
-      return user ? user.id : null;
-    }
+    let currentUserId = null;
 
-    const payBtn = document.getElementById("payBtn");
+    // Login handler
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        alert("Login failed: " + error.message);
+      } else {
+        currentUserId = data.user.id;
+        document.getElementById("welcome").innerText = "Welcome, " + (data.user.email || "User");
+        alert("Login successful!");
+      }
+    });
 
-    payBtn.addEventListener("click", async () => {
-      const userId = await getUserId();
-      if (!userId) {
+    // Payment handler
+    document.getElementById("payBtn").addEventListener("click", async () => {
+      if (!currentUserId) {
         alert("Please log in first!");
         return;
       }
 
-      // Step 1: Create Razorpay order via Supabase Edge Function
+      // Step 1: Create Razorpay order
       const orderRes = await fetch(
         "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-razorpay-order",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: 9900, currency: "INR", user_id: userId }),
+          body: JSON.stringify({ amount: 9900, currency: "INR", user_id: currentUserId }),
         }
       );
       const order = await orderRes.json();
@@ -79,7 +95,7 @@
         name: "Kapila Institute",
         description: "Mock Test Series",
         handler: async function (response) {
-          // Step 3: Verify payment via Supabase Edge Function
+          // Step 3: Verify payment
           await fetch(
             "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify_payment",
             {
@@ -87,18 +103,16 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 payment_id: response.razorpay_payment_id,
-                user_id: userId,
+                user_id: currentUserId,
               }),
             }
           );
 
-          // Step 4: Unlock mock test cards
-          document.querySelectorAll(".card.locked").forEach(card => {
-            card.classList.remove("locked");
-          });
+          // Step 4: Unlock tests
+          document.querySelectorAll(".card.locked").forEach(card => card.classList.remove("locked"));
           alert("Payment successful! Mock tests unlocked for 45 days.");
         },
-        prefill: { email: "user@example.com" }, // Replace with actual user email
+        prefill: { email: "user@example.com" },
       };
 
       const rzp = new Razorpay(options);
