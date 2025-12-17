@@ -17,31 +17,28 @@
     <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
         <h1 class="text-xl font-bold text-gray-800">STI Mock Test</h1>
         <div class="space-x-2">
-            <button onclick="toggleModal('registerModal')" class="border border-blue-600 text-blue-600 px-4 py-1.5 rounded-full text-sm font-bold uppercase">Register</button>
-            <button onclick="toggleModal('loginModal')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-bold uppercase shadow-md shadow-blue-200">Login</button>
+            <button onclick="toggleModal('registerModal')" class="border border-blue-600 text-blue-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase">Register</button>
+            <button onclick="toggleModal('loginModal')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase shadow-md">Login</button>
         </div>
     </header>
 
     <div class="bg-white rounded-2xl p-5 mb-5 shadow-md border border-gray-50">
-        <div class="flex items-center gap-2 mb-2">
-            <span class="text-yellow-400 text-xl">⭐</span>
-            <h2 class="text-lg font-bold text-gray-800">Demo Test - ફ્રી એક્સેસ</h2>
-        </div>
-        <p class="text-gray-600 text-[15px] mb-4">આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો.</p>
-        <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3.5 rounded-full font-bold shadow-lg shadow-blue-200">DEMO Test શરૂ કરો</button>
+        <h2 class="text-lg font-bold text-gray-800">⭐ Demo Test - ફ્રી એક્સેસ</h2>
+        <p class="text-gray-600 text-[15px] my-4 leading-relaxed">આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો.</p>
+        <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3.5 rounded-full font-bold shadow-lg">DEMO Test શરૂ કરો</button>
     </div>
 
     <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
-        <h2 class="text-lg font-bold text-gray-800">Test Series: PSI/ASI - 5 Mock Tests</h2>
+        <h2 class="text-lg font-bold text-gray-800">Test Series: PSI/ASI</h2>
         <div class="flex justify-between items-center my-4">
             <span class="text-green-600 font-bold text-xl">₹99/-</span>
-            <span class="bg-orange-50 text-orange-600 text-[11px] px-3 py-1 rounded-full font-bold">5 Mock Test Bundle</span>
+            <span class="bg-orange-50 text-orange-600 text-[11px] px-3 py-1 rounded-full font-bold uppercase border border-orange-100">5 Mock Tests</span>
         </div>
         <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Buy Now (₹99)</button>
     </div>
 
     <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
-        <div class="text-[10px] text-gray-400">© 2025 STI Mock Test</div>
+        <div class="text-[10px] text-gray-400">© 2025 STI Mock Test<br>All rights reserved.</div>
         <div class="flex gap-2">
             <button class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">WhatsApp</button>
             <button class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">Call</button>
@@ -75,9 +72,7 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        function toggleModal(id) {
-            document.getElementById(id).classList.toggle('active');
-        }
+        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
 
         async function handleRegister() {
             const email = document.getElementById('regEmail').value;
@@ -86,59 +81,38 @@
             const mobile = document.getElementById('regMobile').value;
             const btn = document.getElementById('regBtn');
 
-            if(!email || !password || !fullName || !mobile) {
-                alert("બધી વિગતો ભરો.");
-                return;
-            }
+            if(!email || !password || !fullName || !mobile) { alert("બધી વિગતો ભરો."); return; }
+            btn.disabled = true; btn.innerText = "સેવ થઈ રહ્યું છે...";
 
-            btn.disabled = true;
-            btn.innerText = "સેવ થઈ રહ્યું છે...";
-
-            // 1. Sign Up
             const { data, error: authError } = await _supabase.auth.signUp({ email, password });
 
             if (authError) {
-                alert("Auth Error: " + authError.message);
-                btn.disabled = false;
-                btn.innerText = "રજીસ્ટર કરો";
+                alert("ભૂલ: " + authError.message);
+                btn.disabled = false; btn.innerText = "રજીસ્ટર કરો";
                 return;
             }
 
-            // 2. Profile Upsert (This prevents the 'duplicate key' error)
             if (data.user) {
                 const { error: profileError } = await _supabase
                     .from('profiles')
-                    .upsert({ 
-                        id: data.user.id, 
-                        email: email,
-                        full_name: fullName, 
-                        mobile: mobile,
-                        updated_at: new Date()
-                    });
+                    .insert([{ id: data.user.id, email: email, full_name: fullName, mobile: mobile }]);
                 
                 if (profileError) {
-                    alert("પ્રોફાઈલ ભૂલ: " + profileError.message);
+                    alert("ટેબલ એરર: " + profileError.message);
                 } else {
                     alert("રજિસ્ટ્રેશન સફળ!");
                     toggleModal('registerModal');
                 }
             }
-            btn.disabled = false;
-            btn.innerText = "રજીસ્ટર કરો";
+            btn.disabled = false; btn.innerText = "રજીસ્ટર કરો";
         }
 
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
-            const btn = document.getElementById('loginBtn');
-
             const { error } = await _supabase.auth.signInWithPassword({ email, password });
-
-            if (error) alert("લોગિન ભૂલ: " + error.message);
-            else {
-                alert("લોગિન સફળ!");
-                location.reload();
-            }
+            if (error) alert("લોગિન એરર: " + error.message);
+            else { alert("લોગિન સફળ!"); location.reload(); }
         }
     </script>
 </body>
