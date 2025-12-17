@@ -1,783 +1,132 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-  <meta charset="UTF-8" />
-  <title>STI Mock Test</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    /* * નોંધ: અહીં તમારો મૂળ CSS કોડ છે.
-     * મેં તેમાં કોઈ ફેરફાર કર્યો નથી.
-     */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body {
-      background: #f5f5f7;
-      color: #111827;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    button {
-      border: none;
-      cursor: pointer;
-      background: none;
-    }
-
-    .page-wrapper {
-      max-width: 480px;
-      margin: 0 auto;
-      min-height: 100vh;
-      background: #ffffff;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.06);
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid #e5e7eb;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: #ffffff;
-    }
-
-    .header-left-title {
-      font-weight: 700;
-      font-size: 18px;
-      color: #111827;
-    }
-
-    .nav-tabs {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .nav-pill {
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      border: 1px solid #e5e7eb;
-      background: #f9fafb;
-      color: #374151;
-    }
-
-    .nav-pill.primary {
-      background: #2563eb;
-      color: #ffffff;
-      border-color: #2563eb;
-    }
-
-    .nav-user {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: #111827;
-    }
-
-    .logout-btn {
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: #f97316;
-      color: #ffffff;
-      font-size: 12px;
-      border: none;
-      cursor: pointer;
-    }
-
-    /* Content */
-    .content {
-      padding: 16px 16px 80px;
-      flex: 1;
-      background: #f3f4f6;
-    }
-
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 14px 14px 12px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
-      margin-bottom: 14px;
-    }
-
-    .card-header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-
-    .card-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #111827;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .star-icon {
-      color: #fbbf24;
-      font-size: 16px;
-    }
-
-    .card-subtitle {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 6px;
-    }
-
-    .card-text {
-      font-size: 13px;
-      color: #374151;
-      line-height: 1.4;
-      margin-bottom: 10px;
-    }
-
-    .pill-info {
-      display: inline-flex;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #eff6ff;
-      color: #1d4ed8;
-      font-size: 11px;
-      margin-bottom: 6px;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: #2563eb;
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 600;
-      text-align: center;
-      border: none;
-      cursor: pointer;
-      display: inline-block;
-    }
-
-    .btn-outline {
-      width: 100%;
-      padding: 9px 12px;
-      border-radius: 999px;
-      border: 1px solid #2563eb;
-      background: #ffffff;
-      color: #2563eb;
-      font-size: 14px;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      display: inline-block;
-    }
-
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: #374151;
-      margin-bottom: 10px;
-    }
-
-    .price-tag {
-      font-weight: 600;
-      color: #16a34a;
-    }
-
-    .tag {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    /* Footer */
-    .footer {
-      border-top: 1px solid #e5e7eb;
-      padding: 10px 12px 12px;
-      background: #ffffff;
-      font-size: 11px;
-      color: #6b7280;
-    }
-
-    .footer-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .footer-contact {
-      display: flex;
-      gap: 8px;
-    }
-
-    .footer-btn {
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      border: 1px solid #e5e7eb;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: #f9fafb;
-    }
-
-    .footer-btn.whatsapp {
-      border-color: #22c55e;
-      color: #15803d;
-    }
-
-    .footer-btn.call {
-      border-color: #2563eb;
-      color: #1d4ed8;
-    }
-
-    /* Modal */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 40;
-    }
-
-    .modal-backdrop.active {
-      display: flex;
-    }
-
-    .modal {
-      width: 100%;
-      max-width: 380px;
-      margin: 0 16px;
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 16px 16px 14px;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
-      animation: fadeInUp 0.18s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .modal-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .modal-close {
-      background: transparent;
-      border: none;
-      font-size: 18px;
-      color: #6b7280;
-      padding: 2px 4px;
-      cursor: pointer;
-    }
-
-    .modal-subtitle {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 10px;
-    }
-
-    .form-group {
-      margin-bottom: 10px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 12px;
-      margin-bottom: 4px;
-      color: #4b5563;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 9px;
-      border: 1px solid #e5e7eb;
-      font-size: 13px;
-      outline: none;
-    }
-
-    .form-input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
-    }
-
-    .form-footer-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 4px;
-      margin-bottom: 6px;
-      font-size: 11px;
-    }
-
-    .link-text {
-      color: #2563eb;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .error-text {
-      font-size: 11px;
-      color: #b91c1c;
-      margin-bottom: 4px;
-      display: none;
-    }
-
-    .small-note {
-      font-size: 11px;
-      color: #6b7280;
-      margin-bottom: 6px;
-    }
-
-    @media (min-width: 768px) {
-      .page-wrapper {
-        margin-top: 16px;
-        margin-bottom: 16px;
-        border-radius: 16px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STI Mock Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+    </style>
 </head>
-<body>
-  <div class="page-wrapper">
-    <header class="header">
-      <div class="header-left-title">STI Mock Test</div>
+<body class="p-4">
 
-      <nav class="nav-tabs" id="nav-logged-out">
-        <button class="nav-pill" id="register-nav-btn">REGISTER</button>
-        <button class="nav-pill primary" id="login-nav-btn">LOGIN</button>
-      </nav>
-
-      <nav class="nav-tabs" id="nav-logged-in" style="display: none;">
-        <div class="nav-user">
-          <span id="student-name-label">વિદ્યાર્થી</span>
-          <button class="logout-btn" id="logout-btn">Logout</button>
+    <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-lg shadow-sm">
+        <h1 class="text-xl font-bold text-gray-800">STI Mock Test</h1>
+        <div class="space-x-2">
+            <button onclick="toggleModal('registerModal')" class="border border-blue-600 text-blue-600 px-4 py-1.5 rounded-full text-sm font-medium">REGISTER</button>
+            <button onclick="toggleModal('loginModal')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium">LOGIN</button>
         </div>
-      </nav>
     </header>
 
-    <main class="content">
-      <section class="card">
-        <div class="card-header-row">
-          <div class="card-title">
-            <span class="star-icon">⭐</span>
-            <span>Demo Test - ફ્રી એક્સેસ</span>
-          </div>
+    <div class="bg-white rounded-2xl p-5 mb-5 shadow-md border border-gray-100">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="text-yellow-400 text-xl">⭐</span>
+            <h2 class="text-lg font-bold text-gray-800">Demo Test - ફ્રી એક્સેસ</h2>
         </div>
-        <p class="card-subtitle">
-          20 માર્કની ક્વિઝ | શરૂઆત માટે યોગ્ય
-        </p>
-        <p class="card-text">
-          આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો અને
-          સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.
-        </p>
-        <span class="pill-info">Duration: 20 min • Negative marking નથી</span>
-
-        <div style="margin-top: 10px;">
-          <a href="demo-test-page.html">
-            <div class="btn-primary">DEMO Test શરૂ કરો</div>
-          </a>
+        <p class="text-sm text-gray-500 mb-2">20 માર્કની ક્વિઝ | શરૂઆત માટે યોગ્ય</p>
+        <p class="text-gray-700 text-sm mb-4 leading-relaxed">આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો અને સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.</p>
+        <div class="inline-block bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full font-medium mb-5">
+            Duration: 20 min • Negative marking નથી
         </div>
-      </section>
-
-      <section class="card">
-        <div class="card-header-row">
-          <div class="card-title">
-            <span>Test Series: PSI/ASI - 5 Mock Tests</span>
-          </div>
-        </div>
-        <p class="card-subtitle">
-          નવીનતમ અભ્યાસક્રમ મુજબ • પૂર્ણ સિલેબસ કવર
-        </p>
-        <p class="card-text">
-          આ સીરિઝમાં PSI/ASI પરીક્ષાના ધોરણ મુજબ 5 ફુલ લંબાઈના મૉક ટેસ્ટ સામેલ છે.
-          દરેક પેપર પછી વિગતવાર રીઝલ્ટ અને એનાલિસિસ મળશે.
-        </p>
-        <div class="price-row">
-          <span class="price-tag">કિંમત: ₹99/-</span>
-          <span class="tag">5 Mock Test Bundle</span>
-        </div>
-
-        <a href="mock-test-page.html">
-          <div class="btn-outline">Buy Now (₹99)</div>
-        </a>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-top">
-        <span>© 2025 STI Mock Test</span>
-        <div class="footer-contact">
-          <a class="footer-btn whatsapp" href="https://wa.me/916353511804" target="_blank" rel="noopener">
-            <span>WhatsApp</span>
-          </a>
-          <a class="footer-btn call" href="tel:+916353511804">
-            <span>Call</span>
-          </a>
-        </div>
-      </div>
-      <div>All rights reserved.</div>
-    </footer>
-  </div>
-
-  <div class="modal-backdrop" id="auth-modal-backdrop">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title" id="auth-modal-title">Login</div>
-        <button class="modal-close" id="auth-modal-close">&times;</button>
-      </div>
-      <p class="modal-subtitle" id="auth-modal-subtitle">
-        તમારા Email અને Password થી Login કરો.
-      </p>
-
-      <p class="error-text" id="auth-error-text">Invalid details. કૃપા કરી ફરીથી તપાસો.</p>
-
-      <form id="login-form">
-        <div class="form-group">
-          <label class="form-label" for="login-email">Email</label>
-          <input
-            type="email"
-            id="login-email"
-            class="form-input"
-            placeholder="Enter your email"
-            autocomplete="email"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="login-password">Password</label>
-          <input
-            type="password"
-            id="login-password"
-            class="form-input"
-            placeholder="Password"
-            autocomplete="current-password"
-          />
-        </div>
-
-        <div class="form-footer-row">
-          <span></span>
-          <span class="link-text" id="to-register-link">New user? Register now</span>
-        </div>
-
-        <button type="submit" class="btn-primary">Login</button>
-      </form>
-
-      <form id="register-form" style="display: none; margin-top: 6px;">
-        <div class="form-group">
-          <label class="form-label" for="reg-name">Full Name</label>
-          <input
-            type="text"
-            id="reg-name"
-            class="form-input"
-            placeholder="તમારું નામ"
-            autocomplete="name"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="reg-email">Email</label>
-          <input
-            type="email"
-            id="reg-email"
-            class="form-input"
-            placeholder="Enter your email"
-            autocomplete="email"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="reg-mobile">Mobile Number</label>
-          <input
-            type="tel"
-            id="reg-mobile"
-            class="form-input"
-            placeholder="10 digit mobile"
-            autocomplete="tel"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="reg-password">Password</label>
-          <input
-            type="password"
-            id="reg-password"
-            class="form-input"
-            placeholder="Create password"
-            autocomplete="new-password"
-          />
-        </div>
-
-        <div class="form-footer-row">
-          <span></span>
-          <span class="link-text" id="to-login-link">Already user? Login</span>
-        </div>
-
-        <button type="submit" class="btn-primary">Register</button>
-      </form>
+        <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold shadow-lg hover:bg-blue-700 transition">DEMO Test શરૂ કરો</button>
     </div>
-  </div>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    // ====== SUPABASE INIT ======
-    // આ કોડ બ્લોક એક જ વાર અહીં આપવામાં આવ્યો છે.
-    const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+    <div class="bg-white rounded-2xl p-5 mb-20 shadow-md border border-gray-100">
+        <h2 class="text-lg font-bold text-gray-800">Test Series: PSI/ASI - 5 Mock Tests</h2>
+        <p class="text-sm text-gray-500 mb-3">નવીનતમ અભ્યાસક્રમ મુજબ • પૂર્ણ સિલેબસ કવર</p>
+        <p class="text-gray-700 text-sm mb-4 leading-relaxed">આ સીરિઝમાં PSI/ASI પરીક્ષાના ધોરણ મુજબ 5 કુલ લંબાઈના મોક ટેસ્ટ સામેલ છે. દરેક પેપર પછી વિગતવાર રીઝલ્ટ અને એનાલિસિસ મળશે.</p>
+        
+        <div class="flex justify-between items-center mb-5">
+            <span class="text-green-600 font-bold text-lg">કિંમત: ₹99/-</span>
+            <span class="bg-orange-100 text-orange-700 text-xs px-3 py-1 rounded-full font-medium">5 Mock Test Bundle</span>
+        </div>
+        <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold hover:bg-blue-50 transition">Buy Now (₹99)</button>
+    </div>
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex justify-between items-center px-6">
+        <div class="text-[10px] text-gray-500">
+            © 2025 STI Mock Test<br>All rights reserved.
+        </div>
+        <div class="flex gap-2">
+            <button class="border border-green-500 text-green-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
+                WhatsApp
+            </button>
+            <button class="border border-blue-500 text-blue-600 px-4 py-1.5 rounded-full text-sm font-medium">Call</button>
+        </div>
+    </footer>
 
-    // ====== HEADER STATE ======
-    const navLoggedOut = document.getElementById("nav-logged-out");
-    const navLoggedIn = document.getElementById("nav-logged-in");
-    const studentNameLabel = document.getElementById("student-name-label");
-    const logoutBtn = document.getElementById("logout-btn");
+    <div id="loginModal" class="modal px-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-4">લોગિન</h3>
+            <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full border p-3 rounded-lg mb-3 outline-none focus:border-blue-500">
+            <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full border p-3 rounded-lg mb-4 outline-none focus:border-blue-500">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">Login</button>
+        </div>
+    </div>
 
-    const loginNavBtn = document.getElementById("login-nav-btn");
-    const registerNavBtn = document.getElementById("register-nav-btn");
+    <div id="registerModal" class="modal px-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-4">નવું રજિસ્ટ્રેશન</h3>
+            <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full border p-3 rounded-lg mb-3 outline-none">
+            <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full border p-3 rounded-lg mb-3 outline-none">
+            <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full border p-3 rounded-lg mb-3 outline-none">
+            <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full border p-3 rounded-lg mb-4 outline-none">
+            <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">Register</button>
+        </div>
+    </div>
 
-    // ====== MODAL ELEMENTS ======
-    const authModalBackdrop = document.getElementById("auth-modal-backdrop");
-    const authModalClose = document.getElementById("auth-modal-close");
-    const authModalTitle = document.getElementById("auth-modal-title");
-    const authModalSubtitle = document.getElementById("auth-modal-subtitle");
-    const authErrorText = document.getElementById("auth-error-text");
+    <script>
+        // Supabase configuration
+        const supabaseUrl = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const loginForm = document.getElementById("login-form");
-    const registerForm = document.getElementById("register-form");
-    const toRegisterLink = document.getElementById("to-register-link");
-    const toLoginLink = document.getElementById("to-login-link");
-
-    function openAuthModal(mode) {
-      authErrorText.style.display = "none";
-
-      if (mode === "login") {
-        authModalTitle.textContent = "Login";
-        authModalSubtitle.textContent =
-          "તમારા Email અને Password થી Login કરો.";
-        loginForm.style.display = "block";
-        registerForm.style.display = "none";
-      } else {
-        authModalTitle.textContent = "Register";
-        authModalSubtitle.textContent =
-          "નવી એકાઉન્ટ બનાવવા માટે નીચે વિગતો भरो.";
-        loginForm.style.display = "none";
-        registerForm.style.display = "block";
-      }
-      authModalBackdrop.classList.add("active");
-    }
-
-    function closeAuthModal() {
-      authModalBackdrop.classList.remove("active");
-    }
-
-    // Header button events
-    loginNavBtn.addEventListener("click", function () {
-      openAuthModal("login");
-    });
-
-    registerNavBtn.addEventListener("click", function () {
-      openAuthModal("register");
-    });
-
-    // Modal close
-    authModalClose.addEventListener("click", closeAuthModal);
-
-    authModalBackdrop.addEventListener("click", function (e) {
-      if (e.target === authModalBackdrop) {
-        closeAuthModal();
-      }
-    });
-
-    // Switch forms
-    toRegisterLink.addEventListener("click", function () {
-      openAuthModal("register");
-    });
-
-    toLoginLink.addEventListener("click", function () {
-      openAuthModal("login");
-    });
-
-    // ====== UI HELPERS ======
-    function setLoggedInUI(name) {
-      studentNameLabel.textContent = name || "વિદ્યાર્થી";
-      navLoggedOut.style.display = "none";
-      navLoggedIn.style.display = "flex";
-    }
-
-    function setLoggedOutUI() {
-      navLoggedOut.style.display = "flex";
-      navLoggedIn.style.display = "none";
-      studentNameLabel.textContent = "વિદ્યાર્થી";
-    }
-
-    async function fetchProfileAndSetName(user) {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .single();
-
-        if (!error && data && data.full_name) {
-          setLoggedInUI(data.full_name);
-        } else {
-          setLoggedInUI("STI Student");
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('active');
         }
-      } catch (e) {
-        setLoggedInUI("STI Student");
-      }
-    }
 
-    // ====== AUTH STATE ON LOAD ======
-    (async () => {
-      const {
-        data: { session },
-        error
-      } = await supabase.auth.getSession();
+        async function handleRegister() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+            const fullName = document.getElementById('regName').value;
+            const mobile = document.getElementById('regMobile').value;
 
-      if (!error && session && session.user) {
-        await fetchProfileAndSetName(session.user);
-      } else {
-        setLoggedOutUI();
-      }
-    })();
+            const { data, error } = await _supabase.auth.signUp({ email, password });
 
-    // ====== REGISTER ======
-    registerForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      authErrorText.style.display = "none";
-
-      const name = document.getElementById("reg-name").value.trim();
-      const email = document.getElementById("reg-email").value.trim();
-      const mobile = document.getElementById("reg-mobile").value.trim();
-      const password = document.getElementById("reg-password").value.trim();
-
-      if (!name || !email || !mobile || !password) {
-        authErrorText.textContent = "બધા field ભરો.";
-        authErrorText.style.display = "block";
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-            mobile: mobile
-          }
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                // Insert into profiles table
+                const { error: profileError } = await _supabase
+                    .from('profiles')
+                    .insert([{ id: data.user.id, full_name: fullName, mobile: mobile, email: email }]);
+                
+                if (profileError) alert("Profile Error: " + profileError.message);
+                else {
+                    alert("રજિસ્ટ્રેશન સફળ! ઈમેલ વેરીફાય કરો.");
+                    toggleModal('registerModal');
+                }
+            }
         }
-      });
 
-      if (error) {
-        authErrorText.textContent = error.message || "Registration નિષ્ફળ ગયું.";
-        authErrorText.style.display = "block";
-        return;
-      }
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
 
-      const user = data.user;
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
-      if (user) {
-        // અહીં યુઝરનો પ્રોફાઇલ ડેટાબેઝમાં (profiles table) ઉમેરવામાં આવે છે
-        await supabase.from("profiles").upsert({
-          id: user.id,
-          full_name: name,
-          email: email,
-          mobile: mobile
-        });
-        setLoggedInUI(name);
-      } else {
-        setLoggedInUI("STI Student");
-      }
-
-      closeAuthModal();
-    });
-
-    // ====== LOGIN ======
-    loginForm.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      authErrorText.style.display = "none";
-
-      const email = document.getElementById("login-email").value.trim();
-      const password = document.getElementById("login-password").value.trim();
-
-      if (!email || !password) {
-        authErrorText.textContent = "બધા field ભરો.";
-        authErrorText.style.display = "block";
-        return;
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        authErrorText.textContent = "Login fail. Email / Password તપાસો.";
-        authErrorText.style.display = "block";
-        return;
-      }
-
-      const user = data.user;
-      if (user) {
-        await fetchProfileAndSetName(user);
-      } else {
-        setLoggedInUI("STI Student");
-      }
-
-      closeAuthModal();
-    });
-
-    // ====== LOGOUT ======
-    logoutBtn.addEventListener("click", async function () {
-      await supabase.auth.signOut();
-      setLoggedOutUI();
-    });
-  </script>
+            if (error) alert("Login Error: " + error.message);
+            else {
+                alert("લોગિન સફળ!");
+                location.reload();
+            }
+        }
+    </script>
 </body>
 </html>
