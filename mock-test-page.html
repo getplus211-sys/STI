@@ -1,1 +1,652 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STI Mock Test – Test Series</title>
 
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Razorpay Checkout -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #e1e1e1;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .header-left {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .header-center {
+      flex: 1;
+      text-align: center;
+      font-size: 14px;
+      color: #444;
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      background: #007bff;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn.small {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid #007bff;
+      color: #007bff;
+    }
+
+    /* MAIN LAYOUT */
+    .page-wrapper {
+      max-width: 650px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px 16px 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-title {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .card-sub {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .card-text {
+      margin: 4px 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .card-actions {
+      margin-top: 14px;
+    }
+
+    .price-tag {
+      font-weight: 700;
+      color: #1b7d28;
+    }
+
+    .tests-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .test-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+    }
+
+    .test-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .test-sub {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .badge-lock {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #ffe4e4;
+      color: #b71c1c;
+      border: 1px solid #ffb3b3;
+    }
+
+    .badge-unlock {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #e6ffea;
+      color: #1b5e20;
+      border: 1px solid #9ee2ad;
+    }
+
+    .test-actions button {
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    .test-actions button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .info-text {
+      font-size: 12px;
+      color: #777;
+      margin-top: 8px;
+    }
+
+    .status-bar {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #444;
+    }
+
+    .status-ok {
+      color: #1b5e20;
+    }
+
+    .status-error {
+      color: #b71c1c;
+    }
+
+    /* FOOTER */
+    footer {
+      margin-top: 32px;
+      background: #ffffff;
+      border-top: 1px solid #e1e1e1;
+      padding: 14px 16px 18px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .footer-buttons {
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 400px) {
+      header {
+        flex-wrap: wrap;
+        row-gap: 6px;
+      }
+      .header-center {
+        order: 3;
+        width: 100%;
+        text-align: left;
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">STI Mock Test</div>
+    <div class="header-center" id="user-name-display">Loading...</div>
+    <div class="header-right">
+      <button class="btn small ghost" onclick="window.location.href='index.html'">
+        Go to Home
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="page-wrapper">
+    <!-- BUY CARD -->
+    <section class="card">
+      <h2 class="card-title">PSI/ASI Test Series – 5 Mock Tests</h2>
+      <p class="card-sub">નવীনતમ અભ્યાસક્રમ મુજબ • પૂર્ણ સિલેબસ કવર</p>
+
+      <p class="card-text">
+        આ સીરીઝમાં PSI/ASI પરીક્ષાના ધોરણ મુજબ 5 કુલ લંબાઈના મોક ટેસ્ટ સામેલ છે.
+        દરેક પેપર પછી વિગતવાર રિઝલ્ટ અને એનાલિસિસ મળશે.
+      </p>
+
+      <p class="card-meta">
+        કિંમત: <span class="price-tag">₹49/-</span> • 5 Mock Test Bundle
+      </p>
+
+      <div class="card-actions">
+        <button class="btn" id="buy-btn" onclick="startPurchase()">
+          Buy Full Series (₹49)
+        </button>
+      </div>
+
+      <div class="status-bar" id="access-status"></div>
+    </section>
+
+    <!-- TEST CARDS (UNLOCK AFTER PAYMENT) -->
+    <section class="card">
+      <h2 class="card-title">તમારા Mock Tests</h2>
+      <p class="card-text">
+        એક વાર bundle ખરીદી લેશો પછી નીચેના 5 મોક ટેસ્ટ તમારા માટે unlock થઈ જશે.
+      </p>
+
+      <div class="tests-grid" id="tests-grid">
+        <!-- Test 1 -->
+        <div class="test-card">
+          <div>
+            <div class="test-title">
+              Mock Test 1
+            </div>
+            <div class="test-sub">
+              PSI/ASI Standard • Full Length Paper
+            </div>
+          </div>
+          <div class="test-actions">
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn
+                    onclick="openTest('test-1.html')" disabled>
+              Start Test
+            </button>
+          </div>
+        </div>
+
+        <!-- Test 2 -->
+        <div class="test-card">
+          <div>
+            <div class="test-title">
+              Mock Test 2
+            </div>
+            <div class="test-sub">
+              PSI/ASI Standard • Full Length Paper
+            </div>
+          </div>
+          <div class="test-actions">
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn
+                    onclick="openTest('test-2.html')" disabled>
+              Start Test
+            </button>
+          </div>
+        </div>
+
+        <!-- Test 3 -->
+        <div class="test-card">
+          <div>
+            <div class="test-title">
+              Mock Test 3
+            </div>
+            <div class="test-sub">
+              PSI/ASI Standard • Full Length Paper
+            </div>
+          </div>
+          <div class="test-actions">
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn
+                    onclick="openTest('test-3.html')" disabled>
+              Start Test
+            </button>
+          </div>
+        </div>
+
+        <!-- Test 4 -->
+        <div class="test-card">
+          <div>
+            <div class="test-title">
+              Mock Test 4
+            </div>
+            <div class="test-sub">
+              PSI/ASI Standard • Full Length Paper
+            </div>
+          </div>
+          <div class="test-actions">
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn
+                    onclick="openTest('test-4.html')" disabled>
+              Start Test
+            </button>
+          </div>
+        </div>
+
+        <!-- Test 5 -->
+        <div class="test-card">
+          <div>
+            <div class="test-title">
+              Mock Test 5
+            </div>
+            <div class="test-sub">
+              PSI/ASI Standard • Full Length Paper
+            </div>
+          </div>
+          <div class="test-actions">
+            <span class="badge-lock" data-lock-badge>Locked</span>
+            <button class="btn small" data-test-btn
+                    onclick="openTest('test-5.html')" disabled>
+              Start Test
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="info-text">
+        નોંધ: Tests ખોલવા માટે login ફરજિયાત છે. જો તમે payment already કરી હોય અને tests lock દેખાતા હોય તો થોડું સમય પછી refresh કરો.
+      </p>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-buttons">
+      <a href="https://wa.me/916353511804">
+        <button class="btn small">WhatsApp</button>
+      </a>
+    </div>
+    <div>© 2025 STI Mock Test</div>
+    <div>All rights reserved.</div>
+  </footer>
+
+  <script>
+    // ===== SUPABASE CLIENT =====
+    const sbClient = window.supabase.createClient(
+      "https://bhmycvrbucmbbrpzeane.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
+    );
+
+    let currentUser = null;
+
+    const accessStatusEl = document.getElementById("access-status");
+    const buyBtn = document.getElementById("buy-btn");
+    const userNameDisplay = document.getElementById("user-name-display");
+
+    // ===== INIT ON LOAD =====
+    (async function initPage() {
+      try {
+        userNameDisplay.textContent = "Checking login...";
+        const { data } = await sbClient.auth.getSession();
+
+        if (!data || !data.session || !data.session.user) {
+          // No login → send to home/login
+          userNameDisplay.textContent = "Not logged in";
+          accessStatusEl.innerHTML = '<span class="status-error">સૌપ્રથમ Home page પરથી login કરો.</span>';
+          buyBtn.disabled = true;
+          buyBtn.classList.add("ghost");
+          return;
+        }
+
+        currentUser = data.session.user;
+        await loadUserName();
+        await checkAccessAndUpdateUI();
+      } catch (err) {
+        console.error(err);
+        userNameDisplay.textContent = "Error loading user";
+      }
+    })();
+
+    // ===== LOAD USER NAME FROM profiles =====
+    async function loadUserName() {
+      try {
+        const { data, error } = await sbClient
+          .from("profiles")
+          .select("full_name")
+          .eq("id", currentUser.id)
+          .single();
+
+        if (error) {
+          console.error(error);
+          userNameDisplay.textContent = "User";
+          return;
+        }
+
+        const name = data?.full_name || "User";
+        userNameDisplay.textContent = name;
+      } catch (err) {
+        console.error(err);
+        userNameDisplay.textContent = "User";
+      }
+    }
+
+    // ===== CHECK ACCESS FROM "user access" TABLE =====
+    async function checkAccessAndUpdateUI() {
+      try {
+        accessStatusEl.textContent = "Access status ચેક થઈ રહ્યું છે...";
+        const { data, error } = await sbClient
+          .from("user access")
+          .select("id")
+          .eq("user_id", currentUser.id)
+          .eq("is_active", true)
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.error(error);
+          accessStatusEl.innerHTML =
+            '<span class="status-error">Access ની માહિતી મેળવી શકાઈ નહિ.</span>';
+          lockAllTests();
+          return;
+        }
+
+        if (data && data.id) {
+          // Access Granted
+          unlockAllTests();
+          accessStatusEl.innerHTML =
+            '<span class="status-ok">Access Active: તમે બધાં 5 Mock Tests આપી શકો છો.</span>';
+          buyBtn.textContent = "Already Purchased";
+          buyBtn.disabled = true;
+          buyBtn.classList.add("ghost");
+        } else {
+          // No active access
+          lockAllTests();
+          accessStatusEl.innerHTML =
+            '<span class="status-error">Access નથી: Bundle ખરીદી પછી tests unlock થશે.</span>';
+          buyBtn.disabled = false;
+          buyBtn.classList.remove("ghost");
+        }
+      } catch (err) {
+        console.error(err);
+        accessStatusEl.innerHTML =
+          '<span class="status-error">Access ચેક કરતી વખતે ભૂલ આવી.</span>';
+        lockAllTests();
+      }
+    }
+
+    function lockAllTests() {
+      const btns = document.querySelectorAll("[data-test-btn]");
+      const badges = document.querySelectorAll("[data-lock-badge]");
+      btns.forEach((b) => {
+        b.disabled = true;
+      });
+      badges.forEach((badge) => {
+        badge.textContent = "Locked";
+        badge.classList.remove("badge-unlock");
+        badge.classList.add("badge-lock");
+      });
+    }
+
+    function unlockAllTests() {
+      const btns = document.querySelectorAll("[data-test-btn]");
+      const badges = document.querySelectorAll("[data-lock-badge]");
+      btns.forEach((b) => {
+        b.disabled = false;
+      });
+      badges.forEach((badge) => {
+        badge.textContent = "Unlocked";
+        badge.classList.remove("badge-lock");
+        badge.classList.add("badge-unlock");
+      });
+    }
+
+    // ===== OPEN TEST PAGE (only if unlocked) =====
+    function openTest(url) {
+      window.location.href = url;
+    }
+
+    // ===== START PURCHASE FLOW =====
+    async function startPurchase() {
+      if (!currentUser) {
+        alert("સૌપ્રથમ login કરો (Home page પરથી).");
+        return;
+      }
+
+      buyBtn.disabled = true;
+      buyBtn.textContent = "Creating order...";
+      accessStatusEl.textContent = "";
+
+      try {
+        // 1) Create order via Supabase Edge Function
+        const res = await fetch(
+          "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-order",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              // backend already configured; extra data optional
+              // plan_name, etc. can be handled in function
+            })
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Order create failed");
+        }
+
+        const order = await res.json();
+        // Expected: { order_id, amount, currency, ... }
+        const options = {
+          key: "rzp_live_RrlYub6HRqZ8MD",
+          amount: order.amount,
+          currency: order.currency || "INR",
+          name: "STI Mock Test",
+          description: "PSI/ASI Test Series – 5 Mock Tests",
+          order_id: order.order_id,
+          prefill: {
+            email: currentUser.email || "",
+          },
+          handler: async function (response) {
+            // 2) Verify payment via Supabase Edge Function
+            try {
+              buyBtn.textContent = "Verifying payment...";
+              const verifyRes = await fetch(
+                "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/verify_payment",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature
+                  })
+                }
+              );
+
+              if (!verifyRes.ok) {
+                throw new Error("Verification failed");
+              }
+
+              const verifyData = await verifyRes.json();
+              // assume backend: on success → user access row set active
+              if (verifyData.success) {
+                accessStatusEl.innerHTML =
+                  '<span class="status-ok">Payment Successful! Access update થઈ રહ્યું છે...</span>';
+                await checkAccessAndUpdateUI();
+              } else {
+                accessStatusEl.innerHTML =
+                  '<span class="status-error">Payment verify થઈ શક્યો નહિ.</span>';
+              }
+            } catch (err) {
+              console.error(err);
+              accessStatusEl.innerHTML =
+                '<span class="status-error">Payment verify કરતી વખતે ભૂલ આવી.</span>';
+            } finally {
+              buyBtn.textContent = "Buy Full Series (₹49)";
+              buyBtn.disabled = false;
+            }
+          },
+          theme: {
+            color: "#007bff",
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on("payment.failed", function () {
+          accessStatusEl.innerHTML =
+            '<span class="status-error">Payment fail થયું. ફરી પ્રયત્ન કરો.</span>';
+          buyBtn.textContent = "Buy Full Series (₹49)";
+          buyBtn.disabled = false;
+        });
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        accessStatusEl.innerHTML =
+          '<span class="status-error">Order create કરતી વખતે ભૂલ આવી.</span>';
+        buyBtn.textContent = "Buy Full Series (₹49)";
+        buyBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+  </html>
