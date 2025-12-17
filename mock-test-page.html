@@ -38,11 +38,27 @@
 
   <!-- Razorpay Script -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- Supabase Script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
-    const userId = "USER_UUID"; // Replace with actual logged-in user UUID
+    // Supabase client (use 'sb' instead of 'supabase' to avoid conflicts)
+    const sb = supabase.createClient("https://bhmycvrbucmbbrpzeane.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4");
+
+    async function getUserId() {
+      const { data: { user } } = await sb.auth.getUser();
+      return user ? user.id : null;
+    }
+
     const payBtn = document.getElementById("payBtn");
 
     payBtn.addEventListener("click", async () => {
+      const userId = await getUserId();
+      if (!userId) {
+        alert("Please log in first!");
+        return;
+      }
+
       // Step 1: Create Razorpay order via Supabase Edge Function
       const orderRes = await fetch(
         "https://bhmycvrbucmbbrpzeane.supabase.co/functions/v1/create-razorpay-order",
@@ -56,7 +72,7 @@
 
       // Step 2: Razorpay Checkout
       const options = {
-        key: "YOUR_RAZORPAY_KEY_ID", // Replace with your Razorpay Key ID
+        key: "rzp_live_RrlYub6HRqZ8MD", // Replace with your Razorpay Key ID
         amount: order.amount,
         currency: order.currency,
         order_id: order.id,
