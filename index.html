@@ -2,252 +2,568 @@
 <html lang="gu">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>STI Mock Test</title>
+
+  <!-- Supabase JS v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      margin: 0;
-      background: #f2f2f2;
-      font-family: system-ui, sans-serif;
+    /* ===== RESET / BASE ===== */
+    * {
+      box-sizing: border-box;
     }
 
-    /* HEADER */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* ===== HEADER ===== */
     header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
       background: #ffffff;
+      border-bottom: 1px solid #e1e1e1;
       padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #ddd;
-      position: sticky;
-      top: 0;
-      z-index: 10;
     }
 
-    header h1 {
-      margin: 0;
+    .brand-title {
       font-size: 20px;
       font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
-    .btn {
-      background: #007bff;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
+    .auth-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-size: 14px;
     }
 
-    .btn-small {
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      background: #007bff;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn.small {
       padding: 6px 10px;
       font-size: 13px;
     }
 
-    /* CARDS */
-    .container {
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid #007bff;
+      color: #007bff;
+    }
+
+    .user-name {
+      font-weight: 600;
+      max-width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .page-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
       padding: 16px;
     }
 
     .card {
-      background: white;
-      padding: 16px;
-      border-radius: 10px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px 16px 18px;
       margin-bottom: 18px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
-    .card h3 {
-      margin-top: 0;
+    .card-title {
+      margin: 0 0 6px;
       font-size: 18px;
       font-weight: 700;
     }
 
-    .card p {
-      margin: 6px 0;
+    .card-sub {
+      margin: 0 0 10px;
       font-size: 14px;
-      line-height: 1.4;
+      color: #444;
     }
 
-    /* FOOTER */
+    .card-text {
+      margin: 4px 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .card-actions {
+      margin-top: 14px;
+    }
+
+    /* ===== FOOTER ===== */
     footer {
-      background: #ffffff;
-      padding: 16px;
-      text-align: center;
-      border-top: 1px solid #ddd;
       margin-top: 40px;
+      background: #ffffff;
+      border-top: 1px solid #e1e1e1;
+      padding: 14px 16px 18px;
+      text-align: center;
+      font-size: 13px;
     }
 
-    footer .btn {
-      margin: 6px;
+    .footer-buttons {
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    /* POPUP */
+    /* ===== POPUP / MODAL ===== */
     .overlay {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.50);
       display: none;
-      z-index: 100;
+      z-index: 90;
     }
 
     .popup {
       position: fixed;
-      top: 50%; left: 50%;
+      left: 50%;
+      top: 50%;
       transform: translate(-50%, -50%);
-      background: white;
-      width: 90%;
-      max-width: 350px;
-      padding: 20px;
-      border-radius: 10px;
+      width: 92%;
+      max-width: 380px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 18px 16px 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.20);
       display: none;
-      z-index: 101;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 100;
     }
 
-    .popup input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
-    .popup h3 {
-      margin-top: 0;
+    .popup-title {
+      margin: 0;
       font-size: 18px;
       font-weight: 700;
     }
+
+    .popup-close {
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .popup-body {
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: #444;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid #cccccc;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.15);
+    }
+
+    .popup-footer {
+      margin-top: 14px;
+      text-align: right;
+    }
+
+    .error-text {
+      font-size: 12px;
+      color: #c62828;
+      margin-top: 4px;
+      min-height: 16px;
+    }
+
+    @media (max-width: 360px) {
+      .brand-title {
+        font-size: 18px;
+      }
+      .auth-area {
+        gap: 4px;
+      }
+      .btn.small {
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
-
 <body>
 
   <!-- HEADER -->
   <header>
-    <h1>STI Mock Test</h1>
-    <div id="auth-area">
-      <button class="btn btn-small" onclick="openPopup('login')">Login</button>
-      <button class="btn btn-small" onclick="openPopup('register')">Register</button>
+    <div class="brand-title">STI Mock Test</div>
+
+    <div class="auth-area" id="auth-area">
+      <!-- Default: Login + Register -->
+      <button class="btn small" onclick="openPopup('login')">Login</button>
+      <button class="btn small ghost" onclick="openPopup('register')">Register</button>
     </div>
   </header>
 
   <!-- MAIN CONTENT -->
-  <div class="container">
+  <main class="page-wrapper">
 
-    <div class="card">
-      <h3>⭐ Demo Test - ફ્રી એક્સેસ</h3>
-      <p>20 માર્કની ક્વિઝ | શરુઆત માટે યોગ્ય</p>
-      <p>આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો અને સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.</p>
-      <p>Duration: 20 min • Negative marking નથી</p>
-      <a href="demo-test-page.html">
-        <button class="btn">DEMO Test શરૂ કરો</button>
-      </a>
-    </div>
+    <!-- DEMO TEST CARD -->
+    <section class="card">
+      <h2 class="card-title">⭐ Demo Test - ફ્રી એક્સેસ</h2>
+      <p class="card-sub">20 માર્કની ક્વિઝ | શરુઆત માટે યોગ્ય</p>
 
-    <div class="card">
-      <h3>Test Series: PSI/ASI - 5 Mock Tests</h3>
-      <p>નવीनતમ અભ્યાસક્રમ મુજબ • પૂર્ણ સિલેબસ કવર</p>
-      <p>આ સીરીઝમાં PSI/ASI પરીક્ષાના ધોરણ મુજબ 5 કુલ લંબાઈના મોક ટેસ્ટ સામેલ છે.</p>
-      <p>કિંમત: ₹99/-</p>
-      <a href="mock-test-page.html">
-        <button class="btn">Buy Now (₹99)</button>
-      </a>
-    </div>
+      <p class="card-text">
+        આ ડેમો ટેસ્ટ છે. તમે અહીં મફતમાં 20 માર્કની ક્વિઝ આપી શકો છો અને
+        સિસ્ટમની કાર્યક્ષમતા ચકાસી શકો છો.
+      </p>
 
-  </div>
+      <p class="card-meta">
+        Duration: 20 min • Negative marking નથી
+      </p>
+
+      <div class="card-actions">
+        <a href="demo-test-page.html">
+          <button class="btn">DEMO Test શરૂ કરો</button>
+        </a>
+      </div>
+    </section>
+
+    <!-- PAID TEST SERIES CARD -->
+    <section class="card">
+      <h2 class="card-title">Test Series: PSI/ASI - 5 Mock Tests</h2>
+      <p class="card-sub">નવीनતમ અભ્યાસક્રમ મુજબ • પૂર્ણ સિલેબસ કવર</p>
+
+      <p class="card-text">
+        આ સીરીઝમાં PSI/ASI પરીક્ષાના ધોરણ મુજબ 5 કુલ લંબાઈના મોક ટેસ્ટ સામેલ છે.
+        દરેક પેપર પછી વિગતવાર રિઝલ્ટ અને એનાલિસિસ મળશે.
+      </p>
+
+      <p class="card-meta">
+        કિંમત: ₹99/- • 5 Mock Test Bundle
+      </p>
+
+      <div class="card-actions">
+        <a href="mock-test-page.html">
+          <button class="btn">Buy Now (₹99)</button>
+        </a>
+      </div>
+    </section>
+
+  </main>
 
   <!-- FOOTER -->
   <footer>
-    <a href="https://wa.me/916353511804"><button class="btn">WhatsApp</button></a>
-    <a href="tel:+916353511804"><button class="btn">Call</button></a>
-    <p>© 2025 STI Mock Test</p>
+    <div class="footer-buttons">
+      <a href="https://wa.me/916353511804">
+        <button class="btn small">WhatsApp</button>
+      </a>
+      <a href="tel:+916353511804">
+        <button class="btn small ghost">Call</button>
+      </a>
+    </div>
+    <div>© 2025 STI Mock Test</div>
+    <div>All rights reserved.</div>
   </footer>
 
-  <!-- POPUPS -->
-  <div class="overlay" id="overlay" onclick="closePopup()"></div>
+  <!-- OVERLAY -->
+  <div class="overlay" id="overlay" onclick="closeAllPopups()"></div>
 
+  <!-- LOGIN POPUP -->
   <div class="popup" id="popup-login">
-    <h3>Login</h3>
-    <input type="email" id="login-email" placeholder="Email">
-    <input type="password" id="login-pass" placeholder="Password">
-    <button class="btn" onclick="login()">Login</button>
+    <div class="popup-header">
+      <h3 class="popup-title">Login</h3>
+      <button class="popup-close" onclick="closeAllPopups()">×</button>
+    </div>
+
+    <div class="popup-body">
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email</label>
+        <input id="login-email" class="form-input" type="email" placeholder="you@example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <input id="login-password" class="form-input" type="password" placeholder="Password">
+      </div>
+
+      <div id="login-error" class="error-text"></div>
+
+      <div class="popup-footer">
+        <button class="btn small" onclick="handleLogin()">Login</button>
+      </div>
+    </div>
   </div>
 
+  <!-- REGISTER POPUP -->
   <div class="popup" id="popup-register">
-    <h3>Register</h3>
-    <input type="text" id="reg-name" placeholder="Full Name">
-    <input type="email" id="reg-email" placeholder="Email">
-    <input type="password" id="reg-pass" placeholder="Password">
-    <button class="btn" onclick="register()">Register</button>
+    <div class="popup-header">
+      <h3 class="popup-title">Register</h3>
+      <button class="popup-close" onclick="closeAllPopups()">×</button>
+    </div>
+
+    <div class="popup-body">
+      <div class="form-group">
+        <label class="form-label" for="reg-name">Full Name</label>
+        <input id="reg-name" class="form-input" type="text" placeholder="તમારું સંપૂર્ણ નામ">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-mobile">Mobile</label>
+        <input id="reg-mobile" class="form-input" type="tel" placeholder="10 digit mobile નંબર">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-email">Email</label>
+        <input id="reg-email" class="form-input" type="email" placeholder="you@example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-password">Password</label>
+        <input id="reg-password" class="form-input" type="password" placeholder="Minimum 6 characters">
+      </div>
+
+      <div id="reg-error" class="error-text"></div>
+
+      <div class="popup-footer">
+        <button class="btn small" onclick="handleRegister()">Create Account</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const supabase = supabase.createClient(
+    // ===== SUPABASE CLIENT (IMPORTANT: USE DIFFERENT NAME) =====
+    const sbClient = window.supabase.createClient(
       "https://bhmycvrbucmbbrpzeane.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
     );
 
+    // ===== POPUP HELPERS =====
     function openPopup(type) {
       document.getElementById("overlay").style.display = "block";
-      document.getElementById("popup-" + type).style.display = "block";
+      if (type === "login") {
+        document.getElementById("popup-login").style.display = "block";
+        document.getElementById("popup-register").style.display = "none";
+        document.getElementById("login-error").textContent = "";
+      } else {
+        document.getElementById("popup-register").style.display = "block";
+        document.getElementById("popup-login").style.display = "none";
+        document.getElementById("reg-error").textContent = "";
+      }
     }
 
-    function closePopup() {
+    function closeAllPopups() {
       document.getElementById("overlay").style.display = "none";
       document.getElementById("popup-login").style.display = "none";
       document.getElementById("popup-register").style.display = "none";
     }
 
-    async function register() {
-      const email = document.getElementById("reg-email").value;
-      const password = document.getElementById("reg-pass").value;
-      const full_name = document.getElementById("reg-name").value;
+    // ===== AUTH: REGISTER =====
+    async function handleRegister() {
+      const full_name = document.getElementById("reg-name").value.trim();
+      const mobile = document.getElementById("reg-mobile").value.trim();
+      const email = document.getElementById("reg-email").value.trim();
+      const password = document.getElementById("reg-password").value;
+      const errorBox = document.getElementById("reg-error");
+      errorBox.textContent = "";
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (!full_name || !mobile || !email || !password) {
+        errorBox.textContent = "બધા ફીલ્ડ ફરજિયાત છે.";
+        return;
+      }
+      if (password.length < 6) {
+        errorBox.textContent = "Password ઓછામાં ઓછા 6 characters હોવો જોઇએ.";
+        return;
+      }
 
-      if (data.user) {
-        await supabase.from("profiles").insert([
-          { id: data.user.id, email, full_name }
-        ]);
-        loadUser(data.user.id);
-        closePopup();
-      } else alert(error.message);
+      try {
+        const { data, error } = await sbClient.auth.signUp({
+          email,
+          password
+        });
+
+        if (error) {
+          errorBox.textContent = error.message || "Registration દરમિયાન ભૂલ આવી.";
+          return;
+        }
+
+        if (data && data.user) {
+          const userId = data.user.id;
+          const { error: insertError } = await sbClient
+            .from("profiles")
+            .insert([
+              {
+                id: userId,
+                email: email,
+                full_name: full_name,
+                mobile: mobile
+              }
+            ]);
+
+          if (insertError) {
+            errorBox.textContent = insertError.message || "Profile save કરતી વખતે ભૂલ આવી.";
+            return;
+          }
+
+          await loadCurrentUser(userId);
+          closeAllPopups();
+        } else {
+          errorBox.textContent = "User create નથી થયો. થોડી વાર પછી ફરી પ્રયત્ન કરો.";
+        }
+      } catch (err) {
+        console.error(err);
+        errorBox.textContent = "Network અથવા unknown error આવી.";
+      }
     }
 
-    async function login() {
-      const email = document.getElementById("login-email").value;
-      const password = document.getElementById("login-pass").value;
+    // ===== AUTH: LOGIN =====
+    async function handleLogin() {
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      const errorBox = document.getElementById("login-error");
+      errorBox.textContent = "";
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!email || !password) {
+        errorBox.textContent = "Email અને password ફરજિયાત છે.";
+        return;
+      }
 
-      if (data.user) {
-        loadUser(data.user.id);
-        closePopup();
-      } else alert(error.message);
+      try {
+        const { data, error } = await sbClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          errorBox.textContent = error.message || "Login દરમિયાન ભૂલ આવી.";
+          return;
+        }
+
+        if (data && data.user) {
+          await loadCurrentUser(data.user.id);
+          closeAllPopups();
+        } else {
+          errorBox.textContent = "User મળ્યો નથી.";
+        }
+      } catch (err) {
+        console.error(err);
+        errorBox.textContent = "Network અથવા unknown error આવી.";
+      }
     }
 
-    async function loadUser(uid) {
-      const { data } = await supabase.from("profiles").select("full_name").eq("id", uid).single();
+    // ===== LOAD USER PROFILE & UPDATE HEADER =====
+    async function loadCurrentUser(userId) {
+      try {
+        const { data, error } = await sbClient
+          .from("profiles")
+          .select("full_name")
+          .eq("id", userId)
+          .single();
 
-      document.getElementById("auth-area").innerHTML =
-        `<strong>${data.full_name}</strong> 
-         <button class="btn btn-small" onclick="logout()">Logout</button>`;
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        const name = data?.full_name || "User";
+        const authArea = document.getElementById("auth-area");
+        authArea.innerHTML = `
+          <span class="user-name">${name}</span>
+          <button class="btn small ghost" onclick="handleLogout()">Logout</button>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
     }
 
-    async function logout() {
-      await supabase.auth.signOut();
-      location.reload();
+    // ===== LOGOUT =====
+    async function handleLogout() {
+      try {
+        await sbClient.auth.signOut();
+      } catch (err) {
+        console.error(err);
+      }
+      // Reset header UI
+      const authArea = document.getElementById("auth-area");
+      authArea.innerHTML = `
+        <button class="btn small" onclick="openPopup('login')">Login</button>
+        <button class="btn small ghost" onclick="openPopup('register')">Register</button>
+      `;
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) loadUser(data.session.user.id);
-    });
+    // ===== ON PAGE LOAD: CHECK SESSION =====
+    (async function initAuthOnLoad() {
+      try {
+        const { data } = await sbClient.auth.getSession();
+        if (data && data.session && data.session.user) {
+          const userId = data.session.user.id;
+          await loadCurrentUser(userId);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    })();
   </script>
 
 </body>
