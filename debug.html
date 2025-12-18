@@ -3,57 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSI Mock Test - Fixed</title>
+    <title>PSI/ASI Mock Test Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { user-select: none; -webkit-user-select: none; background-color: #f8fafc; }
+        .opt-card { border: 2px solid #e2e8f0; transition: 0.2s; cursor: pointer; }
+        .opt-card:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        .opt-selected { border-color: #2563eb !important; background-color: #dbeafe !important; font-weight: bold; }
+        .pal-btn { width: 35px; height: 35px; border-radius: 6px; font-size: 11px; font-weight: bold; border: 1px solid #e2e8f0; background: white; color: #64748b; }
+        .pal-done { background-color: #2563eb !important; color: white !important; border: none; }
+        .pal-active { border: 3px solid #f59e0b !important; }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <div id="app" class="p-10 text-center">
-        <h1 id="status-text" class="text-xl font-bold mb-4">કનેક્ટ થઈ રહ્યું છે...</h1>
-        <button id="start-btn" class="hidden bg-blue-600 text-white px-8 py-3 rounded-xl font-bold">Start Test</button>
+<div id="loader" class="fixed inset-0 bg-white z-[100] flex items-center justify-center">
+    <div class="text-center">
+        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="font-bold text-gray-500 italic">પ્રશ્નો લોડ થઈ રહ્યા છે...</p>
     </div>
+</div>
 
-    <script>
-        // ૧. સાચી URL અને KEY (Trimmed)
-        const URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+<div id="test-ui" class="hidden min-h-screen flex flex-col">
+    <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div id="q-status" class="font-bold text-blue-700 text-sm">Q: 1/200</div>
+        <div id="timer" class="text-xl font-mono font-bold text-red-600 px-4 py-1 bg-red-50 rounded-full italic">120:00</div>
+        <button onclick="submitTest()" class="bg-red-600 text-white px-5 py-1 rounded-lg font-bold hover:bg-red-700 transition">સબમિટ</button>
+    </header>
 
-        // ૨. ગ્લોબલ ક્લાયન્ટ (શોર્ટ નામ વાપરો જેથી ટકરાવ ના થાય)
-        const sb = supabase.createClient(URL, KEY);
+    <main class="flex-grow flex flex-col md:flex-row overflow-hidden">
+        <div class="flex-grow p-4 md:p-8 overflow-y-auto h-[calc(100vh-70px)]">
+            <div class="max-w-3xl mx-auto bg-white p-6 md:p-10 rounded-[30px] shadow-sm border border-gray-100 min-h-[450px] relative">
+                <h2 id="q-text" class="text-xl font-bold text-gray-800 mb-8 leading-relaxed">Loading...</h2>
+                <div id="options-area" class="space-y-4"></div>
+                <div class="flex justify-between mt-12 pt-6 border-t">
+                    <button onclick="changeIdx(-1)" class="px-6 py-2 text-gray-400 font-bold hover:bg-gray-100 rounded-xl">Back</button>
+                    <button onclick="changeIdx(1)" class="px-10 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100">Next</button>
+                </div>
+            </div>
+        </div>
+        <aside class="w-full md:w-72 bg-white border-l p-5 overflow-y-auto h-[calc(100vh-70px)]">
+            <p class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-tighter text-center">Questions Grid</p>
+            <div id="palette" class="grid grid-cols-6 md:grid-cols-4 gap-2"></div>
+        </aside>
+    </main>
+</div>
 
-        async function initCheck() {
-            try {
-                const statusLabel = document.getElementById('status-text');
-                
-                // પહેલા ફક્ત પ્રશ્નો ખેંચીને ચેક કરો (ટેસ્ટિંગ માટે)
-                const { data, error } = await sb
-                    .from('questions')
-                    .select('id')
-                    .eq('test_id', 'mock_test_1')
-                    .limit(1);
+<div id="result-ui" class="hidden min-h-screen p-4 md:p-10 bg-gray-50 flex flex-col items-center">
+    <div class="max-w-4xl w-full bg-white rounded-[40px] shadow-2xl overflow-hidden md:flex mb-10">
+        <div class="md:w-1/2 p-10 text-center border-r flex flex-col justify-center bg-white">
+            <h2 class="text-xl font-bold text-gray-400 uppercase tracking-widest">તમારો સ્કોર</h2>
+            <div class="text-7xl font-black text-blue-600 my-6" id="final-score">0.00</div>
+            <div class="flex gap-4 justify-center mt-4">
+                <button onclick="toggleSolutions()" class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg">Solutions</button>
+                <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg">Leaderboard</button>
+            </div>
+        </div>
+        <div class="md:w-1/2 p-10 bg-gray-50 flex flex-col items-center justify-center">
+            <div class="w-60 h-60"><canvas id="resChart"></canvas></div>
+            <div class="grid grid-cols-2 gap-4 mt-8 w-full text-center">
+                <div class="bg-white p-3 rounded-2xl shadow-sm"><p class="text-green-600 font-black text-xl" id="c-count">0</p><p class="text-[10px] font-bold text-gray-400">CORRECT</p></div>
+                <div class="bg-white p-3 rounded-2xl shadow-sm"><p class="text-red-600 font-black text-xl" id="w-count">0</p><p class="text-[10px] font-bold text-gray-400">WRONG/SKIP</p></div>
+            </div>
+        </div>
+    </div>
+    <div id="sol-area" class="hidden w-full max-w-4xl space-y-6 pb-20">
+        <h3 class="text-2xl font-black text-gray-800 px-4">Answers & Explanations</h3>
+        <div id="sol-list" class="space-y-4"></div>
+    </div>
+</div>
 
-                if (error) {
-                    console.error("Supabase Error:", error);
-                    statusLabel.innerText = "એરર: " + error.message;
-                    return;
-                }
+<script>
+    const URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+    const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+    const sb = supabase.createClient(URL, KEY);
 
-                statusLabel.innerText = "ડેટાબેઝ કનેક્શન સફળ! ૨૮ પ્રશ્નો તૈયાર છે.";
-                document.getElementById('start-btn').classList.remove('hidden');
+    let questions = [], userAns = {}, currentIdx = 0, timer = 120 * 60, interval;
 
-            } catch (err) {
-                console.error("JS Error:", err);
-                document.getElementById('status-text').innerText = "કનેક્શનમાં ભૂલ છે.";
-            }
+    async function init() {
+        try {
+            const { data, error } = await sb.from('questions').select('*').eq('test_id', 'mock_test_1').order('id', {ascending: true});
+            if (error) throw error;
+            questions = data;
+            
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('test-ui').classList.remove('hidden');
+            
+            renderPalette();
+            renderQ();
+            startTimer();
+        } catch (e) {
+            alert("Error: " + e.message);
         }
+    }
 
-        document.getElementById('start-btn').onclick = () => {
-            alert("ટેસ્ટ એન્જીન લોડ થઈ રહ્યું છે...");
-            // અહીંથી તમારું ટેસ્ટ લોજિક આગળ વધશે
-        };
+    function renderQ() {
+        const q = questions[currentIdx];
+        document.getElementById('q-status').innerText = `Q: ${currentIdx + 1}/${questions.length}`;
+        document.getElementById('q-text').innerText = q.question_text;
+        
+        const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e || "E - Not Attempted"];
+        const div = document.getElementById('options-area');
+        div.innerHTML = '';
 
-        window.onload = initCheck;
-    </script>
+        opts.forEach((txt, i) => {
+            const btn = document.createElement('div');
+            btn.className = `opt-card p-4 rounded-2xl flex items-center gap-4 ${userAns[currentIdx] === i ? 'opt-selected' : ''}`;
+            btn.innerHTML = `<span class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center font-bold text-xs">${String.fromCharCode(65+i)}</span> <span class="text-gray-700">${txt}</span>`;
+            btn.onclick = () => { userAns[currentIdx] = i; renderQ(); updatePal(); };
+            div.appendChild(btn);
+        });
+        updatePal();
+    }
+
+    function renderPalette() {
+        const grid = document.getElementById('palette');
+        questions.forEach((_, i) => {
+            const b = document.createElement('button');
+            b.id = `pal-${i}`; b.className = "pal-btn"; b.innerText = i + 1;
+            b.onclick = () => { currentIdx = i; renderQ(); };
+            grid.appendChild(b);
+        });
+    }
+
+    function updatePal() {
+        questions.forEach((_, i) => {
+            const b = document.getElementById(`pal-${i}`);
+            b.classList.remove('pal-active', 'pal-done');
+            if(i === currentIdx) b.classList.add('pal-active');
+            if(userAns[i] !== undefined) b.classList.add('pal-done');
+        });
+    }
+
+    function changeIdx(dir) {
+        let n = currentIdx + dir;
+        if(n >= 0 && n < questions.length) { currentIdx = n; renderQ(); }
+    }
+
+    function startTimer() {
+        interval = setInterval(() => {
+            timer--;
+            let m = Math.floor(timer/60), s = timer%60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            if(timer <= 0) submitTest();
+        }, 1000);
+    }
+
+    function submitTest() {
+        if(!confirm("શું તમે ફાઈનલ સબમિટ કરવા માંગો છો?")) return;
+        clearInterval(interval);
+        
+        let c = 0, w = 0, e = 0, s = 0;
+        questions.forEach((q, i) => {
+            const u = userAns[i];
+            if (u === undefined) s++; // Skipped
+            else if (u === 4) e++; // Option E
+            else if (u === q.correct_option) c++; // Correct
+            else w++; // Wrong
+        });
+
+        const score = (c * 1) - ((w + s) * 0.33);
+
+        document.getElementById('test-ui').classList.add('hidden');
+        document.getElementById('result-ui').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score.toFixed(2);
+        document.getElementById('c-count').innerText = c;
+        document.getElementById('w-count').innerText = (w + s);
+
+        new Chart(document.getElementById('resChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Correct', 'Wrong/Skip', 'Option E'],
+                datasets: [{ data: [c, (w+s), e], backgroundColor: ['#22c55e', '#ef4444', '#f97316'], borderWidth: 0 }]
+            },
+            options: { plugins: { legend: { display: false } }, cutout: '80%' }
+        });
+    }
+
+    function toggleSolutions() {
+        const area = document.getElementById('sol-area');
+        area.classList.toggle('hidden');
+        const list = document.getElementById('sol-list');
+        list.innerHTML = '';
+        questions.forEach((q, i) => {
+            const u = userAns[i];
+            const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e || "E - Not Attempted"];
+            const card = document.createElement('div');
+            card.className = `p-6 rounded-[25px] bg-white border shadow-sm ${u === q.correct_option ? 'border-green-100' : 'border-red-100'}`;
+            card.innerHTML = `<p class="font-bold text-gray-800 mb-4">${i+1}. ${q.question_text}</p>
+                <div class="grid md:grid-cols-2 gap-3 text-sm">
+                    <div class="p-3 rounded-xl bg-gray-50 border border-gray-100"><b>તમારો જવાબ:</b> ${u !== undefined ? opts[u] : 'સ્કીપ કર્યો'}</div>
+                    <div class="p-3 rounded-xl bg-blue-50 border border-blue-100 text-blue-700"><b>સાચો જવાબ:</b> ${opts[q.correct_option]}</div>
+                </div>
+                <div class="mt-4 p-4 bg-gray-50 rounded-xl text-xs italic text-gray-500"><b>સમજૂતી:</b> ${q.explanation || 'કોઈ સમજૂતી ઉપલબ્ધ નથી.'}</div>`;
+            list.appendChild(card);
+        });
+        window.scrollTo({top: area.offsetTop, behavior: 'smooth'});
+    }
+
+    window.onload = init;
+</script>
 </body>
 </html>
