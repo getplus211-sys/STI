@@ -187,60 +187,119 @@ async function submitTest(auto=false){
  loadResult(score,correct,wrong,skip,e);
 }
 
-/* ========== RESULT (Sudharelo) ========== */
+/* 1. QUESTION RENDER: 0-Index મુજબ ઓપ્શન સિલેક્ટ કરવા માટે */
+function renderQuestion(){
+ const q = questions[current];
+ app.innerHTML=
+ <div class="top">
+  <div>Q ${current+1}/${questions.length}</div>
+  <div id="timer"></div>
+ </div>
+
+ <div class="card">
+  <p>${q.question_text}</p>
+  ${["a","b","c","d","e"].map((o,i)=>
+   <div class="option ${answers[q.id] === i ? "active" : ""}"
+    onclick="selectAnswer(${q.id}, ${i})">
+    ${q["option_"+o]}
+   </div>).join("")}
+ </div>
+
+ <button class="gray" onclick="prev()">Previous</button><br><br>
+ <button class="gray" onclick="next()">Next</button><br><br>
+ <button class="danger" onclick="submitTest()">Submit</button>
+ ;
+}
+
+/* 2. SUBMIT: 0-Index અને Negative Marking ની ગણતરી માટે */
+async function submitTest(auto=false){
+ if(submitted) return;
+ if(!auto && !confirm("Submit test?")) return;
+ submitted=true;
+ clearInterval(timer);
+
+ let correct=0, wrong=0, skip=0, e=0, score=0;
+
+ questions.forEach(q=>{
+  const a = answers[q.id];
+  // 0 ને પણ વેલ્યુ ગણવા માટે undefined ચેક કરવું જરૂરી છે
+  if(a === undefined){ skip++; score -= 0.33; }
+  else if(a === 4){ e++; } // 4 એટલે 'e' ઓપ્શન
+  else if(a === q.correct_option){ correct++; score++; }
+  else { wrong++; score -= 0.33; }
+ });
+
+ score = Number(score.toFixed(2));
+ const safeAnswers = JSON.parse(JSON.stringify(answers));
+
+ const {error} = await supabase.from("test_results").insert({
+  user_id:user.id,
+  test_id:TEST_ID,
+  total_score:score,
+  correct_count:correct,
+  wrong_count:wrong,
+  skipped_count:skip,
+  e_count:e,
+  time_taken_seconds:TOTAL_TIME-timeLeft,
+  answers:safeAnswers
+ });
+
+ if(error){ alert("Result save failed: "+error.message); return; }
+ loadResult(score, correct, wrong, skip, e);
+}
+
+/* 3. RESULT & SOLUTIONS: સ્કોર, ટાઈમ અને આન્સર કી બતાવવા માટે */
 function loadResult(score, c, w, s, e) {
   const timeTaken = TOTAL_TIME - timeLeft;
-  const minutes = Math.floor(timeTaken / 60);
-  const seconds = timeTaken % 60;
+  const mins = Math.floor(timeTaken / 60);
+  const secs = timeTaken % 60;
 
-  app.innerHTML = `
+  app.innerHTML = 
  <div class="card">
   <h2>Your Score: ${score}</h2>
-  <div style="margin: 15px 0; line-height: 1.6;">
+  <div style="margin:15px 0; font-size:15px; line-height:1.6;">
     <p><b>Correct:</b> ${c} | <b>Wrong:</b> ${w}</p>
     <p><b>Skipped:</b> ${s} | <b>E Options:</b> ${e}</p>
-    <p><b>Time Taken:</b> ${minutes}m ${seconds}s</p>
+    <p><b>Time Taken:</b> ${mins}m ${secs}s</p>
   </div>
   <canvas id="chart"></canvas><br>
-  
   <button class="primary" onclick="loadLeaderboard()">View Leaderboard</button>
   <br><br>
   <button class="gray" onclick="viewSolutions()">View Answers / Solutions</button>
- </div>`;
+ </div>;
 
   new Chart(chart, {
     type: "pie",
     data: {
-      labels: ["Correct", "Wrong", "Skipped", "E"],
-      datasets: [{ data: [c, w, s, e], backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308'] }]
+      labels: ["Correct","Wrong","Skipped","E"],
+      datasets: [{ 
+        data: [c, w, s, e], 
+        backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308'] 
+      }]
     }
   });
 }
 
-/* ========== SOLUTIONS VIEW ========== */
 function viewSolutions() {
-  let solutionHTML = `<h3>Answer Key & Solutions</h3>
-                      <button class="gray" style="margin-bottom:15px" onclick="location.reload()">Back to Result</button>`;
+  let html = <h3>Answer Key & Solutions</h3>
+              <button class="gray" style="margin-bottom:15px" onclick="location.reload()">⬅ Back to Result</button>;
+  const opts = ["a", "b", "c", "d", "e"];
 
-  questions.forEach((q, index) => {
+  questions.forEach((q, i) => {
     const userAns = answers[q.id];
     const isCorrect = userAns === q.correct_option;
-    const options = ["a", "b", "c", "d", "e"];
     
-    solutionHTML += `
-    <div class="card" style="border-left: 5px solid ${isCorrect ? '#22c55e' : '#ef4444'}">
-      <p><b>Q${index + 1}:</b> ${q.question_text}</p>
-      <p><b>Your Answer:</b> ${userAns ? q["option_" + options[userAns - 1]] : "Skipped"}</p>
-      <p style="color: #22c55e"><b>Correct Answer:</b> ${q["option_" + options[q.correct_option - 1]]}</p>
-      ${q.solution ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Solution:</b> ${q.solution}</div>` : ""}
-    </div>`;
+    html += 
+    <div class="card" style="border-left:5px solid ${userAns === undefined ? '#cbd5e1' : (isCorrect ? '#22c55e' : '#ef4444')}">
+      <p><b>Q${i+1}:</b> ${q.question_text}</p>
+      <p><b>Your Answer:</b> ${userAns !== undefined ? q["option_"+opts[userAns]] : "Skipped"}</p>
+      <p style="color:#22c55e"><b>Correct Answer:</b> ${q["option_"+opts[q.correct_option]]}</p>
+      ${q.solution ? <div style="background:#f1f5f9; padding:10px; margin-top:10px; font-size:14px; border-radius:8px;"><b>Solution:</b> ${q.solution}</div> : ""}
+    </div>;
   });
-
-  solutionHTML += `<button class="primary" onclick="location.reload()">Finish</button>`;
-  app.innerHTML = solutionHTML;
+  app.innerHTML = html + <button class="primary" onclick="location.reload()">Finish</button>;
   window.scrollTo(0, 0);
-}
-
+      }
 
 
 /* ========== LEADERBOARD ========== */
