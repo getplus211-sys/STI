@@ -84,7 +84,8 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
   .maybeSingle();
 
  if (existingResult) {
-  // જો આપી દીધી હોય તો સીધું રિઝલ્ટ કાર્ડ બતાવો
+   answers = existingResult.answers || {};
+ // જો આપી દીધી હોય તો સીધું રિઝલ્ટ કાર્ડ બતાવો
  loadResult(
   existingResult.total_score, 
   existingResult.correct_count, 
@@ -328,6 +329,10 @@ async function loadLeaderboard(){
 
   // 3️⃣ Find logged-in user rank
   const myIndex = results.findIndex(r => r.user_id === user.id);
+if (myIndex === -1) {
+  alert("Your result not found in leaderboard");
+  return;
+}
   const myRank = myIndex + 1;
   const myData = results[myIndex];
 
