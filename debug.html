@@ -55,13 +55,12 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 let user, questions=[], answers={}, current=0;
 let timeLeft=TOTAL_TIME, timer, submitted=false;
 
-/* ========== INIT (સુધારેલું) ========== */
+/* ========== INIT ========== */
 (async()=>{
  const {data:{user:u}} = await supabase.auth.getUser();
  if(!u){app.innerHTML="Please login";return;}
  user=u;
 
- // એક્સેસ ચેક કરો
  const {data:access} = await supabase
   .from("user_access")
   .select("*")
@@ -75,88 +74,35 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
   return;
  }
 
- // હવે ચેક કરો કે ટેસ્ટ આપી દીધી છે કે નહીં
- const { data: existingResult } = await supabase
-  .from("test_results")
-  .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds")
-  .eq("user_id", user.id)
-  .eq("test_id", TEST_ID)
-  .maybeSingle();
-
- if (existingResult) {
-  // જો આપી દીધી હોય તો સીધું રિઝલ્ટ કાર્ડ બતાવો
-  loadResult(
-    existingResult.total_score, 
-    existingResult.correct_count, 
-    existingResult.wrong_count, 
-    existingResult.skipped_count, 
-    existingResult.e_count,
-    true // એક નવો ફ્લેગ મોકલીએ છીએ કે આ પહેલેથી આપેલી ટેસ્ટ છે
-  );
- } else {
-  loadIntro();
- }
+ loadIntro();
 })();
 
-/* ========== LOAD INTRO (નવું ઉમેરવાનું) ========== */
-function loadIntro() {
-  app.innerHTML = `
-    <div class="card">
-      <h2>Mock Test 1</h2>
-      <p><b>Instructions:</b></p>
-      <ul>
-        <li>Total Time: 120 Minutes</li>
-        <li>Negative Marking: 0.33 for wrong/skipped answers.</li>
-        <li>E option: No negative marking.</li>
-      </ul>
-      <label>
-        <input type="checkbox" id="agree"> I agree to the terms and conditions.
-      </label>
-      <br><br>
-      <button class="primary" onclick="startTest()">Start Test Now</button>
-    </div>
-  `;
+/* ========== INTRO ========== */
+function loadIntro(){
+ app.innerHTML=`
+ <div class="card">
+  <h2>Mock Test 1</h2>
+  <p>200 Questions • 120 Minutes</p>
+  <label><input type="checkbox" id="agree"> I accept instructions</label><br><br>
+  <button class="primary" onclick="startTest()">Start Test</button>
+ </div>`;
 }
-  
-  
-/* ========== START TEST (સુધારેલું) ========== */
+
+/* ========== START TEST ========== */
 async function startTest(){
  if(!agree.checked){alert("Accept instructions");return;}
 
- // 1. ચેક કરો કે યુઝરે આ ટેસ્ટ પહેલા આપી છે કે નહીં
- const { data: existingResult, error: checkError } = await supabase
-  .from("test_results")
-  .select("id")
-  .eq("user_id", user.id)
-  .eq("test_id", TEST_ID)
-  .maybeSingle(); // જો ડેટા હોય તો સિંગલ ઓબ્જેક્ટ આપશે
-
- if (existingResult) {
-  alert("તમે આ ટેસ્ટ પહેલેથી આપી દીધી છે. તમે તેને ફરીથી આપી શકતા નથી.");
-  // જો રિઝલ્ટ જોવું હોય તો સીધું લીડરબોર્ડ અથવા રિઝલ્ટ પેજ પર મોકલી શકાય
-  location.reload(); 
-  return;
- }
-
- // 2. જો ટેસ્ટ નથી આપી, તો સવાલો લોડ કરો
- const { data, error } = await supabase
+  const {data} = await supabase
   .from("questions")
   .select("*")
-  .eq("test_id", TEST_ID)
+  .eq("test_id",TEST_ID)
   .order("id");
 
- if (error || !data) {
-  alert("સવાલો લોડ કરવામાં ભૂલ આવી રહી છે.");
-  return;
- }
-
- questions = data;
+ questions=data;
  renderQuestion();
  startTimer();
 }
-  
 
-  
 /* ========== QUESTION RENDER ========== */
 function renderQuestion(){
  const q = questions[current];
