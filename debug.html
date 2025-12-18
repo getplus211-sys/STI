@@ -189,21 +189,22 @@ async function submitTest(auto=false){
 
 /* ========== RESULT ========== */
 function loadResult(score,c,w,s,e){
- app.innerHTML = `
- 
-  <h2>Your Result</h2>
+ app.innerHTML=`
+ <div class="card">
+  <h2>Your Score: ${score}</h2>
+  <canvas id="chart"></canvas><br>
+  <button class="primary" onclick="loadLeaderboard()">View Leaderboard</button>
+ </div>`;
 
-  <canvas id="pieChart"></canvas>
+ new Chart(chart,{
+  type:"pie",
+  data:{
+   labels:["Correct","Wrong","Skipped","E"],
+   datasets:[{data:[c,w,s,e]}]
+  }
+ });
+}
 
-  <div class="card">
-    <p><b>Total Score:</b> ${score}</p>
-    <p><b>Correct Answers:</b> ${correct}</p>
-    <p><b>Wrong Answers:</b> ${wrong}</p>
-    <p><b>Skipped:</b> ${skip}</p>
-    <p><b>E Option Used:</b> ${e}</p>
-    <p><b>Time Taken:</b> ${TOTAL_TIME - timeLeft} seconds</p>
-  </div>
-`;
 
 
 /* ========== LEADERBOARD ========== */
