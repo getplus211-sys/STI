@@ -85,14 +85,14 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
 
  if (existingResult) {
   // જો આપી દીધી હોય તો સીધું રિઝલ્ટ કાર્ડ બતાવો
-  loadResult(
-    existingResult.total_score, 
-    existingResult.correct_count, 
-    existingResult.wrong_count, 
-    existingResult.skipped_count, 
-    existingResult.e_count,
-    true // એક નવો ફ્લેગ મોકલીએ છીએ કે આ પહેલેથી આપેલી ટેસ્ટ છે
-  );
+ loadResult(
+  existingResult.total_score, 
+  existingResult.correct_count, 
+  existingResult.wrong_count, 
+  existingResult.skipped_count, 
+  existingResult.e_count,
+  existingResult.time_taken_seconds
+);
  } else {
   loadIntro();
  }
@@ -242,8 +242,10 @@ async function submitTest(auto=false){
 }
 
 /* ========== RESULT (Sudharelo) ========== */
-function loadResult(score, c, w, s, e) {
-  const timeTaken = TOTAL_TIME - timeLeft;
+function loadResult(score, c, w, s, e, timeFromDB = null) {
+  const timeTaken = timeFromDB !== null
+  ? timeFromDB
+  : (TOTAL_TIME - timeLeft);
   const minutes = Math.floor(timeTaken / 60);
   const seconds = timeTaken % 60;
 
