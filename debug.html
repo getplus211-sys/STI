@@ -78,7 +78,7 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
  // હવે ચેક કરો કે ટેસ્ટ આપી દીધી છે કે નહીં
  const { data: existingResult } = await supabase
   .from("test_results")
-  .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds")
+  .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds, answers")
   .eq("user_id", user.id)
   .eq("test_id", TEST_ID)
   .maybeSingle();
