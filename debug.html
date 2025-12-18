@@ -206,7 +206,7 @@ function loadResult(score,c,w,s,e){
 /* ========== LEADERBOARD ========== */
 async function loadLeaderboard(){
 
-  // 1️⃣ Get leaderboard data
+  // 1️⃣ Get leaderboard results
   const { data: results, error } = await supabase
     .from("test_results")
     .select("user_id,total_score,time_taken_seconds")
@@ -219,32 +219,50 @@ async function loadLeaderboard(){
     return;
   }
 
-  // 2️⃣ Collect user_ids
+  // 2️⃣ Get profiles
   const userIds = results.map(r => r.user_id);
 
-  // 3️⃣ Get user names from profiles
   const { data: profiles } = await supabase
     .from("profiles")
     .select("id, full_name")
     .in("id", userIds);
 
-  // 4️⃣ Create map: user_id → name
   const nameMap = {};
-  profiles.forEach(p => {
-    nameMap[p.id] = p.full_name;
-  });
+  profiles.forEach(p => nameMap[p.id] = p.full_name);
 
-  // 5️⃣ Render leaderboard
-  app.innerHTML = `
-    <h2>Leaderboard</h2>
-    ${results.map((u, i) => `
-      <div class="card rank ${u.user_id === user.id ? "me" : ""}">
-        <b>Rank #${i + 1}</b><br>
+  // 3️⃣ Find logged-in user rank
+  const myIndex = results.findIndex(r => r.user_id === user.id);
+  const myRank = myIndex + 1;
+  const myData = results[myIndex];
+
+  // 4️⃣ Build leaderboard list (excluding me)
+  const listHTML = results
+    .filter(r => r.user_id !== user.id)
+    .map((u, i) => `
+      <div class="card rank">
+        <b>Rank #${results.indexOf(u) + 1}</b><br>
         Name: ${nameMap[u.user_id] || "User"}<br>
         Score: ${u.total_score}<br>
         Time: ${u.time_taken_seconds} sec
       </div>
-    `).join("")}
+    `).join("");
+
+  // 5️⃣ Render UI
+  app.innerHTML = `
+    <!-- Back button -->
+    <button class="gray" onclick="loadResultPage()">⬅ Back to Result</button>
+    <br><br>
+
+    <!-- My Rank (always on top) -->
+    <div class="card rank me">
+      <b>Your Rank: #${myRank}</b><br>
+      Name: ${nameMap[user.id] || "You"}<br>
+      Score: ${myData.total_score}<br>
+      Time: ${myData.time_taken_seconds} sec
+    </div>
+
+    <h2>Leaderboard</h2>
+    ${listHTML}
   `;
 }
 
