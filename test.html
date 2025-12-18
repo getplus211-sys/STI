@@ -8,14 +8,12 @@
     body { font-family: system-ui, sans-serif; margin:0; background:#f7f7fb; }
     .container { max-width:960px; margin:0 auto; padding:12px; }
     .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:10px 0; }
-    .hidden { display:none; }
+    .hidden { display:none !important; }
     .nav-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
     .nav-actions button { flex:1; min-width:100px; padding:10px; border-radius:6px; border:1px solid #ccc; }
     .danger { background:#e6362e; color:#fff; border:none; }
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(40px,1fr)); gap:6px; }
     .grid button { padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px; }
-    .grid button.correct { background:#e6ffed; }
-    .grid button.wrong { background:#ffecec; }
     .grid button.skipped { background:#f0f0f0; }
     header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
     .meta { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
@@ -108,43 +106,24 @@ const DURATION_SECONDS = 120*60;
 
 let questions=[], answers=[], currentIndex=0, timerInterval=null, submitted=false;
 
-// ✅ Proper element references
-const startBtn = document.getElementById("startBtn");
-const rule1 = document.getElementById("rule1");
-const rule2 = document.getElementById("rule2");
-const rule3 = document.getElementById("rule3");
-const preRules = document.getElementById("preRules");
-const testSection = document.getElementById("testSection");
-const qNumber = document.getElementById("qNumber");
-const questionText = document.getElementById("questionText");
-const optionsForm = document.getElementById("optionsForm");
-const paletteBtn = document.getElementById("paletteBtn");
-const paletteModal = document.getElementById("paletteModal");
-const paletteGrid = document.getElementById("paletteGrid");
-const closePalette = document.getElementById("closePalette");
-const prevBtn = document.getElementById("prevBtn");
-const saveNextBtn = document.getElementById("saveNextBtn");
-const skipBtn = document.getElementById("skipBtn");
-const submitBtn = document.getElementById("submitBtn");
-const summary = document.getElementById("summary");
-const pieChart = document.getElementById("pieChart");
-const solutions = document.getElementById("solutions");
-const resultSection = document.getElementById("resultSection");
-const leaderboardSection = document.getElementById("leaderboardSection");
-const lbTable = document.getElementById("lbTable");
-const timer = document.getElementById("timer");
+// ✅ Elements
+const startBtn=document.getElementById("startBtn"),rule1=document.getElementById("rule1"),
+      rule2=document.getElementById("rule2"),rule3=document.getElementById("rule3"),
+      preRules=document.getElementById("preRules"),testSection=document.getElementById("testSection"),
+      qNumber=document.getElementById("qNumber"),questionText=document.getElementById("questionText"),
+      optionsForm=document.getElementById("optionsForm"),paletteBtn=document.getElementById("paletteBtn"),
+      paletteModal=document.getElementById("paletteModal"),paletteGrid=document.getElementById("paletteGrid"),
+      closePalette=document.getElementById("closePalette"),prevBtn=document.getElementById("prevBtn"),
+      saveNextBtn=document.getElementById("saveNextBtn"),skipBtn=document.getElementById("skipBtn"),
+      submitBtn=document.getElementById("submitBtn"),summary=document.getElementById("summary"),
+      pieChart=document.getElementById("pieChart"),solutions=document.getElementById("solutions"),
+      resultSection=document.getElementById("resultSection"),leaderboardSection=document.getElementById("leaderboardSection"),
+      lbTable=document.getElementById("lbTable"),timer=document.getElementById("timer");
 
-// ✅ Pre-rules logic
-const checks = [rule1, rule2, rule3];
-checks.forEach(ch => ch.addEventListener("change", () => {
-  startBtn.disabled = !checks.every(c => c.checked);
-}));
-
-startBtn.addEventListener("click", () => {
-  preRules.classList.add("hidden");
-  testSection.classList.remove("hidden");
-  startTest();
-});
+// ✅ Pre-rules
+const checks=[rule1,rule2,rule3];
+checks.forEach(ch=>ch.addEventListener("change",()=>{startBtn.disabled=!checks.every(c=>c.checked);}));
+startBtn.addEventListener("click",()=>{preRules.classList.add("hidden");testSection.classList.remove("hidden");startTest();});
 
 // ✅ Load questions
 async function loadQuestions(){
@@ -162,6 +141,7 @@ function renderQuestion(){
   questionText.textContent=q.question_text;
   [...optionsForm.elements].forEach(el=>el.checked=(Number(el.value)===answers[currentIndex].selected));
 }
+
 // ✅ Save answer
 function saveAnswer(sel){answers[currentIndex].selected=sel;buildPalette();}
 
@@ -239,6 +219,16 @@ function drawPie(correct, wrong, skipped, eCount) {
     ctx.fill();
     startAngle += sliceAngle;
   });
+  // legend
+  let y = 10;
+  ctx.font = "14px sans-serif";
+  data.forEach(d => {
+    ctx.fillStyle = d.color;
+    ctx.fillRect(10, y, 12, 12);
+    ctx.fillStyle = "#333";
+    ctx.fillText(`${d.label}: ${d.value}`, 30, y+10);
+    y += 20;
+  });
 }
 
 // ✅ Render solutions
@@ -281,6 +271,5 @@ async function startTest(){
   startTimer();
 }
 </script>
-
 </body>
 </html>
