@@ -2,94 +2,105 @@
 <html lang="gu">
 <head>
   <meta charset="utf-8" />
-  <title>Mock Test System</title>
+  <title>Premium Mock Test System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; margin:0; background:#f7f7fb; }
-    .container { max-width:960px; margin:0 auto; padding:12px; }
-    .card { background:#fff; border:1px solid #ddd; border-radius:8px; padding:12px; margin:10px 0; }
-    .hidden { display:none !important; }
-    .nav-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-    .nav-actions button { flex:1; min-width:100px; padding:10px; border-radius:6px; border:1px solid #ccc; }
-    .danger { background:#e6362e; color:#fff; border:none; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(40px,1fr)); gap:6px; }
-    .grid button { padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px; }
-    .grid button.skipped { background:#f0f0f0; }
-    header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
-    .meta { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; }
-    .modal-content { background:#fff; padding:16px; border-radius:8px; width:95%; max-width:600px; }
-    @media(max-width:600px){
-      .nav-actions button { font-size:14px; padding:8px; }
-      #questionText { font-size:15px; }
-    }
+    :root { --primary: #4f46e5; --secondary: #6366f1; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; background: var(--bg); color: var(--text); line-height: 1.6; }
+    .container { max-width: 800px; margin: 0 auto; padding: 16px; }
+    
+    /* UI Cards */
+    .card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #e2e8f0; padding: 10px 0; }
+    
+    /* Buttons */
+    button { cursor: pointer; border: none; border-radius: 8px; padding: 12px 20px; font-weight: 600; transition: 0.3s; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
+    .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+    .btn-danger { background: #ef4444; color: white; }
+
+    /* Question Styles */
+    .option-label { display: block; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+    .option-label:hover { background: #f1f5f9; }
+    input[type="radio"]:checked + span { font-weight: bold; color: var(--primary); }
+
+    /* Navigation */
+    .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+    .hidden { display: none !important; }
+
+    /* Palette */
+    .grid-palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
+    .pal-btn { width: 40px; height: 40px; border-radius: 8px; font-size: 12px; border: 1px solid #cbd5e1; }
+    .pal-answered { background: #22c55e; color: white; border: none; }
+    
+    #timer { font-weight: bold; font-family: monospace; font-size: 1.2rem; color: #ef4444; }
   </style>
 </head>
 <body>
+
+<div class="glass-header">
+  <div class="container" style="display:flex; justify-content: space-between; align-items: center;">
+    <h2 style="margin:0; font-size: 1.2rem;">Mock Exam</h2>
+    <div id="timer">120:00</div>
+  </div>
+</div>
+
 <div class="container">
-
-  <!-- Header -->
-  <header>
-    <h1>Mock Test</h1>
-    <div class="meta">
-      <div id="timer">બાકી સમય: 120:00</div>
-      <button id="paletteBtn">Palette</button>
-    </div>
-  </header>
-
-  <!-- Pre-Test Rules -->
-  <section id="preRules" class="card">
-    <h2>ટેસ્ટ શરૂ કરતા પહેલાં</h2>
-    <label><input type="checkbox" id="rule1"/> ઇન્ટરનેટ ચાલુ રાખવું</label><br>
-    <label><input type="checkbox" id="rule2"/> એક જ વાર ટેસ્ટ આપશો</label><br>
-    <label><input type="checkbox" id="rule3"/> વિન્ડો બંધ નહિ કરશો</label><br>
-    <button id="startBtn" disabled>Start Test</button>
+  <section id="accessSection" class="card">
+    <h3>User Verification</h3>
+    <p>ટેસ્ટ આપવા માટે સબ્સ્ક્રિપ્શન જરૂરી છે.</p>
+    <button id="checkAccessBtn" class="btn-primary">Check My Access & Start</button>
   </section>
 
-  <!-- Test Section -->
+  <section id="preRules" class="card hidden">
+    <h2 style="margin-top:0">પરીક્ષાના નિયમો</h2>
+    <ul style="padding-left: 20px;">
+      <li>દરેક ખોટા જવાબના 0.33 નેગેટિવ માર્કિંગ છે.</li>
+      <li>E વિકલ્પ પસંદ કરવાથી નેગેટિવ માર્કિંગ થશે નહીં.</li>
+      <li>ટેસ્ટ સબમિટ કર્યા પછી રિઝલ્ટ જોઈ શકાશે.</li>
+    </ul>
+    <label><input type="checkbox" id="ruleAgree"/> હું બધા નિયમોનું પાલન કરીશ.</label>
+    <button id="startBtn" class="btn-primary" style="margin-top:15px" disabled>Start Exam</button>
+  </section>
+
   <section id="testSection" class="hidden">
-    <div id="qNumber"></div>
-    <div id="questionBox" class="card">
-      <div id="questionText"></div>
-      <form id="optionsForm">
-        <label><input type="radio" name="option" value="1"/> A</label><br>
-        <label><input type="radio" name="option" value="2"/> B</label><br>
-        <label><input type="radio" name="option" value="3"/> C</label><br>
-        <label><input type="radio" name="option" value="4"/> D</label><br>
-        <label><input type="radio" name="option" value="5"/> E - Not Attempted</label>
-      </form>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+      <span id="qNumber" style="font-weight: 600;">Question 1/200</span>
+      <button onclick="togglePalette(true)" class="btn-outline" style="padding: 5px 10px;">Palette</button>
     </div>
-    <div class="nav-actions">
-      <button id="prevBtn">પાછળ</button>
-      <button id="saveNextBtn">Save & Next</button>
-      <button id="skipBtn">Skip</button>
-      <button id="submitBtn" class="danger">Final Submit</button>
+
+    <div class="card">
+      <p id="questionText" style="font-size: 1.1rem; font-weight: 500;"></p>
+      <div id="optionsContainer">
+        </div>
     </div>
-    <div id="paletteModal" class="modal hidden">
-      <div class="modal-content">
-        <h3>Question Palette</h3>
-        <div id="paletteGrid" class="grid"></div>
-        <button id="closePalette">Close</button>
-      </div>
+
+    <div class="nav-grid">
+      <button id="prevBtn" class="btn-outline">પાછળ</button>
+      <button id="saveNextBtn" class="btn-primary">Save & Next</button>
+      <button id="skipBtn" style="grid-column: span 2;" class="btn-outline">Skip Question</button>
+      <button id="submitBtn" style="grid-column: span 2;" class="btn-danger">Final Submit</button>
     </div>
   </section>
 
-  <!-- Result Section -->
   <section id="resultSection" class="hidden">
-    <h2>Result</h2>
-    <div id="summary" class="card"></div>
-    <canvas id="pieChart" width="300" height="300"></canvas>
+    <div class="card" style="text-align: center;">
+      <h2>તમારું પરિણામ</h2>
+      <canvas id="resultChart" style="max-width: 300px; margin: 0 auto;"></canvas>
+      <div id="scoreSummary" style="margin-top: 20px; font-size: 1.2rem;"></div>
+    </div>
     <div id="solutions"></div>
-    <button onclick="showLeaderboard()">Leaderboard જુઓ</button>
   </section>
+</div>
 
-  <!-- Leaderboard Section -->
-  <section id="leaderboardSection" class="hidden">
-    <h2>Leaderboard</h2>
-    <div id="lbTable" class="card"></div>
-    <button onclick="backToResult()">Back</button>
-  </section>
-
+<div id="paletteModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;">
+  <div class="card" style="width:100%; max-height:80vh; overflow-y:auto;">
+    <h3>All Questions</h3>
+    <div id="paletteGrid" class="grid-palette"></div>
+    <button onclick="togglePalette(false)" class="btn-primary" style="margin-top:20px">Close</button>
+  </div>
 </div>
 
 <script type="module">
@@ -100,176 +111,181 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
 );
 
+// Configuration
 const TEST_ID = "mock_test_1";
-const TOTAL_QUESTIONS = 200;
-const DURATION_SECONDS = 120*60;
+const NEGATIVE_MARK = 0.33;
+let USER_ID = "88888888-8888-4888-a888-888888888888"; // આ વાસ્તવમાં Auth થી આવશે
 
-let questions=[], answers=[], currentIndex=0, timerInterval=null, submitted=false;
+let questions = [], answers = [], currentIndex = 0, timerInterval;
 
-// ✅ Elements
-const startBtn=document.getElementById("startBtn"),rule1=document.getElementById("rule1"),
-      rule2=document.getElementById("rule2"),rule3=document.getElementById("rule3"),
-      preRules=document.getElementById("preRules"),testSection=document.getElementById("testSection"),
-      qNumber=document.getElementById("qNumber"),questionText=document.getElementById("questionText"),
-      optionsForm=document.getElementById("optionsForm"),paletteBtn=document.getElementById("paletteBtn"),
-      paletteModal=document.getElementById("paletteModal"),paletteGrid=document.getElementById("paletteGrid"),
-      closePalette=document.getElementById("closePalette"),prevBtn=document.getElementById("prevBtn"),
-      saveNextBtn=document.getElementById("saveNextBtn"),skipBtn=document.getElementById("skipBtn"),
-      submitBtn=document.getElementById("submitBtn"),summary=document.getElementById("summary"),
-      pieChart=document.getElementById("pieChart"),solutions=document.getElementById("solutions"),
-      resultSection=document.getElementById("resultSection"),leaderboardSection=document.getElementById("leaderboardSection"),
-      lbTable=document.getElementById("lbTable"),timer=document.getElementById("timer");
+// --- 1. Access Check ---
+document.getElementById('checkAccessBtn').onclick = async () => {
+  const { data, error } = await supabase
+    .from('user_access')
+    .select('*')
+    .eq('user_id', USER_ID)
+    .eq('is_active', true)
+    .single();
 
-// ✅ Pre-rules
-const checks=[rule1,rule2,rule3];
-checks.forEach(ch=>ch.addEventListener("change",()=>{startBtn.disabled=!checks.every(c=>c.checked);}));
-startBtn.addEventListener("click",()=>{preRules.classList.add("hidden");testSection.classList.remove("hidden");startTest();});
+  if (data) {
+    document.getElementById('accessSection').classList.add('hidden');
+    document.getElementById('preRules').classList.remove('hidden');
+  } else {
+    alert("તમારી પાસે એક્ટિવ પ્લાન નથી. કૃપા કરીને સબ્સ્ક્રિપ્શન લો.");
+  }
+};
 
-// ✅ Load questions
-async function loadQuestions(){
-  const {data,error}=await supabase.from("questions").select("*").eq("test_id",TEST_ID);
-  if(error)console.error(error);
-  questions=data||[];
-  answers=questions.map(q=>({qid:q.id,selected:0}));
-}
+// --- 2. Logic ---
+document.getElementById('ruleAgree').onchange = (e) => {
+  document.getElementById('startBtn').disabled = !e.target.checked;
+};
 
-// ✅ Render question
-function renderQuestion(){
-  const q=questions[currentIndex];
-  if(!q)return;
-  qNumber.textContent=`Question ${currentIndex+1}/${TOTAL_QUESTIONS}`;
-  questionText.textContent=q.question_text;
-  [...optionsForm.elements].forEach(el=>el.checked=(Number(el.value)===answers[currentIndex].selected));
-}
+document.getElementById('startBtn').onclick = async () => {
+  document.getElementById('preRules').classList.add('hidden');
+  document.getElementById('testSection').classList.remove('hidden');
+  await startTest();
+};
 
-// ✅ Save answer
-function saveAnswer(sel){answers[currentIndex].selected=sel;buildPalette();}
-
-// ✅ Palette
-function buildPalette(){
-  paletteGrid.innerHTML="";
-  answers.forEach((a,i)=>{
-    const btn=document.createElement("button");
-    btn.textContent=i+1;
-    if(a.selected===0||a.selected===5)btn.classList.add("skipped");
-    btn.onclick=()=>{currentIndex=i;renderQuestion();togglePalette(false);};
-    paletteGrid.appendChild(btn);
-  });
-}
-function togglePalette(show){paletteModal.classList.toggle("hidden",!show);}
-paletteBtn.onclick=()=>togglePalette(true);
-closePalette.onclick=()=>togglePalette(false);
-
-// ✅ Navigation
-prevBtn.onclick=()=>{if(currentIndex>0){currentIndex--;renderQuestion();}};
-saveNextBtn.onclick=()=>{saveAnswer(getSelected());if(currentIndex<TOTAL_QUESTIONS-1){currentIndex++;renderQuestion();}};
-skipBtn.onclick=()=>{saveAnswer(0);if(currentIndex<TOTAL_QUESTIONS-1){currentIndex++;renderQuestion();}};
-function getSelected(){const checked=[...optionsForm.elements].find(el=>el.checked);return checked?Number(checked.value):0;}
-
-// ✅ Timer
-function startTimer(){
-  let remaining=DURATION_SECONDS;
-  timerInterval=setInterval(()=>{
-    remaining--;
-    timer.textContent=`બાકી સમય: ${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,"0")}`;
-    if(remaining<=0){clearInterval(timerInterval);finalSubmit();}
-  },1000);
-}
-
-// ✅ Submit
-submitBtn.onclick=finalSubmit;
-function finalSubmit(){
-  if(submitted)return;submitted=true;clearInterval(timerInterval);
-  let correct=0,wrong=0,skipped=0,eCount=0;
-  answers.forEach((a,i)=>{
-    const q=questions[i];
-    if(a.selected===0){skipped++;}
-    else if(a.selected===5){eCount++;}
-    else if(a.selected===q.correct_option){correct++;}
-    else{wrong++;}
-  });
-  const total=correct*1+(wrong*-0.33)+(skipped*-0.33);
-  summary.textContent=`Score:${total} | Correct:${correct} | Wrong:${wrong} | Skipped:${skipped} | E:${eCount}`;
-  testSection.classList.add("hidden");resultSection.classList.remove("hidden");
-  drawPie(correct,wrong,skipped,eCount);
-  renderSolutions();
-}
-
-// ✅ Pie chart
-function drawPie(correct, wrong, skipped, eCount) {
-  const ctx = pieChart.getContext("2d");
-  const data = [
-    { value: correct, color: "#22c55e", label: "Correct" },
-    { value: wrong,   color: "#ef4444", label: "Wrong" },
-    { value: skipped, color: "#6b7280", label: "Skipped" },
-    { value: eCount,  color: "#f59e0b", label: "E-marked" }
-  ];
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-  let startAngle = 0;
-  data.forEach(d => {
-    if (d.value === 0) return;
-    const sliceAngle = (d.value / total) * 2 * Math.PI;
-    ctx.beginPath();
-    ctx.moveTo(pieChart.width/2, pieChart.height/2);
-    ctx.arc(pieChart.width/2, pieChart.height/2,
-      Math.min(pieChart.width, pieChart.height)/2 - 10,
-      startAngle, startAngle + sliceAngle);
-    ctx.closePath();
-    ctx.fillStyle = d.color;
-    ctx.fill();
-    startAngle += sliceAngle;
-  });
-  // legend
-  let y = 10;
-  ctx.font = "14px sans-serif";
-  data.forEach(d => {
-    ctx.fillStyle = d.color;
-    ctx.fillRect(10, y, 12, 12);
-    ctx.fillStyle = "#333";
-    ctx.fillText(`${d.label}: ${d.value}`, 30, y+10);
-    y += 20;
-  });
-}
-
-// ✅ Render solutions
-function renderSolutions() {
-  solutions.innerHTML = "";
-  questions.forEach((q, idx) => {
-    const sel = answers[idx].selected;
-    const block = document.createElement("div");
-    block.className = "card";
-    block.innerHTML = `
-      <h3>Q${idx+1}</h3>
-      <p>${q.question_text}</p>
-      <p><strong>Your:</strong> ${sel===0?"Skipped":sel===5?"E":"ABCD"[sel-1]}</p>
-      <p><strong>Correct:</strong> ${"ABCD"[q.correct_option-1]}</p>
-      <p><strong>Solution:</strong> ${q.explanation||"—"}</p>
-    `;
-    solutions.appendChild(block);
-  });
-}
-
-// ✅ Leaderboard
-async function showLeaderboard() {
-  resultSection.classList.add("hidden");
-  leaderboardSection.classList.remove("hidden");
-  const { data } = await supabase.from("test_results")
-    .select("user_id,total_score,time_taken_seconds")
-    .eq("test_id", TEST_ID);
-  const rows = (data||[]).map((r,idx)=>`
-    <tr><td>${idx+1}</td><td>${r.user_id}</td><td>${r.total_score}</td><td>${r.time_taken_seconds}</td></tr>`).join("");
-  lbTable.innerHTML=`<table><thead><tr><th>Rank</th><th>User</th><th>Score</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table>`;
-}
-function backToResult(){leaderboardSection.classList.add("hidden");resultSection.classList.remove("hidden");}
-
-// ✅ Start Test
-async function startTest(){
-  await loadQuestions();
-  currentIndex=0;
+async function startTest() {
+  const { data } = await supabase.from("questions").select("*").eq("test_id", TEST_ID);
+  questions = data || [];
+  answers = questions.map(q => ({ qid: q.id, selected: 0 }));
+  
   renderQuestion();
-  buildPalette();
-  startTimer();
+  startTimer(120 * 60);
 }
+
+function renderQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('qNumber').textContent = `Question ${currentIndex + 1}/${questions.length}`;
+  document.getElementById('questionText').textContent = q.question_text;
+  
+  const optionsHtml = [
+    {val: 1, text: q.option_a},
+    {val: 2, text: q.option_b},
+    {val: 3, text: q.option_c},
+    {val: 4, text: q.option_d},
+    {val: 5, text: q.option_e || "E - Not Attempted"}
+  ].map(opt => `
+    <label class="option-label">
+      <input type="radio" name="quiz_opt" value="${opt.val}" ${answers[currentIndex].selected === opt.val ? 'checked' : ''}>
+      <span>${opt.text}</span>
+    </label>
+  `).join('');
+  
+  document.getElementById('optionsContainer').innerHTML = optionsHtml;
+}
+
+// Navigation
+document.getElementById('saveNextBtn').onclick = () => {
+  const selected = document.querySelector('input[name="quiz_opt"]:checked');
+  if (selected) {
+    answers[currentIndex].selected = parseInt(selected.value);
+    if (currentIndex < questions.length - 1) {
+      currentIndex++;
+      renderQuestion();
+    }
+  } else {
+    alert("કૃપા કરીને એક વિકલ્પ પસંદ કરો અથવા Skip કરો.");
+  }
+};
+
+document.getElementById('prevBtn').onclick = () => {
+  if (currentIndex > 0) { currentIndex--; renderQuestion(); }
+};
+
+document.getElementById('skipBtn').onclick = () => {
+  answers[currentIndex].selected = 0; 
+  if (currentIndex < questions.length - 1) { currentIndex++; renderQuestion(); }
+};
+
+// Timer
+function startTimer(sec) {
+  timerInterval = setInterval(() => {
+    sec--;
+    let m = Math.floor(sec/60), s = sec%60;
+    document.getElementById('timer').textContent = `${m}:${s < 10 ? '0'+s : s}`;
+    if(sec <= 0) { clearInterval(timerInterval); submitTest(); }
+  }, 1000);
+}
+
+// Final Submit
+document.getElementById('submitBtn').onclick = () => {
+  if(confirm("શું તમે ખરેખર ટેસ્ટ સબમિટ કરવા માંગો છો?")) submitTest();
+};
+
+async function submitTest() {
+  clearInterval(timerInterval);
+  let correct = 0, wrong = 0, skipped = 0, e_count = 0;
+
+  answers.forEach((ans, i) => {
+    const q = questions[i];
+    if (ans.selected === 0) skipped++;
+    else if (ans.selected === 5) e_count++;
+    else if (ans.selected === q.correct_option) correct++;
+    else wrong++;
+  });
+
+  const total_score = (correct * 1) - (wrong * NEGATIVE_MARK);
+
+  // 1. Save to Supabase
+  const { error } = await supabase.from('test_results').insert([{
+    user_id: USER_ID,
+    test_id: TEST_ID,
+    total_score: total_score.toFixed(2),
+    correct_count: correct,
+    wrong_count: wrong,
+    skipped_count: skipped,
+    e_count: e_count,
+    answers: answers
+  }]);
+
+  if (error) console.error("Error saving result:", error);
+
+  // 2. Show Result UI
+  document.getElementById('testSection').classList.add('hidden');
+  document.getElementById('resultSection').classList.remove('hidden');
+  document.getElementById('scoreSummary').innerHTML = `
+    <strong>સ્કોર: ${total_score.toFixed(2)}</strong><br>
+    <small>સાચા: ${correct} | ખોટા: ${wrong} | બાકી: ${skipped}</small>
+  `;
+  
+  drawChart(correct, wrong, skipped, e_count);
+}
+
+function drawChart(c, w, s, e) {
+  new Chart(document.getElementById('resultChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['સાચા', 'ખોટા', 'બાકી', 'E'],
+      datasets: [{
+        data: [c, w, s, e],
+        backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#f59e0b']
+      }]
+    }
+  });
+}
+
+// Palette Toggle
+window.togglePalette = (show) => {
+  const modal = document.getElementById('paletteModal');
+  if (show) {
+    modal.classList.remove('hidden');
+    const grid = document.getElementById('paletteGrid');
+    grid.innerHTML = answers.map((a, i) => `
+      <button class="pal-btn ${a.selected !== 0 ? 'pal-answered' : ''}" onclick="goToQ(${i})">${i+1}</button>
+    `).join('');
+  } else {
+    modal.classList.add('hidden');
+  }
+};
+
+window.goToQ = (i) => {
+  currentIndex = i;
+  renderQuestion();
+  togglePalette(false);
+};
+
 </script>
 </body>
 </html>
