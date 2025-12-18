@@ -90,18 +90,11 @@ function loadIntro(){
 async function startTest(){
  if(!agree.checked){alert("Accept instructions");return;}
 
- const {data, error} = await supabase
- .from("test_results")
- .select("user_id,total_score,time_taken_seconds")
- .eq("test_id",TEST_ID)
- .order("total_score",{ascending:false})
- .order("time_taken_seconds",{ascending:true});
-
-if(error){
-  alert(error.message);
-  return;
-}
-
+  const {data} = await supabase
+  .from("questions")
+  .select("*")
+  .eq("test_id",TEST_ID)
+  .order("id");
 
  questions=data;
  renderQuestion();
