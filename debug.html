@@ -1,270 +1,212 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="gu">
 <head>
-  <meta charset="utf-8" />
-  <title>Mock Test Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root { --primary: #4f46e5; --bg: #f8fafc; }
-    body { font-family: system-ui, sans-serif; margin:0; background: var(--bg); color: #1e293b; }
-    .container { max-width: 800px; margin: 0 auto; padding: 15px; }
-    .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #e2e8f0; }
-    .hidden { display: none !important; }
-    
-    /* Header & Timer */
-    .test-header { position: sticky; top: 0; background: #fff; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 100; }
-    #timer { color: #ef4444; font-weight: bold; font-family: monospace; font-size: 1.2rem; }
-
-    /* Buttons */
-    button { cursor: pointer; border: none; border-radius: 8px; padding: 12px 18px; font-weight: 600; transition: 0.2s; }
-    .btn-primary { background: var(--primary); color: white; width: 100%; }
-    .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
-    .btn-danger { background: #ef4444; color: white; width: 100%; }
-
-    /* Question Palette (Que Line) */
-    .q-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; margin-top: 15px; }
-    .q-no { width: 40px; height: 40px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; }
-    .q-answered { background: #22c55e !important; color: white; border: none; }
-    .q-current { border: 2px solid var(--primary); font-weight: bold; }
-
-    /* Options */
-    .opt-label { display: block; padding: 14px; border: 2px solid #f1f5f9; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
-    .opt-label:has(input:checked) { border-color: var(--primary); background: #f5f3ff; }
-    input[type="radio"] { margin-right: 10px; transform: scale(1.2); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Mock Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+        body { font-family: system-ui, sans-serif; margin:0; background: var(--bg); color: var(--text); user-select: none; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid #e2e8f0; }
+        .option-box { display: block; padding: 14px; border: 2px solid #f1f5f9; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .option-box:hover { border-color: #cbd5e1; }
+        .option-box.selected { border-color: var(--primary); background: #f5f3ff; font-weight: 600; }
+        .pal-btn { width: 40px; height: 40px; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-weight: bold; }
+        .pal-done { background: #4f46e5 !important; color: white !important; }
+        .pal-current { border: 2px solid #f59e0b !important; }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
-<div id="testHeaderUI" class="hidden">
-  <div class="test-header">
-    <div id="qStatus">Q: 1/200</div>
-    <div id="timer">120:00</div>
-    <button class="btn-outline" style="padding: 5px 10px;" onclick="showPalette()">All Qs</button>
-  </div>
+<div id="testUI" class="hidden">
+    <div class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-50">
+        <div id="qCount" class="font-bold text-indigo-600">Q: 1/200</div>
+        <div id="timer" class="font-mono font-bold text-red-600 text-xl">120:00</div>
+        <button onclick="confirmSubmit()" class="bg-red-600 text-white px-4 py-1 rounded-lg font-bold">Submit</button>
+    </div>
 </div>
 
-<div class="container">
-  <section id="statusSection" class="card">
-    <h3 id="statusText">માહિતી લોડ થઈ રહી છે...</h3>
-  </section>
+<div class="max-w-4xl mx-auto p-4">
+    <section id="loadingSection" class="card text-center py-10">
+        <p class="font-bold text-gray-500">પ્રશ્નો લોડ થઈ રહ્યા છે...</p>
+    </section>
 
-  <section id="preRules" class="card hidden">
-    <h2>પરીક્ષા માટે તૈયાર?</h2>
-    <p>• આ ટેસ્ટ તમે માત્ર 1 જ વાર આપી શકશો.<br>• નેગેટિવ માર્કિંગ: 0.33</p>
-    <label><input type="checkbox" id="agree"> હું બધું સમજી ગયો છું.</label>
-    <button id="startBtn" class="btn-primary" style="margin-top:15px;" disabled>Start Exam</button>
-  </section>
+    <section id="testSection" class="hidden">
+        <div class="card min-h-[300px]">
+            <p id="qText" class="text-lg font-bold text-gray-800 mb-6 leading-relaxed"></p>
+            <div id="optContainer"></div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <button onclick="move(-1)" class="bg-white border border-gray-300 p-3 rounded-xl font-bold">Back</button>
+            <button onclick="move(1)" class="bg-indigo-600 text-white p-3 rounded-xl font-bold">Next</button>
+        </div>
 
-  <section id="testSection" class="hidden">
-    <div class="card">
-      <p id="questionText" style="font-size: 1.1rem; font-weight: 600;"></p>
-      <div id="optionsList"></div>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-      <button class="btn-outline" onclick="goPrev()">પાછળ</button>
-      <button class="btn-primary" onclick="saveAndNext()">Save & Next</button>
-      <button class="btn-outline" style="grid-column: span 2;" onclick="skipToE()">Skip Question (E)</button>
-      <button class="btn-danger" style="grid-column: span 2; margin-top:10px;" onclick="confirmSubmit()">Final Submit</button>
-    </div>
-  </section>
+        <div class="mt-10">
+            <p class="text-xs font-bold text-gray-400 mb-3 uppercase">Question Palette</p>
+            <div id="palGrid" class="grid grid-cols-6 md:grid-cols-10 gap-2"></div>
+        </div>
+    </section>
 
-  <section id="resultSection" class="hidden">
-    <div class="card" style="text-align: center;">
-      <h2 id="resHead">રિઝલ્ટ કાર્ડ</h2>
-      <div id="finalScore" style="font-size: 36px; font-weight: bold; color: var(--primary); margin: 10px 0;"></div>
-      <canvas id="resultChart" style="max-width: 300px; margin: 20px auto;"></canvas>
-      
-      <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button class="btn-primary" onclick="showSolArea()">Solutions</button>
-        <button class="btn-outline" onclick="loadLB()">Leaderboard</button>
-      </div>
-    </div>
-    <div id="lbArea" class="card hidden"><h3>Top Performers</h3><div id="lbContent"></div></div>
-    <div id="solArea" class="hidden"></div>
-  </section>
-</div>
-
-<div id="paletteModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;">
-  <div class="card" style="width:100%; max-height:80%; overflow-y:auto;">
-    <h3>બધા પ્રશ્નો</h3>
-    <div id="paletteGrid" class="q-grid"></div>
-    <button class="btn-primary" style="margin-top:20px;" onclick="closePalette()">Close</button>
-  </div>
+    <section id="resultSection" class="hidden space-y-6">
+        <div class="card text-center p-10">
+            <h2 class="text-2xl font-bold text-gray-500">RESULT</h2>
+            <div id="scoreDisplay" class="text-6xl font-black text-indigo-600 my-6"></div>
+            <div class="flex justify-center gap-10 items-center flex-wrap">
+                <div class="w-48 h-48"><canvas id="resChart"></canvas></div>
+                <div class="text-left space-y-2">
+                    <p class="text-green-600 font-bold">સાચા જવાબ: <span id="res-c"></span></p>
+                    <p class="text-red-600 font-bold">ખોટા/Skip: <span id="res-w"></span></p>
+                    <p class="text-orange-600 font-bold">Option E: <span id="res-e"></span></p>
+                </div>
+            </div>
+            <button onclick="showSolutions()" class="mt-8 bg-gray-800 text-white px-8 py-3 rounded-2xl font-bold">View Solutions</button>
+        </div>
+        <div id="solContainer" class="hidden space-y-4 pb-20"></div>
+    </section>
 </div>
 
 <script type="module">
+// --- તમારી ઓરિજિનલ કનેક્શન રીત (ESM) ---
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const supabase = createClient("https://bhmycvrbucmbbrpzeane.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4");
+const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const supabase = createClient(SB_URL, SB_KEY);
 
-const TEST_ID = "mock_test_1";
-let user = null, questions = [], answers = [], currentIdx = 0, timerVal = 120 * 60, timerInt;
+let questions = [], userAns = {}, currentIdx = 0, timerSec = 120 * 60, interval;
 
-// --- Step 1: Check User & Attempt ---
-async function init() {
-  const { data: { user: u } } = await supabase.auth.getUser();
-  if(!u) { document.getElementById('statusText').innerText = "કૃપા કરીને લોગિન કરો."; return; }
-  user = u;
-
-  // Check Access
-  const { data: acc } = await supabase.from('user_access').select('*').eq('user_id', u.id).eq('is_active', true).maybeSingle();
-  if(!acc) { document.getElementById('statusText').innerText = "તમારી પાસે પ્લાન નથી."; return; }
-
-  // Check Result
-  const { data: res } = await supabase.from('test_results').select('*').eq('user_id', u.id).eq('test_id', TEST_ID).maybeSingle();
-  
-  if(res) {
-    loadExistingResult(res);
-  } else {
-    document.getElementById('statusSection').classList.add('hidden');
-    document.getElementById('preRules').classList.remove('hidden');
-  }
-}
-init();
-
-// --- Step 2: Start Exam ---
-document.getElementById('agree').onchange = (e) => document.getElementById('startBtn').disabled = !e.target.checked;
-
-document.getElementById('startBtn').onclick = async () => {
-  document.getElementById('startBtn').innerText = "Loading Qs...";
-  const { data } = await supabase.from('questions').select('*').eq('test_id', TEST_ID);
-  
-  if(data && data.length > 0) {
-    questions = data;
-    answers = questions.map(q => ({ qid: q.id, sel: 0 }));
+async function startExam() {
+    // તમારી ઓરિજિનલ ક્વેરી
+    const { data, error } = await supabase.from('questions').select('*').eq('test_id', 'mock_test_1');
     
-    // Save Initial Attempt
-    await supabase.from('test_attempts').insert([{ user_id: user.id, test_id: TEST_ID, is_submitted: false, started_at: new Date() }]);
-
-    document.getElementById('preRules').classList.add('hidden');
-    document.getElementById('testHeaderUI').classList.remove('hidden');
-    document.getElementById('testSection').classList.remove('hidden');
-    renderQuestion();
-    startTimer();
-  }
-};
-
-function renderQuestion() {
-  const q = questions[currentIdx];
-  document.getElementById('qStatus').innerText = `Q: ${currentIdx+1}/${questions.length}`;
-  document.getElementById('questionText').innerText = q.question_text;
-  
-  const opts = [
-    {id:1, t:q.option_a}, {id:2, t:q.option_b}, {id:3, t:q.option_c}, {id:4, t:q.option_d}, {id:5, t:q.option_e || "E - Skip"}
-  ];
-  
-  document.getElementById('optionsList').innerHTML = opts.map(o => `
-    <label class="opt-label">
-      <input type="radio" name="exam_opt" value="${o.id}" ${answers[currentIdx].sel == o.id ? 'checked' : ''}>
-      ${o.t}
-    </label>
-  `).join('');
-}
-
-// Navigation
-window.saveAndNext = () => {
-  const selected = document.querySelector('input[name="exam_opt"]:checked');
-  if(selected) {
-    answers[currentIdx].sel = parseInt(selected.value);
-    if(currentIdx < questions.length - 1) { currentIdx++; renderQuestion(); }
-  } else { alert("Please select an option!"); }
-};
-
-window.skipToE = () => { answers[currentIdx].sel = 5; if(currentIdx < questions.length - 1) { currentIdx++; renderQuestion(); } };
-window.goPrev = () => { if(currentIdx > 0) { currentIdx--; renderQuestion(); } };
-
-// Timer
-function startTimer() {
-  timerInt = setInterval(() => {
-    timerVal--;
-    let m = Math.floor(timerVal/60), s = timerVal%60;
-    document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
-    if(timerVal <= 0) confirmSubmit();
-  }, 1000);
-}
-
-// --- Step 3: Final Submit ---
-window.confirmSubmit = async () => {
-  if(!confirm("Submit Test?")) return;
-  clearInterval(timerInt);
-  
-  let c=0, w=0, e=0;
-  answers.forEach((ans, i) => {
-    if(ans.sel == 0 || ans.sel == 5) e++;
-    else if(ans.sel == questions[i].correct_option) c++;
-    else w++;
-  });
-  const score = (c * 1) - (w * 0.33);
-
-  await supabase.from('test_results').insert([{
-    user_id: user.id, test_id: TEST_ID, total_score: score.toFixed(2),
-    correct_count: c, wrong_count: w, e_count: e, answers: answers, time_taken_seconds: (120*60)-timerVal
-  }]);
-
-  await supabase.from('test_attempts').update({ is_submitted: true, submitted_at: new Date() }).eq('user_id', user.id).eq('test_id', TEST_ID);
-  
-  location.reload();
-};
-
-// --- Step 4: Show Results & Solution ---
-async function loadExistingResult(res) {
-  document.getElementById('statusSection').classList.add('hidden');
-  document.getElementById('resultSection').classList.remove('hidden');
-  document.getElementById('finalScore').innerText = res.total_score;
-  document.getElementById('resHead').innerText = "તમારું રિઝલ્ટ સેવ થઈ ગયું છે";
-
-  const { data: qData } = await supabase.from('questions').select('*').eq('test_id', TEST_ID);
-  questions = qData;
-  answers = res.answers;
-
-  new Chart(document.getElementById('resultChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['સાચા', 'ખોટા', 'E/Skip'],
-      datasets: [{ data: [res.correct_count, res.wrong_count, res.e_count], backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1'] }]
+    if (data && data.length > 0) {
+        questions = data;
+        document.getElementById('loadingSection').classList.add('hidden');
+        document.getElementById('testUI').classList.remove('hidden');
+        document.getElementById('testSection').classList.remove('hidden');
+        renderPalette();
+        showQ();
+        startTimer();
+    } else {
+        document.getElementById('loadingSection').innerHTML = `<p class="text-red-500 font-bold">પ્રશ્નો મળ્યા નથી. કી અથવા ટેબલ ચેક કરો.</p>`;
     }
-  });
 }
 
-window.showPalette = () => {
-  document.getElementById('paletteModal').classList.remove('hidden');
-  document.getElementById('paletteGrid').innerHTML = answers.map((a, i) => `
-    <div class="q-no ${a.sel != 0 ? 'q-answered' : ''} ${currentIdx == i ? 'q-current' : ''}" onclick="jumpTo(${i})">${i+1}</div>
-  `).join('');
-};
-window.closePalette = () => document.getElementById('paletteModal').classList.add('hidden');
-window.jumpTo = (i) => { currentIdx = i; renderQuestion(); closePalette(); };
+function showQ() {
+    const q = questions[currentIdx];
+    document.getElementById('qCount').innerText = `Q: ${currentIdx + 1}/${questions.length}`;
+    document.getElementById('qText').innerText = q.question_text;
+    
+    const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e || "E - Not Attempted"];
+    const container = document.getElementById('optContainer');
+    container.innerHTML = '';
 
-window.showSolArea = () => {
-  const area = document.getElementById('solArea');
-  area.classList.toggle('hidden');
-  area.innerHTML = questions.map((q, i) => `
-    <div class="card" style="border-left: 5px solid ${answers[i].sel == q.correct_option ? '#22c55e' : '#ef4444'}">
-      <p><b>Q-${i+1}:</b> ${q.question_text}</p>
-      <p>Your: ${answers[i].sel} | Correct: ${q.correct_option}</p>
-      <div style="background:#f1f5f9; padding:8px; border-radius:5px;"><b>Solution:</b> ${q.explanation || 'No explanation'}</div>
-    </div>
-  `).join('');
+    opts.forEach((txt, i) => {
+        const div = document.createElement('div');
+        div.className = `option-box ${userAns[currentIdx] === i ? 'selected' : ''}`;
+        div.innerHTML = `<span>${String.fromCharCode(65+i)}.</span> <span>${txt}</span>`;
+        div.onclick = () => { userAns[currentIdx] = i; showQ(); updatePal(); };
+        container.appendChild(div);
+    });
+    updatePal();
+}
+
+function renderPalette() {
+    const grid = document.getElementById('palGrid');
+    questions.forEach((_, i) => {
+        const b = document.createElement('button');
+        b.id = `pal-${i}`; b.className = "pal-btn"; b.innerText = i + 1;
+        b.onclick = () => { currentIdx = i; showQ(); };
+        grid.appendChild(b);
+    });
+}
+
+function updatePal() {
+    questions.forEach((_, i) => {
+        const b = document.getElementById(`pal-${i}`);
+        b.classList.remove('pal-current', 'pal-done');
+        if(i === currentIdx) b.classList.add('pal-current');
+        if(userAns[i] !== undefined) b.classList.add('pal-done');
+    });
+}
+
+window.move = (dir) => {
+    let n = currentIdx + dir;
+    if(n >= 0 && n < questions.length) { currentIdx = n; showQ(); }
 };
 
-window.loadLB = async () => {
-  const lbArea = document.getElementById('lbArea');
-  lbArea.classList.toggle('hidden');
-  const { data } = await supabase.from('test_results').select('total_score, profiles(full_name)').eq('test_id', TEST_ID).order('total_score', {ascending:false}).limit(10);
-  document.getElementById('lbContent').innerHTML = data.map((r, i) => `
-    <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #eee;">
-      <span>${i+1}. ${r.profiles?.full_name || 'User'}</span>
-      <b>${r.total_score}</b>
-    </div>
-  `).join('');
+function startTimer() {
+    interval = setInterval(() => {
+        timerSec--;
+        let m = Math.floor(timerSec/60), s = timerSec%60;
+        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        if(timerSec <= 0) autoSubmit();
+    }, 1000);
+}
+
+window.confirmSubmit = () => { if(confirm("સબમિટ કરવું છે?")) autoSubmit(); };
+
+async function autoSubmit() {
+    clearInterval(interval);
+    let c=0, w=0, e=0, sk=0;
+    
+    questions.forEach((q, i) => {
+        const u = userAns[i];
+        if (u === undefined) sk++;
+        else if (u === 4) e++;
+        else if (u === q.correct_option) c++;
+        else w++;
+    });
+
+    const finalScore = (c * 1) - ((w + sk) * 0.33);
+
+    document.getElementById('testUI').classList.add('hidden');
+    document.getElementById('testSection').classList.add('hidden');
+    document.getElementById('resultSection').classList.remove('hidden');
+    document.getElementById('scoreDisplay').innerText = finalScore.toFixed(2);
+    document.getElementById('res-c').innerText = c;
+    document.getElementById('res-w').innerText = (w + sk);
+    document.getElementById('res-e').innerText = e;
+
+    new Chart(document.getElementById('resChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Correct', 'Wrong/Skip', 'E'],
+            datasets: [{ data: [c, (w+sk), e], backgroundColor: ['#22c55e', '#ef4444', '#f97316'] }]
+        },
+        options: { plugins: { legend: { display: false } } }
+    });
+}
+
+window.showSolutions = () => {
+    const box = document.getElementById('solContainer');
+    box.classList.remove('hidden');
+    box.innerHTML = '<h3 class="text-xl font-bold">Detailed Solutions</h3>';
+    questions.forEach((q, i) => {
+        const u = userAns[i];
+        const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e || "E - Not Attempted"];
+        const div = document.createElement('div');
+        div.className = `card border-l-4 ${u === q.correct_option ? 'border-l-green-500' : 'border-l-red-500'}`;
+        div.innerHTML = `
+            <p class="font-bold">${i+1}. ${q.question_text}</p>
+            <div class="grid grid-cols-2 gap-2 mt-3 text-sm">
+                <div class="p-2 bg-gray-50 rounded">તમારો: ${u !== undefined ? opts[u] : 'સ્કીપ'}</div>
+                <div class="p-2 bg-blue-50 text-blue-700 rounded">સાચો: ${opts[q.correct_option]}</div>
+            </div>
+            <p class="mt-3 text-xs italic text-gray-500">સમજૂતી: ${q.explanation || 'નથી'}</p>
+        `;
+        box.appendChild(div);
+    });
+    window.scrollTo({ top: box.offsetTop, behavior: 'smooth' });
 };
-</script>
-</body>
-</html>      <p>Your: ${answers[i].sel} | Correct: ${q.correct_option}</p>
-      <small>${q.explanation || ''}</small>
-    </div>`).join('');
-};
+
+// Start
+startExam();
+
 </script>
 </body>
 </html>
