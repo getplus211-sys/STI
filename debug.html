@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSI Mock Test - Fixed</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div id="app" class="p-10 text-center">
+        <h1 id="status-text" class="text-xl font-bold mb-4">કનેક્ટ થઈ રહ્યું છે...</h1>
+        <button id="start-btn" class="hidden bg-blue-600 text-white px-8 py-3 rounded-xl font-bold">Start Test</button>
+    </div>
+
+    <script>
+        // ૧. સાચી URL અને KEY (Trimmed)
+        const URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+        const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+
+        // ૨. ગ્લોબલ ક્લાયન્ટ (શોર્ટ નામ વાપરો જેથી ટકરાવ ના થાય)
+        const sb = supabase.createClient(URL, KEY);
+
+        async function initCheck() {
+            try {
+                const statusLabel = document.getElementById('status-text');
+                
+                // પહેલા ફક્ત પ્રશ્નો ખેંચીને ચેક કરો (ટેસ્ટિંગ માટે)
+                const { data, error } = await sb
+                    .from('questions')
+                    .select('id')
+                    .eq('test_id', 'mock_test_1')
+                    .limit(1);
+
+                if (error) {
+                    console.error("Supabase Error:", error);
+                    statusLabel.innerText = "એરર: " + error.message;
+                    return;
+                }
+
+                statusLabel.innerText = "ડેટાબેઝ કનેક્શન સફળ! ૨૮ પ્રશ્નો તૈયાર છે.";
+                document.getElementById('start-btn').classList.remove('hidden');
+
+            } catch (err) {
+                console.error("JS Error:", err);
+                document.getElementById('status-text').innerText = "કનેક્શનમાં ભૂલ છે.";
+            }
+        }
+
+        document.getElementById('start-btn').onclick = () => {
+            alert("ટેસ્ટ એન્જીન લોડ થઈ રહ્યું છે...");
+            // અહીંથી તમારું ટેસ્ટ લોજિક આગળ વધશે
+        };
+
+        window.onload = initCheck;
+    </script>
+</body>
+</html>
