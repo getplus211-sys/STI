@@ -68,7 +68,7 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
   .select("*")
   .eq("user_id",user.id)
   .eq("is_active",true)
-  .single();
+ .maybeSingle();
 
  if(!access){
   purchasePopup.classList.remove("hidden");
