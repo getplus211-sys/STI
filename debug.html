@@ -187,22 +187,58 @@ async function submitTest(auto=false){
  loadResult(score,correct,wrong,skip,e);
 }
 
-/* ========== RESULT ========== */
-function loadResult(score,c,w,s,e){
- app.innerHTML=`
+/* ========== RESULT (Sudharelo) ========== */
+function loadResult(score, c, w, s, e) {
+  const timeTaken = TOTAL_TIME - timeLeft;
+  const minutes = Math.floor(timeTaken / 60);
+  const seconds = timeTaken % 60;
+
+  app.innerHTML = `
  <div class="card">
   <h2>Your Score: ${score}</h2>
+  <div style="margin: 15px 0; line-height: 1.6;">
+    <p><b>Correct:</b> ${c} | <b>Wrong:</b> ${w}</p>
+    <p><b>Skipped:</b> ${s} | <b>E Options:</b> ${e}</p>
+    <p><b>Time Taken:</b> ${minutes}m ${seconds}s</p>
+  </div>
   <canvas id="chart"></canvas><br>
+  
   <button class="primary" onclick="loadLeaderboard()">View Leaderboard</button>
+  <br><br>
+  <button class="gray" onclick="viewSolutions()">View Answers / Solutions</button>
  </div>`;
 
- new Chart(chart,{
-  type:"pie",
-  data:{
-   labels:["Correct","Wrong","Skipped","E"],
-   datasets:[{data:[c,w,s,e]}]
-  }
- });
+  new Chart(chart, {
+    type: "pie",
+    data: {
+      labels: ["Correct", "Wrong", "Skipped", "E"],
+      datasets: [{ data: [c, w, s, e], backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308'] }]
+    }
+  });
+}
+
+/* ========== SOLUTIONS VIEW ========== */
+function viewSolutions() {
+  let solutionHTML = `<h3>Answer Key & Solutions</h3>
+                      <button class="gray" style="margin-bottom:15px" onclick="location.reload()">Back to Result</button>`;
+
+  questions.forEach((q, index) => {
+    const userAns = answers[q.id];
+    const isCorrect = userAns === q.correct_option;
+    const options = ["a", "b", "c", "d", "e"];
+    
+    solutionHTML += `
+    <div class="card" style="border-left: 5px solid ${isCorrect ? '#22c55e' : '#ef4444'}">
+      <p><b>Q${index + 1}:</b> ${q.question_text}</p>
+      <p><b>Your Answer:</b> ${userAns ? q["option_" + options[userAns - 1]] : "Skipped"}</p>
+      <p style="color: #22c55e"><b>Correct Answer:</b> ${q["option_" + options[q.correct_option - 1]]}</p>
+      ${q.solution ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Solution:</b> ${q.solution}</div>` : ""}
+    </div>`;
+  });
+
+  solutionHTML += `<button class="primary" onclick="location.reload()">Finish</button>`;
+  app.innerHTML = solutionHTML;
+  window.scrollTo(0, 0);
 }
 
 
