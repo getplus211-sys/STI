@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSI Premium Mock Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { user-select: none; background-color: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+        .option-card { border: 2px solid #e2e8f0; transition: 0.2s; cursor: pointer; }
+        .option-card:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        .option-card.selected { border-color: #2563eb; background-color: #dbeafe; font-weight: 600; }
+        .palette-btn { width: 40px; height: 40px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+        .pal-answered { background-color: #2563eb; color: white; }
+        .pal-current { outline: 3px solid #fbbf24; }
+        .correct-ans { background-color: #dcfce7; border-color: #22c55e; }
+        .wrong-ans { background-color: #fee2e2; border-color: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div id="setup-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-xl w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+            <h1 class="text-2xl font-black text-blue-700 text-center mb-6">PSI/ASI MOCK TEST #1</h1>
+            <div id="access-msg" class="mb-6 p-4 bg-blue-50 rounded-2xl text-sm text-blue-800 leading-relaxed">
+                <b>સૂચનાઓ:</b><br>
+                • ૨૦૦ પ્રશ્નો, ૧૨૦ મિનિટ.<br>
+                • સાચો જવાબ: +૧.૦૦ | ખોટો/Skip: -૦.૩૩ | ઓપ્શન E: ૦.૦૦<br>
+                • એકવાર સબમિટ કર્યા પછી ફેરફાર નહીં થાય.
+            </div>
+            <button id="start-btn" onclick="checkAccessAndStart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition">
+                Start Mock Test
+            </button>
+        </div>
+    </div>
+
+    <div id="test-screen" class="hidden min-h-screen flex flex-col">
+        <header class="bg-white border-b p-4 sticky top-0 z-50 flex justify-between items-center">
+            <div class="font-bold text-gray-700" id="q-counter">Q: 1/200</div>
+            <div id="timer" class="text-xl font-mono font-bold text-red-600 bg-red-50 px-4 py-1 rounded-full">120:00</div>
+            <button onclick="confirmFinalSubmit()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Submit</button>
+        </header>
+
+        <main class="flex-grow flex flex-col md:flex-row overflow-hidden h-[calc(100vh-73px)]">
+            <div class="flex-grow overflow-y-auto p-4 md:p-8">
+                <div class="max-w-3xl mx-auto bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-gray-100">
+                    <h2 id="q-text" class="text-xl font-bold text-gray-800 mb-8 leading-relaxed">Loading...</h2>
+                    <div id="options-grid" class="space-y-4"></div>
+                    <div class="flex justify-between mt-10 pt-6 border-t">
+                        <button onclick="prevQ()" class="text-gray-400 font-bold px-4 py-2 hover:bg-gray-100 rounded-lg">← Back</button>
+                        <button onclick="nextQ()" class="bg-blue-600 text-white px-10 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100">Next →</button>
+                    </div>
+                </div>
+            </div>
+            <aside class="w-full md:w-80 bg-white border-l p-4 overflow-y-auto">
+                <p class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Question Palette</p>
+                <div id="palette" class="grid grid-cols-5 md:grid-cols-4 gap-2"></div>
+            </aside>
+        </main>
+    </div>
+
+    <div id="result-screen" class="hidden min-h-screen p-4 md:p-10">
+        <div class="max-w-5xl mx-auto space-y-8">
+            <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+                <div class="p-10 text-center flex flex-col justify-center border-r">
+                    <h2 class="text-3xl font-black text-gray-800">Your Score</h2>
+                    <div class="my-8">
+                        <span id="final-score" class="text-7xl font-black text-blue-600">0.00</span>
+                        <p class="text-gray-400 font-bold mt-2">OUT OF 200.00</p>
+                    </div>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="showSolutions()" class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-bold">Answers & Solution</button>
+                        <button onclick="alert('Leaderboard coming soon!')" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold">Leaderboard</button>
+                    </div>
+                </div>
+                <div class="p-10 bg-gray-50 flex flex-col items-center">
+                    <div class="w-64 h-64"><canvas id="resultChart"></canvas></div>
+                    <div class="mt-8 grid grid-cols-2 gap-4 w-full">
+                        <div class="bg-white p-4 rounded-2xl text-center shadow-sm">
+                            <p class="text-green-600 font-black text-xl" id="res-c">0</p>
+                            <p class="text-[10px] text-gray-400 font-bold">CORRECT</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl text-center shadow-sm">
+                            <p class="text-red-600 font-black text-xl" id="res-w">0</p>
+                            <p class="text-[10px] text-gray-400 font-bold">WRONG/SKIP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="solution-area" class="hidden space-y-6">
+                <h3 class="text-2xl font-black text-gray-800 px-2">Detailed Solutions</h3>
+                <div id="solution-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+        const client = supabase.createClient(SB_URL, SB_KEY);
+
+        let questions = [], userAnswers = {}, currentIdx = 0, timerSec = 120 * 60;
+        let testID = "mock_test_1";
+        let interval;
+
+        // --- STEP 1: ACCESS & START ---
+        async function checkAccessAndStart() {
+            const btn = document.getElementById('start-btn');
+            btn.innerText = "Checking Access...";
+            
+            // Note: Placeholder for actual Auth login check
+            const user_id = "USER_123"; 
+
+            // Check if already submitted
+            const { data: attempt } = await client.from('test_attempts').select('is_submitted').eq('user_id', user_id).eq('test_id', testID).maybeSingle();
+            if (attempt?.is_submitted) {
+                alert("તમે આ ટેસ્ટ પહેલેથી જ આપી દીધી છે!");
+                return;
+            }
+
+            // Load Questions
+            const { data, error } = await client.from('questions').select('*').eq('test_id', testID).order('id', {ascending: true});
+            if (error || !data.length) { alert("પ્રશ્નો લોડ થયા નથી."); return; }
+            
+            questions = data;
+            loadProgress(); // Restore from LocalStorage if exists
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('hidden');
+            
+            renderPalette();
+            showQuestion();
+            startTimer();
+        }
+
+        // --- STEP 2: TEST ENGINE ---
+        function showQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('q-counter').innerText = `Question ${currentIdx + 1}/${questions.length}`;
+            document.getElementById('q-text').innerText = q.question_text;
+            
+            const opts = [
+                {k:0, v:q.option_a}, {k:1, v:q.option_b}, 
+                {k:2, v:q.option_c}, {k:3, v:q.option_d}, {k:4, v:q.option_e}
+            ];
+            
+            const div = document.getElementById('options-grid');
+            div.innerHTML = '';
+            opts.forEach(o => {
+                const card = document.createElement('div');
+                card.className = `option-card p-4 rounded-2xl flex items-center gap-4 ${userAnswers[currentIdx] === o.k ? 'selected' : ''}`;
+                card.innerHTML = `<span class="w-8 h-8 rounded-full border flex items-center justify-center text-xs font-bold">${String.fromCharCode(65+o.k)}</span> ${o.v}`;
+                card.onclick = () => { userAnswers[currentIdx] = o.k; saveProgress(); showQuestion(); updatePal(); };
+                div.appendChild(card);
+            });
+        }
+
+        function renderPalette() {
+            const p = document.getElementById('palette');
+            questions.forEach((_, i) => {
+                const b = document.createElement('button');
+                b.id = `p-${i}`; b.className = "palette-btn bg-gray-100 text-gray-400 border border-gray-100";
+                b.innerText = i + 1;
+                b.onclick = () => { currentIdx = i; showQuestion(); };
+                p.appendChild(b);
+            });
+            updatePal();
+        }
+
+        function updatePal() {
+            questions.forEach((_, i) => {
+                const b = document.getElementById(`p-${i}`);
+                b.classList.remove('pal-current', 'pal-answered');
+                if(i === currentIdx) b.classList.add('pal-current');
+                if(userAnswers[i] !== undefined) b.classList.add('pal-answered');
+            });
+        }
+
+        function startTimer() {
+            interval = setInterval(() => {
+                timerSec--;
+                let m = Math.floor(timerSec/60), s = timerSec%60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if(timerSec <= 0) { clearInterval(interval); autoSubmit(); }
+            }, 1000);
+        }
+
+        function nextQ() { if(currentIdx < questions.length - 1) { currentIdx++; showQuestion(); } }
+        function prevQ() { if(currentIdx > 0) { currentIdx--; showQuestion(); } }
+
+        // --- STORAGE LOGIC ---
+        function saveProgress() {
+            localStorage.setItem(`test_${testID}_ans`, JSON.stringify(userAnswers));
+            localStorage.setItem(`test_${testID}_time`, timerSec);
+        }
+        function loadProgress() {
+            const savedAns = localStorage.getItem(`test_${testID}_ans`);
+            const savedTime = localStorage.getItem(`test_${testID}_time`);
+            if(savedAns) userAnswers = JSON.parse(savedAns);
+            if(savedTime) timerSec = parseInt(savedTime);
+        }
+
+        // --- STEP 3: RESULT & SOLUTION ---
+        function confirmFinalSubmit() { if(confirm("શું તમે ફાઈનલ સબમિટ કરવા માંગો છો?")) autoSubmit(); }
+
+        async function autoSubmit() {
+            clearInterval(interval);
+            let c=0, w=0, e=0, skipped=0;
+            
+            questions.forEach((q, i) => {
+                const ans = userAnswers[i];
+                if(ans === undefined) skipped++;
+                else if(ans === 4) e++;
+                else if(ans === q.correct_option) c++;
+                else w++;
+            });
+
+            const finalScore = (c * 1) - ((w + skipped) * 0.33); // Skipped and Wrong both -0.33
+            
+            // Save to Supabase
+            await client.from('test_attempts').insert([{ user_id:"USER_123", test_id:testID, is_submitted:true, e_count:e }]);
+            
+            localStorage.removeItem(`test_${testID}_ans`);
+            localStorage.removeItem(`test_${testID}_time`);
+
+            showResultUI(finalScore, c, (w + skipped), e);
+        }
+
+        function showResultUI(score, c, w_s, e) {
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score.toFixed(2);
+            document.getElementById('res-c').innerText = c;
+            document.getElementById('res-w').innerText = w_s;
+
+            new Chart(document.getElementById('resultChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correct', 'Wrong/Skip', 'Option E'],
+                    datasets: [{ data:[c, w_s, e], backgroundColor:['#22c55e', '#ef4444', '#f97316'], borderWidth:0 }]
+                },
+                options: { cutout: '80%', plugins: { legend: { display:false } } }
+            });
+        }
+
+        function showSolutions() {
+            document.getElementById('solution-area').classList.remove('hidden');
+            const list = document.getElementById('solution-list');
+            list.innerHTML = '';
+
+            questions.forEach((q, i) => {
+                const uAns = userAnswers[i];
+                const isCorrect = uAns === q.correct_option;
+                const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e];
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-3xl border border-gray-100 shadow-sm";
+                card.innerHTML = `
+                    <p class="font-bold text-gray-800 mb-4">${i+1}. ${q.question_text}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div class="p-3 rounded-xl border ${uAns === q.correct_option ? 'correct-ans' : (uAns !== undefined ? 'wrong-ans' : 'bg-gray-50')}">
+                            <b>તમારો જવાબ:</b> ${uAns !== undefined ? opts[uAns] : 'સ્કીપ કર્યો'}
+                        </div>
+                        <div class="p-3 rounded-xl border bg-green-50 border-green-200">
+                            <b>સાચો જવાબ:</b> ${opts[q.correct_option]}
+                        </div>
+                    </div>
+                    <div class="mt-4 text-xs text-blue-600 bg-blue-50 p-3 rounded-xl italic">
+                        <b>સમજૂતી:</b> ${q.explanation || 'કોઈ સમજૂતી ઉપલબ્ધ નથી.'}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            window.scrollTo({ top: document.getElementById('solution-area').offsetTop, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
