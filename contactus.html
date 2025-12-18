@@ -1,105 +1,232 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="gu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
+    <title>PSI Mock Test - Full Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 30px auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-
-        h1 {
-            text-align: center;
-            color: #222;
-            margin-bottom: 10px;
-        }
-
-        .updated {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-        p {
-            font-size: 15px;
-            line-height: 1.7;
-            color: #333;
-        }
-
-        .info {
-            margin-top: 20px;
-        }
-
-        .info p {
-            margin: 8px 0;
-        }
-
-        .label {
-            font-weight: bold;
-            color: #000;
-        }
-
-        footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 14px;
-            color: #777;
-        }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
+        body { user-select: none; background-color: #f8fafc; font-family: sans-serif; }
+        .option-btn { border: 2px solid #e2e8f0; transition: 0.2s; cursor: pointer; display: flex; align-items: center; padding: 1rem; border-radius: 1rem; gap: 1rem; width: 100%; text-align: left; }
+        .option-btn:hover { border-color: #3b82f6; background: #eff6ff; }
+        .option-btn.selected { border-color: #2563eb; background: #dbeafe; font-weight: bold; }
+        .pal-btn { width: 40px; height: 40px; border-radius: 8px; font-weight: bold; font-size: 12px; transition: 0.2s; border: 1px solid #e2e8f0; }
+        .pal-answered { background: #2563eb !important; color: white; border-color: #2563eb; }
+        .pal-current { border: 3px solid #f59e0b !important; }
+        .correct-card { background: #dcfce7; border: 2px solid #22c55e; }
+        .wrong-card { background: #fee2e2; border: 2px solid #ef4444; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Contact Us</h1>
-        <div class="updated">Last updated on 15-12-2025 09:40:47</div>
-
-        <p>You may contact us using the information below:</p>
-
-        <div class="info">
-            <p><span class="label">Merchant Legal Entity Name:</span> J D BAVERAGES</p>
-
-            <p><span class="label">Registered Address:</span><br>
-                GROUND FLOOR, SHOP NO.40,41,42,43, BHAGYODAY COMPLEX, MILKAT<br>
-                NO.2297/9 TO 2297/12, SOYLA ROAD, NAVA BHILDI,<br>
-                BANASKANTHA, DISA, GUJARAT, PIN: 385530
-            </p>
-
-            <p><span class="label">Operational Address:</span><br>
-                GROUND FLOOR, SHOP NO.40,41,42,43, BHAGYODAY COMPLEX, MILKAT<br>
-                NO.2297/9 TO 2297/12, SOYLA ROAD, NAVA BHILDI,<br>
-                BANASKANTHA, DISA, GUJARAT, PIN: 385530
-            </p>
-
-            <p><span class="label">Telephone No:</span> <a href="tel:6353511804">6353511804</a></p>
-
-            <p><span class="label">E-Mail ID:</span> 
-                <a href="mailto:joshidevendra211@gmail.com">joshidevendra211@gmail.com</a>
-            </p>
+    <div id="loader" class="fixed inset-0 flex items-center justify-center bg-white z-[100]">
+        <div class="text-center">
+            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="mt-4 font-bold text-gray-600">ટેસ્ટ લોડ થઈ રહી છે...</p>
         </div>
-
-        <footer>
-            © 2025 J D BAVERAGES. All Rights Reserved.
-        </footer>
     </div>
 
+    <div id="main-ui" class="hidden min-h-screen flex flex-col">
+        <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-50">
+            <div class="font-bold text-blue-600" id="q-label">Q: 1/200</div>
+            <div id="timer" class="text-xl font-mono font-bold text-red-600">120:00</div>
+            <button onclick="confirmSubmit()" class="bg-red-600 text-white px-4 py-1 rounded-lg font-bold">Submit</button>
+        </header>
+
+        <main class="flex-grow flex flex-col md:flex-row">
+            <div class="flex-grow p-4 md:p-8 overflow-y-auto h-[calc(100vh-70px)]">
+                <div class="max-w-3xl mx-auto bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100">
+                    <h2 id="question-text" class="text-lg md:text-xl font-bold text-gray-800 mb-8 leading-relaxed">Loading Question...</h2>
+                    <div id="options-container" class="space-y-3"></div>
+                    <div class="flex justify-between mt-10 pt-6 border-t">
+                        <button onclick="move(-1)" class="px-6 py-2 text-gray-400 font-bold hover:bg-gray-100 rounded-xl">Back</button>
+                        <button onclick="move(1)" class="px-10 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg">Save & Next</button>
+                    </div>
+                </div>
+            </div>
+            <aside class="w-full md:w-80 bg-white border-l p-4 overflow-y-auto h-[calc(100vh-70px)]">
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-4">Question Palette</p>
+                <div id="palette-grid" class="grid grid-cols-5 md:grid-cols-4 gap-2"></div>
+            </aside>
+        </main>
+    </div>
+
+    <div id="result-screen" class="hidden min-h-screen p-4 md:p-10 bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-[40px] shadow-xl overflow-hidden md:flex">
+                <div class="p-10 text-center border-r md:w-1/2 flex flex-col justify-center">
+                    <h2 class="text-2xl font-bold text-gray-600">તમારો સ્કોર</h2>
+                    <div class="text-7xl font-black text-blue-600 my-4" id="final-score">0.00</div>
+                    <div class="flex gap-2 mt-4 justify-center">
+                        <button onclick="showSolutions()" class="bg-gray-800 text-white px-4 py-2 rounded-xl text-sm font-bold">Solutions</button>
+                        <button onclick="location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold">Re-Take</button>
+                    </div>
+                </div>
+                <div class="p-10 md:w-1/2 flex flex-col items-center justify-center bg-gray-50">
+                    <canvas id="resChart" style="max-width: 200px; max-height: 200px;"></canvas>
+                    <div class="grid grid-cols-2 gap-4 mt-6 w-full text-center">
+                        <div class="p-2 bg-white rounded-lg shadow-sm"><p class="text-green-600 font-bold" id="c-count">0</p><p class="text-[10px]">Correct</p></div>
+                        <div class="p-2 bg-white rounded-lg shadow-sm"><p class="text-red-600 font-bold" id="w-count">0</p><p class="text-[10px]">Wrong/Skip</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="solution-box" class="hidden mt-10 space-y-4 pb-20">
+                <h3 class="text-xl font-bold text-gray-800">Answers & Explanations</h3>
+                <div id="solution-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+        
+        const sb = supabase.createClient(SB_URL, SB_KEY);
+        let questions = [], userAnswers = {}, currentIdx = 0, timer = 120 * 60, interval;
+
+        async function init() {
+            try {
+                const { data, error } = await sb.from('questions').select('*').eq('test_id', 'mock_test_1').order('id', {ascending: true});
+                if (error) throw error;
+                if (!data || data.length === 0) { alert("ડેટાબેઝમાં પ્રશ્નો મળ્યા નથી!"); return; }
+                
+                questions = data;
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('main-ui').classList.remove('hidden');
+                
+                renderPalette();
+                displayQuestion();
+                startTimer();
+            } catch (err) {
+                console.error(err);
+                alert("Error loading data: " + err.message);
+            }
+        }
+
+        function displayQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('q-label').innerText = `Q: ${currentIdx + 1}/${questions.length}`;
+            document.getElementById('question-text').innerText = q.question_text;
+            
+            const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e];
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            opts.forEach((txt, i) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn ${userAnswers[currentIdx] === i ? 'selected' : ''}`;
+                btn.innerHTML = `<span class="w-8 h-8 rounded-full border flex items-center justify-center font-bold text-xs">${String.fromCharCode(65+i)}</span> <span>${txt}</span>`;
+                btn.onclick = () => { userAnswers[currentIdx] = i; displayQuestion(); updatePalette(); };
+                container.appendChild(btn);
+            });
+            updatePalette();
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            questions.forEach((_, i) => {
+                const b = document.createElement('button');
+                b.id = `pal-${i}`;
+                b.className = "pal-btn bg-white text-gray-400";
+                b.innerText = i + 1;
+                b.onclick = () => { currentIdx = i; displayQuestion(); };
+                grid.appendChild(b);
+            });
+        }
+
+        function updatePalette() {
+            questions.forEach((_, i) => {
+                const b = document.getElementById(`pal-${i}`);
+                b.classList.remove('pal-current', 'pal-answered');
+                if(i === currentIdx) b.classList.add('pal-current');
+                if(userAnswers[i] !== undefined) b.classList.add('pal-answered');
+            });
+        }
+
+        function move(dir) {
+            let next = currentIdx + dir;
+            if (next >= 0 && next < questions.length) { currentIdx = next; displayQuestion(); }
+        }
+
+        function startTimer() {
+            interval = setInterval(() => {
+                timer--;
+                let m = Math.floor(timer/60), s = timer%60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if (timer <= 0) autoSubmit();
+            }, 1000);
+        }
+
+        function confirmSubmit() { if(confirm("સબમિટ કરવા માંગો છો?")) autoSubmit(); }
+
+        async function autoSubmit() {
+            clearInterval(interval);
+            let correct = 0, wrong = 0, e_opt = 0, skipped = 0;
+            
+            questions.forEach((q, i) => {
+                const ans = userAnswers[i];
+                if (ans === undefined) skipped++;
+                else if (ans === 4) e_opt++;
+                else if (ans === q.correct_option) correct++;
+                else wrong++;
+            });
+
+            // marking: Correct +1, (Wrong + Skipped) -0.33, E 0.0
+            const totalWrong = wrong + skipped;
+            const score = (correct * 1) - (totalWrong * 0.33);
+
+            // Hide UI, Show Result
+            document.getElementById('main-ui').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score.toFixed(2);
+            document.getElementById('c-count').innerText = correct;
+            document.getElementById('w-count').innerText = totalWrong;
+
+            // Chart
+            new Chart(document.getElementById('resChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['સાચા', 'ખોટા/સ્કીપ', 'Option E'],
+                    datasets: [{ data: [correct, totalWrong, e_opt], backgroundColor: ['#22c55e', '#ef4444', '#f97316'] }]
+                },
+                options: { plugins: { legend: { display: false } } }
+            });
+        }
+
+        function showSolutions() {
+            document.getElementById('solution-box').classList.remove('hidden');
+            const list = document.getElementById('solution-list');
+            list.innerHTML = '';
+
+            questions.forEach((q, i) => {
+                const uAns = userAnswers[i];
+                const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e];
+                const isCorrect = uAns === q.correct_option;
+
+                const div = document.createElement('div');
+                div.className = `p-6 rounded-2xl bg-white border shadow-sm ${uAns === undefined || !isCorrect ? 'border-red-100' : 'border-green-100'}`;
+                div.innerHTML = `
+                    <p class="font-bold mb-3">${i+1}. ${q.question_text}</p>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div class="p-3 rounded-lg ${isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}">
+                            <b>તમારો જવાબ:</b> ${uAns !== undefined ? opts[uAns] : 'સ્કીપ કર્યો'}
+                        </div>
+                        <div class="p-3 rounded-lg bg-blue-50 text-blue-700">
+                            <b>સાચો જવાબ:</b> ${opts[q.correct_option]}
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg text-xs italic text-gray-600">
+                        <b>સમજૂતી:</b> ${q.explanation || 'કોઈ સમજૂતી ઉપલબ્ધ નથી.'}
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
