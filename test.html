@@ -102,18 +102,51 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
 );
 
-const TEST_ID = "mock_test_1"; // 👈 questions table માં test_id આ value હોવી જોઈએ
+const TEST_ID = "mock_test_1";
 const TOTAL_QUESTIONS = 200;
 const DURATION_SECONDS = 120*60;
 
 let questions=[], answers=[], currentIndex=0, timerInterval=null, submitted=false;
 
-// Pre-rules
-const checks=[rule1,rule2,rule3];
-checks.forEach(ch=>ch.addEventListener("change",()=>{startBtn.disabled=!checks.every(c=>c.checked);}));
-startBtn.addEventListener("click",()=>{preRules.classList.add("hidden");testSection.classList.remove("hidden");startTest();});
+// ✅ Proper element references
+const startBtn = document.getElementById("startBtn");
+const rule1 = document.getElementById("rule1");
+const rule2 = document.getElementById("rule2");
+const rule3 = document.getElementById("rule3");
+const preRules = document.getElementById("preRules");
+const testSection = document.getElementById("testSection");
+const qNumber = document.getElementById("qNumber");
+const questionText = document.getElementById("questionText");
+const optionsForm = document.getElementById("optionsForm");
+const paletteBtn = document.getElementById("paletteBtn");
+const paletteModal = document.getElementById("paletteModal");
+const paletteGrid = document.getElementById("paletteGrid");
+const closePalette = document.getElementById("closePalette");
+const prevBtn = document.getElementById("prevBtn");
+const saveNextBtn = document.getElementById("saveNextBtn");
+const skipBtn = document.getElementById("skipBtn");
+const submitBtn = document.getElementById("submitBtn");
+const summary = document.getElementById("summary");
+const pieChart = document.getElementById("pieChart");
+const solutions = document.getElementById("solutions");
+const resultSection = document.getElementById("resultSection");
+const leaderboardSection = document.getElementById("leaderboardSection");
+const lbTable = document.getElementById("lbTable");
+const timer = document.getElementById("timer");
 
-// Load questions
+// ✅ Pre-rules logic
+const checks = [rule1, rule2, rule3];
+checks.forEach(ch => ch.addEventListener("change", () => {
+  startBtn.disabled = !checks.every(c => c.checked);
+}));
+
+startBtn.addEventListener("click", () => {
+  preRules.classList.add("hidden");
+  testSection.classList.remove("hidden");
+  startTest();
+});
+
+// ✅ Load questions
 async function loadQuestions(){
   const {data,error}=await supabase.from("questions").select("*").eq("test_id",TEST_ID);
   if(error)console.error(error);
@@ -121,7 +154,7 @@ async function loadQuestions(){
   answers=questions.map(q=>({qid:q.id,selected:0}));
 }
 
-// Render question
+// ✅ Render question
 function renderQuestion(){
   const q=questions[currentIndex];
   if(!q)return;
@@ -129,11 +162,10 @@ function renderQuestion(){
   questionText.textContent=q.question_text;
   [...optionsForm.elements].forEach(el=>el.checked=(Number(el.value)===answers[currentIndex].selected));
 }
-
-// Save answer
+// ✅ Save answer
 function saveAnswer(sel){answers[currentIndex].selected=sel;buildPalette();}
 
-// Palette
+// ✅ Palette
 function buildPalette(){
   paletteGrid.innerHTML="";
   answers.forEach((a,i)=>{
@@ -148,13 +180,11 @@ function togglePalette(show){paletteModal.classList.toggle("hidden",!show);}
 paletteBtn.onclick=()=>togglePalette(true);
 closePalette.onclick=()=>togglePalette(false);
 
-// Navigation
+// ✅ Navigation
 prevBtn.onclick=()=>{if(currentIndex>0){currentIndex--;renderQuestion();}};
 saveNextBtn.onclick=()=>{saveAnswer(getSelected());if(currentIndex<TOTAL_QUESTIONS-1){currentIndex++;renderQuestion();}};
 skipBtn.onclick=()=>{saveAnswer(0);if(currentIndex<TOTAL_QUESTIONS-1){currentIndex++;renderQuestion();}};
-function getSelected(){const checked=[...optionsForm.elements].find(el=>
-
-// ✅ Navigation (already above)
+function getSelected(){const checked=[...optionsForm.elements].find(el=>el.checked);return checked?Number(checked.value):0;}
 
 // ✅ Timer
 function startTimer(){
@@ -209,16 +239,6 @@ function drawPie(correct, wrong, skipped, eCount) {
     ctx.fill();
     startAngle += sliceAngle;
   });
-  // legend
-  let y = 10;
-  ctx.font = "14px sans-serif";
-  data.forEach(d => {
-    ctx.fillStyle = d.color;
-    ctx.fillRect(10, y, 12, 12);
-    ctx.fillStyle = "#333";
-    ctx.fillText(`${d.label}: ${d.value}`, 30, y+10);
-    y += 20;
-  });
 }
 
 // ✅ Render solutions
@@ -231,13 +251,6 @@ function renderSolutions() {
     block.innerHTML = `
       <h3>Q${idx+1}</h3>
       <p>${q.question_text}</p>
-      <ul>
-        <li>A: ${q.option_a}</li>
-        <li>B: ${q.option_b}</li>
-        <li>C: ${q.option_c}</li>
-        <li>D: ${q.option_d}</li>
-        <li>E: ${q.option_e}</li>
-      </ul>
       <p><strong>Your:</strong> ${sel===0?"Skipped":sel===5?"E":"ABCD"[sel-1]}</p>
       <p><strong>Correct:</strong> ${"ABCD"[q.correct_option-1]}</p>
       <p><strong>Solution:</strong> ${q.explanation||"—"}</p>
@@ -250,29 +263,12 @@ function renderSolutions() {
 async function showLeaderboard() {
   resultSection.classList.add("hidden");
   leaderboardSection.classList.remove("hidden");
-  const { data, error } = await supabase
-    .from("test_results")
+  const { data } = await supabase.from("test_results")
     .select("user_id,total_score,time_taken_seconds")
     .eq("test_id", TEST_ID);
-  if (error) { lbTable.textContent="Error loading leaderboard"; return; }
-  const userIds=[...new Set(data.map(r=>r.user_id))];
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id,full_name,email")
-    .in("id", userIds);
-  const nameMap=new Map((profiles||[]).map(p=>[p.id,p.full_name||p.email]));
-  const sorted=data.sort((a,b)=>{
-    if(b.total_score!==a.total_score) return b.total_score-a.total_score;
-    return a.time_taken_seconds-b.time_taken_seconds;
-  });
-  const rows=sorted.map((r,idx)=>`
-    <tr><td>${idx+1}</td>
-    <td>${nameMap.get(r.user_id)||r.user_id}</td>
-    <td>${r.total_score}</td>
-    <td>${r.time_taken_seconds}</td></tr>`).join("");
-  lbTable.innerHTML=`<table>
-    <thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Time(s)</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+  const rows = (data||[]).map((r,idx)=>`
+    <tr><td>${idx+1}</td><td>${r.user_id}</td><td>${r.total_score}</td><td>${r.time_taken_seconds}</td></tr>`).join("");
+  lbTable.innerHTML=`<table><thead><tr><th>Rank</th><th>User</th><th>Score</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function backToResult(){leaderboardSection.classList.add("hidden");resultSection.classList.remove("hidden");}
 
@@ -285,5 +281,6 @@ async function startTest(){
   startTimer();
 }
 </script>
+
 </body>
 </html>
