@@ -77,38 +77,42 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
  loadIntro();
 })();
 
-/* ========== INTRO (સુધારેલું) ========== */
-async function loadIntro(){
- // પેલા ચેક કરો કે યુઝરે ટેસ્ટ આપી છે કે નહીં
- const { data: existing } = await supabase
+/* ========== START TEST (સુધારેલું) ========== */
+async function startTest(){
+ if(!agree.checked){alert("Accept instructions");return;}
+
+ // 1. ચેક કરો કે યુઝરે આ ટેસ્ટ પહેલા આપી છે કે નહીં
+ const { data: existingResult, error: checkError } = await supabase
   .from("test_results")
-  .select("total_score, correct_count, wrong_count, skipped_count, e_count")
+  .select("id")
   .eq("user_id", user.id)
   .eq("test_id", TEST_ID)
-  .maybeSingle();
+  .maybeSingle(); // જો ડેટા હોય તો સિંગલ ઓબ્જેક્ટ આપશે
 
- if (existing) {
-  // જો ટેસ્ટ આપી દીધી હોય તો સીધું રિઝલ્ટ બતાવો
-  app.innerHTML = `
-  <div class="card">
-   <h2>Mock Test 1</h2>
-   <p style="color: #dc2626; font-weight: bold;">તમે આ ટેસ્ટ આપી દીધી છે.</p>
-   <button class="primary" onclick="loadResult(${existing.total_score}, ${existing.correct_count}, ${existing.wrong_count}, ${existing.skipped_count}, ${existing.e_count})">
-    તમારું રિઝલ્ટ જુઓ
-   </button>
-  </div>`;
- } else {
-  // જો ટેસ્ટ નથી આપી તો સ્ટાર્ટ બટન બતાવો
-  app.innerHTML = `
-  <div class="card">
-   <h2>Mock Test 1</h2>
-   <p>200 Questions • 120 Minutes</p>
-   <label><input type="checkbox" id="agree"> I accept instructions</label><br><br>
-   <button class="primary" onclick="startTest()">Start Test</button>
-  </div>`;
+ if (existingResult) {
+  alert("તમે આ ટેસ્ટ પહેલેથી આપી દીધી છે. તમે તેને ફરીથી આપી શકતા નથી.");
+  // જો રિઝલ્ટ જોવું હોય તો સીધું લીડરબોર્ડ અથવા રિઝલ્ટ પેજ પર મોકલી શકાય
+  location.reload(); 
+  return;
  }
-}
 
+ // 2. જો ટેસ્ટ નથી આપી, તો સવાલો લોડ કરો
+ const { data, error } = await supabase
+  .from("questions")
+  .select("*")
+  .eq("test_id", TEST_ID)
+  .order("id");
+
+ if (error || !data) {
+  alert("સવાલો લોડ કરવામાં ભૂલ આવી રહી છે.");
+  return;
+ }
+
+ questions = data;
+ renderQuestion();
+ startTimer();
+}
+  
 /* ========== START TEST ========== */
 async function startTest(){
  if(!agree.checked){alert("Accept instructions");return;}
