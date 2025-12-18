@@ -41,79 +41,79 @@ display:flex;align-items:center;justify-content:center;z-index:9}
 </div>
 
 <script>
-
-
 /* ================= CONFIG ================= */
 const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
 const TEST_ID = "mock_test_1";
 const TOTAL_TIME = 120 * 60;
-/* ========================================== */
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+// વેરીએબલ ડિક્લેરેશનમાં સુધારો
+if (!window.sb) {
+    window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+}
+const supabase = window.sb; 
 
 let user, questions=[], answers={}, current=0;
 let timeLeft=TOTAL_TIME, timer, submitted=false;
 
-/* ========== INIT (સુધારેલું - આ કોડ રિપ્લેસ કરો) ========== */
+/* ========== INIT (સંપૂર્ણ સુધારેલું) ========== */
 (async()=>{
-  const {data:{user:u}} = await supabase.auth.getUser();
-  if(!u){app.innerHTML="Please login";return;}
-  user=u;
+ try {
+     const {data:{user:u}} = await supabase.auth.getUser();
+     if(!u){ app.innerHTML="Please login to continue."; return; }
+     user=u;
 
-  // 1. એક્સેસ ચેક કરો
-  const {data:access} = await supabase
-    .from("user_access")
-    .select("*")
-    .eq("user_id",user.id)
-    .eq("is_active",true)
-    .single();
+     // ૧. એક્સેસ ચેક
+     const {data:access} = await supabase
+      .from("user_access")
+      .select("*")
+      .eq("user_id",user.id)
+      .eq("is_active",true)
+      .single();
 
-  if(!access){
-    purchasePopup.classList.remove("hidden");
-    app.innerHTML="";
-    return;
-  }
+     if(!access){
+      purchasePopup.classList.remove("hidden");
+      app.innerHTML="";
+      return;
+     }
 
-  // 2. પહેલા સવાલો લોડ કરી લો (જેથી સોલ્યુશનમાં કામ લાગે)
-  const { data: qData, error: qError } = await supabase
-    .from("questions")
-    .select("*")
-    .eq("test_id", TEST_ID)
-    .order("id");
-  
-  if (qError) {
-    app.innerHTML = "Error loading questions.";
-    return;
-  }
-  questions = qData;
+     // ૨. પ્રશ્નો પહેલા લોડ કરો (ગમે તે સ્થિતિમાં)
+     const { data: qData } = await supabase
+      .from("questions")
+      .select("*")
+      .eq("test_id", TEST_ID)
+      .order("id");
+     
+     questions = qData || [];
 
-  // 3. હવે ચેક કરો કે ટેસ્ટ આપી દીધી છે કે નહીં
-  const { data: existingResult } = await supabase
-    .from("test_results")
-    .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds, answers")
-    .eq("user_id", user.id)
-    .eq("test_id", TEST_ID)
-    .maybeSingle();
+     // ૩. ટેસ્ટ રિઝલ્ટ ચેક કરો
+     const { data: existingResult } = await supabase
+      .from("test_results")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("test_id", TEST_ID)
+      .maybeSingle();
 
-  if (existingResult) {
-    // જો આપી દીધી હોય, તો સેવ કરેલા જવાબો પણ લોડ કરો
-    answers = existingResult.answers || {};
-    // timeLeft ને સેટ કરો જેથી ટાઈમ સાચો દેખાય
-    timeLeft = TOTAL_TIME - existingResult.time_taken_seconds;
-    
-    loadResult(
-      existingResult.total_score, 
-      existingResult.correct_count, 
-      existingResult.wrong_count, 
-      existingResult.skipped_count, 
-      existingResult.e_count
-    );
-  } else {
-    loadIntro();
-  }
+     if (existingResult) {
+      answers = existingResult.answers || {};
+      timeLeft = TOTAL_TIME - existingResult.time_taken_seconds;
+      loadResult(
+        existingResult.total_score, 
+        existingResult.correct_count, 
+        existingResult.wrong_count, 
+        existingResult.skipped_count, 
+        existingResult.e_count
+      );
+     } else {
+      loadIntro();
+     }
+ } catch (e) {
+     app.innerHTML = "Something went wrong. Please refresh.";
+     console.error(e);
+ }
 })();
-  
+
+
 
 /* ========== LOAD INTRO (નવું ઉમેરવાનું) ========== */
 function loadIntro() {
