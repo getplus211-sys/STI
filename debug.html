@@ -220,7 +220,7 @@ if(error){
 
  app.innerHTML="<h2>Leaderboard</h2>"+data.map((u,i)=>`
  <div class="card rank ${u.user_id===user.id?"me":""}">
-  <b>#${i+1}</b> ${u.profiles?.full_name||"full_name"}<br>
+  <b>#${i+1}</b> User ID: ${u.user_id.slice(0,8)}<br>
   Score: ${u.total_score} | Time: ${u.time_taken_seconds}s
  </div>`).join("");
 }
