@@ -1,282 +1,487 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSI Premium Mock Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { user-select: none; background-color: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
-        .option-card { border: 2px solid #e2e8f0; transition: 0.2s; cursor: pointer; }
-        .option-card:hover { border-color: #3b82f6; background-color: #eff6ff; }
-        .option-card.selected { border-color: #2563eb; background-color: #dbeafe; font-weight: 600; }
-        .palette-btn { width: 40px; height: 40px; border-radius: 8px; font-size: 12px; font-weight: bold; }
-        .pal-answered { background-color: #2563eb; color: white; }
-        .pal-current { outline: 3px solid #fbbf24; }
-        .correct-ans { background-color: #dcfce7; border-color: #22c55e; }
-        .wrong-ans { background-color: #fee2e2; border-color: #ef4444; }
-    </style>
+<meta charset="UTF-8">
+<title>Mock Test 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f1f5f9}
+.container{max-width:900px;margin:auto;padding:12px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;
+box-shadow:0 8px 24px rgba(0,0,0,.06)}
+h2,h3{margin:6px 0}
+button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cursor:pointer}
+.primary{background:#2563eb;color:#fff}
+.gray{background:#e5e7eb}
+.danger{background:#dc2626;color:#fff}
+.option{border:1px solid #ddd;border-radius:12px;padding:12px;margin:8px 0;cursor:pointer}
+.option.active{background:#2563eb;color:#fff}
+.top{display:flex;justify-content:space-between;font-weight:700}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.6);
+display:flex;align-items:center;justify-content:center;z-index:9}
+.hidden{display:none}
+.rank{display:flex;gap:10px;align-items:center}
+.rank.me{border:2px solid #2563eb}
+.loader{text-align:center;padding:40px}
+.loader-icon{font-size:40px;animation:spin 2s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+</style>
 </head>
+
 <body>
+<div class="container" id="app">
+  <div class="card loader">
+    <div class="loader-icon">⏳</div>
+    <h3>Loading...</h3>
+    <p>Please wait</p>
+  </div>
+</div>
 
-    <div id="setup-screen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-xl w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-            <h1 class="text-2xl font-black text-blue-700 text-center mb-6">PSI/ASI MOCK TEST #1</h1>
-            <div id="access-msg" class="mb-6 p-4 bg-blue-50 rounded-2xl text-sm text-blue-800 leading-relaxed">
-                <b>સૂચનાઓ:</b><br>
-                • ૨૦૦ પ્રશ્નો, ૧૨૦ મિનિટ.<br>
-                • સાચો જવાબ: +૧.૦૦ | ખોટો/Skip: -૦.૩૩ | ઓપ્શન E: ૦.૦૦<br>
-                • એકવાર સબમિટ કર્યા પછી ફેરફાર નહીં થાય.
-            </div>
-            <button id="start-btn" onclick="checkAccessAndStart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition">
-                Start Mock Test
-            </button>
+<div class="popup hidden" id="purchasePopup">
+  <div class="card">
+    <h3>Access Required</h3>
+    <p>Please purchase plan to attempt this test.</p>
+    <button class="primary" onclick="location.href='/purchase.html'">Purchase Now</button>
+  </div>
+</div>
+
+<script>
+
+/* ================= CONFIG ================= */
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const TEST_ID = "mock_test_1";
+const TOTAL_TIME = 120 * 60;
+const TIMEOUT_MS = 15000; // 15 seconds timeout
+/* ========================================== */
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const app = document.getElementById("app");
+const purchasePopup = document.getElementById("purchasePopup");
+let user, questions=[], answers={}, current=0;
+let timeLeft=TOTAL_TIME, timer, submitted=false;
+
+/* ========== TIMEOUT HELPER ========== */
+const timeout = (ms) => new Promise((_, reject) => 
+  setTimeout(() => reject(new Error('Request timeout')), ms)
+);
+
+/* ========== ERROR DISPLAY ========== */
+function showError(message, showRetry = true) {
+  app.innerHTML = `
+    <div class="card">
+      <h3>⚠️ Error</h3>
+      <p>${message}</p>
+      ${showRetry ? '<button class="primary" onclick="location.reload()">Retry</button>' : ''}
+    </div>
+  `;
+}
+
+/* ========== INIT (સુધારેલું + Error Handling) ========== */
+(async()=>{
+  try {
+    // Check internet connection
+    if (!navigator.onLine) {
+      showError('No internet connection. Please check and try again.');
+      return;
+    }
+
+    // Get user with timeout
+    const {data:{user:u}} = await Promise.race([
+      supabase.auth.getUser(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if(!u){
+      showError('Please login first', false);
+      return;
+    }
+    user=u;
+
+    // Check access with timeout
+    const {data:access} = await Promise.race([
+      supabase
+        .from("user_access")
+        .select("*")
+        .eq("user_id",user.id)
+        .eq("is_active",true)
+        .maybeSingle(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if(!access){
+      purchasePopup.classList.remove("hidden");
+      app.innerHTML="";
+      return;
+    }
+
+    // Check existing result with timeout
+    const { data: existingResult } = await Promise.race([
+      supabase
+        .from("test_results")
+        .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds, answers")
+        .eq("user_id", user.id)
+        .eq("test_id", TEST_ID)
+        .maybeSingle(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if (existingResult) {
+      answers = existingResult.answers || {};
+
+      const { data: qData } = await Promise.race([
+        supabase
+          .from("questions")
+          .select("*")
+          .eq("test_id", TEST_ID)
+          .order("id"),
+        timeout(TIMEOUT_MS)
+      ]);
+
+      questions = qData || [];
+
+      loadResult(
+        existingResult.total_score, 
+        existingResult.correct_count, 
+        existingResult.wrong_count, 
+        existingResult.skipped_count, 
+        existingResult.e_count,
+        existingResult.time_taken_seconds
+      );
+    }
+    else {
+      loadIntro();
+    }
+  } catch(err) {
+    console.error('Init error:', err);
+    if(err.message === 'Request timeout') {
+      showError('Server is taking too long to respond. Please check your connection and try again.');
+    } else {
+      showError('Failed to load. Please try again.');
+    }
+  }
+})();
+
+/* ========== LOAD INTRO ========== */
+function loadIntro() {
+  app.innerHTML = `
+    <div class="card">
+      <h2>Mock Test 1</h2>
+      <p><b>Instructions:</b></p>
+      <ul>
+        <li>Total Time: 120 Minutes</li>
+        <li>Negative Marking: 0.33 for wrong/skipped answers.</li>
+        <li>E option: No negative marking.</li>
+      </ul>
+      <label>
+        <input type="checkbox" id="agree"> I agree to the terms and conditions.
+      </label>
+      <br><br>
+      <button class="primary" onclick="startTest()">Start Test Now</button>
+    </div>
+  `;
+}
+
+/* ========== START TEST (સુધારેલું + Error Handling) ========== */
+async function startTest(){
+  const agreeCheckbox = document.getElementById('agree');
+  if(!agreeCheckbox.checked){
+    alert("Please accept instructions");
+    return;
+  }
+
+  try {
+    // Check if already attempted
+    const { data: existingResult } = await Promise.race([
+      supabase
+        .from("test_results")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("test_id", TEST_ID)
+        .maybeSingle(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if (existingResult) {
+      alert("તમે આ ટેસ્ટ પહેલેથી આપી દીધી છે. તમે તેને ફરીથી આપી શકતા નથી.");
+      location.reload(); 
+      return;
+    }
+
+    // Load questions
+    const { data, error } = await Promise.race([
+      supabase
+        .from("questions")
+        .select("*")
+        .eq("test_id", TEST_ID)
+        .order("id"),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if (error || !data || data.length === 0) {
+      showError("Failed to load questions. Please try again.");
+      return;
+    }
+
+    questions = data;
+    renderQuestion();
+    startTimer();
+  } catch(err) {
+    console.error('Start test error:', err);
+    showError('Failed to start test. Please try again.');
+  }
+}
+
+/* ========== QUESTION RENDER ========== */
+function renderQuestion(){
+  const q = questions[current];
+  app.innerHTML=`
+  <div class="top">
+    <div>Q ${current+1}/${questions.length}</div>
+    <div id="timer"></div>
+  </div>
+
+  <div class="card">
+    <p>${q.question_text}</p>
+    ${["a","b","c","d","e"].map((o,i)=>`
+      <div class="option ${answers[q.id]==i+1?"active":""}"
+        onclick="selectAnswer(${q.id},${i+1})">
+        ${q["option_"+o]}
+      </div>`).join("")}
+  </div>
+
+  <button class="gray" onclick="prev()">Previous</button><br><br>
+  <button class="gray" onclick="next()">Next</button><br><br>
+  <button class="danger" onclick="submitTest()">Submit</button>
+  `;
+}
+
+/* ========== ANSWER SELECT ========== */
+function selectAnswer(qid,val){
+  answers[qid]=val;
+  renderQuestion();
+}
+
+function next(){ 
+  if(current<questions.length-1){
+    current++;
+    renderQuestion();
+  }
+}
+
+function prev(){ 
+  if(current>0){
+    current--;
+    renderQuestion();
+  }
+}
+
+/* ========== TIMER ========== */
+function startTimer(){
+  timer=setInterval(()=>{
+    timeLeft--;
+    const t=document.getElementById("timer");
+    if(t) t.innerText=Math.floor(timeLeft/60)+":"+String(timeLeft%60).padStart(2,"0");
+    if(timeLeft<=0){
+      clearInterval(timer);
+      submitTest(true);
+    }
+  },1000);
+}
+
+/* ========== SUBMIT (સુધારેલું + Error Handling) ========== */
+async function submitTest(auto=false){
+  if(submitted) return;
+  if(!auto && !confirm("Submit test?")) return;
+  submitted=true;
+  clearInterval(timer);
+
+  try {
+    let correct=0, wrong=0, skip=0, e=0, score=0;
+
+    questions.forEach(q=>{
+      const a=answers[q.id];
+      if(!a){skip++;score-=0.33;}
+      else if(a===5){e++;}
+      else if(a===q.correct_option){correct++;score++;}
+      else{wrong++;score-=0.33;}
+    });
+
+    score = Number(score.toFixed(2));
+    const safeAnswers = JSON.parse(JSON.stringify(answers));
+
+    const {error} = await Promise.race([
+      supabase.from("test_results").insert({
+        user_id:user.id,
+        test_id:TEST_ID,
+        total_score:score,
+        correct_count:correct,
+        wrong_count:wrong,
+        skipped_count:skip,
+        e_count:e,
+        time_taken_seconds:TOTAL_TIME-timeLeft,
+        answers:safeAnswers
+      }),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if(error){
+      alert("Result save failed: "+error.message);
+      submitted = false;
+      return;
+    }
+
+    loadResult(score,correct,wrong,skip,e,TOTAL_TIME-timeLeft);
+  } catch(err) {
+    console.error('Submit error:', err);
+    alert("Failed to submit. Please try again.");
+    submitted = false;
+  }
+}
+
+/* ========== RESULT ========== */
+function loadResult(score, c, w, s, e, timeFromDB = null) {
+  const timeTaken = timeFromDB !== null ? timeFromDB : (TOTAL_TIME - timeLeft);
+  const minutes = Math.floor(timeTaken / 60);
+  const seconds = timeTaken % 60;
+
+  app.innerHTML = `
+  <div class="card">
+    <h2>Your Score: ${score}</h2>
+    <div style="margin: 15px 0; line-height: 1.6;">
+      <p><b>Correct:</b> ${c} | <b>Wrong:</b> ${w}</p>
+      <p><b>Skipped:</b> ${s} | <b>E Options:</b> ${e}</p>
+      <p><b>Time Taken:</b> ${minutes}m ${seconds}s</p>
+    </div>
+    <canvas id="chart"></canvas><br>
+    
+    <button class="primary" onclick="loadLeaderboard()">View Leaderboard</button>
+    <br><br>
+    <button class="gray" onclick="viewSolutions()">View Answers / Solutions</button>
+  </div>`;
+
+  const chart = document.getElementById("chart");
+  new Chart(chart, {
+    type: "pie",
+    data: {
+      labels: ["Correct", "Wrong", "Skipped", "E"],
+      datasets: [{ 
+        data: [c, w, s, e], 
+        backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308'] 
+      }]
+    }
+  });
+}
+
+/* ========== SOLUTIONS VIEW ========== */
+function viewSolutions() {
+  let solutionHTML = `<h3>Answer Key & Solutions</h3>
+                      <button class="gray" style="margin-bottom:15px" onclick="location.reload()">Back to Result</button>`;
+
+  questions.forEach((q, index) => {
+    const userAns = answers[q.id];
+    const isCorrect = userAns === q.correct_option;
+    const options = ["a", "b", "c", "d", "e"];
+    
+    solutionHTML += `
+    <div class="card" style="border-left: 5px solid ${isCorrect ? '#22c55e' : '#ef4444'}">
+      <p><b>Q${index + 1}:</b> ${q.question_text}</p>
+      <p><b>Your Answer:</b> ${userAns ? q["option_" + options[userAns - 1]] : "Skipped"}</p>
+      <p style="color: #22c55e"><b>Correct Answer:</b> ${q["option_" + options[q.correct_option - 1]]}</p>
+      ${q.solution ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Solution:</b> ${q.solution}</div>` : ""}
+    </div>`;
+  });
+
+  solutionHTML += `<button class="primary" onclick="location.reload()">Finish</button>`;
+  app.innerHTML = solutionHTML;
+  window.scrollTo(0, 0);
+}
+
+/* ========== LEADERBOARD (સુધારેલું + Error Handling) ========== */
+async function loadLeaderboard(){
+  try {
+    // Get leaderboard results
+    const { data: results, error } = await Promise.race([
+      supabase
+        .from("test_results")
+        .select("user_id,total_score,time_taken_seconds")
+        .eq("test_id", TEST_ID)
+        .order("total_score", { ascending: false })
+        .order("time_taken_seconds", { ascending: true }),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if(error){
+      alert("Failed to load leaderboard: " + error.message);
+      return;
+    }
+
+    // Get profiles
+    const userIds = results.map(r => r.user_id);
+
+    const { data: profiles } = await Promise.race([
+      supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", userIds),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    const nameMap = {};
+    if(profiles) {
+      profiles.forEach(p => nameMap[p.id] = p.full_name);
+    }
+
+    // Find logged-in user rank
+    const myIndex = results.findIndex(r => r.user_id === user.id);
+    if (myIndex === -1) {
+      alert("Your result not found in leaderboard");
+      return;
+    }
+
+    const myRank = myIndex + 1;
+    const myData = results[myIndex];
+
+    // Build leaderboard list (excluding me)
+    const listHTML = results
+      .filter(r => r.user_id !== user.id)
+      .map((u, i) => `
+        <div class="card rank">
+          <b>Rank #${results.indexOf(u) + 1}</b><br>
+          Name: ${nameMap[u.user_id] || "User"}<br>
+          Score: ${u.total_score}<br>
+          Time: ${u.time_taken_seconds} sec
         </div>
-    </div>
+      `).join("");
 
-    <div id="test-screen" class="hidden min-h-screen flex flex-col">
-        <header class="bg-white border-b p-4 sticky top-0 z-50 flex justify-between items-center">
-            <div class="font-bold text-gray-700" id="q-counter">Q: 1/200</div>
-            <div id="timer" class="text-xl font-mono font-bold text-red-600 bg-red-50 px-4 py-1 rounded-full">120:00</div>
-            <button onclick="confirmFinalSubmit()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Submit</button>
-        </header>
+    // Render UI
+    app.innerHTML = `
+      <button class="gray" onclick="location.reload()">⬅ Back to Result</button>
+      <br><br>
 
-        <main class="flex-grow flex flex-col md:flex-row overflow-hidden h-[calc(100vh-73px)]">
-            <div class="flex-grow overflow-y-auto p-4 md:p-8">
-                <div class="max-w-3xl mx-auto bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-gray-100">
-                    <h2 id="q-text" class="text-xl font-bold text-gray-800 mb-8 leading-relaxed">Loading...</h2>
-                    <div id="options-grid" class="space-y-4"></div>
-                    <div class="flex justify-between mt-10 pt-6 border-t">
-                        <button onclick="prevQ()" class="text-gray-400 font-bold px-4 py-2 hover:bg-gray-100 rounded-lg">← Back</button>
-                        <button onclick="nextQ()" class="bg-blue-600 text-white px-10 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100">Next →</button>
-                    </div>
-                </div>
-            </div>
-            <aside class="w-full md:w-80 bg-white border-l p-4 overflow-y-auto">
-                <p class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Question Palette</p>
-                <div id="palette" class="grid grid-cols-5 md:grid-cols-4 gap-2"></div>
-            </aside>
-        </main>
-    </div>
+      <div class="card rank me">
+        <b>Your Rank: #${myRank}</b><br>
+        Name: ${nameMap[user.id] || "You"}<br>
+        Score: ${myData.total_score}<br>
+        Time: ${myData.time_taken_seconds} sec
+      </div>
 
-    <div id="result-screen" class="hidden min-h-screen p-4 md:p-10">
-        <div class="max-w-5xl mx-auto space-y-8">
-            <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-                <div class="p-10 text-center flex flex-col justify-center border-r">
-                    <h2 class="text-3xl font-black text-gray-800">Your Score</h2>
-                    <div class="my-8">
-                        <span id="final-score" class="text-7xl font-black text-blue-600">0.00</span>
-                        <p class="text-gray-400 font-bold mt-2">OUT OF 200.00</p>
-                    </div>
-                    <div class="flex gap-4 justify-center">
-                        <button onclick="showSolutions()" class="bg-gray-800 text-white px-6 py-3 rounded-2xl font-bold">Answers & Solution</button>
-                        <button onclick="alert('Leaderboard coming soon!')" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold">Leaderboard</button>
-                    </div>
-                </div>
-                <div class="p-10 bg-gray-50 flex flex-col items-center">
-                    <div class="w-64 h-64"><canvas id="resultChart"></canvas></div>
-                    <div class="mt-8 grid grid-cols-2 gap-4 w-full">
-                        <div class="bg-white p-4 rounded-2xl text-center shadow-sm">
-                            <p class="text-green-600 font-black text-xl" id="res-c">0</p>
-                            <p class="text-[10px] text-gray-400 font-bold">CORRECT</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-2xl text-center shadow-sm">
-                            <p class="text-red-600 font-black text-xl" id="res-w">0</p>
-                            <p class="text-[10px] text-gray-400 font-bold">WRONG/SKIP</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <h2>Leaderboard</h2>
+      ${listHTML}
+    `;
+  } catch(err) {
+    console.error('Leaderboard error:', err);
+    alert("Failed to load leaderboard. Please try again.");
+  }
+}
 
-            <div id="solution-area" class="hidden space-y-6">
-                <h3 class="text-2xl font-black text-gray-800 px-2">Detailed Solutions</h3>
-                <div id="solution-list" class="space-y-4"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- CONFIG ---
-        const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-        const client = supabase.createClient(SB_URL, SB_KEY);
-
-        let questions = [], userAnswers = {}, currentIdx = 0, timerSec = 120 * 60;
-        let testID = "mock_test_1";
-        let interval;
-
-        // --- STEP 1: ACCESS & START ---
-        async function checkAccessAndStart() {
-            const btn = document.getElementById('start-btn');
-            btn.innerText = "Checking Access...";
-            
-            // Note: Placeholder for actual Auth login check
-            const user_id = "USER_123"; 
-
-            // Check if already submitted
-            const { data: attempt } = await client.from('test_attempts').select('is_submitted').eq('user_id', user_id).eq('test_id', testID).maybeSingle();
-            if (attempt?.is_submitted) {
-                alert("તમે આ ટેસ્ટ પહેલેથી જ આપી દીધી છે!");
-                return;
-            }
-
-            // Load Questions
-            const { data, error } = await client.from('questions').select('*').eq('test_id', testID).order('id', {ascending: true});
-            if (error || !data.length) { alert("પ્રશ્નો લોડ થયા નથી."); return; }
-            
-            questions = data;
-            loadProgress(); // Restore from LocalStorage if exists
-            
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('test-screen').classList.remove('hidden');
-            
-            renderPalette();
-            showQuestion();
-            startTimer();
-        }
-
-        // --- STEP 2: TEST ENGINE ---
-        function showQuestion() {
-            const q = questions[currentIdx];
-            document.getElementById('q-counter').innerText = `Question ${currentIdx + 1}/${questions.length}`;
-            document.getElementById('q-text').innerText = q.question_text;
-            
-            const opts = [
-                {k:0, v:q.option_a}, {k:1, v:q.option_b}, 
-                {k:2, v:q.option_c}, {k:3, v:q.option_d}, {k:4, v:q.option_e}
-            ];
-            
-            const div = document.getElementById('options-grid');
-            div.innerHTML = '';
-            opts.forEach(o => {
-                const card = document.createElement('div');
-                card.className = `option-card p-4 rounded-2xl flex items-center gap-4 ${userAnswers[currentIdx] === o.k ? 'selected' : ''}`;
-                card.innerHTML = `<span class="w-8 h-8 rounded-full border flex items-center justify-center text-xs font-bold">${String.fromCharCode(65+o.k)}</span> ${o.v}`;
-                card.onclick = () => { userAnswers[currentIdx] = o.k; saveProgress(); showQuestion(); updatePal(); };
-                div.appendChild(card);
-            });
-        }
-
-        function renderPalette() {
-            const p = document.getElementById('palette');
-            questions.forEach((_, i) => {
-                const b = document.createElement('button');
-                b.id = `p-${i}`; b.className = "palette-btn bg-gray-100 text-gray-400 border border-gray-100";
-                b.innerText = i + 1;
-                b.onclick = () => { currentIdx = i; showQuestion(); };
-                p.appendChild(b);
-            });
-            updatePal();
-        }
-
-        function updatePal() {
-            questions.forEach((_, i) => {
-                const b = document.getElementById(`p-${i}`);
-                b.classList.remove('pal-current', 'pal-answered');
-                if(i === currentIdx) b.classList.add('pal-current');
-                if(userAnswers[i] !== undefined) b.classList.add('pal-answered');
-            });
-        }
-
-        function startTimer() {
-            interval = setInterval(() => {
-                timerSec--;
-                let m = Math.floor(timerSec/60), s = timerSec%60;
-                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if(timerSec <= 0) { clearInterval(interval); autoSubmit(); }
-            }, 1000);
-        }
-
-        function nextQ() { if(currentIdx < questions.length - 1) { currentIdx++; showQuestion(); } }
-        function prevQ() { if(currentIdx > 0) { currentIdx--; showQuestion(); } }
-
-        // --- STORAGE LOGIC ---
-        function saveProgress() {
-            localStorage.setItem(`test_${testID}_ans`, JSON.stringify(userAnswers));
-            localStorage.setItem(`test_${testID}_time`, timerSec);
-        }
-        function loadProgress() {
-            const savedAns = localStorage.getItem(`test_${testID}_ans`);
-            const savedTime = localStorage.getItem(`test_${testID}_time`);
-            if(savedAns) userAnswers = JSON.parse(savedAns);
-            if(savedTime) timerSec = parseInt(savedTime);
-        }
-
-        // --- STEP 3: RESULT & SOLUTION ---
-        function confirmFinalSubmit() { if(confirm("શું તમે ફાઈનલ સબમિટ કરવા માંગો છો?")) autoSubmit(); }
-
-        async function autoSubmit() {
-            clearInterval(interval);
-            let c=0, w=0, e=0, skipped=0;
-            
-            questions.forEach((q, i) => {
-                const ans = userAnswers[i];
-                if(ans === undefined) skipped++;
-                else if(ans === 4) e++;
-                else if(ans === q.correct_option) c++;
-                else w++;
-            });
-
-            const finalScore = (c * 1) - ((w + skipped) * 0.33); // Skipped and Wrong both -0.33
-            
-            // Save to Supabase
-            await client.from('test_attempts').insert([{ user_id:"USER_123", test_id:testID, is_submitted:true, e_count:e }]);
-            
-            localStorage.removeItem(`test_${testID}_ans`);
-            localStorage.removeItem(`test_${testID}_time`);
-
-            showResultUI(finalScore, c, (w + skipped), e);
-        }
-
-        function showResultUI(score, c, w_s, e) {
-            document.getElementById('test-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = score.toFixed(2);
-            document.getElementById('res-c').innerText = c;
-            document.getElementById('res-w').innerText = w_s;
-
-            new Chart(document.getElementById('resultChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Correct', 'Wrong/Skip', 'Option E'],
-                    datasets: [{ data:[c, w_s, e], backgroundColor:['#22c55e', '#ef4444', '#f97316'], borderWidth:0 }]
-                },
-                options: { cutout: '80%', plugins: { legend: { display:false } } }
-            });
-        }
-
-        function showSolutions() {
-            document.getElementById('solution-area').classList.remove('hidden');
-            const list = document.getElementById('solution-list');
-            list.innerHTML = '';
-
-            questions.forEach((q, i) => {
-                const uAns = userAnswers[i];
-                const isCorrect = uAns === q.correct_option;
-                const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e];
-
-                const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-3xl border border-gray-100 shadow-sm";
-                card.innerHTML = `
-                    <p class="font-bold text-gray-800 mb-4">${i+1}. ${q.question_text}</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <div class="p-3 rounded-xl border ${uAns === q.correct_option ? 'correct-ans' : (uAns !== undefined ? 'wrong-ans' : 'bg-gray-50')}">
-                            <b>તમારો જવાબ:</b> ${uAns !== undefined ? opts[uAns] : 'સ્કીપ કર્યો'}
-                        </div>
-                        <div class="p-3 rounded-xl border bg-green-50 border-green-200">
-                            <b>સાચો જવાબ:</b> ${opts[q.correct_option]}
-                        </div>
-                    </div>
-                    <div class="mt-4 text-xs text-blue-600 bg-blue-50 p-3 rounded-xl italic">
-                        <b>સમજૂતી:</b> ${q.explanation || 'કોઈ સમજૂતી ઉપલબ્ધ નથી.'}
-                    </div>
-                `;
-                list.appendChild(card);
-            });
-            window.scrollTo({ top: document.getElementById('solution-area').offsetTop, behavior: 'smooth' });
-        }
-    </script>
+</script>
 </body>
 </html>
