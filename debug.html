@@ -205,12 +205,18 @@ function loadResult(score,c,w,s,e){
 
 /* ========== LEADERBOARD ========== */
 async function loadLeaderboard(){
- const {data} = await supabase
-  .from("test_results")
-  .select("user_id,total_score,time_taken_seconds,profiles(full_name)")
-  .eq("test_id",TEST_ID)
-  .order("total_score",{ascending:false})
-  .order("time_taken_seconds",{ascending:true});
+const {data, error} = await supabase
+ .from("test_results")
+ .select("user_id,total_score,time_taken_seconds")
+ .eq("test_id",TEST_ID)
+ .order("total_score",{ascending:false})
+ .order("time_taken_seconds",{ascending:true});
+
+if(error){
+  alert(error.message);
+  return;
+}
+
 
  app.innerHTML="<h2>Leaderboard</h2>"+data.map((u,i)=>`
  <div class="card rank ${u.user_id===user.id?"me":""}">
