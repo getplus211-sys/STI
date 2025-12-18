@@ -85,17 +85,27 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
   .maybeSingle();
 
  if (existingResult) {
-   answers = existingResult.answers || {};
- // જો આપી દીધી હોય તો સીધું રિઝલ્ટ કાર્ડ બતાવો
- loadResult(
-  existingResult.total_score, 
-  existingResult.correct_count, 
-  existingResult.wrong_count, 
-  existingResult.skipped_count, 
-  existingResult.e_count,
-  existingResult.time_taken_seconds
-);
- } else {
+
+  answers = existingResult.answers || {};
+
+  const { data: qData } = await supabase
+    .from("questions")
+    .select("*")
+    .eq("test_id", TEST_ID)
+    .order("id");
+
+  questions = qData || [];
+
+  loadResult(
+    existingResult.total_score, 
+    existingResult.correct_count, 
+    existingResult.wrong_count, 
+    existingResult.skipped_count, 
+    existingResult.e_count,
+    existingResult.time_taken_seconds
+  );
+}
+ else {
   loadIntro();
  }
 })();
