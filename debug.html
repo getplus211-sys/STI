@@ -77,32 +77,38 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
  loadIntro();
 })();
 
-/* ========== INTRO ========== */
-function loadIntro(){
- app.innerHTML=`
- <div class="card">
-  <h2>Mock Test 1</h2>
-  <p>200 Questions • 120 Minutes</p>
-  <label><input type="checkbox" id="agree"> I accept instructions</label><br><br>
-  <button class="primary" onclick="startTest()">Start Test</button>
- </div>`;
+/* ========== INTRO (સુધારેલું) ========== */
+async function loadIntro(){
+ // પેલા ચેક કરો કે યુઝરે ટેસ્ટ આપી છે કે નહીં
+ const { data: existing } = await supabase
+  .from("test_results")
+  .select("total_score, correct_count, wrong_count, skipped_count, e_count")
+  .eq("user_id", user.id)
+  .eq("test_id", TEST_ID)
+  .maybeSingle();
+
+ if (existing) {
+  // જો ટેસ્ટ આપી દીધી હોય તો સીધું રિઝલ્ટ બતાવો
+  app.innerHTML = `
+  <div class="card">
+   <h2>Mock Test 1</h2>
+   <p style="color: #dc2626; font-weight: bold;">તમે આ ટેસ્ટ આપી દીધી છે.</p>
+   <button class="primary" onclick="loadResult(${existing.total_score}, ${existing.correct_count}, ${existing.wrong_count}, ${existing.skipped_count}, ${existing.e_count})">
+    તમારું રિઝલ્ટ જુઓ
+   </button>
+  </div>`;
+ } else {
+  // જો ટેસ્ટ નથી આપી તો સ્ટાર્ટ બટન બતાવો
+  app.innerHTML = `
+  <div class="card">
+   <h2>Mock Test 1</h2>
+   <p>200 Questions • 120 Minutes</p>
+   <label><input type="checkbox" id="agree"> I accept instructions</label><br><br>
+   <button class="primary" onclick="startTest()">Start Test</button>
+  </div>`;
+ }
 }
-
-/* ========== START TEST ========== */
-async function startTest(){
- if(!agree.checked){alert("Accept instructions");return;}
-
-  const {data} = await supabase
-  .from("questions")
-  .select("*")
-  .eq("test_id",TEST_ID)
-  .order("id");
-
- questions=data;
- renderQuestion();
- startTimer();
-}
-
+  
 /* ========== QUESTION RENDER ========== */
 function renderQuestion(){
  const q = questions[current];
