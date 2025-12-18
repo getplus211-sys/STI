@@ -205,7 +205,9 @@ function loadResult(score,c,w,s,e){
 
 /* ========== LEADERBOARD ========== */
 async function loadLeaderboard(){
-  const { data, error } = await supabase
+
+  // 1️⃣ Get leaderboard data
+  const { data: results, error } = await supabase
     .from("test_results")
     .select("user_id,total_score,time_taken_seconds")
     .eq("test_id", TEST_ID)
@@ -217,19 +219,35 @@ async function loadLeaderboard(){
     return;
   }
 
-  // HTML render block 👇
+  // 2️⃣ Collect user_ids
+  const userIds = results.map(r => r.user_id);
+
+  // 3️⃣ Get user names from profiles
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", userIds);
+
+  // 4️⃣ Create map: user_id → name
+  const nameMap = {};
+  profiles.forEach(p => {
+    nameMap[p.id] = p.full_name;
+  });
+
+  // 5️⃣ Render leaderboard
   app.innerHTML = `
     <h2>Leaderboard</h2>
-    ${data.map((u, i) => `
+    ${results.map((u, i) => `
       <div class="card rank ${u.user_id === user.id ? "me" : ""}">
         <b>Rank #${i + 1}</b><br>
-        User: ${u.user_id.slice(0, 8)}<br>
+        Name: ${nameMap[u.user_id] || "User"}<br>
         Score: ${u.total_score}<br>
         Time: ${u.time_taken_seconds} sec
       </div>
     `).join("")}
   `;
 }
+
 
 </script>
 </body>
