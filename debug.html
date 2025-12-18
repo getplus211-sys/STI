@@ -51,7 +51,7 @@ const TOTAL_TIME = 120 * 60;
 /* ========================================== */
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
+const app = document.getElementById("app");
 let user, questions=[], answers={}, current=0;
 let timeLeft=TOTAL_TIME, timer, submitted=false;
 
