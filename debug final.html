@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mock Test 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f1f5f9}
+.container{max-width:900px;margin:auto;padding:12px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;
+box-shadow:0 8px 24px rgba(0,0,0,.06)}
+h2,h3{margin:6px 0}
+button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%}
+.primary{background:#2563eb;color:#fff}
+.gray{background:#e5e7eb}
+.danger{background:#dc2626;color:#fff}
+.option{border:1px solid #ddd;border-radius:12px;padding:12px;margin:8px 0}
+.option.active{background:#2563eb;color:#fff}
+.top{display:flex;justify-content:space-between;font-weight:700}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.6);
+display:flex;align-items:center;justify-content:center;z-index:9}
+.hidden{display:none}
+.rank{display:flex;gap:10px;align-items:center}
+.rank.me{border:2px solid #2563eb}
+</style>
+</head>
+
+<body>
+<div class="container" id="app">Loading...</div>
+
+<div class="popup hidden" id="purchasePopup">
+  <div class="card">
+    <h3>Access Required</h3>
+    <p>Please purchase plan to attempt this test.</p>
+    <button class="primary" onclick="location.href='/purchase.html'">Purchase Now</button>
+  </div>
+</div>
+
+<script>
+
+
+/* ================= CONFIG ================= */
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const TEST_ID = "mock_test_1";
+const TOTAL_TIME = 120 * 60;
+/* ========================================== */
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let user, questions=[], answers={}, current=0;
+let timeLeft=TOTAL_TIME, timer, submitted=false;
+
+/* ========== INIT ========== */
+(async()=>{
+ const {data:{user:u}} = await supabase.auth.getUser();
+ if(!u){app.innerHTML="Please login";return;}
+ user=u;
+
+ const {data:access} = await supabase
+  .from("user_access")
+  .select("*")
+  .eq("user_id",user.id)
+  .eq("is_active",true)
+  .single();
+
+ if(!access){
+  purchasePopup.classList.remove("hidden");
+  app.innerHTML="";
+  return;
+ }
+
+ loadIntro();
+})();
+
+/* ========== INTRO ========== */
+function loadIntro(){
+ app.innerHTML=`
+ <div class="card">
+  <h2>Mock Test 1</h2>
+  <p>200 Questions • 120 Minutes</p>
+  <label><input type="checkbox" id="agree"> I accept instructions</label><br><br>
+  <button class="primary" onclick="startTest()">Start Test</button>
+ </div>`;
+}
+
+/* ========== START TEST ========== */
+async function startTest(){
+ if(!agree.checked){alert("Accept instructions");return;}
+
+  const {data} = await supabase
+  .from("questions")
+  .select("*")
+  .eq("test_id",TEST_ID)
+  .order("id");
+
+ questions=data;
+ renderQuestion();
+ startTimer();
+}
+
+/* ========== QUESTION RENDER ========== */
+function renderQuestion(){
+ const q = questions[current];
+ app.innerHTML=`
+ <div class="top">
+  <div>Q ${current+1}/${questions.length}</div>
+  <div id="timer"></div>
+ </div>
+
+ <div class="card">
+  <p>${q.question_text}</p>
+  ${["a","b","c","d","e"].map((o,i)=>`
+   <div class="option ${answers[q.id]==i+1?"active":""}"
+    onclick="selectAnswer(${q.id},${i+1})">
+    ${q["option_"+o]}
+   </div>`).join("")}
+ </div>
+
+ <button class="gray" onclick="prev()">Previous</button><br><br>
+ <button class="gray" onclick="next()">Next</button><br><br>
+ <button class="danger" onclick="submitTest()">Submit</button>
+ `;
+}
+
+/* ========== ANSWER SELECT ========== */
+function selectAnswer(qid,val){
+ answers[qid]=val;
+ renderQuestion();
+}
+
+function next(){ if(current<questions.length-1){current++;renderQuestion();}}
+function prev(){ if(current>0){current--;renderQuestion();}}
+
+/* ========== TIMER ========== */
+function startTimer(){
+ timer=setInterval(()=>{
+  timeLeft--;
+  const t=document.getElementById("timer");
+  if(t) t.innerText=Math.floor(timeLeft/60)+":"+String(timeLeft%60).padStart(2,"0");
+  if(timeLeft<=0){clearInterval(timer);submitTest(true);}
+ },1000);
+}
+
+/* ========== SUBMIT ========== */
+async function submitTest(auto=false){
+ if(submitted) return;
+ if(!auto && !confirm("Submit test?")) return;
+ submitted=true;
+ clearInterval(timer);
+
+ let correct=0, wrong=0, skip=0, e=0, score=0;
+
+ questions.forEach(q=>{
+  const a=answers[q.id];
+  if(!a){skip++;score-=0.33;}
+  else if(a===5){e++;}
+  else if(a===q.correct_option){correct++;score++;}
+  else{wrong++;score-=0.33;}
+ });
+
+ score = Number(score.toFixed(2));
+
+ const safeAnswers = JSON.parse(JSON.stringify(answers));
+
+ const {error} = await supabase.from("test_results").insert({
+  user_id:user.id,
+  test_id:TEST_ID,
+  total_score:score,
+  correct_count:correct,
+  wrong_count:wrong,
+  skipped_count:skip,
+  e_count:e,
+  time_taken_seconds:TOTAL_TIME-timeLeft,
+  answers:safeAnswers
+ });
+
+ if(error){
+  alert("Result save failed: "+error.message);
+  return;
+ }
+
+ loadResult(score,correct,wrong,skip,e);
+}
+
+/* ========== RESULT (Sudharelo) ========== */
+function loadResult(score, c, w, s, e) {
+  const timeTaken = TOTAL_TIME - timeLeft;
+  const minutes = Math.floor(timeTaken / 60);
+  const seconds = timeTaken % 60;
+
+  app.innerHTML = `
+ <div class="card">
+  <h2>Your Score: ${score}</h2>
+  <div style="margin: 15px 0; line-height: 1.6;">
+    <p><b>Correct:</b> ${c} | <b>Wrong:</b> ${w}</p>
+    <p><b>Skipped:</b> ${s} | <b>E Options:</b> ${e}</p>
+    <p><b>Time Taken:</b> ${minutes}m ${seconds}s</p>
+  </div>
+  <canvas id="chart"></canvas><br>
+  
+  <button class="primary" onclick="loadLeaderboard()">View Leaderboard</button>
+  <br><br>
+  <button class="gray" onclick="viewSolutions()">View Answers / Solutions</button>
+ </div>`;
+
+  new Chart(chart, {
+    type: "pie",
+    data: {
+      labels: ["Correct", "Wrong", "Skipped", "E"],
+      datasets: [{ data: [c, w, s, e], backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308'] }]
+    }
+  });
+}
+
+/* ========== SOLUTIONS VIEW ========== */
+function viewSolutions() {
+  let solutionHTML = `<h3>Answer Key & Solutions</h3>
+                      <button class="gray" style="margin-bottom:15px" onclick="location.reload()">Back to Result</button>`;
+
+  questions.forEach((q, index) => {
+    const userAns = answers[q.id];
+    const isCorrect = userAns === q.correct_option;
+    const options = ["a", "b", "c", "d", "e"];
+    
+    solutionHTML += `
+    <div class="card" style="border-left: 5px solid ${isCorrect ? '#22c55e' : '#ef4444'}">
+      <p><b>Q${index + 1}:</b> ${q.question_text}</p>
+      <p><b>Your Answer:</b> ${userAns ? q["option_" + options[userAns - 1]] : "Skipped"}</p>
+      <p style="color: #22c55e"><b>Correct Answer:</b> ${q["option_" + options[q.correct_option - 1]]}</p>
+      ${q.solution ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Solution:</b> ${q.solution}</div>` : ""}
+    </div>`;
+  });
+
+  solutionHTML += `<button class="primary" onclick="location.reload()">Finish</button>`;
+  app.innerHTML = solutionHTML;
+  window.scrollTo(0, 0);
+}
+
+
+
+/* ========== LEADERBOARD ========== */
+async function loadLeaderboard(){
+
+  // 1️⃣ Get leaderboard results
+  const { data: results, error } = await supabase
+    .from("test_results")
+    .select("user_id,total_score,time_taken_seconds")
+    .eq("test_id", TEST_ID)
+    .order("total_score", { ascending: false })
+    .order("time_taken_seconds", { ascending: true });
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  // 2️⃣ Get profiles
+  const userIds = results.map(r => r.user_id);
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", userIds);
+
+  const nameMap = {};
+  profiles.forEach(p => nameMap[p.id] = p.full_name);
+
+  // 3️⃣ Find logged-in user rank
+  const myIndex = results.findIndex(r => r.user_id === user.id);
+  const myRank = myIndex + 1;
+  const myData = results[myIndex];
+
+  // 4️⃣ Build leaderboard list (excluding me)
+  const listHTML = results
+    .filter(r => r.user_id !== user.id)
+    .map((u, i) => `
+      <div class="card rank">
+        <b>Rank #${results.indexOf(u) + 1}</b><br>
+        Name: ${nameMap[u.user_id] || "User"}<br>
+        Score: ${u.total_score}<br>
+        Time: ${u.time_taken_seconds} sec
+      </div>
+    `).join("");
+
+  // 5️⃣ Render UI
+  app.innerHTML = `
+    <!-- Back button -->
+    <button class="gray" onclick="location.reload()">⬅ Back to Result</button>
+    <br><br>
+
+    <!-- My Rank (always on top) -->
+    <div class="card rank me">
+      <b>Your Rank: #${myRank}</b><br>
+      Name: ${nameMap[user.id] || "You"}<br>
+      Score: ${myData.total_score}<br>
+      Time: ${myData.time_taken_seconds} sec
+    </div>
+
+    <h2>Leaderboard</h2>
+    ${listHTML}
+  `;
+}
+
+
+</script>
+</body>
+</html>
