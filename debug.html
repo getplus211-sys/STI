@@ -108,6 +108,21 @@ async function loadIntro(){
   </div>`;
  }
 }
+
+/* ========== START TEST ========== */
+async function startTest(){
+ if(!agree.checked){alert("Accept instructions");return;}
+
+  const {data} = await supabase
+  .from("questions")
+  .select("*")
+  .eq("test_id",TEST_ID)
+  .order("id");
+
+ questions=data;
+ renderQuestion();
+ startTimer();
+}
   
 /* ========== QUESTION RENDER ========== */
 function renderQuestion(){
