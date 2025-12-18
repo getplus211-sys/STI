@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Original Mock Test Engine</title>
+    <title>PSI Mock Test - Original Version</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f3f4f6; user-select: none; }
-        .option-item { border: 2px solid #e5e7eb; transition: 0.2s; cursor: pointer; border-radius: 12px; padding: 15px; margin-bottom: 10px; background: white; display: flex; align-items: center; gap: 10px; }
-        .option-item:hover { border-color: #6366f1; background: #f5f3ff; }
-        .option-item.selected { border-color: #4f46e5; background: #e0e7ff; font-weight: bold; }
-        .pal-btn { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #d1d5db; background: white; font-weight: bold; font-size: 12px; }
-        .pal-done { background: #4f46e5 !important; color: white !important; }
-        .pal-active { border: 2px solid #f59e0b !important; }
+        .option-card { border: 2px solid #e5e7eb; transition: 0.2s; cursor: pointer; border-radius: 12px; padding: 15px; margin-bottom: 10px; background: white; display: flex; align-items: center; gap: 10px; }
+        .option-card.selected { border-color: #4f46e5; background: #e0e7ff; font-weight: bold; }
+        .palette-btn { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #d1d5db; background: white; font-weight: bold; }
+        .answered { background: #4f46e5 !important; color: white !important; }
+        .active-q { border: 2px solid #f59e0b !important; }
     </style>
 </head>
 <body>
@@ -24,182 +23,179 @@
 
 <div id="exam-container" class="hidden min-h-screen flex flex-col">
     <header class="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-40">
-        <div id="q-nav-text" class="font-bold text-indigo-600 uppercase text-sm">Question 1/200</div>
+        <div id="q-nav" class="font-bold text-indigo-600 uppercase">Question 1/200</div>
         <div id="timer" class="text-2xl font-mono font-bold text-red-600">120:00</div>
-        <button onclick="handleManualSubmit()" class="bg-red-600 text-white px-6 py-2 rounded-xl font-bold">Submit</button>
+        <button onclick="finalSubmit()" class="bg-red-600 text-white px-6 py-2 rounded-xl font-bold">Submit</button>
     </header>
 
     <main class="flex-grow flex flex-col md:flex-row">
-        <div class="flex-grow p-4 md:p-8">
+        <div class="flex-grow p-4 md:p-8 overflow-y-auto">
             <div class="max-w-3xl mx-auto bg-white p-8 rounded-3xl shadow-lg border border-gray-100 min-h-[400px]">
-                <h2 id="question-display" class="text-xl font-bold text-gray-800 mb-8 leading-snug"></h2>
+                <h2 id="q-text" class="text-xl font-bold text-gray-800 mb-8 leading-snug"></h2>
                 <div id="options-list"></div>
                 <div class="flex justify-between mt-10 pt-6 border-t">
-                    <button onclick="navigate(-1)" class="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-2xl">Back</button>
-                    <button onclick="navigate(1)" class="px-12 py-3 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg">Next</button>
+                    <button onclick="changeQ(-1)" class="px-8 py-3 bg-gray-100 text-gray-600 font-bold rounded-2xl">Back</button>
+                    <button onclick="changeQ(1)" class="px-12 py-3 bg-indigo-600 text-white font-bold rounded-2xl">Next</button>
                 </div>
             </div>
         </div>
         <aside class="w-full md:w-80 bg-white border-l p-6 overflow-y-auto h-[calc(100vh-75px)]">
-            <p class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest text-center">Questions Palette</p>
-            <div id="palette-container" class="grid grid-cols-6 md:grid-cols-4 gap-2"></div>
+            <div id="palette" class="grid grid-cols-6 md:grid-cols-4 gap-2"></div>
         </aside>
     </main>
 </div>
 
-<div id="result-view" class="hidden p-4 md:p-10 bg-gray-50 min-h-screen">
+<div id="result-screen" class="hidden p-4 md:p-10 bg-gray-50 min-h-screen">
     <div class="max-w-4xl mx-auto bg-white rounded-[40px] shadow-2xl overflow-hidden md:flex mb-10 border border-gray-100">
         <div class="md:w-1/2 p-12 text-center border-r flex flex-col justify-center">
-            <h2 class="text-2xl font-bold text-gray-400">TOTAL SCORE</h2>
-            <div id="score-text" class="text-8xl font-black text-indigo-600 my-6">0.00</div>
+            <h2 class="text-2xl font-bold text-gray-400">Total Score</h2>
+            <div id="score-val" class="text-7xl font-black text-indigo-600 my-6">0.00</div>
             <div class="flex flex-col gap-3">
-                <button onclick="viewDetailedSolutions()" class="bg-gray-800 text-white py-4 rounded-2xl font-bold shadow-xl">Solutions & Answers</button>
-                <button onclick="location.reload()" class="bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl">Back to Dashboard</button>
+                <button onclick="showPaperSolution()" class="bg-gray-800 text-white py-4 rounded-2xl font-bold shadow-lg">View Solutions</button>
+                <button onclick="location.reload()" class="bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg">Leaderboard</button>
             </div>
         </div>
         <div class="md:w-1/2 p-10 bg-gray-50 flex flex-col items-center justify-center">
-            <div class="w-64 h-64"><canvas id="scoreChart"></canvas></div>
+            <div class="w-64 h-64"><canvas id="resChart"></canvas></div>
             <div class="grid grid-cols-2 gap-4 mt-8 w-full text-center">
-                <div class="bg-white p-4 rounded-2xl shadow-sm"><p class="text-green-600 font-bold text-2xl" id="stat-correct">0</p><p class="text-[10px] font-bold text-gray-400 uppercase">Correct</p></div>
-                <div class="bg-white p-4 rounded-2xl shadow-sm"><p class="text-red-600 font-bold text-2xl" id="stat-wrong">0</p><p class="text-[10px] font-bold text-gray-400 uppercase">Wrong / Skip</p></div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm"><p class="text-green-600 font-bold text-2xl" id="res-correct">0</p><p class="text-[10px] font-bold text-gray-400">CORRECT</p></div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm"><p class="text-red-600 font-bold text-2xl" id="res-wrong">0</p><p class="text-[10px] font-bold text-gray-400">WRONG/SKIP</p></div>
             </div>
         </div>
     </div>
-    <div id="solution-section" class="hidden space-y-4 max-w-4xl mx-auto pb-20"></div>
+    <div id="solution-list" class="hidden space-y-4 max-w-4xl mx-auto pb-20"></div>
 </div>
 
 <script type="module">
-// --- તમારી ઓરિજિનલ ESM કનેક્શન મેથડ ---
+// --- તમારી ઓરિજિનલ કનેક્શન પદ્ધતિ ---
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
 const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljcvrbucmbbrpzeaneiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
 const supabase = createClient(URL, KEY);
 
-let questions = [], userAnswers = {}, currentPos = 0, timerLeft = 120 * 60, interval;
+let questions = [], userAns = {}, currentIdx = 0, timerSec = 120 * 60, interval;
 
-async function loadExamData() {
-    // આ તમારી ઓરિજિનલ ક્વેરી છે જે એક્સેસ ચેક પછી ચાલતી હતી
+// ૧. ડેટા લોડ કરવાની તમારી ઓરિજિનલ રીત
+async function loadQuestions() {
     const { data, error } = await supabase.from('questions').select('*').eq('test_id', 'mock_test_1').order('id', {ascending: true});
     
     if (data && data.length > 0) {
         questions = data;
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('exam-container').classList.remove('hidden');
-        setupPalette();
-        renderCurrentQuestion();
-        runTimer();
+        renderPalette();
+        renderQuestion();
+        startTimer();
     } else {
-        document.getElementById('loading').innerHTML = `<p class="text-red-500 font-bold p-10 text-center">તમે આ ટેસ્ટ માટે ઓથોરાઈઝ્ડ નથી અથવા ડેટામાં ભૂલ છે.</p>`;
+        document.getElementById('loading').innerHTML = `<p class="text-red-500 font-bold">ડેટા લોડ કરવામાં ભૂલ છે. (401 Unauthorized ચેક કરો)</p>`;
     }
 }
 
-function renderCurrentQuestion() {
-    const q = questions[currentPos];
-    document.getElementById('q-nav-text').innerText = `Question ${currentPos + 1}/${questions.length}`;
-    document.getElementById('question-display').innerText = q.question_text;
+function renderQuestion() {
+    const q = questions[currentIdx];
+    document.getElementById('q-nav').innerText = `Question ${currentIdx + 1}/${questions.length}`;
+    document.getElementById('q-text').innerText = q.question_text;
     
-    const ops = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e || "E - Option Not Selected"];
-    const list = document.getElementById('options-list');
-    list.innerHTML = '';
+    const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e || "E - Skip"];
+    const container = document.getElementById('options-list');
+    container.innerHTML = '';
 
-    ops.forEach((text, i) => {
-        const item = document.createElement('div');
-        item.className = `option-item ${userAnswers[currentPos] === i ? 'selected' : ''}`;
-        item.innerHTML = `<span class="w-8 h-8 rounded-full border flex items-center justify-center font-bold text-xs">${String.fromCharCode(65+i)}</span> <span>${text}</span>`;
-        item.onclick = () => { userAnswers[currentPos] = i; renderCurrentQuestion(); syncPalette(); };
-        list.appendChild(item);
+    opts.forEach((txt, i) => {
+        const div = document.createElement('div');
+        div.className = `option-card ${userAns[currentIdx] === i ? 'selected' : ''}`;
+        div.innerHTML = `<span class="w-8 h-8 rounded-full border flex items-center justify-center font-bold text-xs">${String.fromCharCode(65+i)}</span> <span>${txt}</span>`;
+        div.onclick = () => { userAns[currentIdx] = i; renderQuestion(); updatePalette(); };
+        container.appendChild(div);
     });
-    syncPalette();
+    updatePalette();
 }
 
-function setupPalette() {
-    const container = document.getElementById('palette-container');
+function renderPalette() {
+    const div = document.getElementById('palette');
     questions.forEach((_, i) => {
-        const b = document.createElement('button');
-        b.id = `pal-dot-${i}`; b.className = "pal-btn"; b.innerText = i + 1;
-        b.onclick = () => { currentPos = i; renderCurrentQuestion(); };
-        container.appendChild(b);
+        const btn = document.createElement('button');
+        btn.id = `pal-${i}`; btn.className = "palette-btn"; btn.innerText = i + 1;
+        btn.onclick = () => { currentIdx = i; renderQuestion(); };
+        div.appendChild(btn);
     });
 }
 
-function syncPalette() {
+function updatePalette() {
     questions.forEach((_, i) => {
-        const b = document.getElementById(`pal-dot-${i}`);
-        b.classList.remove('pal-active', 'pal-done');
-        if(i === currentPos) b.classList.add('pal-active');
-        if(userAnswers[i] !== undefined) b.classList.add('pal-done');
+        const b = document.getElementById(`pal-${i}`);
+        b.classList.remove('active-q', 'answered');
+        if(i === currentIdx) b.classList.add('active-q');
+        if(userAns[i] !== undefined) b.classList.add('answered');
     });
 }
 
-window.navigate = (step) => {
-    let next = currentPos + step;
-    if(next >= 0 && next < questions.length) { currentPos = next; renderCurrentQuestion(); }
+window.changeQ = (dir) => {
+    let next = currentIdx + dir;
+    if(next >= 0 && next < questions.length) { currentIdx = next; renderQuestion(); }
 };
 
-function runTimer() {
+function startTimer() {
     interval = setInterval(() => {
-        timerLeft--;
-        let min = Math.floor(timerLeft/60), sec = timerLeft%60;
-        document.getElementById('timer').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
-        if(timerLeft <= 0) processFinalSubmit();
+        timerSec--;
+        let m = Math.floor(timerSec/60), s = timerSec%60;
+        document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        if(timerSec <= 0) finalSubmit();
     }, 1000);
 }
 
-window.handleManualSubmit = () => { if(confirm("Are you sure you want to finish the test?")) processFinalSubmit(); };
-
-async function processFinalSubmit() {
+window.finalSubmit = () => {
+    if(!confirm("Are you sure?")) return;
     clearInterval(interval);
-    let correct = 0, wrong = 0, skip = 0, eCount = 0;
     
+    let c = 0, w = 0, sk = 0, eCount = 0;
     questions.forEach((q, i) => {
-        const userSelection = userAnswers[i];
-        if (userSelection === undefined) skip++;
-        else if (userSelection === 4) eCount++;
-        else if (userSelection === q.correct_option) correct++;
-        else wrong++;
+        const u = userAns[i];
+        if (u === undefined) sk++;
+        else if (u === 4) eCount++;
+        else if (u === q.correct_option) c++;
+        else w++;
     });
 
-    const finalMarks = (correct * 1) - ((wrong + skip) * 0.33);
+    const marks = (c * 1) - ((w + sk) * 0.33);
 
     document.getElementById('exam-container').classList.add('hidden');
-    document.getElementById('result-view').classList.remove('hidden');
-    document.getElementById('score-text').innerText = finalMarks.toFixed(2);
-    document.getElementById('stat-correct').innerText = correct;
-    document.getElementById('stat-wrong').innerText = (wrong + skip);
+    document.getElementById('result-screen').classList.remove('hidden');
+    document.getElementById('score-val').innerText = marks.toFixed(2);
+    document.getElementById('res-correct').innerText = c;
+    document.getElementById('res-wrong').innerText = (w + sk);
 
-    new Chart(document.getElementById('scoreChart'), {
+    new Chart(document.getElementById('resChart'), {
         type: 'doughnut',
         data: {
-            labels: ['Correct', 'Negative/Skip', 'Neutral (E)'],
-            datasets: [{ data: [correct, (wrong+skip), eCount], backgroundColor: ['#22c55e', '#ef4444', '#f97316'], borderWidth: 0 }]
+            labels: ['Correct', 'Negative', 'Option E'],
+            datasets: [{ data: [c, (w+sk), eCount], backgroundColor: ['#22c55e', '#ef4444', '#f97316'], borderWidth: 0 }]
         },
         options: { plugins: { legend: { display: false } }, cutout: '85%' }
     });
 }
 
-window.viewDetailedSolutions = () => {
-    const area = document.getElementById('solution-section');
-    area.classList.remove('hidden');
-    area.innerHTML = '<h3 class="text-2xl font-bold py-6 px-2">Paper Solution</h3>';
+window.showPaperSolution = () => {
+    const div = document.getElementById('solution-list');
+    div.classList.remove('hidden');
+    div.innerHTML = '<h3 class="text-2xl font-bold py-6">Answers & Solutions</h3>';
     questions.forEach((q, i) => {
-        const u = userAnswers[i];
+        const u = userAns[i];
         const opts = [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e || "E - Skip"];
         const card = document.createElement('div');
         card.className = `p-6 rounded-3xl bg-white border mb-4 shadow-sm ${u === q.correct_option ? 'border-green-100' : 'border-red-100'}`;
         card.innerHTML = `<p class="font-bold text-gray-800 mb-4">${i+1}. ${q.question_text}</p>
             <div class="grid md:grid-cols-2 gap-3 text-sm">
-                <div class="p-3 rounded-xl bg-gray-50 border border-gray-100"><b>તમારો જવાબ:</b> ${u !== undefined ? opts[u] : 'સ્કીપ કર્યો'}</div>
-                <div class="p-3 rounded-xl bg-blue-50 border border-blue-100 text-blue-700"><b>સાચો જવાબ:</b> ${opts[q.correct_option]}</div>
+                <div class="p-3 rounded-xl bg-gray-50"><b>તમારો જવાબ:</b> ${u !== undefined ? opts[u] : 'સ્કીપ'}</div>
+                <div class="p-3 rounded-xl bg-blue-50 text-blue-700"><b>સાચો જવાબ:</b> ${opts[q.correct_option]}</div>
             </div>
-            <div class="mt-4 p-4 bg-gray-50 rounded-xl text-xs text-gray-500 italic"><b>Explanation:</b> ${q.explanation || 'સમજૂતી ઉપલબ્ધ નથી.'}</div>`;
-        area.appendChild(card);
+            <p class="mt-4 text-xs italic text-gray-500"><b>સમજૂતી:</b> ${q.explanation || 'નથી'}</p>`;
+        div.appendChild(card);
     });
-    window.scrollTo({ top: area.offsetTop, behavior: 'smooth' });
-};
+    window.scrollTo({ top: div.offsetTop, behavior: 'smooth' });
+}
 
-loadExamData();
-
+loadQuestions();
 </script>
 </body>
 </html>
