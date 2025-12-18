@@ -98,6 +98,27 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
  }
 })();
 
+/* ========== LOAD INTRO (નવું ઉમેરવાનું) ========== */
+function loadIntro() {
+  app.innerHTML = `
+    <div class="card">
+      <h2>Mock Test 1</h2>
+      <p><b>Instructions:</b></p>
+      <ul>
+        <li>Total Time: 120 Minutes</li>
+        <li>Negative Marking: 0.33 for wrong/skipped answers.</li>
+        <li>E option: No negative marking.</li>
+      </ul>
+      <label>
+        <input type="checkbox" id="agree"> I agree to the terms and conditions.
+      </label>
+      <br><br>
+      <button class="primary" onclick="startTest()">Start Test Now</button>
+    </div>
+  `;
+}
+  
+  
 /* ========== START TEST (સુધારેલું) ========== */
 async function startTest(){
  if(!agree.checked){alert("Accept instructions");return;}
