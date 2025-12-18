@@ -205,25 +205,32 @@ function loadResult(score,c,w,s,e){
 
 /* ========== LEADERBOARD ========== */
 async function loadLeaderboard(){
-const {data, error} = await supabase
- .from("test_results")
- .select("user_id,total_score,time_taken_seconds")
- .eq("test_id",TEST_ID)
- .order("total_score",{ascending:false})
- .order("time_taken_seconds",{ascending:true});
+  const { data, error } = await supabase
+    .from("test_results")
+    .select("user_id,total_score,time_taken_seconds")
+    .eq("test_id", TEST_ID)
+    .order("total_score", { ascending: false })
+    .order("time_taken_seconds", { ascending: true });
 
-if(error){
-  alert(error.message);
-  return;
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  // HTML render block 👇
+  app.innerHTML = `
+    <h2>Leaderboard</h2>
+    ${data.map((u, i) => `
+      <div class="card rank ${u.user_id === user.id ? "me" : ""}">
+        <b>Rank #${i + 1}</b><br>
+        User: ${u.user_id.slice(0, 8)}<br>
+        Score: ${u.total_score}<br>
+        Time: ${u.time_taken_seconds} sec
+      </div>
+    `).join("")}
+  `;
 }
 
-
- app.innerHTML="<h2>Leaderboard</h2>"+data.map((u,i)=>`
- <div class="card rank ${u.user_id===user.id?"me":""}">
-  <b>#${i+1}</b> User ID: ${u.user_id.slice(0,8)}<br>
-  Score: ${u.total_score} | Time: ${u.time_taken_seconds}s
- </div>`).join("");
-}
 </script>
 </body>
 </html>
