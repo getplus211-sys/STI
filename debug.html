@@ -55,12 +55,13 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 let user, questions=[], answers={}, current=0;
 let timeLeft=TOTAL_TIME, timer, submitted=false;
 
-/* ========== INIT ========== */
+/* ========== INIT (સુધારેલું) ========== */
 (async()=>{
  const {data:{user:u}} = await supabase.auth.getUser();
  if(!u){app.innerHTML="Please login";return;}
  user=u;
 
+ // એક્સેસ ચેક કરો
  const {data:access} = await supabase
   .from("user_access")
   .select("*")
@@ -74,7 +75,27 @@ let timeLeft=TOTAL_TIME, timer, submitted=false;
   return;
  }
 
- loadIntro();
+ // હવે ચેક કરો કે ટેસ્ટ આપી દીધી છે કે નહીં
+ const { data: existingResult } = await supabase
+  .from("test_results")
+  .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds")
+  .eq("user_id", user.id)
+  .eq("test_id", TEST_ID)
+  .maybeSingle();
+
+ if (existingResult) {
+  // જો આપી દીધી હોય તો સીધું રિઝલ્ટ કાર્ડ બતાવો
+  loadResult(
+    existingResult.total_score, 
+    existingResult.correct_count, 
+    existingResult.wrong_count, 
+    existingResult.skipped_count, 
+    existingResult.e_count,
+    true // એક નવો ફ્લેગ મોકલીએ છીએ કે આ પહેલેથી આપેલી ટેસ્ટ છે
+  );
+ } else {
+  loadIntro();
+ }
 })();
 
 /* ========== START TEST (સુધારેલું) ========== */
@@ -113,20 +134,7 @@ async function startTest(){
  startTimer();
 }
   
-/* ========== START TEST ========== */
-async function startTest(){
- if(!agree.checked){alert("Accept instructions");return;}
 
-  const {data} = await supabase
-  .from("questions")
-  .select("*")
-  .eq("test_id",TEST_ID)
-  .order("id");
-
- questions=data;
- renderQuestion();
- startTimer();
-}
   
 /* ========== QUESTION RENDER ========== */
 function renderQuestion(){
