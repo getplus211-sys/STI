@@ -1,165 +1,564 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STI Mock Test</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background-color: #f3f4f6; font-family: sans-serif; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-    </style>
+<meta charset="UTF-8">
+<title>Mock Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f1f5f9}
+.container{max-width:900px;margin:auto;padding:12px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;
+box-shadow:0 8px 24px rgba(0,0,0,.06)}
+h2,h3{margin:6px 0}
+button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cursor:pointer}
+.primary{background:#22c55e;color:#fff}
+.gray{background:#e5e7eb}
+.danger{background:#dc2626;color:#fff}
+.option{border:1px solid #ddd;border-radius:12px;padding:12px;margin:8px 0;cursor:pointer}
+.option.active{background:#22c55e;color:#fff}
+.top{display:flex;justify-content:space-between;font-weight:700;margin-bottom:10px}
+.hidden{display:none}
+.rank{display:flex;gap:10px;align-items:center}
+.rank.me{border:2px solid #22c55e}
+.loader{text-align:center;padding:40px}
+.loader-icon{font-size:40px;animation:spin 2s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(45px,1fr));gap:8px;margin:15px 0}
+.qbtn{padding:10px;border:2px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:14px}
+.qbtn.answered{background:#22c55e;color:#fff;border-color:#22c55e}
+.qbtn.current{background:#22c55e;color:#fff;border-color:#22c55e}
+.qbtn.correct{background:#22c55e;color:#fff;border-color:#22c55e}
+.qbtn.wrong{background:#ef4444;color:#fff;border-color:#ef4444}
+.qbtn.skipped{background:#cbd5e1;color:#333;border-color:#cbd5e1}
+.badge{background:#22c55e;color:#fff;padding:5px 12px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:10px}
+.badge.free{background:#3b82f6}
+.badge.paid{background:#f59e0b}
+</style>
 </head>
-<body class="p-4 pb-24">
 
-    <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-        <h1 class="text-xl font-bold text-gray-800">STI Mock Test</h1>
-        <div id="authArea" class="flex items-center gap-2">
-            <button id="btnReg" onclick="toggleModal('registerModal')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
-            <button id="btnLogin" onclick="toggleModal('loginModal')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase shadow-md">Login</button>
-            <div id="userProfile" class="hidden flex items-center gap-2">
-                <span id="userName" class="text-xs font-bold text-gray-700"></span>
-                <button onclick="handleLogout()" class="bg-red-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Logout</button>
-            </div>
-        </div>
-    </header>
+<body>
+<div class="container" id="app">
+  <div class="card loader">
+    <div class="loader-icon">⏳</div>
+    <h3>Loading...</h3>
+    <p>Please wait</p>
+  </div>
+</div>
 
-    <div class="space-y-4">
-        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
-            <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
-            <p class="text-gray-500 text-sm my-3">20 માર્કની ક્વિઝ | શરૂઆત માટે યોગ્ય</p>
-            <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
-        </div>
+<script>
 
-        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
-            <h2 class="text-lg font-bold">Test Series: PSI/ASI</h2>
-            <div class="flex justify-between items-center my-4">
-                <span class="text-green-600 font-bold text-xl">₹99/-</span>
-                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded-full font-bold">5 MOCK TESTS</span>
-            </div>
-            <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Buy Now (₹99)</button>
-        </div>
+/* ================= CONFIG ================= */
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const TIMEOUT_MS = 15000;
+
+// 🔥 URL થી test_id લો
+const urlParams = new URLSearchParams(window.location.search);
+const TEST_ID = urlParams.get('test') || 'free_test'; // Default: free_test
+
+// 🔥 Test Configuration (test_id base કરીને)
+const TEST_CONFIG = {
+  'free_test': {
+    name: 'Free Mock Test',
+    duration: 60 * 60, // 60 minutes
+    isFree: true,
+    badge: '🎉 FREE TEST',
+    badgeClass: 'free'
+  },
+  'paid_test_1': {
+    name: 'Paid Test 1',
+    duration: 90 * 60, // 90 minutes
+    isFree: false,
+    badge: '💎 PAID TEST',
+    badgeClass: 'paid'
+  },
+  'paid_test_2': {
+    name: 'Paid Test 2',
+    duration: 120 * 60, // 120 minutes
+    isFree: false,
+    badge: '💎 PREMIUM TEST',
+    badgeClass: 'paid'
+  }
+};
+
+// Current test config
+const CURRENT_TEST = TEST_CONFIG[TEST_ID] || TEST_CONFIG['free_test'];
+const TOTAL_TIME = CURRENT_TEST.duration;
+/* ========================================== */
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const app = document.getElementById("app");
+let user, questions=[], answers={}, current=0;
+let timeLeft=TOTAL_TIME, timer, submitted=false;
+
+/* ========== TIMEOUT HELPER ========== */
+const timeout = (ms) => new Promise((_, reject) => 
+  setTimeout(() => reject(new Error('Request timeout')), ms)
+);
+
+/* ========== ERROR DISPLAY ========== */
+function showError(message, showRetry = true) {
+  app.innerHTML = `
+    <div class="card">
+      <h3>⚠️ Error</h3>
+      <p>${message}</p>
+      ${showRetry ? '<button class="primary" onclick="location.reload()">Retry</button>' : ''}
     </div>
+  `;
+}
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
-        <div class="text-[10px] text-gray-400">© 2025 STI Mock Test</div>
-        <div class="flex gap-2">
-            <button class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">WhatsApp</button>
-            <button class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">Call</button>
-        </div>
-    </footer>
+/* ========== INIT ========== */
+(async()=>{
+  try {
+    // Check internet connection
+    if (!navigator.onLine) {
+      showError('No internet connection. Please check and try again.');
+      return;
+    }
 
-    <div id="registerModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
-            <button onclick="toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
-            <h3 class="text-xl font-bold mb-5">નવું રજિસ્ટ્રેશન</h3>
-            <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
-            <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">સેવ કરો</button>
-        </div>
+    // Get user with timeout
+    const {data:{user:u}} = await Promise.race([
+      sb.auth.getUser(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if(!u){
+      showError('Please login first', false);
+      return;
+    }
+    user=u;
+
+    // 🔥 Check access (only for paid tests)
+    if (!CURRENT_TEST.isFree) {
+      const { data: access } = await Promise.race([
+        sb
+          .from("user_test_access")
+          .select("has_access")
+          .eq("user_id", user.id)
+          .eq("test_id", TEST_ID)
+          .maybeSingle(),
+        timeout(TIMEOUT_MS)
+      ]);
+
+      if (!access || !access.has_access) {
+        showError('તમારી પાસે આ ટેસ્ટનો એક્સેસ નથી. કૃપા કરીને પહેલા payment કરો.', false);
+        return;
+      }
+    }
+
+    // Check existing result with timeout
+    const { data: existingResult } = await Promise.race([
+      sb
+        .from("test_results")
+        .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds, answers")
+        .eq("user_id", user.id)
+        .eq("test_id", TEST_ID)
+        .maybeSingle(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if (existingResult) {
+      answers = existingResult.answers || {};
+
+      const { data: qData } = await Promise.race([
+        sb
+          .from("questions")
+          .select("*")
+          .eq("test_id", TEST_ID)
+          .order("id"),
+        timeout(TIMEOUT_MS)
+      ]);
+
+      questions = qData || [];
+
+      loadResult(
+        existingResult.total_score, 
+        existingResult.correct_count, 
+        existingResult.wrong_count, 
+        existingResult.skipped_count, 
+        existingResult.e_count,
+        existingResult.time_taken_seconds
+      );
+    }
+    else {
+      loadIntro();
+    }
+  } catch(err) {
+    console.error('Init error:', err);
+    if(err.message === 'Request timeout') {
+      showError('Server is taking too long to respond. Please check your connection and try again.');
+    } else {
+      showError('Failed to load. Please try again.');
+    }
+  }
+})();
+
+/* ========== LOAD INTRO ========== */
+function loadIntro() {
+  const minutes = Math.floor(TOTAL_TIME / 60);
+  app.innerHTML = `
+    <div class="card">
+      <span class="badge ${CURRENT_TEST.badgeClass}">${CURRENT_TEST.badge}</span>
+      <h2>${CURRENT_TEST.name}</h2>
+      <p><b>Instructions:</b></p>
+      <ul>
+        <li>Total Time: ${minutes} Minutes</li>
+        <li>Negative Marking: 0.33 for wrong/skipped answers.</li>
+        <li>E option: No negative marking.</li>
+        ${CURRENT_TEST.isFree ? '<li><b>✅ No payment required - 100% Free!</b></li>' : '<li><b>💎 Paid Test - Access Required</b></li>'}
+      </ul>
+      <label>
+        <input type="checkbox" id="agree"> I agree to the terms and conditions.
+      </label>
+      <br><br>
+      <button class="primary" onclick="startTest()">Start Test Now</button>
     </div>
+  `;
+}
 
-    <div id="loginModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
-            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
-            <h3 class="text-xl font-bold mb-5">લોગિન</h3>
-            <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
-            <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
-        </div>
+/* ========== START TEST ========== */
+async function startTest(){
+  const agreeCheckbox = document.getElementById('agree');
+  if(!agreeCheckbox.checked){
+    alert("Please accept instructions");
+    return;
+  }
+
+  try {
+    // Check if already attempted
+    const { data: existingResult } = await Promise.race([
+      sb
+        .from("test_results")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("test_id", TEST_ID)
+        .maybeSingle(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if (existingResult) {
+      alert("તમે આ ટેસ્ટ પહેલેથી આપી દીધી છે. તમે તેને ફરીથી આપી શકતા નથી.");
+      location.reload(); 
+      return;
+    }
+
+    // Load questions
+    const { data, error } = await Promise.race([
+      sb
+        .from("questions")
+        .select("*")
+        .eq("test_id", TEST_ID)
+        .order("id"),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if (error || !data || data.length === 0) {
+      showError("Failed to load questions. Please try again.");
+      return;
+    }
+
+    questions = data;
+    renderQuestion();
+    startTimer();
+  } catch(err) {
+    console.error('Start test error:', err);
+    showError('Failed to start test. Please try again.');
+  }
+}
+
+/* ========== QUESTION RENDER ========== */
+function renderQuestion(){
+  const q = questions[current];
+  
+  // Question Grid
+  let gridHTML = '<div class="card"><h4>Question Navigator</h4><div class="qgrid">';
+  questions.forEach((ques, idx) => {
+    let btnClass = 'qbtn';
+    if(idx === current) btnClass += ' current';
+    else if(answers[ques.id]) btnClass += ' answered';
+    gridHTML += `<button class="${btnClass}" onclick="goToQuestion(${idx})">${idx+1}</button>`;
+  });
+  gridHTML += '</div></div>';
+
+  app.innerHTML=`
+  <div class="top">
+    <div>Q ${current+1}/${questions.length}</div>
+    <div id="timer"></div>
+  </div>
+
+  ${gridHTML}
+
+  <div class="card">
+    <span class="badge ${CURRENT_TEST.badgeClass}">${CURRENT_TEST.badge}</span>
+    <p>${q.question_text}</p>
+    ${["a","b","c","d","e"].map((o,i)=>`
+      <div class="option ${answers[q.id]==i+1?"active":""}"
+        onclick="selectAnswer(${q.id},${i+1})">
+        ${q["option_"+o]}
+      </div>`).join("")}
+  </div>
+
+  <button class="gray" onclick="prev()">Previous</button><br><br>
+  <button class="gray" onclick="next()">Next</button><br><br>
+  <button class="danger" onclick="submitTest()">Submit</button>
+  `;
+}
+
+/* ========== GO TO QUESTION ========== */
+function goToQuestion(idx){
+  current = idx;
+  renderQuestion();
+}
+
+/* ========== ANSWER SELECT ========== */
+function selectAnswer(qid,val){
+  answers[qid]=val;
+  renderQuestion();
+}
+
+function next(){ 
+  if(current<questions.length-1){
+    current++;
+    renderQuestion();
+  }
+}
+
+function prev(){ 
+  if(current>0){
+    current--;
+    renderQuestion();
+  }
+}
+
+/* ========== TIMER ========== */
+function startTimer(){
+  timer=setInterval(()=>{
+    timeLeft--;
+    const t=document.getElementById("timer");
+    if(t) t.innerText=Math.floor(timeLeft/60)+":"+String(timeLeft%60).padStart(2,"0");
+    if(timeLeft<=0){
+      clearInterval(timer);
+      submitTest(true);
+    }
+  },1000);
+}
+
+/* ========== SUBMIT ========== */
+async function submitTest(auto=false){
+  if(submitted) return;
+  if(!auto && !confirm("Submit test?")) return;
+  submitted=true;
+  clearInterval(timer);
+
+  try {
+    let correct=0, wrong=0, skip=0, e=0, score=0;
+
+    questions.forEach(q=>{
+      const a=answers[q.id];
+      if(!a){skip++;score-=0.33;}
+      else if(a===5){e++;}
+      else if(a===q.correct_option){correct++;score++;}
+      else{wrong++;score-=0.33;}
+    });
+
+    score = Number(score.toFixed(2));
+    const safeAnswers = JSON.parse(JSON.stringify(answers));
+
+    const {error} = await Promise.race([
+      sb.from("test_results").insert({
+        user_id:user.id,
+        test_id:TEST_ID,
+        total_score:score,
+        correct_count:correct,
+        wrong_count:wrong,
+        skipped_count:skip,
+        e_count:e,
+        time_taken_seconds:TOTAL_TIME-timeLeft,
+        answers:safeAnswers
+      }),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if(error){
+      alert("Result save failed: "+error.message);
+      submitted = false;
+      return;
+    }
+
+    loadResult(score,correct,wrong,skip,e,TOTAL_TIME-timeLeft);
+  } catch(err) {
+    console.error('Submit error:', err);
+    alert("Failed to submit. Please try again.");
+    submitted = false;
+  }
+}
+
+/* ========== RESULT ========== */
+function loadResult(score, c, w, s, e, timeFromDB = null) {
+  const timeTaken = timeFromDB !== null ? timeFromDB : (TOTAL_TIME - timeLeft);
+  const minutes = Math.floor(timeTaken / 60);
+  const seconds = timeTaken % 60;
+
+  app.innerHTML = `
+  <div class="card">
+    <span class="badge ${CURRENT_TEST.badgeClass}">${CURRENT_TEST.badge}</span>
+    <h2>Your Score: ${score}</h2>
+    <div style="margin: 15px 0; line-height: 1.6;">
+      <p><b>Correct:</b> ${c} | <b>Wrong:</b> ${w}</p>
+      <p><b>Skipped:</b> ${s} | <b>E Options:</b> ${e}</p>
+      <p><b>Time Taken:</b> ${minutes}m ${seconds}s</p>
     </div>
+    <canvas id="chart"></canvas><br>
+    
+    <button class="primary" onclick="loadLeaderboard()">View Leaderboard</button>
+    <br><br>
+    <button class="gray" onclick="viewSolutions()">View Answers / Solutions</button>
+  </div>`;
 
-    <div id="successModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-8 text-center">
-            <div class="mb-4 text-5xl">✅</div>
-            <h3 class="text-2xl font-bold text-green-600 mb-2">Successful!</h3>
-            <p class="text-gray-600 text-lg font-semibold mb-6">KAPiLa Institute</p>
-            <button onclick="toggleModal('successModal'); location.reload();" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold">OK</button>
+  const chart = document.getElementById("chart");
+  new Chart(chart, {
+    type: "pie",
+    data: {
+      labels: ["Correct", "Wrong", "Skipped", "E"],
+      datasets: [{ 
+        data: [c, w, s, e], 
+        backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308'] 
+      }]
+    }
+  });
+}
+
+/* ========== SOLUTIONS VIEW ========== */
+function viewSolutions() {
+  // Question Grid for Solutions
+  let gridHTML = '<div class="card"><h4>Question Navigator</h4><div class="qgrid">';
+  questions.forEach((q, idx) => {
+    const userAns = answers[q.id];
+    const isCorrect = userAns === q.correct_option;
+    let btnClass = 'qbtn';
+    if(!userAns) btnClass += ' skipped';
+    else if(isCorrect) btnClass += ' correct';
+    else btnClass += ' wrong';
+    gridHTML += `<button class="${btnClass}" onclick="scrollToSolution(${idx})">${idx+1}</button>`;
+  });
+  gridHTML += '</div></div>';
+
+  let solutionHTML = `<span class="badge ${CURRENT_TEST.badgeClass}">${CURRENT_TEST.badge}</span>
+                      <h3>Answer Key & Solutions</h3>
+                      <button class="gray" style="margin-bottom:15px" onclick="location.reload()">Back to Result</button>
+                      ${gridHTML}`;
+
+  questions.forEach((q, index) => {
+    const userAns = answers[q.id];
+    const isCorrect = userAns === q.correct_option;
+    const options = ["a", "b", "c", "d", "e"];
+    
+    solutionHTML += `
+    <div class="card" id="sol${index}" style="border-left: 5px solid ${isCorrect ? '#22c55e' : '#ef4444'}">
+      <p><b>Q${index + 1}:</b> ${q.question_text}</p>
+      <p><b>Your Answer:</b> ${userAns ? q["option_" + options[userAns - 1]] : "Skipped"}</p>
+      <p style="color: #22c55e"><b>Correct Answer:</b> ${q["option_" + options[q.correct_option - 1]]}</p>
+      ${q.solution ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Solution:</b> ${q.solution}</div>` : ""}
+    </div>`;
+  });
+
+  solutionHTML += `<button class="primary" onclick="location.reload()">Finish</button>`;
+  app.innerHTML = solutionHTML;
+  window.scrollTo(0, 0);
+}
+
+/* ========== SCROLL TO SOLUTION ========== */
+function scrollToSolution(idx){
+  const el = document.getElementById('sol'+idx);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+/* ========== LEADERBOARD ========== */
+async function loadLeaderboard(){
+  try {
+    // Get leaderboard results
+    const { data: results, error } = await Promise.race([
+      sb
+        .from("test_results")
+        .select("user_id,total_score,time_taken_seconds")
+        .eq("test_id", TEST_ID)
+        .order("total_score", { ascending: false })
+        .order("time_taken_seconds", { ascending: true }),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if(error){
+      alert("Failed to load leaderboard: " + error.message);
+      return;
+    }
+
+    // Get profiles
+    const userIds = results.map(r => r.user_id);
+
+    const { data: profiles } = await Promise.race([
+      sb
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", userIds),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    const nameMap = {};
+    if(profiles) {
+      profiles.forEach(p => nameMap[p.id] = p.full_name);
+    }
+
+    // Find logged-in user rank
+    const myIndex = results.findIndex(r => r.user_id === user.id);
+    if (myIndex === -1) {
+      alert("Your result not found in leaderboard");
+      return;
+    }
+
+    const myRank = myIndex + 1;
+    const myData = results[myIndex];
+
+    // Build leaderboard list (excluding me)
+    const listHTML = results
+      .filter(r => r.user_id !== user.id)
+      .map((u, i) => `
+        <div class="card rank">
+          <b>Rank #${results.indexOf(u) + 1}</b><br>
+          Name: ${nameMap[u.user_id] || "User"}<br>
+          Score: ${u.total_score}<br>
+          Time: ${u.time_taken_seconds} sec
         </div>
-    </div>
+      `).join("");
 
-    <script>
-        const supabaseUrl = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    // Render UI
+    app.innerHTML = `
+      <span class="badge ${CURRENT_TEST.badgeClass}">${CURRENT_TEST.badge}</span>
+      <button class="gray" onclick="location.reload()">⬅ Back to Result</button>
+      <br><br>
 
-        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+      <div class="card rank me">
+        <b>Your Rank: #${myRank}</b><br>
+        Name: ${nameMap[user.id] || "You"}<br>
+        Score: ${myData.total_score}<br>
+        Time: ${myData.time_taken_seconds} sec
+      </div>
 
-        window.onload = async () => {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if (user) showUser(user);
-        };
+      <h2>Leaderboard</h2>
+      ${listHTML}
+    `;
+  } catch(err) {
+    console.error('Leaderboard error:', err);
+    alert("Failed to load leaderboard. Please try again.");
+  }
+}
 
-        async function showUser(user) {
-            const { data } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
-            if (data) {
-                document.getElementById('userName').innerText = data.full_name;
-                document.getElementById('btnReg').classList.add('hidden');
-                document.getElementById('btnLogin').classList.add('hidden');
-                document.getElementById('userProfile').classList.remove('hidden');
-            }
-        }
-
-        async function handleRegister() {
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPass').value;
-            const fullName = document.getElementById('regName').value;
-            const mobile = document.getElementById('regMobile').value;
-            const btn = document.getElementById('regBtn');
-
-            if(!email || !password || !fullName || !mobile) { alert("વિગતો ભરો"); return; }
-            btn.disabled = true; btn.innerText = "સેવ થાય છે...";
-
-            const { data, error: authError } = await _supabase.auth.signUp({ email, password });
-
-            if (authError) {
-                alert("Auth ભૂલ: " + authError.message);
-                btn.disabled = false; btn.innerText = "સેવ કરો";
-                return;
-            }
-
-            if (data.user) {
-                const { error: profileError } = await _supabase
-                    .from('profiles')
-                    .upsert({ id: data.user.id, email: email, full_name: fullName, mobile: mobile });
-                
-                if (profileError) {
-                    alert("ટેબલ એરર: " + profileError.message);
-                    btn.disabled = false; btn.innerText = "સેવ કરો";
-                } else {
-                    toggleModal('registerModal');
-                    toggleModal('successModal');
-                }
-            }
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPass').value;
-            const btn = document.getElementById('loginBtn');
-            
-            if(!email || !password) { alert("વિગતો ભરો"); return; }
-            btn.disabled = true; btn.innerText = "લોગિન થાય છે...";
-            
-            const { error } = await _supabase.auth.signInWithPassword({ email, password });
-            
-            if (error) {
-                alert("લોગિન એરર: " + error.message);
-                btn.disabled = false; btn.innerText = "લોગિન કરો";
-            } else {
-                toggleModal('loginModal');
-                toggleModal('successModal');
-            }
-        }
-
-        async function handleLogout() {
-            await _supabase.auth.signOut();
-            location.reload();
-        }
-    </script>
+</script>
 </body>
 </html>
