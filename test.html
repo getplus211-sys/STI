@@ -372,8 +372,8 @@ function renderQuestion(){
   </div>
 
   <div class="nav-buttons">
-    <button class="gray" onclick="next()" ${current===questions.length-1?'disabled':''}>આગળ ➡</button>
     <button class="gray" onclick="prev()" ${current===0?'disabled':''}>⬅ પાછળ</button>
+    <button class="gray" onclick="next()" ${current===questions.length-1?'disabled':''}>આગળ ➡</button>
   </div>
 
   ${gridHTML}
