@@ -42,11 +42,8 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .badge.paid{background:#f59e0b}
 
 /* Navigation buttons */
-.nav-buttons{display:flex;gap:10px;margin-top:10px}
+.nav-buttons{display:flex;gap:10px;margin-top:10px;margin-bottom:20px}
 .nav-buttons button{flex:1}
-@media(max-width:600px){
-  .nav-buttons{flex-direction:row-reverse}
-}
 
 /* Modern Popup/Modal */
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
@@ -375,8 +372,8 @@ function renderQuestion(){
   </div>
 
   <div class="nav-buttons">
-    <button class="gray" onclick="prev()" ${current===0?'disabled':''}>⬅ પાછળ</button>
     <button class="gray" onclick="next()" ${current===questions.length-1?'disabled':''}>આગળ ➡</button>
+    <button class="gray" onclick="prev()" ${current===0?'disabled':''}>⬅ પાછળ</button>
   </div>
 
   ${gridHTML}
