@@ -1,229 +1,165 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="gu">
 <head>
-  <meta charset="utf-8" />
-  <title>Premium Mock Test</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
-    body { font-family: system-ui, -apple-system, sans-serif; margin:0; background: var(--bg); color: var(--text); }
-    .container { max-width: 800px; margin: 0 auto; padding: 16px; }
-    .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid #e2e8f0; }
-    .hidden { display: none !important; }
-    
-    /* Timer Header */
-    .header { position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 10; }
-    #timer { font-weight: bold; color: #ef4444; font-size: 1.1rem; }
-
-    /* Buttons */
-    button { cursor: pointer; border: none; border-radius: 8px; padding: 12px 16px; font-weight: 600; font-size: 15px; transition: 0.2s; }
-    .btn-main { background: var(--primary); color: white; width: 100%; }
-    .btn-main:disabled { background: #cbd5e1; cursor: not-allowed; }
-    .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
-    .btn-danger { background: #ef4444; color: white; }
-
-    /* Question Options */
-    .option-box { display: block; padding: 14px; border: 2px solid #f1f5f9; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
-    .option-box:has(input:checked) { border-color: var(--primary); background: #f5f3ff; }
-    input[type="radio"] { margin-right: 10px; transform: scale(1.2); }
-
-    .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-    .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
-    .pal-btn { width: 40px; height: 40px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
-    .pal-done { background: #22c55e !important; color: white; border: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STI Mock Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; }
+    </style>
 </head>
-<body>
+<body class="p-4 pb-24">
 
-<div id="testUI" class="hidden">
-  <div class="header">
-    <div id="qCount">Q: 1/200</div>
-    <div id="timer">120:00</div>
-    <button class="btn-outline" style="padding: 5px 10px;" onclick="togglePalette(true)">Grid</button>
-  </div>
-</div>
+    <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+        <h1 class="text-xl font-bold text-gray-800">STI Mock Test</h1>
+        <div id="authArea" class="flex items-center gap-2">
+            <button id="btnReg" onclick="toggleModal('registerModal')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
+            <button id="btnLogin" onclick="toggleModal('loginModal')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase shadow-md">Login</button>
+            <div id="userProfile" class="hidden flex items-center gap-2">
+                <span id="userName" class="text-xs font-bold text-gray-700"></span>
+                <button onclick="handleLogout()" class="bg-red-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Logout</button>
+            </div>
+        </div>
+    </header>
 
-<div class="container">
-  <section id="accessSection" class="card">
-    <h2 style="margin-top:0">Mock Test System</h2>
-    <p>પરીક્ષા આપવા માટે તમારું એક્સેસ ચેક કરો.</p>
-    <button id="checkAccessBtn" class="btn-main">Check My Access</button>
-  </section>
+    <div class="space-y-4">
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
+            <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
+            <p class="text-gray-500 text-sm my-3">20 માર્કની ક્વિઝ | શરૂઆત માટે યોગ્ય</p>
+            <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
+        </div>
 
-  <section id="preRules" class="card hidden">
-    <h3>પરીક્ષાના નિયમો</h3>
-    <p>• દરેક પ્રશ્નનો ૧ માર્ક છે.<br>• ખોટા જવાબના ૦.૩૩ માર્ક કપાશે.<br>• E ઓપ્શનમાં નેગેટિવ માર્કિંગ નથી.</p>
-    <label style="display:block; margin: 20px 0;">
-      <input type="checkbox" id="ruleAgree"> હું નિયમો સમજું છું.
-    </label>
-    <button id="startBtn" class="btn-main" disabled>Start Exam</button>
-  </section>
-
-  <section id="testSection" class="hidden">
-    <div class="card">
-      <p id="qText" style="font-size: 17px; font-weight: 600; line-height: 1.5;"></p>
-      <div id="optContainer"></div>
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
+            <h2 class="text-lg font-bold">Test Series: PSI/ASI</h2>
+            <div class="flex justify-between items-center my-4">
+                <span class="text-green-600 font-bold text-xl">₹99/-</span>
+                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded-full font-bold">5 MOCK TESTS</span>
+            </div>
+            <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Buy Now (₹99)</button>
+        </div>
     </div>
-    <div class="nav-grid">
-      <button class="btn-outline" onclick="prevQ()">પાછળ</button>
-      <button class="btn-main" onclick="saveNext()">Save & Next</button>
-      <button class="btn-outline" style="grid-column: span 2;" onclick="skipQ()">Skip (E)</button>
-      <button class="btn-danger" style="grid-column: span 2; margin-top: 10px;" onclick="finalSubmit()">Final Submit</button>
+
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
+        <div class="text-[10px] text-gray-400">© 2025 STI Mock Test</div>
+        <div class="flex gap-2">
+            <button class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">WhatsApp</button>
+            <button class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">Call</button>
+        </div>
+    </footer>
+
+    <div id="registerModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-5">નવું રજિસ્ટ્રેશન</h3>
+            <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
+            <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">સેવ કરો</button>
+        </div>
     </div>
-  </section>
 
-  <section id="resultSection" class="hidden">
-    <div class="card" style="text-align: center;">
-      <h2>Result</h2>
-      <div id="scoreDisplay" style="font-size: 24px; font-weight: bold; margin: 15px 0;"></div>
-      <canvas id="resChart"></canvas>
-      <button class="btn-main" style="margin-top:20px;" onclick="location.reload()">બીજી ટેસ્ટ આપો</button>
+    <div id="loginModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-5">લોગિન</h3>
+            <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
+            <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
+        </div>
     </div>
-  </section>
-</div>
 
-<div id="palModal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; display:flex; align-items:center; justify-content:center; padding:15px;">
-  <div class="card" style="width:100%; max-height:80%; overflow-y:auto;">
-    <h3>Questions Palette</h3>
-    <div id="palGrid" class="palette-grid"></div>
-    <button class="btn-main" style="margin-top:15px;" onclick="togglePalette(false)">Close</button>
-  </div>
-</div>
+    <div id="successModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-8 text-center">
+            <div class="mb-4 text-5xl">✅</div>
+            <h3 class="text-2xl font-bold text-green-600 mb-2">Successful!</h3>
+            <p class="text-gray-600 text-lg font-semibold mb-6">KAPiLa Institute</p>
+            <button onclick="toggleModal('successModal'); location.reload();" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold">OK</button>
+        </div>
+    </div>
 
-<script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    <script>
+        const supabaseUrl = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-const supabase = createClient(
-  "https://bhmycvrbucmbbrpzeane.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
-);
+        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
 
-const TEST_ID = "mock_test_1";
-let questions = [], answers = [], currentIdx = 0, timerSec = 120 * 60, interval;
-let userObj = null;
+        window.onload = async () => {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (user) showUser(user);
+        };
 
-// --- Access Check ---
-document.getElementById('checkAccessBtn').onclick = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) { alert("મહેરબાની કરી લોગિન કરો."); return; }
-  userObj = user;
+        async function showUser(user) {
+            const { data } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
+            if (data) {
+                document.getElementById('userName').innerText = data.full_name;
+                document.getElementById('btnReg').classList.add('hidden');
+                document.getElementById('btnLogin').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('hidden');
+            }
+        }
 
-  const { data: access } = await supabase.from('user_access').select('*').eq('user_id', user.id).eq('is_active', true).maybeSingle();
+        async function handleRegister() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+            const fullName = document.getElementById('regName').value;
+            const mobile = document.getElementById('regMobile').value;
+            const btn = document.getElementById('regBtn');
 
-  if (access) {
-    document.getElementById('accessSection').classList.add('hidden');
-    document.getElementById('preRules').classList.remove('hidden');
-  } else {
-    alert("તમારી પાસે એક્ટિવ પ્લાન નથી.");
-  }
-};
+            if(!email || !password || !fullName || !mobile) { alert("વિગતો ભરો"); return; }
+            btn.disabled = true; btn.innerText = "સેવ થાય છે...";
 
-// --- Start Test ---
-document.getElementById('ruleAgree').onchange = (e) => { document.getElementById('startBtn').disabled = !e.target.checked; };
+            const { data, error: authError } = await _supabase.auth.signUp({ email, password });
 
-document.getElementById('startBtn').onclick = async () => {
-  document.getElementById('startBtn').textContent = "Loading...";
-  const { data, error } = await supabase.from('questions').select('*').eq('test_id', TEST_ID);
-  
-  if (data && data.length > 0) {
-    questions = data;
-    answers = questions.map(q => ({ qid: q.id, sel: 0 }));
-    document.getElementById('preRules').classList.add('hidden');
-    document.getElementById('testUI').classList.remove('hidden');
-    document.getElementById('testSection').classList.remove('hidden');
-    renderQ();
-    startTimer();
-  } else {
-    alert("પ્રશ્નો મળ્યા નથી!");
-    document.getElementById('startBtn').textContent = "Start Exam";
-  }
-};
+            if (authError) {
+                alert("Auth ભૂલ: " + authError.message);
+                btn.disabled = false; btn.innerText = "સેવ કરો";
+                return;
+            }
 
-function renderQ() {
-  const q = questions[currentIdx];
-  document.getElementById('qCount').textContent = `Q: ${currentIdx + 1}/${questions.length}`;
-  document.getElementById('qText').textContent = q.question_text;
-  
-  const opts = [
-    { id: 1, txt: q.option_a }, { id: 2, txt: q.option_b },
-    { id: 3, txt: q.option_c }, { id: 4, txt: q.option_d },
-    { id: 5, txt: q.option_e || "E - Not Attempted" }
-  ];
+            if (data.user) {
+                const { error: profileError } = await _supabase
+                    .from('profiles')
+                    .upsert({ id: data.user.id, email: email, full_name: fullName, mobile: mobile });
+                
+                if (profileError) {
+                    alert("ટેબલ એરર: " + profileError.message);
+                    btn.disabled = false; btn.innerText = "સેવ કરો";
+                } else {
+                    toggleModal('registerModal');
+                    toggleModal('successModal');
+                }
+            }
+        }
 
-  document.getElementById('optContainer').innerHTML = opts.map(o => `
-    <label class="option-box">
-      <input type="radio" name="opt" value="${o.id}" ${answers[currentIdx].sel == o.id ? 'checked' : ''}>
-      ${o.txt}
-    </label>
-  `).join('');
-}
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+            const btn = document.getElementById('loginBtn');
+            
+            if(!email || !password) { alert("વિગતો ભરો"); return; }
+            btn.disabled = true; btn.innerText = "લોગિન થાય છે...";
+            
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                alert("લોગિન એરર: " + error.message);
+                btn.disabled = false; btn.innerText = "લોગિન કરો";
+            } else {
+                toggleModal('loginModal');
+                toggleModal('successModal');
+            }
+        }
 
-window.saveNext = () => {
-  const sel = document.querySelector('input[name="opt"]:checked');
-  if (sel) {
-    answers[currentIdx].sel = parseInt(sel.value);
-    if (currentIdx < questions.length - 1) { currentIdx++; renderQ(); }
-  } else { alert("એક ઓપ્શન પસંદ કરો."); }
-};
-
-window.skipQ = () => { answers[currentIdx].sel = 5; if (currentIdx < questions.length - 1) { currentIdx++; renderQ(); } };
-window.prevQ = () => { if (currentIdx > 0) { currentIdx--; renderQ(); } };
-
-function startTimer() {
-  interval = setInterval(() => {
-    timerSec--;
-    let m = Math.floor(timerSec/60), s = timerSec%60;
-    document.getElementById('timer').textContent = `${m}:${s<10?'0'+s:s}`;
-    if(timerSec <= 0) finalSubmit();
-  }, 1000);
-}
-
-window.togglePalette = (show) => {
-  document.getElementById('palModal').classList.toggle('hidden', !show);
-  if(show) {
-    document.getElementById('palGrid').innerHTML = answers.map((a, i) => `
-      <button class="pal-btn ${a.sel!=0?'pal-done':''}" onclick="goT(${i})">${i+1}</button>
-    `).join('');
-  }
-};
-window.goT = (i) => { currentIdx = i; renderQ(); togglePalette(false); };
-
-window.finalSubmit = async () => {
-  if(!confirm("સબમિટ કરવું છે?")) return;
-  clearInterval(interval);
-  
-  let c=0, w=0, e=0;
-  answers.forEach((ans, i) => {
-    if (ans.sel == 0 || ans.sel == 5) e++;
-    else if (ans.sel == questions[i].correct_option) c++;
-    else w++;
-  });
-
-  const score = (c * 1) - (w * 0.33);
-  
-  // Save to DB
-  await supabase.from('test_results').insert([{
-    user_id: userObj.id,
-    test_id: TEST_ID,
-    total_score: score.toFixed(2),
-    correct_count: c,
-    wrong_count: w,
-    e_count: e,
-    answers: answers,
-    time_taken_seconds: (120 * 60) - timerSec
-  }]);
-
-  document.getElementById('testSection').classList.add('hidden');
-  document.getElementById('testUI').classList.add('hidden');
-  document.getElementById('resultSection').classList.remove('hidden');
-  document.getElementById('scoreDisplay').textContent = `Score: ${score.toFixed(2)}`;
-  
-  new Chart(document.getElementById('resChart'), {
-    type: 'doughnut',
-    data: { labels: ['સાચા', 'ખોટા', 'E/Skip'], datasets: [{ data: [c, w, e], backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1'] }] }
-  });
-};
-</script>
+        async function handleLogout() {
+            await _supabase.auth.signOut();
+            location.reload();
+        }
+    </script>
 </body>
 </html>
