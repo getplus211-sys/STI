@@ -60,6 +60,7 @@ padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalPop 0.3s ease
 .modal-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:10px;color:#1e293b}
 .modal-text{font-size:15px;color:#64748b;text-align:center;line-height:1.6;margin-bottom:20px}
 .modal-brand{font-size:13px;color:#94a3b8;text-align:center;margin-top:15px;font-weight:600}
+.modal-brand span{color:#22c55e;font-weight:700}
 .modal-buttons{display:flex;gap:10px}
 .modal-buttons button{flex:1;border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;border:none}
 .modal-btn-confirm{background:#22c55e;color:#fff}
@@ -84,7 +85,7 @@ padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalPop 0.3s ease
     <div class="modal-title" id="modalTitle">Title</div>
     <div class="modal-text" id="modalText">Message</div>
     <div class="modal-buttons" id="modalButtons"></div>
-    <div class="modal-brand">KAPiLa Institute</div>
+    <div class="modal-brand"><span>KAPiLa Institute</span><br>Created by devendra_dd</div>
   </div>
 </div>
 
@@ -167,7 +168,7 @@ function alertModal(icon, title, text) {
     icon,
     title,
     text,
-    `<button class="modal-btn-ok" onclick="hideModal()">સમજાયું</button>`
+    `<button class="modal-btn-ok" onclick="hideModal();location.reload()">સમજાયું</button>`
   );
 }
 
@@ -423,10 +424,12 @@ function startTimer(){
 
 /* ========== SUBMIT CONFIRMATION ========== */
 function confirmSubmit() {
-  confirmModal(
+  showModal(
+    '❓',
     'ટેસ્ટ સબમિટ કરો?',
     'શું તમે ખરેખર આ ટેસ્ટ સબમિટ કરવા માંગો છો? તમે પછી કોઈ જવાબ બદલી શકશો નહીં.',
-    submitTest
+    `<button class="modal-btn-cancel" onclick="hideModal()">રદ કરો</button>
+     <button class="modal-btn-confirm" onclick="hideModal();submitTest()">હા, સબમિટ કરો</button>`
   );
 }
 
