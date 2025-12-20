@@ -40,7 +40,26 @@ display:flex;align-items:center;justify-content:center;z-index:9}
 .qbtn.wrong{background:#ef4444;color:#fff;border-color:#ef4444}
 .qbtn.skipped{background:#cbd5e1;color:#333;border-color:#cbd5e1}
 
-/* Mobile Navigation Buttons */
+.submit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.submit-header button {
+  width: auto;
+  padding: 12px 24px;
+  font-weight: bold;
+}
+
+.submit-header #timer {
+  font-size: 20px;
+  font-weight: bold;
+  color: #dc2626;
+}
+
 .mobile-nav {
   position: fixed;
   bottom: 20px;
@@ -84,14 +103,12 @@ display:flex;align-items:center;justify-content:center;z-index:9}
   color: white;
 }
 
-/* Desktop પર hide કરો */
 @media (min-width: 768px) {
   .mobile-nav {
     display: none;
   }
 }
 
-/* Custom Confirmation Popup */
 .confirm-popup {
   position: fixed;
   inset: 0;
@@ -151,13 +168,67 @@ display:flex;align-items:center;justify-content:center;z-index:9}
 }
 
 .btn-yes {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #FF9933 0%, #FF6600 100%);
   color: white;
 }
 
 .btn-cancel {
   background: #e5e7eb;
   color: #374151;
+}
+
+.terms-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.terms-box {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: slideIn 0.3s ease;
+}
+
+.terms-box h3 {
+  background: linear-gradient(135deg, #FF9933 0%, #138808 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.terms-content {
+  line-height: 1.8;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.terms-content ul {
+  padding-left: 20px;
+}
+
+.terms-content li {
+  margin: 10px 0;
+}
+
+.terms-box button {
+  background: linear-gradient(135deg, #FF9933 0%, #FF6600 100%);
+  color: white;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 20px;
 }
 </style>
 </head>
@@ -181,15 +252,12 @@ display:flex;align-items:center;justify-content:center;z-index:9}
 
 <script>
 
-/* ================= CONFIG ================= */
 const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
 
-// URL પરથી test લો
 const urlParams = new URLSearchParams(window.location.search);
 const TEST_ID = urlParams.get('test') || 'mock_test_1';
 
-// Test names (heading માટે)
 const TEST_NAMES = {
   'mock_test_1': 'Mock Test 1',
   'mock_test_2': 'Mock Test 2', 
@@ -200,8 +268,7 @@ const TEST_NAMES = {
 
 const TEST_NAME = TEST_NAMES[TEST_ID] || 'Mock Test';
 const TOTAL_TIME = 120 * 60;
-const TIMEOUT_MS = 15000; // 15 seconds timeout
-/* ========================================== */
+const TIMEOUT_MS = 15000;
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 const app = document.getElementById("app");
@@ -209,12 +276,10 @@ const purchasePopup = document.getElementById("purchasePopup");
 let user, questions=[], answers={}, current=0;
 let timeLeft=TOTAL_TIME, timer, submitted=false;
 
-/* ========== TIMEOUT HELPER ========== */
 const timeout = (ms) => new Promise((_, reject) => 
   setTimeout(() => reject(new Error('Request timeout')), ms)
 );
 
-/* ========== ERROR DISPLAY ========== */
 function showError(message, showRetry = true) {
   app.innerHTML = `
     <div class="card">
@@ -225,16 +290,13 @@ function showError(message, showRetry = true) {
   `;
 }
 
-/* ========== INIT (સુધારેલું + Error Handling) ========== */
 (async()=>{
   try {
-    // Check internet connection
     if (!navigator.onLine) {
       showError('No internet connection. Please check and try again.');
       return;
     }
 
-    // Get user with timeout
     const {data:{user:u}} = await Promise.race([
       sb.auth.getUser(),
       timeout(TIMEOUT_MS)
@@ -246,7 +308,6 @@ function showError(message, showRetry = true) {
     }
     user=u;
 
-    // Check access with timeout
     const {data:access} = await Promise.race([
       sb
         .from("user_access")
@@ -263,7 +324,6 @@ function showError(message, showRetry = true) {
       return;
     }
 
-    // Check existing result with timeout
     const { data: existingResult } = await Promise.race([
       sb
         .from("test_results")
@@ -310,14 +370,39 @@ function showError(message, showRetry = true) {
   }
 })();
 
-/* ========== LOAD INTRO (IMPROVED UX/UI) ========== */
+function showTermsPopup() {
+  const popup = document.createElement('div');
+  popup.className = 'terms-popup';
+  popup.innerHTML = `
+    <div class="terms-box">
+      <h3>🇮🇳 KAPiLa Institute 🇮🇳</h3>
+      <div class="terms-content">
+        <h4>📋 શરતો અને નિયમો:</h4>
+        <ul>
+          <li>⏱️ <b>કુલ સમય:</b> 120 મિનિટ</li>
+          <li>❌ <b>નેગેટિવ માર્કિંગ:</b> ખોટા/છોડેલા જવાબ માટે 0.33</li>
+          <li>✅ <b>E વિકલ્પ:</b> નેગેટિવ માર્કિંગ નથી</li>
+          <li>🚫 એક વખત સબમિટ કર્યા પછી ફરીથી ટેસ્ટ આપી શકાશે નહીં</li>
+          <li>⚡ સમય પૂરો થયા પછી ટેસ્ટ ઓટોમેટિક સબમિટ થશે</li>
+          <li>🎯 દરેક પ્રશ્ન માટે પોઈન્ટ્સ સમાન છે</li>
+        </ul>
+        <p style="text-align:center; margin-top:20px; font-weight:bold; color:#FF9933;">
+          🙏 જય શ્રી રામ 🙏
+        </p>
+      </div>
+      <button onclick="acceptTerms()">સ્વીકારો અને આગળ વધો</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+}
+
+function acceptTerms() {
+  document.querySelector('.terms-popup')?.remove();
+  document.getElementById('agree').checked = true;
+}
+
 function loadIntro() {
   app.innerHTML = `
-    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 30px;">
-      <h1 style="font-size: 32px; margin-bottom: 10px;">🎯 ${TEST_NAME}</h1>
-      <p style="font-size: 18px; opacity: 0.9;">KAPiLa Institute</p>
-    </div>
-
     <div class="card" style="box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
       <h3 style="color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px;">📋 Instructions</h3>
       <ul style="line-height: 2; font-size: 16px;">
@@ -326,10 +411,10 @@ function loadIntro() {
         <li>✅ <b>E Option:</b> No negative marking</li>
       </ul>
       
-      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px;">
+      <div style="background: linear-gradient(135deg, #FFE5B4 0%, #FFF4E0 100%); border-left: 4px solid #FF9933; padding: 15px; margin: 20px 0; border-radius: 8px;">
         <label style="display: flex; align-items: center; font-size: 16px; cursor: pointer;">
-          <input type="checkbox" id="agree" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;">
-          <span>હું શરતો અને નિયમો સ્વીકારું છું</span>
+          <input type="checkbox" id="agree" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; accent-color: #FF9933;">
+          <span style="color: #FF6600; font-weight: 600;" onclick="showTermsPopup()">હું શરતો અને નિયમો સ્વીકારું છું (વાંચવા ક્લિક કરો)</span>
         </label>
       </div>
 
@@ -340,7 +425,6 @@ function loadIntro() {
   `;
 }
 
-/* ========== START TEST (સુધારેલું + Error Handling) ========== */
 async function startTest(){
   const agreeCheckbox = document.getElementById('agree');
   if(!agreeCheckbox.checked){
@@ -349,7 +433,6 @@ async function startTest(){
   }
 
   try {
-    // Check if already attempted
     const { data: existingResult } = await Promise.race([
       sb
         .from("test_results")
@@ -366,7 +449,6 @@ async function startTest(){
       return;
     }
 
-    // Load questions
     const { data, error } = await Promise.race([
       sb
         .from("questions")
@@ -390,11 +472,9 @@ async function startTest(){
   }
 }
 
-/* ========== QUESTION RENDER (with Mobile Nav) ========== */
 function renderQuestion(){
   const q = questions[current];
   
-  // Question Grid
   let gridHTML = '<div class="card"><h4>Question Navigator</h4><div class="qgrid">';
   questions.forEach((ques, idx) => {
     let btnClass = 'qbtn';
@@ -405,14 +485,13 @@ function renderQuestion(){
   gridHTML += '</div></div>';
 
   app.innerHTML=`
-  <div class="top">
-    <div>Q ${current+1}/${questions.length}</div>
+  <div class="submit-header">
+    <button class="danger" onclick="submitTest()">Submit Test</button>
     <div id="timer"></div>
   </div>
 
-  ${gridHTML}
-
   <div class="card">
+    <div style="font-weight:700; margin-bottom:10px;">Q ${current+1}/${questions.length}</div>
     <p>${q.question_text}</p>
     ${["a","b","c","d","e"].map((o,i)=>`
       <div class="option ${answers[q.id]==i+1?"active":""}"
@@ -421,16 +500,12 @@ function renderQuestion(){
       </div>`).join("")}
   </div>
 
-  <button class="gray" onclick="prev()">Previous</button><br><br>
-  <button class="gray" onclick="next()">Next</button><br><br>
-  <button class="danger" onclick="submitTest()">Submit</button>
+  ${gridHTML}
   `;
 
-  // Mobile Navigation Buttons UPDATE કરો
   updateMobileNav();
 }
 
-/* ========== UPDATE MOBILE NAV ========== */
 function updateMobileNav() {
   let navDiv = document.querySelector('.mobile-nav');
   
@@ -446,13 +521,11 @@ function updateMobileNav() {
   `;
 }
 
-/* ========== GO TO QUESTION ========== */
 function goToQuestion(idx){
   current = idx;
   renderQuestion();
 }
 
-/* ========== ANSWER SELECT ========== */
 function selectAnswer(qid,val){
   answers[qid]=val;
   renderQuestion();
@@ -472,7 +545,6 @@ function prev(){
   }
 }
 
-/* ========== TIMER ========== */
 function startTimer(){
   timer=setInterval(()=>{
     timeLeft--;
@@ -485,12 +557,10 @@ function startTimer(){
   },1000);
 }
 
-/* ========== SUBMIT (IMPROVED CONFIRMATION) ========== */
 async function submitTest(auto=false){
   if(submitted) return;
   
   if(!auto) {
-    // Custom confirmation popup બતાવો
     const confirmPopup = document.createElement('div');
     confirmPopup.className = 'confirm-popup';
     confirmPopup.innerHTML = `
@@ -509,8 +579,6 @@ async function submitTest(auto=false){
   
   submitted=true;
   clearInterval(timer);
-  
-  // Mobile nav remove કરો
   document.querySelector('.mobile-nav')?.remove();
 
   try {
@@ -556,13 +624,11 @@ async function submitTest(auto=false){
   }
 }
 
-/* ========== CONFIRM SUBMIT HELPER ========== */
 function confirmSubmit() {
   document.querySelector('.confirm-popup')?.remove();
-  submitTest(true); // Force submit
+  submitTest(true);
 }
 
-/* ========== RESULT ========== */
 function loadResult(score, c, w, s, e, timeFromDB = null) {
   const timeTaken = timeFromDB !== null ? timeFromDB : (TOTAL_TIME - timeLeft);
   const minutes = Math.floor(timeTaken / 60);
@@ -596,9 +662,7 @@ function loadResult(score, c, w, s, e, timeFromDB = null) {
   });
 }
 
-/* ========== SOLUTIONS VIEW ========== */
 function viewSolutions() {
-  // Question Grid for Solutions
   let gridHTML = '<div class="card"><h4>Question Navigator</h4><div class="qgrid">';
   questions.forEach((q, idx) => {
     const userAns = answers[q.id];
@@ -634,16 +698,13 @@ function viewSolutions() {
   window.scrollTo(0, 0);
 }
 
-/* ========== SCROLL TO SOLUTION ========== */
 function scrollToSolution(idx){
   const el = document.getElementById('sol'+idx);
   if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
-/* ========== LEADERBOARD (સુધારેલું + Error Handling) ========== */
 async function loadLeaderboard(){
   try {
-    // Get leaderboard results
     const { data: results, error } = await Promise.race([
       sb
         .from("test_results")
@@ -659,7 +720,6 @@ async function loadLeaderboard(){
       return;
     }
 
-    // Get profiles
     const userIds = results.map(r => r.user_id);
 
     const { data: profiles } = await Promise.race([
@@ -675,7 +735,6 @@ async function loadLeaderboard(){
       profiles.forEach(p => nameMap[p.id] = p.full_name);
     }
 
-    // Find logged-in user rank
     const myIndex = results.findIndex(r => r.user_id === user.id);
     if (myIndex === -1) {
       alert("Your result not found in leaderboard");
@@ -685,7 +744,6 @@ async function loadLeaderboard(){
     const myRank = myIndex + 1;
     const myData = results[myIndex];
 
-    // Build leaderboard list (excluding me)
     const listHTML = results
       .filter(r => r.user_id !== user.id)
       .map((u, i) => `
@@ -697,7 +755,6 @@ async function loadLeaderboard(){
         </div>
       `).join("");
 
-    // Render UI
     app.innerHTML = `
       <button class="gray" onclick="location.reload()">⬅ Back to Result</button>
       <br><br>
