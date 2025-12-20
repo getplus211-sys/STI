@@ -113,15 +113,16 @@
                 return;
             }
 
-
-<div id="successModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-8 text-center">
-            <div class="mb-4 text-5xl">✅</div>
-            <h3 class="text-2xl font-bold text-green-600 mb-2">Successful!</h3>
-            <p class="text-gray-600 text-lg font-semibold mb-6">KAPiLa Institute</p>
-            <button onclick="toggleModal('successModal'); location.reload();" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold">OK</button>
-        </div>
-    </div>
+            if (data.user) {
+                // UPSERT વાપરેલ છે જેથી "duplicate key" એરર ન આવે
+                const { error: profileError } = await _supabase
+                    .from('profiles')
+                    .upsert({ id: data.user.id, email: email, full_name: fullName, mobile: mobile });
+                
+                if (profileError) alert("ટેબલ એરર: " + profileError.message);
+                else { alert("સફળ!"); location.reload(); }
+             }
+            }
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
