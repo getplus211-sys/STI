@@ -29,17 +29,17 @@
     <div class="space-y-4">
         <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
             <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
-            <p class="text-gray-500 text-sm my-3">50 માર્કની ટેસ્ટ | અત્યારે જ આપો</p>
-            <button onclick="location.href='demo-test-page.html?test=demo_test_sti'" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
+            <p class="text-gray-500 text-sm my-3">20 માર્કની ક્વિઝ | શરૂઆત માટે યોગ્ય</p>
+            <button onclick="location.href='demo-test-page.html'" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
         </div>
 
         <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
-            <h2 class="text-lg font-bold">Test Series: GPSC-STI</h2>
+            <h2 class="text-lg font-bold">Test Series: PSI/ASI</h2>
             <div class="flex justify-between items-center my-4">
-                <span class="text-green-600 font-bold text-xl">₹49/-</span>
+                <span class="text-green-600 font-bold text-xl">₹99/-</span>
                 <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded-full font-bold">5 MOCK TESTS</span>
             </div>
-            <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Give Right Now </button>
+            <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Buy Now (₹99)</button>
         </div>
     </div>
 
@@ -70,6 +70,15 @@
             <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
             <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
             <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
+        </div>
+    </div>
+
+    <div id="successModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-8 text-center">
+            <div class="mb-4 text-5xl">✅</div>
+            <h3 class="text-2xl font-bold text-green-600 mb-2">Successful!</h3>
+            <p class="text-gray-600 text-lg font-semibold mb-6">KAPiLa Institute</p>
+            <button onclick="toggleModal('successModal'); location.reload();" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold">OK</button>
         </div>
     </div>
 
@@ -114,22 +123,37 @@
             }
 
             if (data.user) {
-                // UPSERT વાપરેલ છે જેથી "duplicate key" એરર ન આવે
                 const { error: profileError } = await _supabase
                     .from('profiles')
                     .upsert({ id: data.user.id, email: email, full_name: fullName, mobile: mobile });
                 
-                if (profileError) alert("ટેબલ એરર: " + profileError.message);
-                else { alert("સફળ!"); location.reload(); }
+                if (profileError) {
+                    alert("ટેબલ એરર: " + profileError.message);
+                    btn.disabled = false; btn.innerText = "સેવ કરો";
+                } else {
+                    toggleModal('registerModal');
+                    toggleModal('successModal');
+                }
             }
         }
 
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
+            const btn = document.getElementById('loginBtn');
+            
+            if(!email || !password) { alert("વિગતો ભરો"); return; }
+            btn.disabled = true; btn.innerText = "લોગિન થાય છે...";
+            
             const { error } = await _supabase.auth.signInWithPassword({ email, password });
-            if (error) alert("લોગિન એરર: " + error.message);
-            else { location.reload(); }
+            
+            if (error) {
+                alert("લોગિન એરર: " + error.message);
+                btn.disabled = false; btn.innerText = "લોગિન કરો";
+            } else {
+                toggleModal('loginModal');
+                toggleModal('successModal');
+            }
         }
 
         async function handleLogout() {
@@ -139,5 +163,3 @@
     </script>
 </body>
 </html>
-
-
