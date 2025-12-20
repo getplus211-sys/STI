@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STI Mock Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="p-4 pb-24">
+
+    <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+        <h1 class="text-xl font-bold text-gray-800">STI Mock Test</h1>
+        <div id="authArea" class="flex items-center gap-2">
+            <button id="btnReg" onclick="toggleModal('registerModal')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
+            <button id="btnLogin" onclick="toggleModal('loginModal')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase shadow-md">Login</button>
+            <div id="userProfile" class="hidden flex items-center gap-2">
+                <span id="userName" class="text-xs font-bold text-gray-700"></span>
+                <button onclick="handleLogout()" class="bg-red-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="space-y-4">
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
+            <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
+            <p class="text-gray-500 text-sm my-3">50 માર્કની ટેસ્ટ | અત્યારે જ આપો</p>
+            <button onclick="location.href='demo-test-page.html?test=demo_test_sti'" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
+            <h2 class="text-lg font-bold">Test Series: GPSC-STI</h2>
+            <div class="flex justify-between items-center my-4">
+                <span class="text-green-600 font-bold text-xl">₹49/-</span>
+                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded-full font-bold">5 MOCK TESTS</span>
+            </div>
+            <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Give Right Now </button>
+        </div>
+    </div>
+
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
+        <div class="text-[10px] text-gray-400">© 2025 STI Mock Test</div>
+        <div class="flex gap-2">
+            <button class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">WhatsApp</button>
+            <button class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">Call</button>
+        </div>
+    </footer>
+
+    <div id="registerModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-5">નવું રજિસ્ટ્રેશન</h3>
+            <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
+            <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">સેવ કરો</button>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
+            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-5">લોગિન</h3>
+            <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+            <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
+            <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+
+        window.onload = async () => {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (user) showUser(user);
+        };
+
+        async function showUser(user) {
+            const { data } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
+            if (data) {
+                document.getElementById('userName').innerText = data.full_name;
+                document.getElementById('btnReg').classList.add('hidden');
+                document.getElementById('btnLogin').classList.add('hidden');
+                document.getElementById('userProfile').classList.remove('hidden');
+            }
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+            const fullName = document.getElementById('regName').value;
+            const mobile = document.getElementById('regMobile').value;
+            const btn = document.getElementById('regBtn');
+
+            if(!email || !password || !fullName || !mobile) { alert("વિગતો ભરો"); return; }
+            btn.disabled = true; btn.innerText = "સેવ થાય છે...";
+
+            const { data, error: authError } = await _supabase.auth.signUp({ email, password });
+
+            if (authError) {
+                alert("Auth ભૂલ: " + authError.message);
+                btn.disabled = false; btn.innerText = "સેવ કરો";
+                return;
+            }
+
+
+<div id="successModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-8 text-center">
+            <div class="mb-4 text-5xl">✅</div>
+            <h3 class="text-2xl font-bold text-green-600 mb-2">Successful!</h3>
+            <p class="text-gray-600 text-lg font-semibold mb-6">KAPiLa Institute</p>
+            <button onclick="toggleModal('successModal'); location.reload();" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold">OK</button>
+        </div>
+    </div>
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) alert("લોગિન એરર: " + error.message);
+            else { location.reload(); }
+        }
+
+        async function handleLogout() {
+            await _supabase.auth.signOut();
+            location.reload();
+        }
+    </script>
+</body>
+</html>
+
+
