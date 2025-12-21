@@ -10,6 +10,10 @@
         body { background-color: #f3f4f6; font-family: sans-serif; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
+        .tab-button { padding: 12px 24px; border-bottom: 3px solid transparent; font-weight: 600; transition: all 0.3s; }
+        .tab-button.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body class="p-4 pb-24">
@@ -17,8 +21,8 @@
     <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
         <h1 class="text-xl font-bold text-gray-800">STI Mock Test</h1>
         <div id="authArea" class="flex items-center gap-2">
-            <button id="btnReg" onclick="toggleModal('registerModal')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
-            <button id="btnLogin" onclick="toggleModal('loginModal')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase shadow-md">Login</button>
+            <button id="btnReg" onclick="openAuthModal('register')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
+            <button id="btnLogin" onclick="openAuthModal('login')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase shadow-md">Login</button>
             <div id="userProfile" class="hidden flex items-center gap-2">
                 <span id="userName" class="text-xs font-bold text-gray-700"></span>
                 <button onclick="handleLogout()" class="bg-red-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Logout</button>
@@ -30,7 +34,7 @@
         <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
             <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
             <p class="text-gray-500 text-sm my-3">50 માર્કની ટેસ્ટ | અત્યારે જ આપો</p>
-            <button onclick="location.href='demo-test-page.html?test=demo_test_sti'" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
+            <button onclick="checkAuthAndProceed('demo-test-page.html?test=demo_test_sti')" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
         </div>
 
         <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
@@ -39,45 +43,61 @@
                 <span class="text-green-600 font-bold text-xl">₹49/-</span>
                 <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded-full font-bold">5 MOCK TESTS</span>
             </div>
-            <button onclick="location.href='mock-test-page.html'" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Give Right Now </button>
-        </div>
-    </div>
-   <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
-    <div class="text-[10px] text-gray-400">© 2025 STI Mock Test</div>
-    <div class="flex gap-2">
-        <a href="https://wa.me/916353511804?text=Hello%20STI%20Mock%20Test"
-           target="_blank"
-           class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">
-           WhatsApp
-        </a>
-
-        <a href="tel:+916353511804"
-           class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">
-           Call
-        </a>
-    </div>
-   </footer>
-   
-
-    <div id="registerModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
-            <button onclick="toggleModal('registerModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
-            <h3 class="text-xl font-bold mb-5">નવું રજિસ્ટ્રેશન</h3>
-            <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
-            <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">સેવ કરો</button>
+            <button onclick="checkAuthAndProceed('mock-test-page.html')" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Give Right Now</button>
         </div>
     </div>
 
-    <div id="loginModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative">
-            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 text-2xl">&times;</button>
-            <h3 class="text-xl font-bold mb-5">લોગિન</h3>
-            <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-            <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-5 outline-none">
-            <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
+        <div class="text-[10px] text-gray-400">© 2025 STI Mock Test</div>
+        <div class="flex gap-2">
+            <a href="https://wa.me/916353511804?text=Hello%20STI%20Mock%20Test"
+               target="_blank"
+               class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">
+               WhatsApp
+            </a>
+            <a href="tel:+916353511804"
+               class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">
+               Call
+            </a>
+        </div>
+    </footer>
+
+    <!-- Unified Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 text-2xl z-10">&times;</button>
+            
+            <!-- Tabs -->
+            <div class="flex border-b">
+                <button id="loginTab" class="tab-button flex-1 active" onclick="switchTab('login')">લોગિન</button>
+                <button id="registerTab" class="tab-button flex-1" onclick="switchTab('register')">રજિસ્ટ્રેશન</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginContent" class="tab-content active p-6">
+                <h3 class="text-xl font-bold mb-5">લોગિન કરો</h3>
+                <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+                <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+                <div id="loginMessage" class="text-sm text-red-600 mb-3 hidden"></div>
+                <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    એકાઉન્ટ નથી? <button onclick="switchTab('register')" class="text-blue-600 font-bold">રજિસ્ટર કરો</button>
+                </p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerContent" class="tab-content p-6">
+                <h3 class="text-xl font-bold mb-5">નવું રજિસ્ટ્રેશન</h3>
+                <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+                <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+                <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+                <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
+                <div id="registerMessage" class="text-sm text-red-600 mb-3 hidden"></div>
+                <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">સેવ કરો</button>
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    પહેલેથી એકાઉન્ટ છે? <button onclick="switchTab('login')" class="text-blue-600 font-bold">લોગિન કરો</button>
+                </p>
+            </div>
         </div>
     </div>
 
@@ -86,7 +106,7 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        function toggleModal(id) { document.getElementById(id).classList.toggle('active'); }
+        let pendingRedirect = null;
 
         window.onload = async () => {
             const { data: { user } } = await _supabase.auth.getUser();
@@ -103,40 +123,158 @@
             }
         }
 
+        function openAuthModal(tab = 'login') {
+            document.getElementById('authModal').classList.add('active');
+            switchTab(tab);
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('active');
+            pendingRedirect = null;
+            clearMessages();
+        }
+
+        function switchTab(tab) {
+            // Clear messages
+            clearMessages();
+
+            // Update tab buttons
+            document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+            document.getElementById('registerTab').classList.toggle('active', tab === 'register');
+
+            // Update tab content
+            document.getElementById('loginContent').classList.toggle('active', tab === 'login');
+            document.getElementById('registerContent').classList.toggle('active', tab === 'register');
+        }
+
+        function clearMessages() {
+            document.getElementById('loginMessage').classList.add('hidden');
+            document.getElementById('registerMessage').classList.add('hidden');
+            document.getElementById('loginMessage').innerText = '';
+            document.getElementById('registerMessage').innerText = '';
+        }
+
+        function showMessage(type, message) {
+            const messageDiv = document.getElementById(type + 'Message');
+            messageDiv.innerText = message;
+            messageDiv.classList.remove('hidden');
+        }
+
+        async function checkAuthAndProceed(url) {
+            const { data: { user } } = await _supabase.auth.getUser();
+            
+            if (user) {
+                // User is logged in, proceed to the test
+                location.href = url;
+            } else {
+                // User is not logged in, show auth modal
+                pendingRedirect = url;
+                openAuthModal('login');
+            }
+        }
+
         async function handleRegister() {
-            const email = document.getElementById('regEmail').value;
+            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPass').value;
-            const fullName = document.getElementById('regName').value;
-            const mobile = document.getElementById('regMobile').value;
+            const fullName = document.getElementById('regName').value.trim();
+            const mobile = document.getElementById('regMobile').value.trim();
             const btn = document.getElementById('regBtn');
 
-            if(!email || !password || !fullName || !mobile) { alert("વિગતો ભરો"); return; }
-            btn.disabled = true; btn.innerText = "સેવ થાય છે...";
+            clearMessages();
+
+            if(!email || !password || !fullName || !mobile) { 
+                showMessage('register', "બધી વિગતો ભરો");
+                return; 
+            }
+
+            btn.disabled = true; 
+            btn.innerText = "સેવ થાય છે...";
+
+            // Check if user already exists
+            const { data: existingUser } = await _supabase
+                .from('profiles')
+                .select('email')
+                .eq('email', email)
+                .single();
+
+            if (existingUser) {
+                showMessage('register', "તમે પહેલેથી જ રજિસ્ટર છો, કૃપયા લોગિન કરો");
+                btn.disabled = false; 
+                btn.innerText = "સેવ કરો";
+                setTimeout(() => switchTab('login'), 2000);
+                return;
+            }
 
             const { data, error: authError } = await _supabase.auth.signUp({ email, password });
 
             if (authError) {
-                alert("Auth ભૂલ: " + authError.message);
-                btn.disabled = false; btn.innerText = "સેવ કરો";
+                showMessage('register', "ભૂલ: " + authError.message);
+                btn.disabled = false; 
+                btn.innerText = "સેવ કરો";
                 return;
             }
 
             if (data.user) {
-                // UPSERT વાપરેલ છે જેથી "duplicate key" એરર ન આવે
                 const { error: profileError } = await _supabase
                     .from('profiles')
                     .upsert({ id: data.user.id, email: email, full_name: fullName, mobile: mobile });
                 
-                if (profileError) alert("ટેબલ એરર: " + profileError.message);
-                else { alert("સફળ!"); location.reload(); }
-             }
+                if (profileError) {
+                    showMessage('register', "ટેબલ ભૂલ: " + profileError.message);
+                    btn.disabled = false; 
+                    btn.innerText = "સેવ કરો";
+                } else { 
+                    showMessage('register', "સફળ! લોગિન થઈ રહ્યું છે...");
+                    setTimeout(() => {
+                        if (pendingRedirect) {
+                            location.href = pendingRedirect;
+                        } else {
+                            location.reload();
+                        }
+                    }, 1000);
+                }
             }
+        }
+
         async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPass').value;
-            const { error } = await _supabase.auth.signInWithPassword({ email, password });
-            if (error) alert("લોગિન એરર: " + error.message);
-            else { location.reload(); }
+            const btn = document.getElementById('loginBtn');
+
+            clearMessages();
+
+            if(!email || !password) { 
+                showMessage('login', "ઈમેલ અને પાસવર્ડ ભરો");
+                return; 
+            }
+
+            btn.disabled = true;
+            btn.innerText = "લોગિન થાય છે...";
+
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                // Check if user doesn't exist
+                if (error.message.includes('Invalid login credentials') || error.message.includes('not found')) {
+                    showMessage('login', "એકાઉન્ટ નથી મળ્યું, કૃપયા પહેલા રજિસ્ટર કરો");
+                    btn.disabled = false;
+                    btn.innerText = "લોગિન કરો";
+                    setTimeout(() => switchTab('register'), 2000);
+                } else {
+                    showMessage('login', "લોગિન ભૂલ: " + error.message);
+                    btn.disabled = false;
+                    btn.innerText = "લોગિન કરો";
+                }
+            } else {
+                showMessage('login', "સફળ! રીડાયરેક્ટ થઈ રહ્યું છે...");
+                setTimeout(() => {
+                    if (pendingRedirect) {
+                        location.href = pendingRedirect;
+                    } else {
+                        location.reload();
+                    }
+                }, 1000);
+            }
         }
 
         async function handleLogout() {
@@ -146,4 +284,3 @@
     </script>
 </body>
 </html>
-
