@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAPiLA Institute - Digital Learning Platform</title>
+    <title>KAPILA Institute - Digital Learning Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -18,10 +18,11 @@
 </head>
 <body class="p-4 pb-24">
 
-    <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-50 flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-md border border-gray-100">
         <div>
-            <h1 class="text-xl font-bold text-gray-800">KAPiLA Institute</h1>
-            <p class="text-[9px] text-gray-500">Digital Learning Platform</p>
+            <h1 class="text-lg font-bold text-gray-800">KAPILA Institute</h1>
+            <p class="text-[10px] text-gray-500">Digital Learning Platform</p>
         </div>
         <div id="authArea" class="flex items-center gap-2">
             <button id="btnReg" onclick="openAuthModal('register')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
@@ -33,54 +34,47 @@
         </div>
     </header>
 
-    <!-- Main Card -->
-    <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-lg mb-6 text-white">
-        <h2 class="text-xl font-bold mb-3">📚 તમામ MCQ Material</h2>
-        <div class="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-            <p class="text-sm font-semibold mb-2">EXAMS:</p>
-            <div class="flex flex-wrap gap-2">
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">GPSC</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">CCE</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">PSI</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">POLICE</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">TALATI</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">MPHW</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">FHW</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">FOREST GUARD</span>
+    <div class="space-y-6">
+        <!-- Main Info Card -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-5 shadow-lg text-white">
+            <h2 class="text-xl font-bold mb-3">📚 અહીંથી આપને મળશે તમામ MCQ Material</h2>
+            <p class="text-sm opacity-90 mb-2">EXAM: GPSC, CCE, PSI, POLICE, TALATI, MPHW, FHW, FOREST GUARD</p>
+            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-3 mt-4">
+                <p class="text-xs">✅ દરરોજ નવી ક્વિઝ અને પ્રેક્ટિસ મટીરિયલ</p>
+                <p class="text-xs mt-1">✅ તમામ સરકારી પરીક્ષાઓ માટે તૈયારી</p>
             </div>
         </div>
-    </div>
 
-    <!-- Daily Learning Section -->
-    <div class="mb-4">
-        <h3 class="text-lg font-bold text-gray-800 mb-3">📅 Daily Learning</h3>
-        <div class="grid grid-cols-2 gap-3">
-            <!-- Daily Quiz Card -->
-            <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
-                <div class="text-3xl mb-2">🧠</div>
-                <h4 class="text-sm font-bold text-gray-800 mb-2">Daily QUIZ</h4>
-                <p class="text-[10px] text-gray-500 mb-3">બધા subjects ની mix quiz, 25 પ્રશ્નો</p>
-                <button onclick="checkAuthAndProceed('daily-quiz.html')" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold">શરૂ કરો</button>
-            </div>
+        <!-- Daily Learning Section -->
+        <div>
+            <h3 class="text-lg font-bold text-gray-800 mb-3 px-1">Daily Learning</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Daily Quiz Card -->
+                <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
+                    <div class="text-3xl mb-2">📝</div>
+                    <h4 class="font-bold text-sm mb-2">Daily QUIZ</h4>
+                    <p class="text-[10px] text-gray-500 mb-3">બધા subjects ની mix quiz, 25 પ્રશ્નો</p>
+                    <button onclick="checkAuthAndProceed('daily-quiz.html')" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold">Start Quiz</button>
+                </div>
 
-            <!-- Daily Maths & Reasoning Card -->
-            <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
-                <div class="text-3xl mb-2">🔢</div>
-                <h4 class="text-sm font-bold text-gray-800 mb-2">MATHS & REASONING</h4>
-                <p class="text-[10px] text-gray-500 mb-3">રોજ અલગ chapter, CCE & PSI માટે ઉપયોગી</p>
-                <button onclick="checkAuthAndProceed('daily-maths-res.html')" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold">શરૂ કરો</button>
+                <!-- Daily Maths & Reasoning Card -->
+                <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
+                    <div class="text-3xl mb-2">🧮</div>
+                    <h4 class="font-bold text-sm mb-2">Daily MATHS & REASONING</h4>
+                    <p class="text-[10px] text-gray-500 mb-3">રોજ અલગ chapter, 25 marks, CCE તેમજ PSI & LRD માટે ખૂબજ ઉપયોગી</p>
+                    <button onclick="checkAuthAndProceed('daily-maths-res.html')" class="w-full bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold">Start Practice</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Existing Cards -->
-    <div class="space-y-4">
+        <!-- Demo Test Card -->
         <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
             <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
             <p class="text-gray-500 text-sm my-3">50 માર્કની ટેસ્ટ | અત્યારે જ આપો</p>
             <button onclick="checkAuthAndProceed('demo-test-page.html?test=demo_test_sti')" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
         </div>
 
+        <!-- Test Series Card -->
         <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
             <h2 class="text-lg font-bold">Test Series: GPSC-STI</h2>
             <div class="flex justify-between items-center my-4">
@@ -91,10 +85,11 @@
         </div>
     </div>
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
-        <div class="text-[10px] text-gray-400">© 2025 KAPiLA Institute</div>
+    <!-- Sticky Footer -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center shadow-lg">
+        <div class="text-[10px] text-gray-400">© 2025 KAPILA Institute</div>
         <div class="flex gap-2">
-            <a href="https://wa.me/916353511804?text=Hello%20KAPiLA%20Institute"
+            <a href="https://wa.me/916353511804?text=Hello%20KAPILA%20Institute"
                target="_blank"
                class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">
                WhatsApp
@@ -179,14 +174,9 @@
         }
 
         function switchTab(tab) {
-            // Clear messages
             clearMessages();
-
-            // Update tab buttons
             document.getElementById('loginTab').classList.toggle('active', tab === 'login');
             document.getElementById('registerTab').classList.toggle('active', tab === 'register');
-
-            // Update tab content
             document.getElementById('loginContent').classList.toggle('active', tab === 'login');
             document.getElementById('registerContent').classList.toggle('active', tab === 'register');
         }
@@ -208,10 +198,8 @@
             const { data: { user } } = await _supabase.auth.getUser();
             
             if (user) {
-                // User is logged in, proceed to the test
                 location.href = url;
             } else {
-                // User is not logged in, show auth modal
                 pendingRedirect = url;
                 openAuthModal('login');
             }
@@ -234,7 +222,6 @@
             btn.disabled = true; 
             btn.innerText = "સેવ થાય છે...";
 
-            // Check if user already exists
             const { data: existingUser } = await _supabase
                 .from('profiles')
                 .select('email')
@@ -298,7 +285,6 @@
             const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
-                // Check if user doesn't exist
                 if (error.message.includes('Invalid login credentials') || error.message.includes('not found')) {
                     showMessage('login', "એકાઉન્ટ નથી મળ્યું, કૃપયા પહેલા રજિસ્ટર કરો");
                     btn.disabled = false;
@@ -319,7 +305,7 @@
                     }
                 }, 1000);
             }
-         }
+        }
 
         async function handleLogout() {
             await _supabase.auth.signOut();
