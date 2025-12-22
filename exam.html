@@ -276,14 +276,69 @@ function showError(message, showRetry = true) {
     }
 
     questions=qData;
-    startTime = Date.now();
-    startTimer();
-    renderQuestion();
+    loadIntro();
   } catch(err) {
     console.error('Init error:', err);
     showError('Failed to load: ' + err.message);
   }
 })();
+
+/* ========== LOAD INTRO (ENTRY CARD) ========== */
+function loadIntro() {
+  app.innerHTML = `
+    <div class="card">
+      <span class="badge ${CURRENT_TEST.badgeClass}">${CURRENT_TEST.badge}</span>
+      <h2>${CURRENT_TEST.name}</h2>
+      <p><b>Instructions:</b></p>
+      <ul>
+        <li>No Time Limit - Take your time!</li>
+        <li><b>No Negative Marking</b> - Only correct answers add points.</li>
+        <li>E option: Available if needed.</li>
+        <li>Your time will be tracked for leaderboard ranking.</li>
+        ${CURRENT_TEST.isFree ? '<li><b>✅ No payment required - 100% Free!</b></li>' : '<li><b>💎 Paid Test - Access Required</b></li>'}
+      </ul>
+      <label>
+        <input type="checkbox" id="agree"> I agree to the terms and conditions.
+      </label>
+      <br><br>
+      <button class="primary" onclick="startTest()">Start Test Now</button>
+    </div>
+  `;
+}
+
+/* ========== START TEST ========== */
+async function startTest(){
+  const agreeCheckbox = document.getElementById('agree');
+  if(!agreeCheckbox.checked){
+    alertModal('⚠️', 'શરતો સ્વીકારો', 'કૃપા કરીને પહેલા instructions સ્વીકારો.');
+    return;
+  }
+
+  try {
+    const { data: existingResult } = await Promise.race([
+      sb
+        .from("test_results")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("test_id", TEST_ID)
+        .maybeSingle(),
+      timeout(TIMEOUT_MS)
+    ]);
+
+    if (existingResult) {
+      alertModal('🚫', 'ટેસ્ટ પૂર્ણ થઈ ગઈ', 'તમે આ ટેસ્ટ પહેલેથી આપી દીધી છે. તમે તેને ફરીથી આપી શકતા નથી.');
+      setTimeout(() => location.reload(), 2000);
+      return;
+    }
+
+    startTime = Date.now();
+    startTimer();
+    renderQuestion();
+  } catch(err) {
+    console.error('Start test error:', err);
+    showError('Failed to start test. Please try again.');
+  }
+}
 
 /* ========== QUESTION DISPLAY ========== */
 function renderQuestion(){
