@@ -2,13 +2,13 @@
 <html lang="gu">
 <head>
 <meta charset="UTF-8">
-<title>Daily Quiz Practice | KAPiLa Institute</title>
+<title>ગુજરાતી વ્યાકરણ - Mock Tests | KAPiLa Institute</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
 }
 
@@ -45,22 +45,29 @@ body {
 }
 </style>
 
+<!-- IMPORTANT: Supabase library જરૂરી છે -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
   <div class="page-header">
-    <h1>📅 Daily Quiz Practice</h1>
-    <p>રોજિંદા Practice માટે General Mock Tests</p>
+    <h1>📚 ગુજરાતી વ્યાકરણ</h1>
+    <p>તમારી ગુજરાતી વ્યાકરણની તૈયારી માટે સંપૂર્ણ Mock Tests</p>
   </div>
 
-  <!-- Automatic Quiz Loading -->
+  <!-- 
+    ==========================================
+    આ માત્ર આટલું જ નાખવાનું! 
+    બાકી બધું automatic! 
+    ==========================================
+  -->
   <div id="quiz-container"></div>
 
   <div class="footer">
     Created with ❤️ by <a href="#">devendra_dd</a> | KAPiLa Institute
   </div>
 
+  <!-- Quiz Loader Script -->
   <script src="quiz-loader.js"></script>
 </body>
 </html>
