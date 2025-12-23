@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Performance Report - GovtExam Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        .card { 
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .header-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-box:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-box:nth-child(3) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .stat-box:nth-child(4) { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        
+        .subject-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .weak-topic {
+            background: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .quick-action {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .alert-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #f59e0b;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 400px) {
+            .stat-grid { grid-template-columns: 1fr; }
+            body { padding: 10px; }
+            .card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-card">
+            <div style="font-size: 24px; font-weight: 900; margin-bottom: 5px;">
+                શ્રી કૃષ્ણ પટેલ
+            </div>
+            <div style="opacity: 0.95; font-size: 14px; margin-bottom: 12px;">
+                GPSC Class 1-2 | Batch 2026
+            </div>
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
+                    🔥 18 Day Streak
+                </span>
+                <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
+                    🏆 Top 15%
+                </span>
+            </div>
+        </div>
+
+        <!-- Key Stats - 2x2 Grid -->
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">Progress</div>
+                <div style="font-size: 32px; font-weight: 900;">72.4%</div>
+                <div style="font-size: 11px; margin-top: 3px;">↑ 8.2%</div>
+            </div>
+            
+            <div class="stat-box">
+                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">Questions</div>
+                <div style="font-size: 32px; font-weight: 900;">2,847</div>
+                <div style="font-size: 11px; margin-top: 3px;">/ 4,000</div>
+            </div>
+            
+            <div class="stat-box">
+                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">Accuracy</div>
+                <div style="font-size: 32px; font-weight: 900;">68.5%</div>
+                <div style="font-size: 11px; margin-top: 3px;">Need 75%+</div>
+            </div>
+            
+            <div class="stat-box">
+                <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px;">Expected</div>
+                <div style="font-size: 32px; font-weight: 900;">82/150</div>
+                <div style="font-size: 11px; margin-top: 3px;">Score</div>
+            </div>
+        </div>
+
+        <!-- Quick Alert -->
+        <div class="alert-box">
+            <div style="display: flex; gap: 12px; align-items: start;">
+                <div style="font-size: 28px;">⚠️</div>
+                <div>
+                    <div style="font-weight: 700; color: #92400e; margin-bottom: 5px;">
+                        3 Critical Weak Areas!
+                    </div>
+                    <div style="font-size: 13px; color: #78350f;">
+                        આ topics તાત્કાલિક ધ્યાન માગે છે. પહેલા આને fix કરો.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Performance -->
+        <div class="card">
+            <div class="section-title">
+                <i data-lucide="bar-chart-3" style="color: #667eea;"></i>
+                Subject Performance
+            </div>
+            
+            <div class="subject-row">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 5px;">Quantitative</div>
+                    <div class="progress-bar">
+                        <div style="width: 64%; height: 100%; background: #ed8936;"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #718096;">64% • 640/1000</div>
+                </div>
+                <span class="badge badge-warning">Improve</span>
+            </div>
+
+            <div class="subject-row" style="border-left-color: #48bb78;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 5px;">Reasoning</div>
+                    <div class="progress-bar">
+                        <div style="width: 82%; height: 100%; background: #48bb78;"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #718096;">82% • 738/900</div>
+                </div>
+                <span class="badge badge-success">Strong</span>
+            </div>
+
+            <div class="subject-row" style="border-left-color: #f56565;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 5px;">General Studies</div>
+                    <div class="progress-bar">
+                        <div style="width: 56%; height: 100%; background: #f56565;"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #718096;">56% • 560/1000</div>
+                </div>
+                <span class="badge badge-danger">Critical</span>
+            </div>
+
+            <div class="subject-row" style="border-left-color: #48bb78;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 5px;">English</div>
+                    <div class="progress-bar">
+                        <div style="width: 76%; height: 100%; background: #48bb78;"></div>
+                    </div>
+                    <div style="font-size: 11px; color: #718096;">76% • 456/600</div>
+                </div>
+                <span class="badge badge-success">Good</span>
+            </div>
+        </div>
+
+        <!-- Top 3 Weak Topics -->
+        <div class="card">
+            <div class="section-title">
+                <i data-lucide="alert-triangle" style="color: #f56565;"></i>
+                Critical Weak Topics
+            </div>
+
+            <div class="weak-topic">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-weight: 700; color: #c53030; font-size: 15px;">💰 Profit & Loss</div>
+                        <div style="font-size: 12px; color: #718096;">Quantitative Aptitude</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 800; color: #f56565; font-size: 18px;">34%</div>
+                        <div style="font-size: 11px; color: #718096;">52% Acc</div>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #7f1d1d; background: white; padding: 8px; border-radius: 6px;">
+                    <b>Issue:</b> Discount + CP/SP calculation errors
+                </div>
+            </div>
+
+            <div class="weak-topic">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-weight: 700; color: #c53030; font-size: 15px;">🏛️ Indian Polity</div>
+                        <div style="font-size: 12px; color: #718096;">General Studies</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 800; color: #f56565; font-size: 18px;">42%</div>
+                        <div style="font-size: 11px; color: #718096;">55% Acc</div>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #7f1d1d; background: white; padding: 8px; border-radius: 6px;">
+                    <b>Issue:</b> Articles, Amendments યાદ નથી રહેતા
+                </div>
+            </div>
+
+            <div class="weak-topic">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-weight: 700; color: #c53030; font-size: 15px;">📊 Data Interpretation</div>
+                        <div style="font-size: 12px; color: #718096;">Quantitative Aptitude</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 800; color: #f56565; font-size: 18px;">38%</div>
+                        <div style="font-size: 11px; color: #718096;">49% Acc</div>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #7f1d1d; background: white; padding: 8px; border-radius: 6px;">
+                    <b>Issue:</b> Graph reading + speed ધીમું (3.5 min)
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Recommendation -->
+        <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <div style="display: flex; gap: 12px; align-items: start;">
+                <div style="font-size: 36px;">🎯</div>
+                <div>
+                    <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">
+                        આજની Priority
+                    </div>
+                    <div style="font-size: 13px; margin-bottom: 10px; opacity: 0.95;">
+                        પહેલા <b>Profit & Loss</b> (50 questions) કરો, પછી <b>Polity</b> revision (30 mins)
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; font-size: 12px;">
+                        Expected: 3-4 days માં 70% accuracy
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="section-title">
+                <i data-lucide="zap" style="color: #f59e0b;"></i>
+                Quick Actions
+            </div>
+            
+            <div class="quick-action" onclick="startMockTest()">
+                <i data-lucide="clipboard-check" style="display: inline-block; vertical-align: middle;"></i>
+                Start Mock Test
+            </div>
+            
+            <div class="quick-action" onclick="dailyChallenge()">
+                <i data-lucide="trophy" style="display: inline-block; vertical-align: middle;"></i>
+                Daily Challenge (25 Questions)
+            </div>
+            
+            <div class="quick-action" onclick="fixWeakTopics()">
+                <i data-lucide="target" style="display: inline-block; vertical-align: middle;"></i>
+                Fix Weak Topics Now
+            </div>
+        </div>
+
+        <!-- View Full Report Button -->
+        <button class="btn-primary" onclick="viewFullReport()">
+            <i data-lucide="file-text" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></i>
+            View Full Detailed Report →
+        </button>
+
+        <!-- Footer Note -->
+        <div style="text-align: center; color: white; margin-top: 20px; font-size: 13px; opacity: 0.9;">
+            <div style="font-weight: 600; margin-bottom: 5px;">💪 Keep Going!</div>
+            <div>Last updated: 23 Dec 2025, 2:30 PM</div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function viewFullReport() {
+            if(confirm('📊 Full Detailed Report માં જોશો?\n\n✓ Charts & Graphs\n✓ Complete topic breakdown\n✓ Weekly trends\n✓ Error analysis\n✓ Study plans\n✓ Achievements\n\nLoad full report?')) {
+                window.location.href = 'full_performance_report.html';
+            }
+        }
+
+        function startMockTest() {
+            alert('🎯 Mock Test શરૂ થઈ રહ્યો છે...\n\n⏱️ 150 minutes\n📝 150 questions\n\nAll the best!');
+        }
+
+        function dailyChallenge() {
+            alert('🏆 Daily Challenge\n\n📊 25 Questions\n⏱️ 30 Minutes\n🎯 Target: 80%+\n\nReady?');
+        }
+
+        function fixWeakTopics() {
+            alert('🔧 Weak Topics Practice\n\n3 critical areas ready:\n• Profit & Loss\n• Indian Polity\n• Data Interpretation\n\nLet\'s fix them!');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Performance Report - GovtExam Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .card { 
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        /* Mobile: 1 column, Tablet: 2 columns, Desktop: 3-4 columns */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        /* Tablet and above */
+        @media (min-width: 768px) {
+            .grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        /* Desktop */
+        @media (min-width: 1024px) {
+            .grid-2 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(3, 1fr); }
+            .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .topic-card {
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 12px 0;
+            transition: all 0.3s;
+        }
+        .topic-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 20px 0;
+        }
+        
+        .btn-primary {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .back-btn {
+                position: static;
+                width: 100%;
+                margin-bottom: 15px;
+            }
+            body { padding: 10px; }
+            .card { padding: 18px; }
+            .section-title { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Button -->
+        <button class="back-btn" onclick="goBack()">
+            <i data-lucide="arrow-left" style="display: inline-block; vertical-align: middle;"></i>
+            Back to Mini Report
+        </button>
+
+        <!-- Header -->
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-top: 60px;">
+            <div style="text-align: center;">
+                <h1 style="font-size: 28px; font-weight: 900; margin-bottom: 8px;">
+                    Complete Performance Analysis
+                </h1>
+                <p style="opacity: 0.95; font-size: 16px; margin-bottom: 15px;">શ્રી કૃષ્ણ પટેલ | GPSC Class 1-2 Preparation</p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">🔥 18 Day Streak</span>
+                    <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">⚡ Level 12</span>
+                    <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">🏆 Top 15%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Stats - 4 Cards in a Row (2 on mobile) -->
+        <div class="grid-4">
+            <div class="stat-box">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Overall Progress</div>
+                <div style="font-size: 40px; font-weight: 900; margin: 10px 0;">72.4%</div>
+                <div style="font-size: 12px;">↑ 8.2% this month</div>
+            </div>
+
+            <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Questions Solved</div>
+                <div style="font-size: 40px; font-weight: 900; margin: 10px 0;">2,847</div>
+                <div style="font-size: 12px;">Target: 4,000 (71%)</div>
+            </div>
+
+            <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Avg Accuracy</div>
+                <div style="font-size: 40px; font-weight: 900; margin: 10px 0;">68.5%</div>
+                <div style="font-size: 12px;">Need 75%+ for exam</div>
+            </div>
+
+            <div class="stat-box" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Expected Score</div>
+                <div style="font-size: 40px; font-weight: 900; margin: 10px 0;">82/150</div>
+                <div style="font-size: 12px;">Based on current</div>
+            </div>
+        </div>
+
+        <!-- Charts - 2 in a Row -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="section-title">
+                    <i data-lucide="trending-up" style="color: #667eea;"></i>
+                    Weekly Performance Trend
+                </div>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">
+                    <i data-lucide="pie-chart" style="color: #f59e0b;"></i>
+                    Subject Distribution
+                </div>
+                <div class="chart-container">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Performance - Full Width -->
+        <div class="card">
+            <div class="section-title">
+                <i data-lucide="bar-chart-3" style="color: #667eea;"></i>
+                Subject-wise Performance
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 18px;">Quantitative Aptitude</span>
+                        <span class="badge badge-warning" style="margin-left: 10px;">Need Improvement</span>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 800; color: #ed8936;">64%</div>
+                </div>
+                <div class="progress-bar">
+                    <div style="width: 64%; height: 100%; background: linear-gradient(90deg, #ed8936, #dd6b20);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #718096; flex-wrap: wrap; gap: 10px;">
+                    <span>16/25 Topics • 640/1000 Questions</span>
+                    <span>Accuracy: 61% • Avg Time: 2.5 min</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 18px;">Reasoning Ability</span>
+                        <span class="badge badge-success" style="margin-left: 10px;">Strong</span>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 800; color: #48bb78;">82%</div>
+                </div>
+                <div class="progress-bar">
+                    <div style="width: 82%; height: 100%; background: linear-gradient(90deg, #48bb78, #38a169);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #718096; flex-wrap: wrap; gap: 10px;">
+                    <span>15/18 Topics • 738/900 Questions</span>
+                    <span>Accuracy: 79% • Avg Time: 1.8 min</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 18px;">General Studies</span>
+                        <span class="badge badge-danger" style="margin-left: 10px;">Critical</span>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 800; color: #f56565;">56%</div>
+                </div>
+                <div class="progress-bar">
+                    <div style="width: 56%; height: 100%; background: linear-gradient(90deg, #f56565, #c53030);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #718096; flex-wrap: wrap; gap: 10px;">
+                    <span>12/20 Topics • 560/1000 Questions</span>
+                    <span>Accuracy: 58% • Avg Time: 2.0 min</span>
+                </div>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 18px;">English Language</span>
+                        <span class="badge badge-success" style="margin-left: 10px;">Good</span>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 800; color: #48bb78;">76%</div>
+                </div>
+                <div class="progress-bar">
+                    <div style="width: 76%; height: 100%; background: linear-gradient(90deg, #48bb78, #38a169);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #718096; flex-wrap: wrap; gap: 10px;">
+                    <span>10/12 Topics • 456/600 Questions</span>
+                    <span>Accuracy: 72% • Avg Time: 1.5 min</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Weak Areas - Full Width -->
+        <div class="card" style="border: 3px solid #f56565;">
+            <div class="section-title">
+                <i data-lucide="alert-triangle" style="color: #f56565;"></i>
+                Critical Weak Areas - તાત્કાલિક Fix કરો! 🚨
+            </div>
+
+            <div class="topic-card" style="background: #fff5f5; border-color: #f56565;">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 28px;">💰</span>
+                            <div>
+                                <div style="font-weight: 700; font-size: 18px; color: #c53030;">Profit & Loss</div>
+                                <div style="font-size: 13px; color: #718096;">Quantitative Aptitude</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span class="badge badge-danger">34% Complete</span>
+                            <span class="badge badge-danger">52% Accuracy</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; font-size: 13px; color: #2d3748;">
+                            <b>Issue:</b> Discount + CP/SP calculation માં consistent errors<br>
+                            <b>Last Practice:</b> 2 days ago • 8/15 wrong
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 120px;">
+                        <button class="btn-primary" style="width: 100%;" onclick="fixTopic('profit-loss')">
+                            Fix Now
+                        </button>
+                        <button style="padding: 8px 20px; background: white; color: #f56565; border: 2px solid #f56565; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Solutions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="topic-card" style="background: #fff5f5; border-color: #f56565;">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 28px;">🏛️</span>
+                            <div>
+                                <div style="font-weight: 700; font-size: 18px; color: #c53030;">Indian Polity</div>
+                                <div style="font-size: 13px; color: #718096;">General Studies</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span class="badge badge-danger">42% Complete</span>
+                            <span class="badge badge-danger">55% Accuracy</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; font-size: 13px; color: #2d3748;">
+                            <b>Issue:</b> Articles, Amendments યાદ નથી રહેતા<br>
+                            <b>Last Practice:</b> 4 days ago • 12/20 wrong
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 120px;">
+                        <button class="btn-primary" style="width: 100%;" onclick="fixTopic('polity')">
+                            Fix Now
+                        </button>
+                        <button style="padding: 8px 20px; background: white; color: #f56565; border: 2px solid #f56565; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Solutions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="topic-card" style="background: #fff5f5; border-color: #f56565;">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 28px;">📊</span>
+                            <div>
+                                <div style="font-weight: 700; font-size: 18px; color: #c53030;">Data Interpretation</div>
+                                <div style="font-size: 13px; color: #718096;">Quantitative Aptitude</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span class="badge badge-danger">38% Complete</span>
+                            <span class="badge badge-danger">49% Accuracy</span>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; font-size: 13px; color: #2d3748;">
+                            <b>Issue:</b> Graph reading + calculation speed ખૂબ ધીમું<br>
+                            <b>Last Practice:</b> 1 day ago • 9/15 wrong • 3.5 min avg
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 120px;">
+                        <button class="btn-primary" style="width: 100%;" onclick="fixTopic('data-interp')">
+                            Fix Now
+                        </button>
+                        <button style="padding: 8px 20px; background: white; color: #f56565; border: 2px solid #f56565; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Solutions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations & Study Plan - 2 Cards -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="section-title">
+                    <i data-lucide="zap" style="color: #f59e0b;"></i>
+                    Smart Recommendations
+                </div>
+
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <div style="font-size: 32px;">🎯</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">આજની Priority</div>
+                            <div style="font-size: 14px; margin-bottom: 10px; opacity: 0.95;">
+                                પહેલા Weak Areas, પછી New Topics. 3 critical areas તમને 15-20 marks ગુમાવી શકે છે!
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; font-size: 13px;">
+                                <b>Action:</b> આગામી 5 દિવસ માત્ર weak areas પર focus કરો
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <div style="font-size: 32px;">⚡</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">Speed Training</div>
+                            <div style="font-size: 14px; margin-bottom: 10px; opacity: 0.95;">
+                                Current: 2.5 mins/question • Target: 1.5-2 mins
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; font-size: 13px;">
+                                <b>Daily:</b> 20 questions timed practice - Timer સાથે!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 20px; border-radius: 12px;">
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <div style="font-size: 32px;">📝</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px;">Mock Tests</div>
+                            <div style="font-size: 14px; margin-bottom: 10px; opacity: 0.95;">
+                                માત્ર 3 mock tests? આ પૂરતું નથી!
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; font-size: 13px;">
+                                <b>Weekly:</b> 2 full mock tests જરૂરી છે
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">
+                    <i data-lucide="calendar" style="color: #8b5cf6;"></i>
+                    7-Day Study Plan
+                </div>
+
+                <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <div style="font-weight: 700; font-size: 16px; margin-bottom: 10px;">📅 આજ - મંગળવાર</div>
+                    <div style="font-size: 14px; line-height: 1.8;">
+                        • સવાર: Profit & Loss (60 mins)<br>
+                        • બપોર: Polity Revision (45 mins)<br>
+                        • સાંજ: Speed Practice (30 mins)<br>
+                        • રાત્રે: Error Review (20 mins)
+                    </div>
+                </div>
+
+                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
+                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">બુધવાર</div>
+                    <div style="font-size: 13px; color: #4a5568;">Data Interpretation + Reasoning Practice</div>
+                </div>
+
+                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
+                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">ગુરુવાર</div>
+                    <div style="font-size: 13px; color: #4a5568;">Weak Topics Day - All 3 areas</div>
+                </div>
+
+                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
+                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">શુક્રવાર</div>
+                    <div style="font-size: 13px; color: #4a5568;">English + Current Affairs</div>
+                </div>
+
+                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #48bb78;">
+                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">શનિવાર</div>
+                    <div style="font-size: 13px; color: #4a5568;">Mock Test + Analysis (3 hours)</div>
+                </div>
+
+                <button class="btn-primary" style="width: 100%; margin-top: 15px;">
+                    ✓ આ Plan શરૂ કરો
+                </button>
+            </div>
+        </div>
+
+        <!-- Time Management & Predictive Score - 2 Cards -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="section-title">
+                    <i data-lucide="clock" style="color: #3b82f6;"></i>
+                    Time Management
+                </div>
+
+                <div style="background: #eff6ff; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <div style="font-size: 13px; color: #1e3a8a; margin-bottom: 5px;">Current Average</div>
+                            <div style="font-size: 28px; font-weight: 800; color: #1e40af;">2.5 mins</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 13px; color: #1e3a8a; margin-bottom: 5px;">Target</div>
+                            <div style="font-size: 28px; font-weight: 800; color: #48bb78;">1.5 mins</div>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 8px;">
+                        <div style="font-size: 13px; color: #2d3748;"><b>Need:</b> 40% speed improvement</div>
+                    </div>
+                </div>
+
+                <div style="padding: 15px; background: #fef3c7; border-radius: 10px; margin-bottom: 10px;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #92400e;">⚠️ Slow Topics (>3 mins)</div>
+                    <div style="font-size: 13px; color: #78350f; line-height: 1.8;">
+                        • Data Interpretation: 3.5 mins<br>
+                        • Profit & Loss: 3.2 mins<br>
+                        • Time & Work: 2.8 mins
+                    </div>
+                </div>
+
+                <div style="padding: 15px; background: #dcfce7; border-radius: 10px;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #14532d;">✓ Fast Topics (<2 mins)</div>
+                    <div style="font-size: 13px; color: #166534; line-height: 1.8;">
+                        • Blood Relations: 1.2 mins<br>
+                        • Number Series: 1.5 mins<br>
+                        • Synonyms: 0.8 mins
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">
+                    <i data-lucide="target" style="color: #ec4899;"></i>
+                    Score Prediction
+                </div>
+
+                <div style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); color: white; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Expected Score</div>
+                    <div style="font-size: 48px; font-weight: 900; margin: 10px 0;">82/150</div>
+                    <div style="font-size: 13px; opacity: 0.95;">Based on current performance</div>
+                </div>
+
+                <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac;">
+                    <div style="font-weight: 700; margin-bottom: 15px; color: #14532d;">Score Breakdown</div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #166534;">Quantitative</span>
+                            <span style="font-weight: 700; color: #166534;">19/40</span>
+                        </div>
+                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
+                            <div style="width: 48%; height: 100%; background: #22c55e;"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #166534;">Reasoning</span>
+                            <span style="font-weight: 700; color: #166534;">29/35</span>
+                        </div>
+                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
+                            <div style="width: 83%; height: 100%; background: #22c55e;"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #166534;">General Studies</span>
+                            <span style="font-weight: 700; color: #166534;">22/50</span>
+                        </div>
+                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
+                            <div style="width: 44%; height: 100%; background: #22c55e;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #166534;">English</span>
+                            <span style="font-weight: 700; color: #166534;">12/25</span>
+                        </div>
+                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
+                            <div style="width: 48%; height: 100%; background: #22c55e;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; padding: 15px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                    <div style="font-size: 13px; color: #78350f; line-height: 1.7;">
+                        <b>100+ marks માટે:</b><br>
+                        • GS accuracy 70% (+10 marks)<br>
+                        • Fix weak Quant topics (+8)<br>
+                        • Speed improvement (+5)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Patterns - 3 Cards -->
+        <div class="grid-3">
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 16px; border-left: 4px solid #f59e0b;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🧮</div>
+                <div style="font-weight: 700; font-size: 16px; color: #92400e; margin-bottom: 8px;">Calculation Mistakes</div>
+                <div style="font-size: 28px; font-weight: 800; color: #b45309; margin-bottom: 8px;">38%</div>
+                <div style="font-size: 13px; color: #78350f; line-height: 1.6;">
+                    Basic arithmetic errors<br>
+                    <b>Fix:</b> Mental math daily
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 16px; border-left: 4px solid #3b82f6;">
+                <div style="font-size: 32px; margin-bottom: 10px;">⏱️</div>
+                <div style="font-weight: 700; font-size: 16px; color: #1e3a8a; margin-bottom: 8px;">Time Pressure</div>
+                <div style="font-size: 28px; font-weight: 800; color: #1e40af; margin-bottom: 8px;">28%</div>
+                <div style="font-size: 13px; color: #1e3a8a; line-height: 1.6;">
+                    જલ્દીમાં question ખોટું<br>
+                    <b>Fix:</b> Read twice habit
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 20px; border-radius: 16px; border-left: 4px solid #ef4444;">
+                <div style="font-size: 32px; margin-bottom: 10px;">📖</div>
+                <div style="font-weight: 700; font-size: 16px; color: #7f1d1d; margin-bottom: 8px;">Concept Confusion</div>
+                <div style="font-size: 28px; font-weight: 800; color: #991b1b; margin-bottom: 8px;">24%</div>
+                <div style="font-size: 13px; color: #7f1d1d; line-height: 1.6;">
+                    Similar topics confusion<br>
+                    <b>Fix:</b> Formula chart બનાવો
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements - 4 Cards -->
+        <div class="card">
+            <div class="section-title">
+                <i data-lucide="trophy" style="color: #f59e0b;"></i>
+                Your Achievements
+            </div>
+            
+            <div class="grid-4">
+                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 12px;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">🔥</div>
+                    <div style="font-weight: 700; color: #7c2d12;">Streak Master</div>
+                    <div style="font-size: 12px; color: #92400e; margin-top: 5px;">18 Days</div>
+                </div>
+
+                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">💯</div>
+                    <div style="font-weight: 700;">Perfect Score</div>
+                    <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">15/15 in 3 topics</div>
+                </div>
+
+                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 12px; color: white;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">⚡</div>
+                    <div style="font-weight: 700;">Speed Demon</div>
+                    <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">50 quick solves</div>
+                </div>
+
+                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; color: white;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">🎯</div>
+                    <div style="font-weight: 700;">Target Crusher</div>
+                    <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">100% daily goals</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+            <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px;">
+                💪 Keep Going! તમે સારું કરી રહ્યા છો!
+            </div>
+            <div style="font-size: 14px; opacity: 0.95; margin-bottom: 15px;">
+                Consistency > Intensity. Every day counts!
+            </div>
+            <button onclick="goBack()" style="padding: 12px 32px; background: white; color: #667eea; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
+                ← Back to Mini Report
+            </button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Charts
+        const weeklyCtx = document.getElementById('weeklyChart');
+        if (weeklyCtx) {
+            new Chart(weeklyCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Questions',
+                        data: [45, 62, 58, 71, 68, 85, 52],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3
+                    }, {
+                        label: 'Accuracy %',
+                        data: [65, 70, 68, 72, 71, 75, 69],
+                        borderColor: '#48bb78',
+                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        const subjectCtx = document.getElementById('subjectChart');
+        if (subjectCtx) {
+            new Chart(subjectCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Quantitative', 'Reasoning', 'General Studies', 'English'],
+                    datasets: [{
+                        data: [640, 738, 560, 456],
+                        backgroundColor: ['#667eea', '#48bb78', '#f56565', '#ed8936'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function goBack() {
+            window.location.href = 'mini_performance_report.html';
+        }
+
+        function fixTopic(topic) {
+            alert(`🎯 Starting ${topic} practice...\n\n50 questions ready!\nLet's fix this weak area!`);
+        }
+    </script>
+</body>
+</html>
