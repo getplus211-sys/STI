@@ -2,72 +2,95 @@
 <html lang="gu">
 <head>
 <meta charset="UTF-8">
-<title>ગુજરાતી વ્યાકરણ - Mock Tests | KAPiLa Institute</title>
+<title>Everyday Tests | KAPiLa Institute</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-}
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    /* બ્લુ થીમ ગ્રેડિયન્ટ */
+    background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+    min-height: 100vh;
+  }
 
-.page-header {
-  text-align: center;
-  color: white;
-  padding: 40px 20px;
-  background: rgba(0,0,0,0.2);
-  margin-bottom: 30px;
-}
+  /* માત્ર હોમ બટન જ જમણી બાજુ ફિક્સ/સ્ટિકી રહેશે */
+  .home-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    background: #ffffff;
+    color: #2193b0;
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-.page-header h1 {
-  font-size: 2.5em;
-  margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
+  .home-btn:hover {
+    transform: scale(1.05);
+    background: #f0f0f0;
+  }
 
-.page-header p {
-  font-size: 1.2em;
-  opacity: 0.9;
-}
+  .page-header {
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+    background: rgba(0,0,0,0.15);
+    margin-bottom: 30px;
+  }
 
-.footer {
-  text-align: center;
-  color: white;
-  padding: 30px;
-  margin-top: 50px;
-}
+  .page-header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  }
 
-.footer a {
-  color: white;
-  text-decoration: none;
-  font-weight: 600;
-}
+  .page-header p {
+    font-size: 1.2em;
+    opacity: 0.9;
+  }
+
+  .footer {
+    text-align: center;
+    color: white;
+    padding: 30px;
+    margin-top: 50px;
+  }
+
+  .footer a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px dashed white;
+  }
 </style>
 
-<!-- IMPORTANT: Supabase library જરૂરી છે -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
+  <a href="index.html" class="home-btn">
+    <span>🏠</span> Home
+  </a>
+
   <div class="page-header">
-    <h1>📚 ગુજરાતી વ્યાકરણ</h1>
-    <p>તમારી ગુજરાતી વ્યાકરણની તૈયારી માટે સંપૂર્ણ Mock Tests</p>
+    <div id="smart-header" data-theme="blue"></div>
+    <h1>🔢 EVERY DAY</h1>
+    <p>Complete Every day Tests for Competitive Exams</p>
   </div>
 
-  <!-- 
-    ==========================================
-    આ માત્ર આટલું જ નાખવાનું! 
-    બાકી બધું automatic! 
-    ==========================================
-  -->
   <div id="quiz-container"></div>
 
   <div class="footer">
-    Created with ❤️ by <a href="#">devendra_dd</a> | KAPiLa Institute
+    Created ️ by <a href="#">devendra_dd</a> | KAPiLa Institute
   </div>
 
-  <!-- Quiz Loader Script -->
   <script src="quiz-loader.js"></script>
 </body>
 </html>
