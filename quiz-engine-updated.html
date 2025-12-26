@@ -456,10 +456,10 @@ async function submitTest(auto=false){
       else if(a===5){
         e++;
       }
-      else if(a===q.correct_option){
-        correct++;
-        score++;
-      }
+else if(Number(a) === Number(q.correct_option)){ //
+  correct++;
+  score++;
+}
       else{
         wrong++;
       }
@@ -556,14 +556,14 @@ function viewSolutions() {
 
   questions.forEach((q, index) => {
     const userAns = answers[q.id];
-    const isCorrect = userAns === q.correct_option;
+    const isCorrect = userAns && Number(userAns) === Number(q.correct_option); //
     const options = ["a", "b", "c", "d", "e"];
     
     solutionHTML += `
     <div class="card" id="sol${index}" style="border-left: 5px solid ${isCorrect ? '#22c55e' : '#ef4444'}">
       <p><b>Q${index + 1}:</b> ${q.question_text}</p>
       <p><b>Your Answer:</b> ${userAns ? q["option_" + options[userAns - 1]] : "Skipped"}</p>
-      <p style="color: #22c55e"><b>Correct Answer:</b> ${q["option_" + options[q.correct_option - 1]]}</p>
+      <p style="color: #22c55e"><b>Correct Answer:</b> ${q["option_" + options[Number(q.correct_option) - 1]]}</p> //
       ${q.solution ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Solution:</b> ${q.solution}</div>` : ""}
     </div>`;
   });
