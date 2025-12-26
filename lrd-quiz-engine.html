@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LRD Quiz Engine</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans Gujarati', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  margin-bottom: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.timer {
+  background: #ef4444;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 10px 0;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.question-number {
+  font-size: 18px;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.difficulty-badge {
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.difficulty-EASY { background: #dcfce7; color: #16a34a; }
+.difficulty-MEDIUM { background: #fef3c7; color: #d97706; }
+.difficulty-HARD { background: #fee2e2; color: #dc2626; }
+
+.question-text {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+.options {
+  display: grid;
+  gap: 15px;
+}
+
+.option {
+  padding: 15px 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: white;
+  font-size: 16px;
+}
+
+.option:hover {
+  border-color: #667eea;
+  background: #f3f4f6;
+  transform: translateX(5px);
+}
+
+.option.selected {
+  border-color: #667eea;
+  background: #eef2ff;
+  font-weight: 600;
+}
+
+.navigation {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #9ca3af;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #6b7280;
+}
+
+.btn-submit {
+  background: #10b981;
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.btn-submit:hover {
+  background: #059669;
+}
+
+.result-card {
+  text-align: center;
+}
+
+.score-display {
+  font-size: 48px;
+  font-weight: bold;
+  color: #667eea;
+  margin: 20px 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.stat-item {
+  background: #f3f4f6;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 20px;
+  color: #667eea;
+}
+
+.error {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+
+.modal-message {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.modal-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #667eea;
+  color: white;
+  margin: 5px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="app" class="card">
+    <div class="loading">⏳ લોડ થઈ રહ્યું છે...</div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-icon" id="modalIcon"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-message" id="modalMessage"></div>
+    <button class="modal-btn" onclick="closeModal()">બરાબર</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ========== CONFIGURATION ==========
+const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NjI2NTYsImV4cCI6MjA1MDUzODY1Nn0.jLCg8YL5h4h1qIWvwpzGTdwyQfHO1eZDFJM-d-c4dS0';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ========== STATE ==========
+let user = null;
+let quizId = null;
+let testId = null;
+let questions = [];
+let currentIndex = 0;
+let answers = [];
+let startTime = null;
+let timerInterval = null;
+let questionStartTime = null;
+let questionTimes = [];
+
+// ========== INITIALIZATION ==========
+async function init() {
+  try {
+    // Get quiz ID from URL
+    const params = new URLSearchParams(window.location.search);
+    quizId = params.get('quiz');
+    
+    if (!quizId) {
+      showError('Quiz ID નથી મળ્યો! URL check કરો.');
+      return;
+    }
+
+    // Check authentication
+    const { data: { user: authUser } } = await sb.auth.getUser();
+    if (!authUser) {
+      showError('કૃપા કરીને પહેલા login કરો!');
+      setTimeout(() => window.location.href = 'index.html', 2000);
+      return;
+    }
+    user = authUser;
+
+    // Get test ID from mapping
+    const { data: mapping, error: mapError } = await sb
+      .from('quiz_test_mapping')
+      .select('lrd_test_id')
+      .eq('quiz_id', quizId)
+      .maybeSingle();
+
+    if (mapError || !mapping) {
+      showError('આ quiz માટે test mapping નથી મળ્યો!');
+      return;
+    }
+    testId = mapping.lrd_test_id;
+
+    // Load questions from lrd_questions
+    const { data: questionsData, error: qError } = await sb
+      .from('lrd_questions')
+      .select('*')
+      .eq('quiz_id', quizId)
+      .order('id');
+
+    if (qError || !questionsData || questionsData.length === 0) {
+      showError('પ્રશ્નો લોડ થયા નથી!');
+      return;
+    }
+
+    questions = questionsData;
+    answers = new Array(questions.length).fill(null);
+    questionTimes = new Array(questions.length).fill(0);
+    startTime = Date.now();
+    questionStartTime = Date.now();
+
+    startTimer();
+    renderQuestion();
+
+  } catch (error) {
+    console.error('Init error:', error);
+    showError('કંઈક ખોટું થયું: ' + error.message);
+  }
+}
+
+// ========== TIMER ==========
+function startTimer() {
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    document.getElementById('timer').textContent = 
+      `⏱️ ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+}
+
+// ========== RENDER QUESTION ==========
+function renderQuestion() {
+  const q = questions[currentIndex];
+  const totalTime = Math.floor((Date.now() - startTime) / 1000);
+  const progress = ((currentIndex + 1) / questions.length) * 100;
+
+  document.getElementById('app').innerHTML = `
+    <div class="header">
+      <h2>LRD Quiz - ${quizId}</h2>
+      <div id="timer" class="timer">⏱️ 00:00</div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: ${progress}%"></div>
+    </div>
+
+    <div class="question-header">
+      <div class="question-number">પ્રશ્ન ${currentIndex + 1} / ${questions.length}</div>
+      <div class="difficulty-badge difficulty-${q.difficulty_level || 'MEDIUM'}">
+        ${q.difficulty_level || 'MEDIUM'}
+      </div>
+    </div>
+
+    <div class="question-text">${q.question_text}</div>
+
+    <div class="options">
+      <div class="option ${answers[currentIndex] === '1' ? 'selected' : ''}" 
+           onclick="selectAnswer('1')">
+        <strong>A.</strong> ${q.option_a}
+      </div>
+      <div class="option ${answers[currentIndex] === '2' ? 'selected' : ''}" 
+           onclick="selectAnswer('2')">
+        <strong>B.</strong> ${q.option_b}
+      </div>
+      <div class="option ${answers[currentIndex] === '3' ? 'selected' : ''}" 
+           onclick="selectAnswer('3')">
+        <strong>C.</strong> ${q.option_c}
+      </div>
+      <div class="option ${answers[currentIndex] === '4' ? 'selected' : ''}" 
+           onclick="selectAnswer('4')">
+        <strong>D.</strong> ${q.option_d}
+      </div>
+      ${q.option_e ? `
+        <div class="option ${answers[currentIndex] === '5' ? 'selected' : ''}" 
+             onclick="selectAnswer('5')">
+          <strong>E.</strong> ${q.option_e}
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="navigation">
+      ${currentIndex > 0 ? '<button class="btn btn-secondary" onclick="prevQuestion()">◀ પાછળ</button>' : ''}
+      ${currentIndex < questions.length - 1 ? 
+        '<button class="btn btn-primary" onclick="nextQuestion()">આગળ ▶</button>' : 
+        '<button class="btn btn-submit" onclick="confirmSubmit()">📝 Submit કરો</button>'
+      }
+    </div>
+  `;
+
+  questionStartTime = Date.now();
+}
+
+// ========== NAVIGATION ==========
+function selectAnswer(option) {
+  // Record time for this question
+  if (answers[currentIndex] === null) {
+    questionTimes[currentIndex] = Math.floor((Date.now() - questionStartTime) / 1000);
+  }
+  answers[currentIndex] = option;
+  renderQuestion();
+}
+
+function nextQuestion() {
+  if (currentIndex < questions.length - 1) {
+    // Record time if not answered
+    if (answers[currentIndex] !== null && questionTimes[currentIndex] === 0) {
+      questionTimes[currentIndex] = Math.floor((Date.now() - questionStartTime) / 1000);
+    }
+    currentIndex++;
+    renderQuestion();
+  }
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+// ========== SUBMIT ==========
+function confirmSubmit() {
+  const unanswered = answers.filter(a => a === null).length;
+  const message = unanswered > 0 ? 
+    `તમે ${unanswered} પ્રશ્નોના જવાબ આપ્યા નથી. શું તમે submit કરવા માંગો છો?` :
+    'શું તમે test submit કરવા માંગો છો?';
+  
+  showModal('⚠️', 'Confirm Submit', message, submitTest);
+}
+
+async function submitTest() {
+  try {
+    closeModal();
+    stopTimer();
+
+    // Calculate results
+    const totalTime = Math.floor((Date.now() - startTime) / 1000);
+    let correct = 0;
+    let easyCorrect = 0, easyTotal = 0;
+    let hardCorrect = 0, hardTotal = 0;
+    let unanswered = 0;
+
+    questions.forEach((q, i) => {
+      const userAns = answers[i];
+      const isCorrect = userAns === q.correct_option;
+      
+      if (!userAns) {
+        unanswered++;
+      } else if (isCorrect) {
+        correct++;
+      }
+
+      // Count by difficulty
+      if (q.difficulty_level === 'EASY') {
+        easyTotal++;
+        if (isCorrect) easyCorrect++;
+      } else if (q.difficulty_level === 'HARD') {
+        hardTotal++;
+        if (isCorrect) hardCorrect++;
+      }
+    });
+
+    const accuracyPct = ((correct / questions.length) * 100).toFixed(2);
+    const concentrationRating = Math.round((correct / questions.length) * 10);
+    const avgTime = (totalTime / questions.length).toFixed(2);
+
+    // Save to lrd_test_results
+    const { data: resultData, error: resultError } = await sb
+      .from('lrd_test_results')
+      .insert({
+        user_id: user.id,
+        test_id: testId,
+        obtained_marks: correct,
+        accuracy_percentage: parseFloat(accuracyPct),
+        total_time_taken_seconds: totalTime,
+        concentration_rating: concentrationRating,
+        easy_correct: easyCorrect,
+        easy_total: easyTotal,
+        hard_correct: hardCorrect,
+        hard_total: hardTotal,
+        unanswered_count: unanswered,
+        avg_time_per_question: parseFloat(avgTime)
+      })
+      .select()
+      .single();
+
+    if (resultError) throw resultError;
+
+    // Save question responses
+    const responses = questions.map((q, i) => ({
+      result_id: resultData.id,
+      question_id: q.id,
+      user_selected_option: answers[i] || 'પ્રયત્ન કરેલ નથી',
+      is_correct: answers[i] === q.correct_option,
+      time_spent_seconds: questionTimes[i] || Math.floor(totalTime / questions.length)
+    }));
+
+    const { error: responseError } = await sb
+      .from('lrd_question_responses')
+      .insert(responses);
+
+    if (responseError) throw responseError;
+
+    // Show result
+    showResult(correct, questions.length - correct, unanswered, totalTime, resultData.id);
+
+  } catch (error) {
+    console.error('Submit error:', error);
+    showError('Submit કરવામાં ભૂલ: ' + error.message);
+  }
+}
+
+// ========== RESULT ==========
+function showResult(correct, wrong, unanswered, totalTime, resultId) {
+  const minutes = Math.floor(totalTime / 60);
+  const seconds = totalTime % 60;
+  const total = questions.length;
+  const percentage = ((correct / total) * 100).toFixed(1);
+
+  document.getElementById('app').innerHTML = `
+    <div class="result-card">
+      <h2>🎉 Test પૂર્ણ થયો!</h2>
+      
+      <div class="score-display">${correct}/${total}</div>
+      <div style="font-size: 20px; color: #667eea; margin-bottom: 30px;">
+        ${percentage}% Accuracy
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-label">✅ સાચા</div>
+          <div class="stat-value" style="color: #10b981;">${correct}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">❌ ખોટા</div>
+          <div class="stat-value" style="color: #ef4444;">${wrong}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">⏭️ છોડ્યા</div>
+          <div class="stat-value" style="color: #6b7280;">${unanswered}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">⏱️ સમય</div>
+          <div class="stat-value">${minutes}:${String(seconds).padStart(2, '0')}</div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%; margin-bottom: 15px;" 
+              onclick="viewPerformance('${resultId}')">
+        📊 Performance જુઓ
+      </button>
+
+      <button class="btn btn-secondary" style="width: 100%;" 
+              onclick="window.location.href='test-selection.html'">
+        🏠 Home
+      </button>
+    </div>
+  `;
+}
+
+function viewPerformance(resultId) {
+  window.location.href = `test-performance.html?result_id=${resultId}`;
+}
+
+// ========== MODAL ==========
+function showModal(icon, title, message, onConfirm = null) {
+  document.getElementById('modalIcon').textContent = icon;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalMessage').textContent = message;
+  
+  const modal = document.getElementById('modal');
+  modal.classList.add('active');
+  
+  if (onConfirm) {
+    const btn = modal.querySelector('.modal-btn');
+    btn.onclick = onConfirm;
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+}
+
+function showError(message) {
+  document.getElementById('app').innerHTML = `
+    <div class="error">
+      <h3>❌ Error</h3>
+      <p>${message}</p>
+      <button class="btn btn-secondary" onclick="window.location.href='test-selection.html'" 
+              style="margin-top: 15px;">
+        ← પાછા જાઓ
+      </button>
+    </div>
+  `;
+}
+
+// ========== START ==========
+init();
+</script>
+
+</body>
+</html>
