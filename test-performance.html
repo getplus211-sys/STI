@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRD Beginners - ટેસ્ટ Performance</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;600;700&display=swap');
+        
+        body {
+            margin: 0;
+            font-family: 'Hind Vadodara', sans-serif;
+            background-color: #f0f2f5;
+        }
+        
+        .subject-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+        
+        nav {
+            background: #1e40af;
+            color: white;
+            padding: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-logo {
+            background: white;
+            color: #1e40af;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .nav-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Hind Vadodara', sans-serif;
+        }
+        
+        .nav-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .profile-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .profile-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .profile-info p {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+        }
+        
+        .profile-info h2 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e293b;
+            margin: 0;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-badge {
+            background: #fed7aa;
+            color: #ea580c;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #1e40af;
+        }
+        
+        .stat-date {
+            font-size: 16px;
+            font-weight: bold;
+            color: #475569;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .chart-title {
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .chart-container {
+            width: 100%;
+            max-width: 250px;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+        
+        .stats-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .stats-card-label {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        
+        .stats-card-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .subject-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .subject-header {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .subject-title {
+            font-weight: bold;
+            color: #1e40af;
+            font-size: 18px;
+        }
+        
+        .proficiency-badge {
+            background: #1e40af;
+            color: white;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 12px;
+        }
+        
+        .subject-body {
+            padding: 16px;
+        }
+        
+        table {
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        thead {
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+        
+        thead th {
+            padding-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        tbody td {
+            padding: 10px 0;
+            color: #475569;
+        }
+        
+        tbody td:first-child {
+            font-weight: 600;
+        }
+        
+        tbody td:last-child {
+            font-weight: bold;
+        }
+        
+        .result-excellent {
+            color: #16a34a;
+        }
+        
+        .result-good {
+            color: #22c55e;
+        }
+        
+        .result-average {
+            color: #f59e0b;
+        }
+        
+        .result-poor {
+            color: #ef4444;
+        }
+        
+        .trend-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .action-plan-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-plan-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 20px;
+            opacity: 0.1;
+            font-size: 64px;
+        }
+        
+        .action-plan-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fbbf24;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .action-plan-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        
+        .action-section h4 {
+            font-size: 13px;
+            font-weight: bold;
+            color: #93c5fd;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .action-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .action-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .action-list i {
+            color: #22c55e;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        
+        .goal-card {
+            background: white;
+            border-left: 4px solid #1e40af;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .goal-text {
+            color: #1e293b;
+            font-style: italic;
+            font-weight: 600;
+        }
+        
+        .loader {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .loader-icon {
+            font-size: 48px;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+            }
+            
+            .nav-btn {
+                flex: 1;
+            }
+            
+            .profile-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .profile-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .subjects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .trend-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-plan-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <div class="nav-logo">LRD</div>
+            <div class="nav-title">Beginners</div>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="window.location.href='test-selection.html'">
+                <i class="fas fa-home"></i> હોમ
+            </button>
+            <button class="nav-btn" onclick="window.location.href='overall-performance.html'">
+                <i class="fas fa-chart-line"></i> Overall Performance
+            </button>
+        </div>
+    </nav>
+
+    <div class="container" id="app">
+        <div class="loader">
+            <div class="loader-icon">⏳</div>
+            <h3>લોડ થઈ રહ્યું છે...</h3>
+            <p>કૃપા કરીને રાહ જુઓ</p>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+        const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+        
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+        const app = document.getElementById('app');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const RESULT_ID = urlParams.get('result_id');
+        
+        if (!RESULT_ID) {
+            showError('Result ID not found', false);
+            throw new Error('No result ID provided');
+        }
+
+        let pieChart = null;
+
+        (async () => {
+            try {
+                const { data: { user } } = await sb.auth.getUser();
+                
+                if (!user) {
+                    showError('કૃપા કરીને પહેલા લોગિન કરો', false);
+                    return;
+                }
+                
+                await loadPerformance(user.id);
+            } catch (error) {
+                console.error('Init error:', error);
+                showError('કંઈક ખોટું થયું: ' + error.message);
+            }
+        })();
+
+        async function loadPerformance(userId) {
+            try {
+                // Get test result
+                const { data: result, error: resultError } = await sb
+                    .from('lrd_test_results')
+                    .select('*')
+                    .eq('id', RESULT_ID)
+                    .single();
+
+                if (resultError || !result) {
+                    showError('Test result નથી મળ્યું');
+                    return;
+                }
+
+                // Get user profile
+                const { data: profile } = await sb
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                // Get test details
+                const { data: test } = await sb
+                    .from('lrd_tests')
+                    .select('*')
+                    .eq('id', result.test_id)
+                    .single();
+
+                // Get all question responses for this result
+                const { data: responses } = await sb
+                    .from('lrd_question_responses')
+                    .select(`
+                        *,
+                        lrd_questions (
+                            *,
+                            lrd_chapters (
+                                *,
+                                lrd_subjects (*)
+                            )
+                        )
+                    `)
+                    .eq('result_id', RESULT_ID);
+
+                // Calculate subject and chapter wise performance
+                const subjectData = calculateSubjectPerformance(responses);
+                
+                // Calculate level for this test
+                const scorePercentage = (result.obtained_marks / test.total_marks) * 100;
+                let testLevel = 'Bronze';
+                if (scorePercentage >= 85) testLevel = 'Platinum';
+                else if (scorePercentage >= 70) testLevel = 'Gold';
+                else if (scorePercentage >= 50) testLevel = 'Silver';
+
+                // Calculate rank for this specific test
+                const { data: allResults } = await sb
+                    .from('lrd_test_results')
+                    .select('user_id, obtained_marks')
+                    .eq('test_id', result.test_id)
+                    .order('obtained_marks', { ascending: false });
+
+                const userRank = allResults.findIndex(r => r.user_id === userId) + 1;
+
+                // Get matching rules for suggestions
+                const suggestions = await getRuleSuggestions(result, subjectData);
+
+                // Render dashboard
+                renderDashboard(profile, test, result, subjectData, testLevel, userRank, suggestions);
+
+            } catch (error) {
+                console.error('Load performance error:', error);
+                showError('Performance લોડ કરવામાં ભૂલ: ' + error.message);
+            }
+        }
+
+        function calculateSubjectPerformance(responses) {
+            const subjectMap = {};
+            const chapterMap = {};
+
+            responses?.forEach(response => {
+                const question = response.lrd_questions;
+                if (!question || !question.lrd_chapters) return;
+
+                const chapter = question.lrd_chapters;
+                const subject = chapter.lrd_subjects;
+
+                // Subject level
+                if (!subjectMap[subject.id]) {
+                    subjectMap[subject.id] = {
+                        id: subject.id,
+                        name: subject.name,
+                        total: 0,
+                        correct: 0,
+                        chapters: {}
+                    };
+                }
+                subjectMap[subject.id].total++;
+                if (response.is_correct) subjectMap[subject.id].correct++;
+
+                // Chapter level
+                if (!subjectMap[subject.id].chapters[chapter.id]) {
+                    subjectMap[subject.id].chapters[chapter.id] = {
+                        id: chapter.id,
+                        name: chapter.name,
+                        code: chapter.chapter_code,
+                        total: 0,
+                        correct: 0
+                    };
+                }
+                subjectMap[subject.id].chapters[chapter.id].total++;
+                if (response.is_correct) subjectMap[subject.id].chapters[chapter.id].correct++;
+            });
+
+            return Object.values(subjectMap);
+        }
+
+        async function getRuleSuggestions(result, subjectData) {
+            const suggestions = [];
+
+            // Calculate speed category
+            const avgTime = result.total_time_taken_seconds / result.obtained_marks || 0;
+            let speedCategory = 'NORMAL';
+            // Assuming ideal time is 60 seconds per question
+            if (avgTime < 30) speedCategory = 'TOO_FAST';
+            else if (avgTime > 90) speedCategory = 'TOO_SLOW';
+
+            // Concentration level based on accuracy
+            let concentrationLevel = 'HIGH';
+            if (result.accuracy_percentage < 50) concentrationLevel = 'LOW';
+            else if (result.accuracy_percentage < 75) concentrationLevel = 'MEDIUM';
+
+            // Get rules for each chapter
+            for (const subject of subjectData) {
+                for (const chapter of Object.values(subject.chapters)) {
+                    const chapterScore = (chapter.correct / chapter.total) * 100;
+                    
+                    const { data: rules } = await sb
+                        .from('lrd_rule_engine')
+                        .select('*')
+                        .eq('chapter_code', chapter.code)
+                        .lte('min_score', chapterScore)
+                        .gte('max_score', chapterScore)
+                        .eq('speed_category', speedCategory)
+                        .eq('concentration_level', concentrationLevel)
+                        .order('priority', { ascending: true })
+                        .limit(1);
+
+                    if (rules && rules.length > 0) {
+                        suggestions.push({
+                            subject: subject.name,
+                            chapter: chapter.name,
+                            ...rules[0]
+                        });
+                    }
+                }
+            }
+
+            return suggestions;
+        }
+
+        function renderDashboard(profile, test, result, subjectData, testLevel, userRank, suggestions) {
+            const initials = profile?.full_name
+                ? profile.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+                : 'U';
+
+            const testDate = new Date(result.created_at).toLocaleDateString('gu-IN');
+            const avgTimePerQ = Math.round(result.total_time_taken_seconds / test.total_marks);
+
+            // Calculate easy vs hard (using difficulty_level if available)
+            const totalQuestions = test.total_marks;
+            const correctAnswers = result.obtained_marks;
+            const wrongAnswers = result.total_questions_wrong || 0;
+            const skipped = result.unanswered_count || 0;
+
+            app.innerHTML = `
+                <div class="card">
+                    <div class="profile-section">
+                        <div class="profile-left">
+                            <div class="avatar">${initials}</div>
+                            <div class="profile-info">
+                                <p>વિદ્યાર્થી</p>
+                                <h2>${profile?.full_name || 'વિદ્યાર્થી'}</h2>
+                            </div>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">લેવલ</div>
+                                <span class="stat-badge">${testLevel}</span>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">રેન્ક</div>
+                                <div class="stat-value">#${userRank}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">તારીખ</div>
+                                <div class="stat-date">${testDate}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="chart-card">
+                        <h3 class="chart-title">ટેસ્ટનું પરિણામ (Pie Chart)</h3>
+                        <div class="chart-container">
+                            <canvas id="performancePie"></canvas>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; gap: 16px;">
+                        <div class="stats-cards">
+                            <div class="stats-card">
+                                <div class="stats-card-label">કુલ/મેળવેલ ગુણ</div>
+                                <div class="stats-card-value">${test.total_marks} / <span style="color: #3b82f6;">${result.obtained_marks}</span></div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">ચોકસાઈ (Accuracy)</div>
+                                <div class="stats-card-value" style="color: #22c55e;">${result.accuracy_percentage.toFixed(1)}%</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">સમય/પ્રશ્ન</div>
+                                <div class="stats-card-value">${avgTimePerQ} સેકન્ડ</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">એકાગ્રતા રેટિંગ</div>
+                                <div class="stats-card-value" style="color: #a855f7;">${result.concentration_rating}/10</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">સરળ (સાચા/કુલ)</div>
+                                <div class="stats-card-value">${result.easy_correct || 0}/${result.easy_total || 0}</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">અઘરા (સાચા/કુલ)</div>
+                                <div class="stats-card-value" style="color: #ef4444;">${result.hard_correct || 0}/${result.hard_total || 0}</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">ટાર્ગેટ સ્કોર</div>
+                                <div class="stats-card-value">${test.target_score || '-'}</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">સુધારો જરૂર (%)</div>
+                                <div class="stats-card-value" style="color: #f59e0b;">${result.improvement_percentage?.toFixed(1) || 0}%</div>
+                            </div>
+                            <div class="stats-card">
+                                <div class="stats-card-label">બાકી પ્રશ્નો</div>
+                                <div class="stats-card-value">${result.unanswered_count || 0}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">
+                    <i class="fas fa-book-open"></i> વિષય અને ચેપ્ટરવાર એનાલિસિસ
+                </h3>
+
+                <div class="subjects-grid" id="subjectsGrid"></div>
+
+                <div class="action-plan-card">
+                    <div class="action-plan-bg">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3 class="action-plan-title">તમારા માટે એક્શન પ્લાન</h3>
+                    <div class="action-plan-content" id="actionPlan"></div>
+                </div>
+
+                <div class="goal-card">
+                    <p class="goal-text">"આગામી ટેસ્ટમાં ${result.accuracy_percentage < 70 ? '70% થી વધુ' : '90% થી વધુ'} સ્કોર મેળવવાનું લક્ષ્ય રાખવું!"</p>
+                </div>
+            `;
+
+            // Render subjects
+            renderSubjects(subjectData);
+
+            // Render action plan
+            renderActionPlan(suggestions, result);
+
+            // Render pie chart
+            renderPieChart(correctAnswers, wrongAnswers, skipped);
+        }
+
+        function renderSubjects(subjectData) {
+            const subjectsGrid = document.getElementById('subjectsGrid');
+            
+            const colors = [
+                { header: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', badge: '#1e40af' },
+                { header: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)', badge: '#4338ca' },
+                { header: 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)', badge: '#be185d' },
+                { header: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)', badge: '#15803d' }
+            ];
+
+            subjectData.forEach((subject, index) => {
+                const proficiency = ((subject.correct / subject.total) * 100).toFixed(0);
+                const color = colors[index % colors.length];
+                
+                let chaptersHTML = '';
+                Object.values(subject.chapters).forEach(chapter => {
+                    const percentage = ((chapter.correct / chapter.total) * 100).toFixed(0);
+                    let resultClass = 'result-poor';
+                    if (percentage >= 90) resultClass = 'result-excellent';
+                    else if (percentage >= 70) resultClass = 'result-good';
+                    else if (percentage >= 50) resultClass = 'result-average';
+
+                    chaptersHTML += `
+                        <tr>
+                            <td>${chapter.name}</td>
+                            <td style="text-align: center;">${chapter.total}</td>
+                            <td style="text-align: center;">${chapter.correct}</td>
+                            <td style="text-align: right;" class="${resultClass}">${percentage}%</td>
+                        </tr>
+                    `;
+                });
+
+                subjectsGrid.innerHTML += `
+                    <div class="subject-card">
+                        <div class="subject-header" style="background: ${color.header};">
+                            <h4 class="subject-title">${subject.name}</h4>
+                            <span class="proficiency-badge" style="background: ${color.badge};">નિપુણતા: ${proficiency}%</span>
+                        </div>
+                        <div class="subject-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ચેપ્ટર</th>
+                                        <th style="text-align: center;">પ્રશ્નો</th>
+                                        <th style="text-align: center;">સાચા</th>
+                                        <th style="text-align: right;">પરિણામ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${chaptersHTML}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderActionPlan(suggestions, result) {
+            const actionPlan = document.getElementById('actionPlan');
+            
+            if (!suggestions || suggestions.length === 0) {
+                actionPlan.innerHTML = `
+                    <div class="action-section">
+                        <h4>શાબાશ!</h4>
+                        <p style="color: #cbd5e1;">તમારું પર્ફોર્મન્સ સારું છે. આગળ વધતા રહો!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group suggestions
+            const focusAreas = suggestions.slice(0, 3);
+            
+            let focusHTML = '<ul class="action-list">';
+            focusAreas.forEach(sug => {
+                focusHTML += `<li><i class="fas fa-check-circle"></i> ${sug.suggestion_text}</li>`;
+            });
+            focusHTML += '</ul>';
+
+            let planHTML = '<ul class="action-list">';
+            focusAreas.forEach(sug => {
+                if (sug.action_plan_text) {
+                    planHTML += `<li><i class="fas fa-check-circle"></i> ${sug.action_plan_text}</li>`;
+                }
+            });
+            planHTML += '</ul>';
+
+            actionPlan.innerHTML = `
+                <div class="action-section">
+                    <h4>વધારે સમય આપો:</h4>
+                    ${focusHTML}
+                </div>
+                <div class="action-section">
+                    <h4>વાંચન સૂચન:</h4>
+                    ${planHTML}
+                </div>
+            `;
+        }
+
+        function renderPieChart(correct, wrong, skipped) {
+            const ctx = document.getElementById('performancePie');
+            
+            if (pieChart) {
+                pieChart.destroy();
+            }
+            
+            pieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['સાચા', 'ખોટા', 'બાકી'],
+                    datasets: [{
+                        data: [correct, wrong, skipped],
+                        backgroundColor: ['#22c55e', '#ef4444', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Hind Vadodara',
+                                    size: 13
+                                },
+                                padding: 15
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+        }
+
+        function showError(message, showRetry = true) {
+            app.innerHTML = `
+                <div class="card">
+                    <h3 style="color: #dc2626;">⚠️ Error</h3>
+                    <p style="margin: 15px 0; color: #64748b;">${message}</p>
+                    ${showRetry ? '<button class="nav-btn" onclick="location.reload()" style="width: auto;">ફરી પ્રયાસ કરો</button>' : ''}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
