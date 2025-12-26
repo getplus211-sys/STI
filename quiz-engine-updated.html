@@ -172,10 +172,10 @@ function showError(message, showRetry = true) {
       return;
     }
 
-    // 1. Load quiz information from quiz_list table
+    // 1. Load quiz information from quiz_test_mapping table
     const { data: quizInfo, error: quizError } = await Promise.race([
       sb
-        .from("quiz_list")
+        .from("quiz_test_mapping")
         .select("*")
         .eq("quiz_id", QUIZ_ID)
         .single(),
