@@ -223,7 +223,7 @@ function showError(message, showRetry = true) {
     // 4. Check if user already took this test
     const { data: existingResult } = await Promise.race([
       sb
-        .from("test_results")
+        .from("lrd_test_results")
         .select("total_score, correct_count, wrong_count, skipped_count, e_count, time_taken_seconds, answers")
         .eq("user_id", user.id)
         .eq("test_id", QUIZ_ID)
@@ -320,7 +320,7 @@ async function startTest(){
   try {
     const { data: existingResult } = await Promise.race([
       sb
-        .from("test_results")
+        .from("lrd_test_results")
         .select("id")
         .eq("user_id", user.id)
         .eq("test_id", QUIZ_ID)
@@ -470,7 +470,7 @@ else if(Number(a) === Number(q.correct_option)){ //
     const safeAnswers = JSON.parse(JSON.stringify(answers));
 
     const {error} = await Promise.race([
-      sb.from("test_results").insert({
+      sb.from("lrd_test_results").insert({
         user_id:user.id,
         test_id:QUIZ_ID,
         total_score:score,
@@ -583,7 +583,7 @@ async function loadLeaderboard(){
   try {
     const { data: results, error } = await Promise.race([
       sb
-        .from("test_results")
+        .from("lrd_test_results")
         .select("user_id,total_score,time_taken_seconds")
         .eq("test_id", QUIZ_ID)
         .order("total_score", { ascending: false })
