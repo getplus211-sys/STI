@@ -236,7 +236,7 @@ function showError(message, showRetry = true) {
 
       const { data: qData } = await Promise.race([
         sb
-          .from("questions")
+          .from("lrd_questions")
           .select("*")
           .eq("test_id", QUIZ_ID)
           .order("id"),
