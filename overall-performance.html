@@ -537,7 +537,7 @@
         // Supabase Configuration
         const SUPABASE_URL = 'https://halzulnewvmyutfqrycy.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhbHp1bG5ld3ZteXV0ZnFyeWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1MjYzMDIsImV4cCI6MjA4MjEwMjMwMn0.oXIheubGUVzQAF8oZmE_U4W94R-nD068cXzTuw_sEro';
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const app = document.getElementById('app');
         let trendChart = null;
@@ -545,16 +545,14 @@
         // Initialize
         async function init() {
             try {
-                // Check if user is logged in
-                const { data: { user }, error: authError } = await sb.auth.getUser();
+                const { data: { session }, error: authError } = await sb.auth.getSession();
                 
-                if (authError || !user) {
-                    showError('તમે લોગિન થયેલ નથી', false);
-                    setTimeout(() => window.location.href = 'index.html', 2000);
+                if (!session || !session.user) {
+                    showError('તમે લોગિન થયેલ નથી. કૃપા કરીને પહેલા લોગિન કરો.', false);
                     return;
                 }
 
-                await loadPerformanceData(user.id);
+                await loadPerformanceData(session.user.id);
             } catch (error) {
                 console.error('Init error:', error);
                 showError('કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.');
