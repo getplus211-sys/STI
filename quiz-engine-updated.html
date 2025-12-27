@@ -319,8 +319,8 @@ async function submitTest() {
     const resp = questions.map((q, i) => ({
       result_id: resData.id,
       question_id: q.id,
-      subject_id: q.subject_id
-      chapter_id: q.chapter_id
+      subject_id: q.subject_id,
+      chapter_id: q.chapter_id,
       user_selected_option: userAnswers[i] ? String.fromCharCode(96 + parseInt(userAnswers[i])) : null,
       is_correct: Number(userAnswers[i]) === Number(q.correct_option),
       time_spent_seconds: Math.floor(finalTime / questions.length)
