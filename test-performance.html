@@ -3,57 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LRD Beginners - ટેસ્ટ પર્ફોર્મન્સ</title>
+    <title>LRD Beginners - પર્ફોર્મન્સ ડેશબોર્ડ</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #1e3a8a; --secondary: #2563eb; --success: #10b981;
-            --danger: #ef4444; --warning: #f59e0b; --bg: #f0f2f5;
+            --danger: #ef4444; --warning: #f59e0b; --dark: #111827; --gray: #f0f2f5;
         }
-        body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #333; }
+        body { font-family: sans-serif; background-color: var(--gray); margin: 0; padding: 0; }
         
-        /* Header & Nav */
-        .navbar { background: var(--primary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        /* Navbar */
+        .nav { background: var(--primary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.2rem; }
         .logo span { background: white; color: var(--primary); padding: 2px 6px; border-radius: 4px; }
         
-        /* Layout Container */
-        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
-        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        .stat-box { background: #f8fafc; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #e2e8f0; }
-        .stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold; }
-        .stat-value { font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 5px; }
+        /* Layout */
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        .grid-main { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        @media (max-width: 800px) { .grid-main { grid-template-columns: 1fr; } }
 
-        /* Charts & Analysis */
-        .analysis-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
-        @media (max-width: 768px) { .analysis-grid { grid-template-columns: 1fr; } }
-        
-        /* Rule Engine Styling (Dark) */
-        .rule-engine { background: #111827; color: white; border-radius: 15px; padding: 25px; position: relative; overflow: hidden; }
-        .rule-engine h3 { color: #fbbf24; border-bottom: 1px solid #374151; padding-bottom: 10px; margin-top: 0; }
+        /* Cards */
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .stat-box { text-align: center; padding: 15px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; }
+        .stat-val { font-size: 24px; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 12px; color: #6b7280; font-weight: bold; }
+
+        /* Rule Engine (Black Box) */
+        .rule-box { background: var(--dark); color: white; padding: 25px; border-radius: 15px; }
+        .rule-box h3 { color: #fde047; margin-top: 0; border-bottom: 1px solid #374151; padding-bottom: 10px; }
         .rule-list { list-style: none; padding: 0; }
-        .rule-list li { margin-bottom: 12px; display: flex; gap: 10px; align-items: start; font-size: 14px; color: #d1d5db; }
-        .rule-list li i { color: var(--success); margin-top: 4px; }
+        .rule-list li { margin-bottom: 12px; font-size: 14px; display: flex; gap: 10px; color: #d1d5db; }
+        .rule-list i { color: var(--success); margin-top: 3px; }
 
-        /* Buttons */
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; font-weight: bold; transition: 0.3s; }
-        .btn-blue { background: var(--secondary); color: white; }
+        /* Table */
+        .table-card { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 13px; color: #475569; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        
+        .badge-plan { background: #eff6ff; border-left: 4px solid var(--secondary); padding: 15px; border-radius: 4px; text-align: center; font-style: italic; font-weight: 600; }
+        .btn { background: var(--secondary); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
+    <nav class="nav">
         <div class="logo"><span>LRD</span> Beginners</div>
-        <a href="quiz-engine-updated__6_.html" class="btn btn-blue"><i class="fas fa-home"></i> હોમ</a>
+        <a href="quiz-engine-updated__6_.html" class="btn"><i class="fas fa-home"></i> હોમ</a>
     </nav>
 
-    <div class="container" id="mainContent">
-        <div style="text-align:center; padding: 50px;">માહિતી લોડ થઈ રહી છે...</div>
+    <div class="container" id="app">
+        <div style="text-align: center; padding: 100px;">
+            <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--secondary);"></i>
+            <p>પર્ફોર્મન્સ એનાલિસિસ લોડ થઈ રહ્યું છે...</p>
+        </div>
     </div>
 
     <script>
@@ -62,70 +67,93 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         async function init() {
-            const params = new URLSearchParams(window.location.search);
-            const resId = params.get('result_id');
-            if(!resId) {
-                document.getElementById('mainContent').innerHTML = "<div class='card'>ટેસ્ટ આઈડી મળ્યું નથી.</div>";
-                return;
-            }
+            const resId = new URLSearchParams(window.location.search).get('result_id');
+            if(!resId) { document.getElementById('app').innerHTML = "No Result ID found."; return; }
 
             try {
-                // 1. Fetch Test Result
-                const { data: res, error: e1 } = await sb.from('lrd_test_results').select('*').eq('id', resId).single();
-                if(e1) throw e1;
+                // 1. Result Data
+                const { data: res } = await sb.from('lrd_test_results').select('*').eq('id', resId).single();
+                
+                // 2. Question Responses with Subject/Chapter
+                const { data: resp } = await sb.from('lrd_question_responses')
+                    .select('*, lrd_questions(chapter_code, lrd_chapters(name, lrd_subjects(name)))')
+                    .eq('result_id', resId);
 
-                // 2. Fetch Rules (Based on speed and marks)
-                const speed = res.total_time_taken_seconds < 300 ? 'fast' : 'slow';
+                // 3. Rule Engine (સ્કોર મુજબ - એરર ફ્રી ફિલ્ટર)
+                const score = res.obtained_marks || 0;
                 const { data: rules } = await sb.from('lrd_rule_engine')
-                                           .select('*')
-                                           .lte('min_score', res.obtained_marks)
-                                           .gte('max_score', res.obtained_marks);
+                    .select('*')
+                    .lte('min_score', score)
+                    .gte('max_score', score);
 
-                render(res, rules);
-            } catch (err) {
-                console.error(err);
-                document.getElementById('mainContent').innerHTML = "<div class='card'>ડેટા લોડ કરવામાં ભૂલ આવી.</div>";
+                render(res, resp, rules);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('app').innerHTML = "ડેટા લોડ કરવામાં સમસ્યા આવી છે.";
             }
         }
 
-        function render(res, rules) {
-            document.getElementById('mainContent').innerHTML = `
-                <div class="card">
-                    <div class="stats-grid">
-                        <div class="stat-box"><p class="stat-label">કુલ ગુણ</p><p class="stat-value">${res.obtained_marks}/100</p></div>
-                        <div class="stat-box"><p class="stat-label">ચોકસાઈ (Accuracy)</p><p class="stat-value" style="color:var(--success)">${res.accuracy_percentage}%</p></div>
-                        <div class="stat-box"><p class="stat-label">કુલ સમય</p><p class="stat-value">${Math.floor(res.total_time_taken_seconds/60)} મિનીટ</p></div>
-                        <div class="stat-box"><p class="stat-label">એકાગ્રતા</p><p class="stat-value" style="color:var(--warning)">${res.concentration_rating}/10</p></div>
-                    </div>
-                </div>
+        function render(res, resp, rules) {
+            // Rules Safe Access
+            const ruleItems = (rules && rules.length > 0) 
+                ? rules.map(r => `<li><i class="fas fa-arrow-right"></i> ${r.suggestion_text}</li>`).join('')
+                : '<li><i class="fas fa-check"></i> મહેનત ચાલુ રાખો, સ્કોર સુધરી રહ્યો છે.</li>';
+            
+            const actionPlan = (rules && rules.length > 0) ? rules[0].action_plan_text : "તમારા નબળા વિષયો પર વધુ ધ્યાન આપો.";
 
-                <div class="analysis-grid">
-                    <div class="card" style="text-align:center;">
-                        <h3>પરિણામ ગ્રાફ</h3>
-                        <canvas id="perfChart" style="max-height: 250px;"></canvas>
+            // Table Rows
+            const tableRows = resp.map(r => `
+                <tr>
+                    <td>${r.lrd_questions?.lrd_chapters?.lrd_subjects?.name || '-'}</td>
+                    <td>${r.lrd_questions?.lrd_chapters?.name || '-'}</td>
+                    <td style="color: ${r.is_correct ? 'green' : 'red'}; font-weight: bold;">
+                        ${r.is_correct ? 'સાચો' : 'ખોટો'}
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('app').innerHTML = `
+                <div class="grid-main">
+                    <div>
+                        <div class="card">
+                            <h3 style="margin-top:0">ટેસ્ટ સ્કોર</h3>
+                            <canvas id="pieChart"></canvas>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                                <div class="stat-box"><span class="stat-label">ગુણ</span><br><span class="stat-val">${res.obtained_marks}</span></div>
+                                <div class="stat-box"><span class="stat-label">ચોકસાઈ</span><br><span class="stat-val">${res.accuracy_percentage}%</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="stat-box" style="background: #fffbeb; border-color: #fef3c7;">
+                                <span class="stat-label" style="color: #92400e;">એકાગ્રતા લેવલ</span><br>
+                                <span class="stat-val" style="color: #92400e;">${res.concentration_rating}/10</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="rule-engine">
-                        <h3><i class="fas fa-robot"></i> એક્શન પ્લાન (Rule Engine)</h3>
-                        <ul class="rule-list">
-                            ${rules && rules.length > 0 
-                                ? rules.map(r => `<li><i class="fas fa-check-circle"></i> ${r.suggestion_text}</li>`).join('') 
-                                : '<li><i class="fas fa-info-circle"></i> સારી મહેનત છે, આ જ રીતે વાંચન ચાલુ રાખો.</li>'}
-                        </ul>
-                        <div style="margin-top:15px; padding-top:10px; border-top: 1px solid #374151;">
-                            <p style="color:#9ca3af; font-size:12px;">વિશેષ સલાહ:</p>
-                            <p style="font-style:italic;">${rules[0]?.action_plan_text || 'આગામી ટેસ્ટમાં ચોકસાઈ વધારવા પર ધ્યાન આપો.'}</p>
+                    <div>
+                        <div class="rule-box">
+                            <h3><i class="fas fa-bolt"></i> એક્શન પ્લાન (Rule Engine)</h3>
+                            <ul class="rule-list">${ruleItems}</ul>
+                        </div>
+                        
+                        <div class="card table-card" style="margin-top:20px;">
+                            <h3>વિષયવાર એનાલિસિસ</h3>
+                            <table>
+                                <thead><tr><th>વિષય</th><th>ચેપ્ટર</th><th>પરિણામ</th></tr></thead>
+                                <tbody>${tableRows}</tbody>
+                            </table>
+                        </div>
+
+                        <div class="badge-plan">
+                            "${actionPlan}"
                         </div>
                     </div>
                 </div>
-
-                <div style="text-align:center; margin-top:20px;">
-                    <a href="overall-performance.html" class="btn btn-blue">ઓવરઓલ પ્રોગ્રેસ જુઓ <i class="fas fa-arrow-right"></i></a>
-                </div>
             `;
 
-            // Chart Logic
-            const ctx = document.getElementById('perfChart').getContext('2d');
+            // Pie Chart Init
+            const ctx = document.getElementById('pieChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -136,7 +164,7 @@
                         borderWidth: 0
                     }]
                 },
-                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
             });
         }
 
