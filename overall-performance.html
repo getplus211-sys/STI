@@ -231,20 +231,20 @@
             background: white;
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
         
         .chart-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #475569;
             margin-bottom: 20px;
             text-align: center;
         }
         
-        .subject-cards {
+        .subject-cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             margin-bottom: 24px;
         }
@@ -253,47 +253,29 @@
             background: white;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
-            border: 2px solid transparent;
         }
         
         .subject-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
         }
         
         .subject-header {
             padding: 20px;
             color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .subject-header::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            font-weight: bold;
         }
         
         .subject-name {
             font-size: 18px;
-            font-weight: bold;
             margin-bottom: 8px;
-            position: relative;
-            z-index: 1;
         }
         
         .subject-stats {
-            font-size: 13px;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
+            font-size: 14px;
+            opacity: 0.9;
         }
         
         .subject-body {
@@ -301,37 +283,62 @@
         }
         
         .progress-bar {
+            width: 100%;
             height: 12px;
             background: #f1f5f9;
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
         
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             border-radius: 10px;
-            transition: width 0.6s ease;
+            transition: width 0.5s ease;
         }
         
         .subject-metrics {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 14px;
             color: #64748b;
         }
         
-        .subject-metrics strong {
-            color: #1e293b;
+        .chapter-list {
+            margin-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 16px;
+        }
+        
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .chapter-item:last-child {
+            border-bottom: none;
+        }
+        
+        .chapter-name {
+            font-size: 14px;
+            color: #475569;
+            font-weight: 500;
+        }
+        
+        .chapter-score {
+            font-size: 14px;
+            font-weight: bold;
         }
         
         .action-plan-card {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             border-radius: 20px;
             padding: 32px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            color: white;
             position: relative;
             overflow: hidden;
         }
@@ -340,8 +347,8 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            opacity: 0.08;
-            font-size: 120px;
+            font-size: 80px;
+            opacity: 0.1;
         }
         
         .action-plan-title {
@@ -349,34 +356,33 @@
             font-weight: bold;
             color: #fbbf24;
             margin-bottom: 24px;
-            border-bottom: 2px solid #334155;
+            border-bottom: 2px solid #475569;
             padding-bottom: 12px;
-            position: relative;
-            z-index: 1;
         }
         
         .suggestions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 32px;
         }
         
         .suggestion-box {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            backdrop-filter: blur(10px);
         }
         
         .suggestion-box h4 {
             font-size: 14px;
             color: #93c5fd;
             text-transform: uppercase;
-            margin-bottom: 12px;
-            font-weight: bold;
-            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .suggestion-list {
@@ -386,58 +392,58 @@
         }
         
         .suggestion-list li {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 12px;
-            color: #e2e8f0;
+            padding: 10px 0;
+            color: #cbd5e1;
             font-size: 14px;
+            display: flex;
+            align-items: start;
+            gap: 10px;
             line-height: 1.6;
         }
         
         .suggestion-list i {
-            color: #fbbf24;
+            color: #22c55e;
             margin-top: 3px;
-            flex-shrink: 0;
         }
         
         .test-history {
-            margin-top: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
         }
         
         .history-title {
             font-size: 18px;
             font-weight: bold;
-            color: white;
+            color: #fbbf24;
             margin-bottom: 16px;
         }
         
         .history-list {
-            display: grid;
+            display: flex;
+            flex-direction: column;
             gap: 12px;
         }
         
         .history-item {
-            background: rgba(255,255,255,0.05);
-            padding: 16px;
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 10px;
+            padding: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         
         .history-item:hover {
-            background: rgba(255,255,255,0.08);
-            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.12);
         }
         
         .history-info h5 {
             font-size: 15px;
             font-weight: 600;
-            color: #e2e8f0;
-            margin: 0 0 4px 0;
+            color: white;
+            margin: 0 0 6px 0;
         }
         
         .history-info p {
@@ -446,32 +452,19 @@
             margin: 0;
         }
         
+        .history-info i {
+            margin-right: 4px;
+        }
+        
         .history-score {
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 900;
             color: #fbbf24;
-        }
-        
-        .loader {
-            text-align: center;
-            padding: 60px 20px;
-            color: white;
-        }
-        
-        .loader-icon {
-            font-size: 64px;
-            animation: spin 2s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
         
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #64748b;
         }
         
         .empty-icon {
@@ -479,14 +472,22 @@
             margin-bottom: 20px;
         }
         
+        .empty-state h2 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e293b;
+            margin: 0 0 12px 0;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+            color: #64748b;
+            margin: 0;
+        }
+        
         @media (max-width: 768px) {
-            nav {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .nav-btn {
-                width: 100%;
+            .nav-title {
+                font-size: 18px;
             }
             
             .profile-section {
@@ -502,10 +503,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .subject-cards {
-                grid-template-columns: 1fr;
-            }
-            
             .suggestions-grid {
                 grid-template-columns: 1fr;
             }
@@ -517,220 +514,235 @@
         <div class="nav-left">
             <div class="nav-logo">LRD</div>
             <div>
-                <div class="nav-title">Overall Performance</div>
-                <div class="nav-subtitle">સંપૂર્ણ પરિણામ વિશ્લેષણ</div>
+                <div class="nav-title">Beginners</div>
+                <div class="nav-subtitle">Overall Performance Dashboard</div>
             </div>
         </div>
-        <button class="nav-btn" onclick="window.location.href='test-selection.html'">
-            <i class="fas fa-home"></i> હોમ પર પાછા જાઓ
-        </button>
+        <div>
+            <button class="nav-btn" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-home"></i> હોમ
+            </button>
+        </div>
     </nav>
 
-    <div class="container" id="app">
-        <div class="loader">
-            <div class="loader-icon">⏳</div>
-            <h2 style="color: white;">લોડ થઈ રહ્યું છે...</h2>
-            <p style="color: rgba(255,255,255,0.8);">કૃપા કરીને રાહ જુઓ</p>
+    <div class="container">
+        <div id="app">
+            <div class="card">
+                <p style="text-align: center; color: #64748b;">લોડ કરી રહ્યા છીએ...</p>
+            </div>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-        const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-        
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-        const app = document.getElementById('app');
-        
-        let trendChart = null;
-        let subjectChart = null;
+        // Supabase Configuration
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        (async () => {
+        const app = document.getElementById('app');
+        let trendChart = null;
+
+        // Initialize
+        async function init() {
             try {
-                const { data: { user } } = await sb.auth.getUser();
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
                 
-                if (!user) {
-                    showError('કૃપા કરીને પહેલા લોગિન કરો', false);
+                if (authError || !user) {
+                    showError('તમે લોગિન થયેલ નથી', false);
+                    setTimeout(() => window.location.href = 'login.html', 2000);
                     return;
                 }
-                
-                await loadOverallPerformance(user.id);
+
+                await loadPerformanceData(user.id);
             } catch (error) {
                 console.error('Init error:', error);
-                showError('કંઈક ખોટું થયું: ' + error.message);
+                showError('કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.');
             }
-        })();
+        }
 
-        async function loadOverallPerformance(userId) {
+        async function loadPerformanceData(userId) {
             try {
-                // Get user profile
-                const { data: profile } = await sb
+                // Load profile
+                const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', userId)
                     .single();
 
-                // Get all test results
-                const { data: allResults } = await sb
+                if (profileError) throw profileError;
+
+                // Load all test results with test details and question responses
+                const { data: allResults, error: resultsError } = await supabase
                     .from('lrd_test_results')
                     .select(`
                         *,
                         lrd_tests (
+                            id,
                             title,
-                            total_marks
+                            total_marks,
+                            target_score
                         )
                     `)
                     .eq('user_id', userId)
                     .order('created_at', { ascending: true });
+
+                if (resultsError) throw resultsError;
 
                 if (!allResults || allResults.length === 0) {
                     showEmptyState(profile);
                     return;
                 }
 
-                // Calculate overall stats
-                const totalTests = allResults.length;
-                const totalScore = allResults.reduce((sum, r) => sum + (r.obtained_marks || 0), 0);
-                const avgScore = (totalScore / totalTests).toFixed(1);
-                const avgAccuracy = (allResults.reduce((sum, r) => sum + (r.accuracy_percentage || 0), 0) / totalTests).toFixed(1);
-
-                // Determine overall level
-                let overallLevel = 'Bronze';
-                if (avgScore >= 85) overallLevel = 'Platinum';
-                else if (avgScore >= 70) overallLevel = 'Gold';
-                else if (avgScore >= 50) overallLevel = 'Silver';
-
-                // Calculate overall rank
-                const { data: allUsers } = await sb
-                    .from('lrd_test_results')
-                    .select('user_id, obtained_marks');
-
-                const userAverages = {};
-                allUsers?.forEach(result => {
-                    if (!userAverages[result.user_id]) {
-                        userAverages[result.user_id] = { sum: 0, count: 0 };
-                    }
-                    userAverages[result.user_id].sum += result.obtained_marks || 0;
-                    userAverages[result.user_id].count += 1;
-                });
-
-                const rankings = Object.entries(userAverages)
-                    .map(([uid, data]) => ({
-                        userId: uid,
-                        average: data.sum / data.count
-                    }))
-                    .sort((a, b) => b.average - a.average);
-
-                const overallRank = rankings.findIndex(r => r.userId === userId) + 1;
-
-                // Get all question responses for subject analysis
-                const resultIds = allResults.map(r => r.id);
-                const { data: allResponses } = await sb
+                // Load all question responses with subject and chapter details
+                const { data: allResponses, error: responsesError } = await supabase
                     .from('lrd_question_responses')
                     .select(`
                         *,
                         lrd_questions (
-                            *,
+                            id,
+                            chapter_id,
+                            chapter_code,
                             lrd_chapters (
-                                *,
-                                lrd_subjects (*)
+                                id,
+                                name,
+                                chapter_code,
+                                subject_id,
+                                lrd_subjects (
+                                    id,
+                                    name,
+                                    subject_code
+                                )
                             )
                         )
                     `)
-                    .in('result_id', resultIds);
+                    .in('result_id', allResults.map(r => r.id));
+
+                if (responsesError) throw responsesError;
+
+                // Calculate overall statistics
+                const totalTests = allResults.length;
+                const avgScore = (allResults.reduce((sum, r) => sum + r.obtained_marks, 0) / totalTests).toFixed(1);
+                const avgAccuracy = (allResults.reduce((sum, r) => sum + r.accuracy_percentage, 0) / totalTests).toFixed(1);
 
                 // Calculate subject-wise performance
                 const subjectPerformance = calculateSubjectPerformance(allResponses);
 
-                // Calculate improvement trend
-                const improvementPercentage = calculateImprovement(allResults);
+                // Generate suggestions based on overall performance
+                const suggestions = await generateSuggestions(subjectPerformance, allResults);
 
-                // Get suggestions based on overall performance
-                const suggestions = await getOverallSuggestions(avgScore, avgAccuracy, subjectPerformance);
-
-                // Render dashboard
+                // Render the dashboard
                 renderDashboard(profile, {
                     totalTests,
                     avgScore,
-                    avgAccuracy,
-                    overallLevel,
-                    overallRank,
-                    improvementPercentage
-                }, allResults, subjectPerformance, suggestions);
+                    avgAccuracy
+                }, subjectPerformance, suggestions, allResults);
 
             } catch (error) {
-                console.error('Load performance error:', error);
-                showError('Performance લોડ કરવામાં ભૂલ: ' + error.message);
+                console.error('Load error:', error);
+                showError('ડેટા લોડ કરવામાં સમસ્યા આવી.');
             }
         }
 
         function calculateSubjectPerformance(responses) {
             const subjectMap = {};
 
-            responses?.forEach(response => {
-                const question = response.lrd_questions;
-                if (!question || !question.lrd_chapters) return;
+            responses.forEach(response => {
+                if (!response.lrd_questions?.lrd_chapters?.lrd_subjects) return;
 
-                const chapter = question.lrd_chapters;
-                const subject = chapter.lrd_subjects;
+                const subject = response.lrd_questions.lrd_chapters.lrd_subjects;
+                const chapter = response.lrd_questions.lrd_chapters;
 
                 if (!subjectMap[subject.id]) {
                     subjectMap[subject.id] = {
                         id: subject.id,
                         name: subject.name,
+                        subject_code: subject.subject_code,
+                        total: 0,
+                        correct: 0,
+                        chapters: {}
+                    };
+                }
+
+                subjectMap[subject.id].total++;
+                if (response.is_correct) {
+                    subjectMap[subject.id].correct++;
+                }
+
+                // Chapter-wise tracking
+                if (!subjectMap[subject.id].chapters[chapter.id]) {
+                    subjectMap[subject.id].chapters[chapter.id] = {
+                        id: chapter.id,
+                        name: chapter.name,
+                        chapter_code: chapter.chapter_code,
                         total: 0,
                         correct: 0
                     };
                 }
-                subjectMap[subject.id].total++;
-                if (response.is_correct) subjectMap[subject.id].correct++;
+
+                subjectMap[subject.id].chapters[chapter.id].total++;
+                if (response.is_correct) {
+                    subjectMap[subject.id].chapters[chapter.id].correct++;
+                }
             });
 
+            // Convert to array and calculate percentages
             return Object.values(subjectMap).map(subject => ({
                 ...subject,
-                percentage: ((subject.correct / subject.total) * 100).toFixed(1)
-            }));
+                percentage: ((subject.correct / subject.total) * 100).toFixed(1),
+                chapters: Object.values(subject.chapters)
+            })).sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
         }
 
-        function calculateImprovement(results) {
-            if (results.length < 2) return 0;
-            
-            const firstScore = results[0].obtained_marks;
-            const lastScore = results[results.length - 1].obtained_marks;
-            
-            return (((lastScore - firstScore) / firstScore) * 100).toFixed(1);
-        }
-
-        async function getOverallSuggestions(avgScore, avgAccuracy, subjectPerformance) {
+        async function generateSuggestions(subjectPerformance, allResults) {
             const suggestions = {
                 focus: [],
                 improve: []
             };
 
-            // General suggestions based on average
-            if (avgScore < 50) {
-                suggestions.focus.push('તમારે મૂળભૂત concepts પર વધુ કામ કરવાની જરૂર છે');
-                suggestions.improve.push('દરરોજ ઓછામાં ઓછા 2 કલાક અભ્યાસ કરો');
-            } else if (avgScore < 70) {
-                suggestions.focus.push('તમારું પ્રદર્શન સારું છે, પણ સુધારાની જરૂર છે');
-                suggestions.improve.push('weak વિષયો પર વધુ ધ્યાન આપો');
-            } else {
-                suggestions.focus.push('તમારું પ્રદર્શન ખૂબ સારું છે!');
-                suggestions.improve.push('હાલની ગતિ જાળવી રાખો અને નવા topics શીખો');
+            // Find weak subjects (below 60%)
+            const weakSubjects = subjectPerformance.filter(s => parseFloat(s.percentage) < 60);
+            
+            weakSubjects.forEach(subject => {
+                suggestions.focus.push(`${subject.name} માં વધુ પ્રેક્ટિસ કરો (હાલનો સ્કોર: ${subject.percentage}%)`);
+                
+                // Find weak chapters in this subject
+                const weakChapters = subject.chapters
+                    .filter(c => (c.correct / c.total) * 100 < 50)
+                    .slice(0, 2);
+                
+                weakChapters.forEach(chapter => {
+                    suggestions.improve.push(`${subject.name}: ${chapter.name} ચેપ્ટરમાં સુધારો જરૂરી`);
+                });
+            });
+
+            // Add general suggestions if performing well
+            if (weakSubjects.length === 0) {
+                suggestions.focus.push('તમારું પર્ફોર્મન્સ સારું છે! સતત પ્રેક્ટિસ ચાલુ રાખો');
+                suggestions.improve.push('સ્પીડ વધારવા પર ધ્યાન આપો અને hard questions માટે વધુ સમય ફાળવો');
             }
 
-            // Subject-specific suggestions
-            const weakSubjects = subjectPerformance.filter(s => parseFloat(s.percentage) < 60);
-            if (weakSubjects.length > 0) {
-                weakSubjects.forEach(subject => {
-                    suggestions.focus.push(`${subject.name}: વધુ practice જરૂરી છે (${subject.percentage}%)`);
-                });
+            // Trend analysis
+            if (allResults.length >= 3) {
+                const lastThree = allResults.slice(-3);
+                const avgLastThree = lastThree.reduce((sum, r) => sum + r.obtained_marks, 0) / 3;
+                const prevThree = allResults.slice(-6, -3);
+                
+                if (prevThree.length === 3) {
+                    const avgPrevThree = prevThree.reduce((sum, r) => sum + r.obtained_marks, 0) / 3;
+                    
+                    if (avgLastThree < avgPrevThree) {
+                        suggestions.improve.push('તાજેતરના tests માં ઘટાડો જોવા મળ્યો છે. નિયમિત પ્રેક્ટિસ કરો');
+                    } else {
+                        suggestions.focus.push('સારી પ્રગતિ! તમારા સ્કોર સુધરી રહ્યા છે');
+                    }
+                }
             }
 
             return suggestions;
         }
 
-        function renderDashboard(profile, stats, allResults, subjectPerformance, suggestions) {
-            const initials = profile?.full_name
+        function renderDashboard(profile, stats, subjectPerformance, suggestions, allResults) {
+            const initials = profile.full_name
                 ? profile.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
                 : 'U';
 
@@ -740,37 +752,26 @@
                         <div class="profile-left">
                             <div class="avatar">${initials}</div>
                             <div class="profile-info">
-                                <h1>${profile?.full_name || 'વિદ્યાર્થી'}</h1>
-                                <p><i class="fas fa-envelope"></i> ${profile?.email || ''}</p>
+                                <h1>${profile.full_name || 'વિદ્યાર્થી'}</h1>
+                                <p>${profile.email || ''}</p>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-box">
-                            <div class="stat-label">કુલ ટેસ્ટ્સ</div>
-                            <div class="stat-value tests">${stats.totalTests}</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">એવરેજ સ્કોર</div>
-                            <div class="stat-value avg">${stats.avgScore}</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">એવરેજ Accuracy</div>
-                            <div class="stat-value" style="color: #22c55e;">${stats.avgAccuracy}%</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Overall લેવલ</div>
-                            <div class="stat-value level">${stats.overallLevel}</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">Overall રેન્ક</div>
-                            <div class="stat-value rank">#${stats.overallRank}</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-label">સુધારો</div>
-                            <div class="stat-value" style="color: ${stats.improvementPercentage >= 0 ? '#22c55e' : '#ef4444'};">
-                                ${stats.improvementPercentage >= 0 ? '+' : ''}${stats.improvementPercentage}%
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">લેવલ</div>
+                                <div class="stat-value level">${profile.current_level || 'Beginner'}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">રેન્ક</div>
+                                <div class="stat-value rank">#${profile.current_rank || '-'}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">કુલ ટેસ્ટ</div>
+                                <div class="stat-value tests">${stats.totalTests}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">સરેરાશ સ્કોર</div>
+                                <div class="stat-value avg">${stats.avgScore}</div>
                             </div>
                         </div>
                     </div>
@@ -779,42 +780,50 @@
                 <div class="card">
                     <div class="section-header">
                         <div class="section-title">
-                            <div class="section-icon"><i class="fas fa-chart-line"></i></div>
-                            પ્રગતિ Trend
+                            <div class="section-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            Performance Trend
                         </div>
                     </div>
-                    <canvas id="trendChart"></canvas>
+                    <div class="chart-card">
+                        <canvas id="trendChart"></canvas>
+                    </div>
                 </div>
 
                 <div class="card">
                     <div class="section-header">
                         <div class="section-title">
-                            <div class="section-icon"><i class="fas fa-book"></i></div>
+                            <div class="section-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
                             વિષયવાર Performance
                         </div>
                     </div>
-                    <div class="subject-cards" id="subjectCards"></div>
+                    <div class="subject-cards-grid" id="subjectCards"></div>
                 </div>
 
-                <div class="action-plan-card">
-                    <div class="action-plan-bg">
-                        <i class="fas fa-rocket"></i>
-                    </div>
-                    <h3 class="action-plan-title">તમારું Overall Action Plan</h3>
-                    <div class="suggestions-grid">
-                        <div class="suggestion-box">
-                            <h4><i class="fas fa-bullseye"></i> Focus Areas</h4>
-                            <ul class="suggestion-list" id="focusList"></ul>
+                <div class="card">
+                    <div class="action-plan-card">
+                        <div class="action-plan-bg">
+                            <i class="fas fa-rocket"></i>
                         </div>
-                        <div class="suggestion-box">
-                            <h4><i class="fas fa-lightbulb"></i> સુધારણા સૂચનો</h4>
-                            <ul class="suggestion-list" id="improveList"></ul>
+                        <h3 class="action-plan-title">તમારું Overall Action Plan</h3>
+                        <div class="suggestions-grid">
+                            <div class="suggestion-box">
+                                <h4><i class="fas fa-bullseye"></i> Focus Areas</h4>
+                                <ul class="suggestion-list" id="focusList"></ul>
+                            </div>
+                            <div class="suggestion-box">
+                                <h4><i class="fas fa-lightbulb"></i> સુધારણા સૂચનો</h4>
+                                <ul class="suggestion-list" id="improveList"></ul>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="test-history">
-                        <h4 class="history-title">તાજેતરના Tests</h4>
-                        <div class="history-list" id="historyList"></div>
+                        
+                        <div class="test-history">
+                            <h4 class="history-title">તાજેતરના Tests</h4>
+                            <div class="history-list" id="historyList"></div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -847,6 +856,23 @@
                 const color = colors[index % colors.length];
                 const percentage = parseFloat(subject.percentage);
                 
+                let chaptersHTML = '';
+                subject.chapters.forEach(chapter => {
+                    const chapterPercentage = ((chapter.correct / chapter.total) * 100).toFixed(0);
+                    let scoreColor = '#ef4444'; // red
+                    if (chapterPercentage >= 70) scoreColor = '#22c55e'; // green
+                    else if (chapterPercentage >= 50) scoreColor = '#f59e0b'; // orange
+                    
+                    chaptersHTML += `
+                        <div class="chapter-item">
+                            <span class="chapter-name">${chapter.name}</span>
+                            <span class="chapter-score" style="color: ${scoreColor};">
+                                ${chapter.correct}/${chapter.total} (${chapterPercentage}%)
+                            </span>
+                        </div>
+                    `;
+                });
+                
                 subjectCards.innerHTML += `
                     <div class="subject-card">
                         <div class="subject-header" style="background: ${color};">
@@ -863,6 +889,7 @@
                                     ${percentage >= 70 ? '✓ સારું' : percentage >= 50 ? '⚠ Average' : '✗ સુધારો જરૂરી'}
                                 </span>
                             </div>
+                            ${chaptersHTML ? `<div class="chapter-list">${chaptersHTML}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -1022,6 +1049,9 @@
                 </div>
             `;
         }
+
+        // Start the app
+        init();
     </script>
 </body>
 </html>
