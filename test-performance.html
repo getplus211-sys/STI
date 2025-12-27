@@ -2,75 +2,96 @@
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
-    <title>LRD Performance</title>
+    <title>ટેસ્ટ પર્ફોર્મન્સ</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-        .stat-item { border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 5px; }
-        .rule-box { background: #1e293b; color: #fbbf24; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; margin: 0; color: #333; }
+        .navbar { background: #1e3a8a; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .stat-card { background: #f8fafc; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #edf2f7; }
+        .stat-val { font-size: 24px; font-weight: bold; color: #1e3a8a; }
+        .rule-section { background: #111827; color: #fbbf24; padding: 20px; border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
-        .btn { background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+        th { text-align: left; background: #f1f5f9; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        .btn { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div id="main-content">
-        <div class="card" style="text-align: center;"><h3>ડેટા લોડ થઈ રહ્યો છે...</h3></div>
+    <div class="navbar">
+        <div style="font-weight: bold; font-size: 1.2rem;">LRD Beginners</div>
+        <a href="quiz-engine-updated__6_.html" class="btn">હોમ</a>
+    </div>
+
+    <div id="app" class="container">
+        <div class="card" style="text-align:center;">લોડ થઈ રહ્યું છે...</div>
     </div>
 
     <script>
-        const sb = supabase.createClient("https://bhmycvrbucmbbrpzeane.supabase.co", "YOUR_ANON_KEY");
+        const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+        const SB_KEY = "તમારી_સાચી_ANON_KEY_અહીં_નાખો";
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        async function loadData() {
-            const resId = new URLSearchParams(window.location.search).get('result_id');
-            if (!resId) { document.getElementById('main-content').innerHTML = "ID missing"; return; }
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const resId = urlParams.get('result_id');
+            if (!resId) { document.getElementById('app').innerHTML = "રિઝલ્ટ આઈડી મળ્યું નથી."; return; }
 
-            // Fetch Results & Profile
-            const { data: result } = await sb.from('lrd_test_results').select('*, profiles(*)').eq('id', resId).single();
-            
-            // Fetch Responses with nested join [cite: 1]
-            const { data: responses } = await sb.from('lrd_question_responses')
-                .select('*, lrd_questions(chapter_code, lrd_chapters(name, lrd_subjects(name)))')
-                .eq('result_id', resId);
+            try {
+                // ૧. રિઝલ્ટ ડેટા
+                const { data: res, error: e1 } = await supabaseClient.from('lrd_test_results').select('*').eq('id', resId).single();
+                if (e1) throw e1;
 
-            // Fetch Rules based on performance
-            const { data: rules } = await sb.from('lrd_rule_engine')
-                .select('*')
-                .eq('speed_category', result.avg_time_per_question < 45 ? 'fast' : 'slow')
-                .limit(2);
+                // ૨. રિસ્પોન્સ ડેટા (વિષય અને ચેપ્ટર સાથે)
+                const { data: resp, error: e2 } = await supabaseClient.from('lrd_question_responses').select('is_correct, lrd_questions(chapter_code, lrd_chapters(name, lrd_subjects(name)))').eq('result_id', resId);
+                
+                // ૩. રૂલ એન્જિન (Accuracy મુજબ)
+                const speedCat = res.avg_time_per_question < 45 ? 'fast' : 'slow';
+                const { data: rules } = await supabaseClient.from('lrd_rule_engine').select('*').eq('speed_category', speedCat).limit(3);
 
-            render(result, responses, rules);
+                render(res, resp, rules);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('app').innerHTML = `<div class="card" style="border-color: red;">
+                    <h3>કનેક્શન એરર (401)</h3>
+                    <p>તમારી Anon Key અથવા Supabase RLS પોલિસી ચેક કરો.</p>
+                </div>`;
+            }
         }
 
         function render(res, resp, rules) {
-            let respRows = resp.map(r => `
+            let listHTML = resp.map(r => `
                 <tr>
-                    <td>${r.lrd_questions.lrd_chapters.lrd_subjects.name}</td>
-                    <td>${r.lrd_questions.lrd_chapters.name}</td>
-                    <td>${r.is_correct ? '✅' : '❌'}</td>
+                    <td>${r.lrd_questions?.lrd_chapters?.lrd_subjects?.name || '-'}</td>
+                    <td>${r.lrd_questions?.lrd_chapters?.name || '-'}</td>
+                    <td>${r.is_correct ? '✅ સાચો' : '❌ ખોટો'}</td>
                 </tr>`).join('');
 
-            document.getElementById('main-content').innerHTML = `
+            document.getElementById('app').innerHTML = `
                 <div class="card">
-                    <h2>વિદ્યાર્થી: ${res.profiles.full_name}</h2>
-                    <div class="stat-grid">
-                        <div class="stat-item"><b>ગુણ</b><br>${res.obtained_marks}</div>
-                        <div class="stat-item"><b>Accuracy</b><br>${res.accuracy_percentage}%</div>
-                        <div class="stat-item"><b>સમય</b><br>${res.avg_time_per_question}s</div>
+                    <h2>ટેસ્ટ સ્કોર: ${res.obtained_marks} / 100</h2>
+                    <div class="grid">
+                        <div class="stat-card">ચોકસાઈ<br><span class="stat-val">${res.accuracy_percentage}%</span></div>
+                        <div class="stat-card">એવરેજ સમય<br><span class="stat-val">${res.avg_time_per_question}s</span></div>
+                        <div class="stat-card">એકાગ્રતા<br><span class="stat-val">${res.concentration_rating}/10</span></div>
                     </div>
                 </div>
-                <div class="rule-box">
-                    <h3>એક્શન પ્લાન (Rule Engine):</h3>
-                    <ul>${rules.map(r => `<li>${r.suggestion_text}</li>`).join('')}</ul>
+
+                <div class="rule-section">
+                    <h3>તમારા માટે વિશેષ સૂચનાઓ (Rule Engine)</h3>
+                    <ul>${rules?.map(r => `<li>${r.suggestion_text}</li>`).join('') || 'સારી મહેનત ચાલુ રાખો!'}</ul>
                 </div>
+
                 <div class="card">
-                    <h3>પ્રશ્નવાર વિગત</h3>
-                    <table><thead><tr><th>વિષય</th><th>ચેપ્ટર</th><th>પરિણામ</th></tr></thead><tbody>${respRows}</tbody></table>
-                </div>`;
+                    <h3>વિષયવાર વિગત</h3>
+                    <table><thead><tr><th>વિષય</th><th>ચેપ્ટર</th><th>રિઝલ્ટ</th></tr></thead>
+                    <tbody>${listHTML}</tbody></table>
+                </div>
+            `;
         }
-        loadData();
+        init();
     </script>
 </body>
 </html>
