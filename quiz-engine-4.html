@@ -181,7 +181,12 @@ async function init() {
   try {
     // 1. Fetch Mapping First
     const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-    const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
+    const finalTestId = mapping ? mapping.lrd_test_id : null;
+
+    if (!finalTestId) {
+      alertModal('⚠️', 'Error', 'આ Quiz માટે Test mapping નથી મળી.');
+      return;
+    }
 
     // 2. Fetch Test Info
     const { data: test } = await sb.from("lrd_tests").select("*").eq("id", finalTestId).maybeSingle();
@@ -396,11 +401,18 @@ async function submitTest() {
 
     if(!a) {
         skipped++;
-    } else if(Number(a) === Number(q.correct_option)) {
+    } else {
+      // Convert correct_option to number for comparison
+      const correctOpt = isNaN(q.correct_option) ? 
+        q.correct_option.toLowerCase().charCodeAt(0) - 96 : // 'a' = 1, 'b' = 2, etc
+        Number(q.correct_option);
+      
+      if(Number(a) === correctOpt) {
         correct++;
         if(isEasy) easy_c++; else hard_c++;
-    } else {
+      } else {
         wrong++;
+      }
     }
   });
 
@@ -425,10 +437,20 @@ async function submitTest() {
 
   try {
     const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-    const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
+    const finalTestId = mapping ? mapping.lrd_test_id : null;
 
-    // Get subject_id from first question
-    const subjectId = questions[0]?.subject_id || null;
+    if (!finalTestId) {
+      alertModal('❌', 'Error', 'Test mapping નથી મળી.');
+      isSubmitting = false;
+      return;
+    }
+
+    // Get subject_id from first question's chapter
+    let subjectId = null;
+    if (questions[0]?.chapter_id) {
+      const { data: chapter } = await sb.from("lrd_chapters").select("subject_id").eq("id", questions[0].chapter_id).single();
+      subjectId = chapter?.subject_id || null;
+    }
 
     const { data: resData, error: resErr } = await sb.from("lrd_test_results").insert({
       user_id: user.id,
@@ -449,14 +471,22 @@ async function submitTest() {
 
     if(resErr) throw resErr;
 
-    // Insert question responses with individual timings
-    const resp = questions.map((q, i) => ({
-      result_id: resData.id,
-      question_id: q.id,
-      user_selected_option: userAnswers[i] ? String.fromCharCode(96 + parseInt(userAnswers[i])) : null,
-      is_correct: userAnswers[i] ? (Number(userAnswers[i]) === Number(q.correct_option)) : false,
-      time_spent_seconds: questionTimes[i] || Math.floor(avgTimePerQuestion)
-    }));
+    // Insert question responses with individual timings and chapter/subject info
+    const resp = questions.map((q, i) => {
+      const correctOpt = isNaN(q.correct_option) ? 
+        q.correct_option.toLowerCase().charCodeAt(0) - 96 : 
+        Number(q.correct_option);
+      
+      return {
+        result_id: resData.id,
+        question_id: q.id,
+        subject_id: q.subject_id || subjectId,
+        chapter_id: q.chapter_id,
+        user_selected_option: userAnswers[i] ? String.fromCharCode(96 + parseInt(userAnswers[i])) : null,
+        is_correct: userAnswers[i] ? (Number(userAnswers[i]) === correctOpt) : false,
+        time_spent_seconds: questionTimes[i] || Math.floor(avgTimePerQuestion)
+      };
+    });
     
     const { error: respErr } = await sb.from("lrd_question_responses").insert(resp);
     if (respErr) console.error('Response insert error:', respErr);
@@ -539,7 +569,10 @@ async function viewSolutions() {
   
   questions.forEach((q, i) => {
     const userAns = userAnswers[i];
-    const isCorrect = userAns && Number(userAns) === Number(q.correct_option);
+    const correctOpt = isNaN(q.correct_option) ? 
+      q.correct_option.toLowerCase().charCodeAt(0) - 96 : 
+      Number(q.correct_option);
+    const isCorrect = userAns && Number(userAns) === correctOpt;
     const div = document.createElement("div");
     div.className = "card";
     div.innerHTML = `
@@ -555,7 +588,7 @@ async function viewSolutions() {
         </div>
         <div style="padding:12px;border-radius:10px;background:#f0fdf4;border:2px solid #22c55e">
           <b style="display:block;margin-bottom:6px;color:#334155">સાચો જવાબ:</b> 
-          <span style="color:#166534">${q['option_'+options[Number(q.correct_option)-1]]}</span>
+          <span style="color:#166534">${q['option_'+options[correctOpt-1]]}</span>
         </div>
       </div>
       ${q.solution ? `
@@ -573,7 +606,12 @@ async function viewSolutions() {
 async function loadLeaderboard() {
   try {
     const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-    const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
+    const finalTestId = mapping ? mapping.lrd_test_id : null;
+    
+    if (!finalTestId) {
+      document.getElementById("leaderboard-list").innerHTML = '<p style="color:#64748b;text-align:center;padding:20px">Test mapping નથી મળી.</p>';
+      return;
+    }
 
     const { data: results } = await sb.from("lrd_test_results")
       .select("user_id, obtained_marks, profiles(full_name)")
@@ -607,7 +645,13 @@ async function loadLeaderboard() {
 
 async function viewPerformance() {
   const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-  const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
+  const finalTestId = mapping ? mapping.lrd_test_id : null;
+  
+  if (!finalTestId) {
+    alertModal('⚠️', 'Error', 'Test mapping નથી મળી.');
+    return;
+  }
+  
   const { data: res } = await sb.from("lrd_test_results").select("id").eq("user_id", user.id).eq("test_id", finalTestId).order("created_at", {ascending: false}).limit(1).maybeSingle();
   
   if(res) {
