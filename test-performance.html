@@ -465,9 +465,9 @@
 
     <script>
         // Supabase Configuration
-        const SUPABASE_URL = 'https://halzulnewvmyutfqrycy.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhbHp1bG5ld3ZteXV0ZnFyeWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1MjYzMDIsImV4cCI6MjA4MjEwMjMwMn0.oXIheubGUVzQAF8oZmE_U4W94R-nD068cXzTuw_sEro';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const app = document.getElementById('app');
         let pieChart = null;
@@ -484,7 +484,7 @@
             }
 
             try {
-                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                const { data: { user }, error: authError } = await sb.auth.getUser();
                 
                 if (authError || !user) {
                     showError('તમે લોગિન થયેલ નથી', false);
