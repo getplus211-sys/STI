@@ -8,56 +8,50 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #1e3a8a; --secondary: #2563eb; --success: #10b981;
-            --danger: #ef4444; --warning: #f59e0b; --dark: #111827; --gray: #f0f2f5;
-        }
-        body { font-family: sans-serif; background-color: var(--gray); margin: 0; padding: 0; }
+        :root { --primary: #1e3a8a; --bg: #f0f2f5; --dark: #0f172a; --accent: #fbbf24; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #334155; }
         
-        /* Navbar */
-        .nav { background: var(--primary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .logo { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.2rem; }
-        .logo span { background: white; color: var(--primary); padding: 2px 6px; border-radius: 4px; }
+        .nav { background: var(--primary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .logo-box { background: white; color: var(--primary); padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-right: 8px; }
         
-        /* Layout */
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-        .grid-main { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        @media (max-width: 800px) { .grid-main { grid-template-columns: 1fr; } }
-
-        /* Cards */
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .stat-box { text-align: center; padding: 15px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; }
-        .stat-val { font-size: 24px; font-weight: 800; color: var(--primary); }
-        .stat-label { font-size: 12px; color: #6b7280; font-weight: bold; }
-
-        /* Rule Engine (Black Box) */
-        .rule-box { background: var(--dark); color: white; padding: 25px; border-radius: 15px; }
-        .rule-box h3 { color: #fde047; margin-top: 0; border-bottom: 1px solid #374151; padding-bottom: 10px; }
-        .rule-list { list-style: none; padding: 0; }
-        .rule-list li { margin-bottom: 12px; font-size: 14px; display: flex; gap: 10px; color: #d1d5db; }
-        .rule-list i { color: var(--success); margin-top: 3px; }
-
-        /* Table */
-        .table-card { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 13px; color: #475569; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
         
-        .badge-plan { background: #eff6ff; border-left: 4px solid var(--secondary); padding: 15px; border-radius: 4px; text-align: center; font-style: italic; font-weight: 600; }
-        .btn { background: var(--secondary); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; }
+        /* Stats Styling */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .stat-label { font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .stat-val { font-size: 24px; font-weight: 800; color: var(--primary); display: block; margin-top: 5px; }
+
+        /* Performance Layout */
+        .perf-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; }
+        @media (max-width: 768px) { .perf-layout { grid-template-columns: 1fr; } }
+
+        /* Dark Rule Engine Box */
+        .rule-box { background: var(--dark); color: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .rule-box h3 { color: var(--accent); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .rule-list { list-style: none; padding: 0; margin: 15px 0; }
+        .rule-list li { margin-bottom: 12px; font-size: 14px; display: flex; gap: 10px; color: #cbd5e1; }
+        .rule-list i { color: #10b981; margin-top: 3px; }
+
+        .action-quote { background: #f8fafc; border-left: 4px solid var(--primary); padding: 15px; border-radius: 8px; text-align: center; font-style: italic; font-weight: 600; margin-top: 20px; color: #1e293b; }
+        
+        canvas { max-width: 100%; }
+        .btn-home { background: #3b82f6; color: white; padding: 8px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <nav class="nav">
-        <div class="logo"><span>LRD</span> Beginners</div>
-        <a href="quiz-engine-updated__6_.html" class="btn"><i class="fas fa-home"></i> હોમ</a>
+        <div style="display:flex; align-items:center;">
+            <span class="logo-box">LRD</span> <b>Beginners</b>
+        </div>
+        <a href="quiz-engine-updated__6_.html" class="btn-home"><i class="fas fa-home"></i> હોમ</a>
     </nav>
 
     <div class="container" id="app">
-        <div style="text-align: center; padding: 100px;">
-            <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--secondary);"></i>
-            <p>પર્ફોર્મન્સ એનાલિસિસ લોડ થઈ રહ્યું છે...</p>
+        <div style="text-align:center; padding:100px;">
+            <i class="fas fa-circle-notch fa-spin fa-3x" style="color:var(--primary)"></i>
+            <p style="margin-top:15px;">એનાલિસિસ રિપોર્ટ તૈયાર થઈ રહ્યો છે...</p>
         </div>
     </div>
 
@@ -68,99 +62,71 @@
 
         async function init() {
             const resId = new URLSearchParams(window.location.search).get('result_id');
-            if(!resId) { document.getElementById('app').innerHTML = "No Result ID found."; return; }
+            if(!resId) { document.getElementById('app').innerHTML = "No ID"; return; }
 
             try {
-                // 1. Result Data
-                const { data: res } = await sb.from('lrd_test_results').select('*').eq('id', resId).single();
-                
-                // 2. Question Responses with Subject/Chapter
-                const { data: resp } = await sb.from('lrd_question_responses')
-                    .select('*, lrd_questions(chapter_code, lrd_chapters(name, lrd_subjects(name)))')
-                    .eq('result_id', resId);
+                // ૧. ટેસ્ટ રિઝલ્ટ મેળવો (કોઈ Join વગર)
+                const { data: res, error: e1 } = await sb.from('lrd_test_results').select('*').eq('id', resId).single();
+                if(e1) throw e1;
 
-                // 3. Rule Engine (સ્કોર મુજબ - એરર ફ્રી ફિલ્ટર)
+                // ૨. રૂલ એન્જિનમાંથી સૂચનો મેળવો (સ્કોર મુજબ)
                 const score = res.obtained_marks || 0;
                 const { data: rules } = await sb.from('lrd_rule_engine')
                     .select('*')
                     .lte('min_score', score)
                     .gte('max_score', score);
 
-                render(res, resp, rules);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('app').innerHTML = "ડેટા લોડ કરવામાં સમસ્યા આવી છે.";
+                render(res, rules);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('app').innerHTML = `<div class="stat-card" style="color:red">માહિતી મળી નથી. કૃપા કરીને ટેબલ સ્ટ્રક્ચર ચેક કરો.</div>`;
             }
         }
 
-        function render(res, resp, rules) {
-            // Rules Safe Access
-            const ruleItems = (rules && rules.length > 0) 
-                ? rules.map(r => `<li><i class="fas fa-arrow-right"></i> ${r.suggestion_text}</li>`).join('')
-                : '<li><i class="fas fa-check"></i> મહેનત ચાલુ રાખો, સ્કોર સુધરી રહ્યો છે.</li>';
-            
-            const actionPlan = (rules && rules.length > 0) ? rules[0].action_plan_text : "તમારા નબળા વિષયો પર વધુ ધ્યાન આપો.";
+        function render(res, rules) {
+            const ruleHTML = (rules && rules.length > 0) 
+                ? rules.map(r => `<li><i class="fas fa-check-circle"></i> ${r.suggestion_text}</li>`).join('')
+                : '<li><i class="fas fa-star"></i> તમે સારું પ્રદર્શન કરી રહ્યા છો, આ જ રીતે વાંચન ચાલુ રાખો.</li>';
 
-            // Table Rows
-            const tableRows = resp.map(r => `
-                <tr>
-                    <td>${r.lrd_questions?.lrd_chapters?.lrd_subjects?.name || '-'}</td>
-                    <td>${r.lrd_questions?.lrd_chapters?.name || '-'}</td>
-                    <td style="color: ${r.is_correct ? 'green' : 'red'}; font-weight: bold;">
-                        ${r.is_correct ? 'સાચો' : 'ખોટો'}
-                    </td>
-                </tr>
-            `).join('');
+            const actionPlan = (rules && rules.length > 0) ? rules[0].action_plan_text : "આવતા ટેસ્ટમાં વધુ સારી ચોકસાઈ લાવવા પ્રયાસ કરો.";
 
             document.getElementById('app').innerHTML = `
-                <div class="grid-main">
-                    <div>
-                        <div class="card">
-                            <h3 style="margin-top:0">ટેસ્ટ સ્કોર</h3>
-                            <canvas id="pieChart"></canvas>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-                                <div class="stat-box"><span class="stat-label">ગુણ</span><br><span class="stat-val">${res.obtained_marks}</span></div>
-                                <div class="stat-box"><span class="stat-label">ચોકસાઈ</span><br><span class="stat-val">${res.accuracy_percentage}%</span></div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="stat-box" style="background: #fffbeb; border-color: #fef3c7;">
-                                <span class="stat-label" style="color: #92400e;">એકાગ્રતા લેવલ</span><br>
-                                <span class="stat-val" style="color: #92400e;">${res.concentration_rating}/10</span>
-                            </div>
-                        </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><span class="stat-label">મેળવેલ ગુણ</span><span class="stat-val">${res.obtained_marks} / 100</span></div>
+                    <div class="stat-card"><span class="stat-label">ચોકસાઈ</span><span class="stat-val" style="color:#10b981">${res.accuracy_percentage}%</span></div>
+                    <div class="stat-card"><span class="stat-label">સમય (સેકન્ડ)</span><span class="stat-val">${res.total_time_taken_seconds}s</span></div>
+                    <div class="stat-box" style="background:white; border-radius:15px; padding:15px; text-align:center; border:1px solid #e2e8f0">
+                        <span class="stat-label">એકાગ્રતા</span><br><span class="stat-val" style="color:#f59e0b">${res.concentration_rating}/10</span>
+                    </div>
+                </div>
+
+                <div class="perf-layout">
+                    <div class="stat-card">
+                        <h3 style="margin-top:0">પરિણામ વિશ્લેષણ</h3>
+                        <canvas id="perfChart"></canvas>
                     </div>
 
                     <div>
                         <div class="rule-box">
-                            <h3><i class="fas fa-bolt"></i> એક્શન પ્લાન (Rule Engine)</h3>
-                            <ul class="rule-list">${ruleItems}</ul>
+                            <h3><i class="fas fa-robot"></i> રૂલ એન્જિન સૂચન</h3>
+                            <ul class="rule-list">${ruleHTML}</ul>
                         </div>
-                        
-                        <div class="card table-card" style="margin-top:20px;">
-                            <h3>વિષયવાર એનાલિસિસ</h3>
-                            <table>
-                                <thead><tr><th>વિષય</th><th>ચેપ્ટર</th><th>પરિણામ</th></tr></thead>
-                                <tbody>${tableRows}</tbody>
-                            </table>
-                        </div>
-
-                        <div class="badge-plan">
+                        <div class="action-quote">
                             "${actionPlan}"
                         </div>
                     </div>
                 </div>
             `;
 
-            // Pie Chart Init
-            const ctx = document.getElementById('pieChart').getContext('2d');
+            // Chart Logic
+            const ctx = document.getElementById('perfChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['સાચા', 'ખોટા'],
+                    labels: ['સાચા ગુણ', 'બાકી'],
                     datasets: [{
                         data: [res.obtained_marks, 100 - res.obtained_marks],
-                        backgroundColor: ['#10B981', '#EF4444'],
+                        backgroundColor: ['#1e3a8a', '#e2e8f0'],
                         borderWidth: 0
                     }]
                 },
