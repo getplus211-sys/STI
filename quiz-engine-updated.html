@@ -134,13 +134,12 @@ const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new E
 
 /* ========== INITIALIZATION ========== */
 async function init() {
-  const { data: { session }, error: authError } = await sb.auth.getSession();
-  if (!session) {
+  const { data: { user }, error: authError } = await sb.auth.getUser();
+  if (authError || !user) {
     alertModal('🔒', 'લોગિન જરૂરી', 'ટેસ્ટ આપવા માટે કૃપા કરીને લોગિન કરો.');
     setTimeout(() => window.location.href = 'index.html', 2000);
     return;
   }
-  user = session.user;
 
   try {
     // 1. Fetch Mapping First
