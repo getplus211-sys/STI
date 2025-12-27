@@ -137,6 +137,7 @@ async function init() {
   const { data: { session }, error: authError } = await sb.auth.getSession();
   if (!session) {
     alertModal('🔒', 'લોગિન જરૂરી', 'ટેસ્ટ આપવા માટે કૃપા કરીને લોગિન કરો.');
+    setTimeout(() => window.location.href = 'index.html', 2000);
     return;
   }
   user = session.user;
