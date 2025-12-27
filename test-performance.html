@@ -3,171 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LRD Beginners - પર્ફોર્મન્સ ડેશબોર્ડ</title>
+    <title>LRD Beginners - ટેસ્ટ પર્ફોર્મન્સ</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --blue-800: #1e3a8a; --blue-600: #2563eb; --dark-slate: #0f172a; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
-        
-        /* PRF112 Navbar */
-        .nav { background: var(--blue-800); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
-        .logo-container { display: flex; align-items: center; gap: 10px; }
-        .logo-tag { background: white; color: var(--blue-800); padding: 2px 8px; border-radius: 4px; font-weight: bold; }
-        
-        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
-        
-        /* Stats Cards */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 1rem; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .stat-label { font-size: 0.75rem; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-        .stat-val { font-size: 1.5rem; font-weight: 800; color: var(--blue-800); margin-top: 0.5rem; display: block; }
-
-        /* Performance Content Area */
-        .perf-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
-        @media (max-width: 768px) { .perf-grid { grid-template-columns: 1fr; } }
-
-        /* Dark Rule Engine Box - PRF112 Exact */
-        .rule-box { background: var(--dark-slate); color: white; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .rule-header { display: flex; align-items: center; gap: 0.75rem; color: #fbbf24; font-size: 1.25rem; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 1.5rem; }
-        .rule-list { list-style: none; padding: 0; margin: 0; }
-        .rule-list li { display: flex; gap: 0.75rem; margin-bottom: 1rem; font-size: 0.9rem; color: #cbd5e1; }
-        .rule-list i { color: #10b981; margin-top: 3px; }
-
-        /* Table Card */
-        .card { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th { text-align: left; padding: 0.75rem; background: #f8fafc; color: #64748b; font-size: 0.8rem; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; font-size: 0.875rem; }
-
-        .action-quote { background: white; border-left: 4px solid var(--blue-600); padding: 1rem; border-radius: 0.5rem; text-align: center; font-style: italic; font-weight: 600; margin-top: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .btn-home { background: var(--blue-600); color: white; padding: 0.5rem 1.5rem; border-radius: 9999px; text-decoration: none; font-weight: bold; }
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;600;700&display=swap');
+        body { font-family: 'Hind Vadodara', sans-serif; background-color: #f0f2f5; }
+        .subject-card:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+        .loading { border: 3px solid #f3f4f6; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
-    <nav class="nav">
-        <div class="logo-container">
-            <span class="logo-tag">LRD</span>
-            <span style="font-size: 1.25rem; font-weight: bold;">Beginners</span>
+    <nav class="bg-blue-800 text-white p-4 shadow-xl flex justify-between items-center px-8 sticky top-0 z-50">
+        <div class="flex items-center gap-2">
+            <div class="bg-white text-blue-800 p-1 rounded font-bold">LRD</div>
+            <h1 class="text-xl font-bold">Beginners</h1>
         </div>
-        <a href="quiz-engine.html" class="btn-home"><i class="fas fa-home"></i> હોમ</a>
+        <div class="flex gap-2">
+            <button onclick="location.href='quiz-engine-updated__6_.html'" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-full text-sm font-semibold transition">
+                <i class="fas fa-home mr-2"></i> હોમ
+            </button>
+            <button onclick="location.href='overall-performance.html'" class="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-full text-sm font-semibold transition">
+                <i class="fas fa-chart-line mr-2"></i> Overall
+            </button>
+        </div>
     </nav>
 
-    <div class="container" id="app">
-        <div style="text-align: center; padding: 5rem;">
-            <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--blue-600)"></i>
-            <p style="margin-top: 1rem;">વિશ્લેષણ તૈયાર થઈ રહ્યું છે...</p>
+    <div id="app" class="max-w-7xl mx-auto p-4 md:p-8">
+        <div class="text-center py-12">
+            <div class="loading"></div>
+            <p class="text-gray-600 mt-4">લોડ થઈ રહ્યું છે...</p>
         </div>
     </div>
 
     <script>
-        const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-        const sb = supabase.createClient(SB_URL, SB_KEY);
+        const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let user = null, pieChart = null;
+        const params = new URLSearchParams(window.location.search);
+        const RESULT_ID = params.get('result_id');
 
         async function init() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const resId = urlParams.get('result_id');
-            if(!resId) return;
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) { showError('લોગિન જરૂરી છે.', false); return; }
+            user = session.user;
+            if (!RESULT_ID) { showError('Result ID નથી મળ્યું.', true); return; }
+            await loadData();
+        }
 
+        async function loadData() {
             try {
-                // ૧. રિઝલ્ટ ડેટા મેળવો
-                const { data: result } = await sb.from('lrd_test_results').select('*').eq('id', resId).single();
-                
-                // ૨. રૂલ એન્જિન (તમારા ટેબલના રૂલ્સ)
-                const { data: rules } = await sb.from('lrd_rule_engine')
-                    .select('*')
-                    .lte('min_score', result.obtained_marks)
-                    .gte('max_score', result.obtained_marks);
+                const { data: result } = await sb.from('lrd_test_results').select('*').eq('id', RESULT_ID).single();
+                const { data: test } = await sb.from('lrd_tests').select('*').eq('id', result.test_id).single();
+                const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+                const { data: responses } = await sb.from('lrd_question_responses').select(`
+                    *, lrd_questions(id, chapter_id, difficulty_level, 
+                    lrd_chapters(id, name, chapter_code, subject_id, lrd_subjects(id, name, subject_code)))
+                `).eq('result_id', RESULT_ID);
 
-                // ૩. પ્રશ્નવાર વિગતો (Subject & Chapter) - Join વગર
-                const { data: responses } = await sb.from('lrd_question_responses').select('*').eq('result_id', resId);
-                
-                let detailList = [];
-                for(let r of responses) {
-                    const { data: q } = await sb.from('lrd_questions').select('chapter_id').eq('id', r.question_id).single();
-                    const { data: ch } = await sb.from('lrd_chapters').select('name, subject_id').eq('id', q.chapter_id).single();
-                    const { data: sub } = await sb.from('lrd_subjects').select('name').eq('id', ch.subject_id).single();
-                    
-                    detailList.push({
-                        sub: sub.name,
-                        chapter: ch.name,
-                        is_correct: r.is_correct
-                    });
-                }
-
-                render(result, rules, detailList);
+                const subjectData = processSubjects(responses);
+                const suggestions = await fetchSuggestions(result, subjectData);
+                renderDashboard(profile, result, test, subjectData, suggestions);
             } catch (err) {
                 console.error(err);
-                document.getElementById('app').innerHTML = "ડેટા લોડ કરવામાં ભૂલ છે.";
+                showError('ડેટા લોડ કરવામાં સમસ્યા: ' + err.message, true);
             }
         }
 
-        function render(res, rules, details) {
-            const ruleItems = rules.length > 0 
-                ? rules.map(r => `<li><i class="fas fa-check-circle"></i> ${r.suggestion_text}</li>`).join('')
-                : '<li><i class="fas fa-info-circle"></i> નિયમિત પ્રેક્ટિસ કરતા રહો.</li>';
+        function processSubjects(responses) {
+            const map = {};
+            responses.forEach(r => {
+                if (!r.lrd_questions?.lrd_chapters) return;
+                const ch = r.lrd_questions.lrd_chapters, sub = ch.lrd_subjects;
+                if (!sub) return;
+                if (!map[sub.id]) map[sub.id] = { id: sub.id, name: sub.name, subject_code: sub.subject_code, total: 0, correct: 0, chapters: {} };
+                if (!map[sub.id].chapters[ch.id]) map[sub.id].chapters[ch.id] = { id: ch.id, name: ch.name, chapter_code: ch.chapter_code, total: 0, correct: 0 };
+                map[sub.id].total++;
+                map[sub.id].chapters[ch.id].total++;
+                if (r.is_correct) { map[sub.id].correct++; map[sub.id].chapters[ch.id].correct++; }
+            });
+            return Object.values(map);
+        }
 
-            const tableRows = details.map(d => `
-                <tr>
-                    <td>${d.sub}</td>
-                    <td>${d.chapter}</td>
-                    <td style="color: ${d.is_correct ? '#10b981' : '#ef4444'}; font-weight: bold;">
-                        ${d.is_correct ? 'સાચો' : 'ખોટો'}
-                    </td>
-                </tr>
-            `).join('');
+        async function fetchSuggestions(result, subjectData) {
+            const all = [];
+            for (const sub of subjectData) {
+                for (const ch of Object.values(sub.chapters)) {
+                    const score = (ch.correct / ch.total) * 100;
+                    const speed = result.avg_time_per_question < 30 ? 'fast' : result.avg_time_per_question < 60 ? 'medium' : 'slow';
+                    const { data } = await sb.from('lrd_rule_engine').select('*').eq('chapter_code', ch.chapter_code)
+                        .lte('min_score', score).gte('max_score', score).eq('speed_category', speed).order('priority', { ascending: false });
+                    if (data) all.push(...data);
+                }
+            }
+            return all;
+        }
+
+        function renderDashboard(profile, result, test, subjectData, suggestions) {
+            const correct = (result.easy_correct || 0) + (result.hard_correct || 0);
+            const total = (result.easy_total || 0) + (result.hard_total || 0);
+            const wrong = total - correct - (result.unanswered_count || 0);
+            const skipped = result.unanswered_count || 0;
+            const initials = profile.full_name ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'US';
+            const date = new Date(result.created_at);
+            const dateStr = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
 
             document.getElementById('app').innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-card"><span class="stat-label">કુલ ગુણ</span><span class="stat-val">${res.obtained_marks} / 100</span></div>
-                    <div class="stat-card"><span class="stat-label">ચોકસાઈ</span><span class="stat-val" style="color:#10b981">${res.accuracy_percentage}%</span></div>
-                    <div class="stat-card"><span class="stat-label">સમય</span><span class="stat-val">${res.total_time_taken_seconds}s</span></div>
-                    <div class="stat-card"><span class="stat-label">એકાગ્રતા</span><span class="stat-val" style="color:#f59e0b">${res.concentration_rating}/10</span></div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 flex flex-wrap justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-2xl font-bold">${initials}</div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium tracking-wide uppercase">વિદ્યાર્થી</p>
+                            <h2 class="text-2xl font-bold text-gray-800">${profile.full_name || 'User'}</h2>
+                        </div>
+                    </div>
+                    <div class="flex gap-8">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-400 uppercase font-bold mb-1">લેવલ</p>
+                            <span class="bg-orange-100 text-orange-600 px-4 py-1 rounded-full text-sm font-bold shadow-sm">${profile.current_level || 'શરૂઆત'}</span>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-400 uppercase font-bold mb-1">રેન્ક</p>
+                            <p class="text-2xl font-black text-blue-700">#${profile.current_rank || '-'}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-400 uppercase font-bold mb-1">તારીખ</p>
+                            <p class="text-lg font-bold text-gray-700">${dateStr}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="perf-grid">
-                    <div>
-                        <div class="card" style="text-align:center;">
-                            <h3 style="margin-top:0">પરિણામ ગ્રાફ</h3>
-                            <canvas id="perfPie" style="max-height: 250px;"></canvas>
-                        </div>
-                        <div class="action-quote">
-                            "${rules[0]?.action_plan_text || 'તમારા નબળા વિષયો પર વધુ ધ્યાન આપો.'}"
-                        </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                        <h3 class="font-bold text-gray-700 mb-6">ટેસ્ટનું પરિણામ (Pie Chart)</h3>
+                        <div class="w-full max-w-[220px]"><canvas id="performancePie"></canvas></div>
                     </div>
 
-                    <div>
-                        <div class="rule-box">
-                            <div class="rule-header"><i class="fas fa-robot"></i> એક્શન પ્લાન (Rule Engine)</div>
-                            <ul class="rule-list">${ruleItems}</ul>
+                    <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">કુલ/મેળવેલ ગુણ</p>
+                            <p class="text-xl font-bold">${test.total_marks} / <span class="text-blue-600">${result.obtained_marks.toFixed(2)}</span></p>
                         </div>
-                        
-                        <div class="card" style="margin-top: 1.5rem;">
-                            <h3 style="margin-top:0">વિષયવાર એનાલિસિસ</h3>
-                            <table>
-                                <thead><tr><th>વિષય</th><th>ચેપ્ટર</th><th>રિઝલ્ટ</th></tr></thead>
-                                <tbody>${tableRows}</tbody>
-                            </table>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">ચોકસાઈ (Accuracy)</p>
+                            <p class="text-xl font-bold text-green-600">${result.accuracy_percentage.toFixed(1)}%</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">સમય/પ્રશ્ન</p>
+                            <p class="text-xl font-bold">${result.avg_time_per_question || 0} સેકન્ડ</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">એકાગ્રતા રેટિંગ</p>
+                            <p class="text-xl font-bold text-purple-600">${result.concentration_rating || 0}/10</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">સરળ (સાચા/કુલ)</p>
+                            <p class="text-xl font-bold">${result.easy_correct || 0}/${result.easy_total || 0}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">અઘરા (સાચા/કુલ)</p>
+                            <p class="text-xl font-bold text-red-500">${result.hard_correct || 0}/${result.hard_total || 0}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">ટાર્ગેટ સ્કોર</p>
+                            <p class="text-xl font-bold">${test.target_score || '-'}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">સુધારો જરૂર (%)</p>
+                            <p class="text-xl font-bold text-orange-500">${result.improvement_percentage?.toFixed(1) || 0}%</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center">
+                            <p class="text-gray-500 text-sm mb-1">બાકી પ્રશ્નો</p>
+                            <p class="text-xl font-bold">${skipped}</p>
                         </div>
                     </div>
+                </div>
+
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-book-open text-blue-600"></i> વિષય અને ચેપ્ટરવાર એનાલિસિસ
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" id="subjectsGrid"></div>
+
+                <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden mb-8">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl"><i class="fas fa-bullseye"></i></div>
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400 border-b border-slate-700 pb-2">તમારા માટે એક્શન પ્લાન</h3>
+                    <div id="actionPlan"></div>
+                </div>
+
+                <div class="bg-white border-l-4 border-blue-600 p-4 rounded shadow-sm text-center">
+                    <p class="text-gray-800 italic font-semibold">"આગામી ટેસ્ટમાં ${result.accuracy_percentage < 70 ? '70%' : '90%'} થી વધુ માર્ક્સ લાવવાનું લક્ષ્ય રાખવું!"</p>
                 </div>
             `;
 
-            new Chart(document.getElementById('perfPie'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['સાચા', 'ખોટા'],
-                    datasets: [{
-                        data: [res.obtained_marks, 100 - res.obtained_marks],
-                        backgroundColor: ['#1e3a8a', '#e2e8f0'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+            renderSubjects(subjectData);
+            renderActionPlan(suggestions);
+            renderPieChart(correct, wrong, skipped);
+        }
+
+        function renderSubjects(subjectData) {
+            const grid = document.getElementById('subjectsGrid');
+            const colors = [
+                { bg: 'bg-blue-50', text: 'text-blue-800', badge: 'bg-blue-600' },
+                { bg: 'bg-indigo-50', text: 'text-indigo-800', badge: 'bg-indigo-600' },
+                { bg: 'bg-purple-50', text: 'text-purple-800', badge: 'bg-purple-600' },
+                { bg: 'bg-pink-50', text: 'text-pink-800', badge: 'bg-pink-600' }
+            ];
+
+            subjectData.forEach((sub, i) => {
+                const prof = sub.total > 0 ? ((sub.correct / sub.total) * 100).toFixed(0) : 0;
+                const color = colors[i % colors.length];
+                let chaptersHTML = '';
+                Object.values(sub.chapters).forEach(ch => {
+                    const pct = ch.total > 0 ? ((ch.correct / ch.total) * 100).toFixed(0) : 0;
+                    const clr = pct >= 90 ? 'text-green-600' : pct >= 70 ? 'text-green-500' : pct >= 50 ? 'text-orange-500' : 'text-red-600';
+                    chaptersHTML += `
+                        <tr class="border-b border-gray-50">
+                            <td class="py-2 font-medium text-gray-600">${ch.name}</td>
+                            <td class="py-2 text-center">${ch.total}</td>
+                            <td class="py-2 text-center">${ch.correct}</td>
+                            <td class="py-2 text-right ${clr} font-bold">${pct}%</td>
+                        </tr>
+                    `;
+                });
+
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden subject-card">
+                        <div class="${color.bg} p-4 border-b border-gray-100 flex justify-between items-center">
+                            <h4 class="font-bold ${color.text} text-lg">${sub.name}</h4>
+                            <span class="${color.badge} text-white text-xs px-2 py-1 rounded">નિપુણતા: ${prof}%</span>
+                        </div>
+                        <div class="p-4">
+                            <table class="w-full text-left text-sm">
+                                <thead class="text-gray-400 uppercase text-xs">
+                                    <tr>
+                                        <th class="pb-2">ચેપ્ટર</th>
+                                        <th class="pb-2 text-center">પ્રશ્નો</th>
+                                        <th class="pb-2 text-center">સાચા</th>
+                                        <th class="pb-2 text-right">પરિણામ</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-700">${chaptersHTML || '<tr><td colspan="4" class="text-center py-4 text-gray-400">ડેટા નથી</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
             });
+        }
+
+        function renderActionPlan(suggestions) {
+            const el = document.getElementById('actionPlan');
+            if (!suggestions || !suggestions.length) {
+                el.innerHTML = '<div class="text-center py-6"><p class="text-gray-300 text-lg">શાબાશ! તમારું પર્ફોર્મન્સ સારું છે.</p></div>';
+                return;
+            }
+            const top = suggestions.slice(0, 3);
+            let focus = '', plans = '';
+            top.forEach(s => { if (s.suggestion_text) focus += `<li class="flex items-start gap-2"><i class="fas fa-check-circle text-green-500 mt-1"></i> ${s.suggestion_text}</li>`; });
+            top.forEach(s => { if (s.action_plan_text) plans += `<li class="flex items-start gap-2"><i class="fas fa-check-circle text-green-500 mt-1"></i> ${s.action_plan_text}</li>`; });
+            el.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-2">વધારે સમય આપો:</p><ul class="space-y-2 text-gray-300 text-sm">${focus || '<li>કોઈ સૂચન નથી</li>'}</ul></div>
+                    <div><p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-2">વાંચન સૂચન:</p><ul class="space-y-2 text-gray-300 text-sm">${plans || '<li>કોઈ સૂચન નથી</li>'}</ul></div>
+                </div>
+            `;
+        }
+
+        function renderPieChart(c, w, s) {
+            const ctx = document.getElementById('performancePie');
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['સાચા', 'ખોટા', 'બાકી'], datasets: [{ data: [c, w, s], backgroundColor: ['#10B981', '#EF4444', '#E5E7EB'], borderWidth: 0 }] },
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function showError(msg, retry) {
+            document.getElementById('app').innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm p-8 text-center">
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <h3 class="text-xl font-bold text-red-600 mb-3">Error</h3>
+                    <p class="text-gray-600 mb-6">${msg}</p>
+                    ${retry ? '<button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold">ફરી પ્રયાસ કરો</button>' : ''}
+                </div>
+            `;
         }
 
         init();
