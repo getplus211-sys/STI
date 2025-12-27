@@ -427,9 +427,8 @@ async function submitTest() {
     const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
     const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
 
-    // Get subject_id and chapter_id from first question
+    // Get subject_id from first question
     const subjectId = questions[0]?.subject_id || null;
-    const chapterId = questions[0]?.chapter_id || null;
 
     const { data: resData, error: resErr } = await sb.from("lrd_test_results").insert({
       user_id: user.id,
@@ -444,7 +443,6 @@ async function submitTest() {
       unanswered_count: skipped,
       avg_time_per_question: avgTimePerQuestion.toFixed(2),
       subject_id: subjectId,
-      chapter_id: chapterId,
       concentration_rating: concentration,
       improvement_percentage: improvement
     }).select().single();
