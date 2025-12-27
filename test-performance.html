@@ -2,69 +2,144 @@
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
-    <title>ટેસ્ટ પર્ફોર્મન્સ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRD Beginners - ટેસ્ટ પર્ફોર્મન્સ</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .stat { text-align: center; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-        .rules { background: #1e293b; color: #fbbf24; padding: 20px; border-radius: 10px; line-height: 1.6; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
-        th { background: #f8fafc; }
-        .btn { background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+        :root {
+            --primary: #1e3a8a; --secondary: #2563eb; --success: #10b981;
+            --danger: #ef4444; --warning: #f59e0b; --bg: #f0f2f5;
+        }
+        body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #333; }
+        
+        /* Header & Nav */
+        .navbar { background: var(--primary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .logo span { background: white; color: var(--primary); padding: 2px 6px; border-radius: 4px; }
+        
+        /* Layout Container */
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .stat-box { background: #f8fafc; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+        .stat-value { font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 5px; }
+
+        /* Charts & Analysis */
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        @media (max-width: 768px) { .analysis-grid { grid-template-columns: 1fr; } }
+        
+        /* Rule Engine Styling (Dark) */
+        .rule-engine { background: #111827; color: white; border-radius: 15px; padding: 25px; position: relative; overflow: hidden; }
+        .rule-engine h3 { color: #fbbf24; border-bottom: 1px solid #374151; padding-bottom: 10px; margin-top: 0; }
+        .rule-list { list-style: none; padding: 0; }
+        .rule-list li { margin-bottom: 12px; display: flex; gap: 10px; align-items: start; font-size: 14px; color: #d1d5db; }
+        .rule-list li i { color: var(--success); margin-top: 4px; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .btn-blue { background: var(--secondary); color: white; }
     </style>
 </head>
 <body>
-    <div id="app">
-        <div style="text-align:center; padding:50px;">લોડ થઈ રહ્યું છે...</div>
+
+    <nav class="navbar">
+        <div class="logo"><span>LRD</span> Beginners</div>
+        <a href="quiz-engine-updated__6_.html" class="btn btn-blue"><i class="fas fa-home"></i> હોમ</a>
+    </nav>
+
+    <div class="container" id="mainContent">
+        <div style="text-align:center; padding: 50px;">માહિતી લોડ થઈ રહી છે...</div>
     </div>
 
     <script>
         const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"; // Je biji files ma chale che e j nakho
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const resId = params.get('result_id');
-            if (!resId) { document.getElementById('app').innerHTML = "No ID found"; return; }
+            if(!resId) {
+                document.getElementById('mainContent').innerHTML = "<div class='card'>ટેસ્ટ આઈડી મળ્યું નથી.</div>";
+                return;
+            }
 
             try {
-                // 1. Get Test Result
-                const { data: res } = await sb.from('lrd_test_results').select('*').eq('id', resId).single();
-                
-                // 2. Get Rules (Simple query without joins)
-                const { data: rules } = await sb.from('lrd_rule_engine').select('*').limit(3);
+                // 1. Fetch Test Result
+                const { data: res, error: e1 } = await sb.from('lrd_test_results').select('*').eq('id', resId).single();
+                if(e1) throw e1;
+
+                // 2. Fetch Rules (Based on speed and marks)
+                const speed = res.total_time_taken_seconds < 300 ? 'fast' : 'slow';
+                const { data: rules } = await sb.from('lrd_rule_engine')
+                                           .select('*')
+                                           .lte('min_score', res.obtained_marks)
+                                           .gte('max_score', res.obtained_marks);
 
                 render(res, rules);
             } catch (err) {
-                document.getElementById('app').innerHTML = "Error loading data.";
+                console.error(err);
+                document.getElementById('mainContent').innerHTML = "<div class='card'>ડેટા લોડ કરવામાં ભૂલ આવી.</div>";
             }
         }
 
         function render(res, rules) {
-            document.getElementById('app').innerHTML = `
+            document.getElementById('mainContent').innerHTML = `
                 <div class="card">
-                    <h2>રિઝલ્ટ: ${res.obtained_marks} / 100</h2>
-                    <div class="grid">
-                        <div class="stat"><b>ચોકસાઈ</b><br>${res.accuracy_percentage}%</div>
-                        <div class="stat"><b>સમય</b><br>${res.total_time_taken_seconds} સેકન્ડ</div>
-                        <div class="stat"><b>એકાગ્રતા</b><br>${res.concentration_rating}/10</div>
+                    <div class="stats-grid">
+                        <div class="stat-box"><p class="stat-label">કુલ ગુણ</p><p class="stat-value">${res.obtained_marks}/100</p></div>
+                        <div class="stat-box"><p class="stat-label">ચોકસાઈ (Accuracy)</p><p class="stat-value" style="color:var(--success)">${res.accuracy_percentage}%</p></div>
+                        <div class="stat-box"><p class="stat-label">કુલ સમય</p><p class="stat-value">${Math.floor(res.total_time_taken_seconds/60)} મિનીટ</p></div>
+                        <div class="stat-box"><p class="stat-label">એકાગ્રતા</p><p class="stat-value" style="color:var(--warning)">${res.concentration_rating}/10</p></div>
                     </div>
                 </div>
 
-                <div class="rules">
-                    <h3>રૂલ એન્જિન સૂચનો:</h3>
-                    <ul>${rules.map(r => `<li>${r.suggestion_text}</li>`).join('')}</ul>
+                <div class="analysis-grid">
+                    <div class="card" style="text-align:center;">
+                        <h3>પરિણામ ગ્રાફ</h3>
+                        <canvas id="perfChart" style="max-height: 250px;"></canvas>
+                    </div>
+
+                    <div class="rule-engine">
+                        <h3><i class="fas fa-robot"></i> એક્શન પ્લાન (Rule Engine)</h3>
+                        <ul class="rule-list">
+                            ${rules && rules.length > 0 
+                                ? rules.map(r => `<li><i class="fas fa-check-circle"></i> ${r.suggestion_text}</li>`).join('') 
+                                : '<li><i class="fas fa-info-circle"></i> સારી મહેનત છે, આ જ રીતે વાંચન ચાલુ રાખો.</li>'}
+                        </ul>
+                        <div style="margin-top:15px; padding-top:10px; border-top: 1px solid #374151;">
+                            <p style="color:#9ca3af; font-size:12px;">વિશેષ સલાહ:</p>
+                            <p style="font-style:italic;">${rules[0]?.action_plan_text || 'આગામી ટેસ્ટમાં ચોકસાઈ વધારવા પર ધ્યાન આપો.'}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="margin-top: 20px;">
-                    <a href="overall-performance.html" class="btn">ઓવરઓલ પર્ફોર્મન્સ જુઓ</a>
+                <div style="text-align:center; margin-top:20px;">
+                    <a href="overall-performance.html" class="btn btn-blue">ઓવરઓલ પ્રોગ્રેસ જુઓ <i class="fas fa-arrow-right"></i></a>
                 </div>
             `;
+
+            // Chart Logic
+            const ctx = document.getElementById('perfChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['સાચા', 'ખોટા'],
+                    datasets: [{
+                        data: [res.obtained_marks, 100 - res.obtained_marks],
+                        backgroundColor: ['#10B981', '#EF4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            });
         }
+
         init();
     </script>
 </body>
