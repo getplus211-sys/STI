@@ -1,685 +1,473 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-<meta charset="UTF-8">
-<title>LRD Quiz - Mock Test</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9}
-.container{max-width:900px;margin:auto;padding:12px}
-.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;
-box-shadow:0 8px 24px rgba(0,0,0,.06)}
-h2,h3{margin:8px 0}
-button{border:none;border-radius:14px;padding:14px 20px;font-size:16px;width:100%;cursor:pointer;font-weight:600;transition:all .3s}
-.primary{background:#22c55e;color:#fff}
-.primary:hover{background:#16a34a}
-.gray{background:#e5e7eb;color:#334155}
-.gray:hover{background:#d1d5db}
-.danger{background:#dc2626;color:#fff}
-.danger:hover{background:#b91c1c}
-.option{border:2px solid #e5e7eb;border-radius:12px;padding:14px;margin:10px 0;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .3s}
-.option:hover{border-color:#22c55e;background:#f0fdf4}
-.option.selected{border-color:#22c55e;background:#f0fdf4}
-.hidden{display:none}
-#timer{font-weight:bold;color:#dc2626;font-size:1.3rem}
-.nav-btns{display:flex;gap:12px;margin-top:20px}
-.q-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:20px}
-.q-num{padding:12px;text-align:center;background:#f1f5f9;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;transition:all .3s}
-.q-num:hover{background:#e2e8f0}
-.q-num.active{background:#22c55e;color:#fff}
-.q-num.answered{background:#8b5cf6;color:#fff}
-.chart-container{width:100%;max-width:300px;margin:20px auto}
-.badge{padding:5px 10px;border-radius:8px;font-size:13px;font-weight:bold;text-transform:uppercase}
-.badge-easy{background:#dcfce7;color:#166534}
-.badge-medium{background:#fef9c3;color:#854d0e}
-.badge-hard{background:#fee2e2;color:#991b1b}
-
-/* Modal Styles */
-#modal-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000;
-}
-#modal-content {
-  background: #fff; padding: 28px; border-radius: 20px; max-width: 360px; width: 90%;
-  text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-}
-.nav-bar{background:#1e40af;color:#fff;padding:16px 24px;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
-.nav-logo{background:#fff;color:#1e40af;padding:6px 12px;border-radius:8px;font-weight:bold;margin-right:12px}
-.nav-btn{background:#2563eb;color:#fff;border:none;padding:10px 20px;border-radius:25px;font-size:14px;cursor:pointer;transition:all .3s}
-.nav-btn:hover{background:#1d4ed8}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRD Quiz Engine V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Hind Vadodara', sans-serif; background: #f1f5f9; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(30,64,175,0.3); }
+        .timer { font-size: 24px; font-weight: bold; }
+        .question-card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .option { background: #f8fafc; border: 2px solid #e2e8f0; padding: 16px; margin: 10px 0; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { background: #e0f2fe; border-color: #3b82f6; }
+        .option.selected { background: #dbeafe; border-color: #2563eb; font-weight: 600; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1e40af; transform: translateY(-2px); }
+        .btn-success { background: #22c55e; color: white; }
+        .btn-danger { background: #dc2626; color: white; }
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .difficulty-easy { background: #dcfce7; color: #166534; }
+        .difficulty-medium { background: #fef3c7; color: #92400e; }
+        .difficulty-hard { background: #fee2e2; color: #991b1b; }
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; margin: 20px 0; }
+        .nav-btn { padding: 10px; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .nav-btn.answered { background: #dbeafe; border-color: #2563eb; color: #1e40af; }
+        .nav-btn.current { background: #2563eb; color: white; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; margin: 10% auto; padding: 30px; border-radius: 16px; max-width: 500px; text-align: center; }
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .question-card { padding: 16px; }
+        }
+    </style>
 </head>
 <body>
-
-<div class="nav-bar">
-  <div style="display:flex;align-items:center">
-    <span class="nav-logo">LRD</span>
-    <span style="font-size:18px;font-weight:bold">Mock Test</span>
-  </div>
-  <button class="nav-btn" onclick="goHome()"><i>🏠</i> હોમ</button>
-</div>
-
-<div id="modal-overlay">
-  <div id="modal-content">
-    <div id="modal-icon" style="font-size: 56px; margin-bottom: 16px;"></div>
-    <h3 id="modal-title" style="margin-bottom: 12px; font-size: 20px;"></h3>
-    <p id="modal-text" style="color: #64748b; margin-bottom: 24px; line-height: 1.6; font-size: 15px;"></p>
-    <button id="modal-btn" class="primary" onclick="closeModal()">OK</button>
-  </div>
-</div>
-
-<div id="setup-screen" class="container">
-  <div class="card">
-    <h2 id="setup-title">📝 Mock Test</h2>
-    <p id="setup-desc" style="color: #64748b; font-size: 15px;">લોડ થઈ રહ્યું છે...</p>
-    
-    <div id="test-info" class="hidden">
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 24px 0;">
-        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; text-align: center; border: 2px solid #e2e8f0;">
-          <small style="color: #64748b; font-weight: 600;">પ્રશ્નો</small>
-          <div id="info-qcount" style="font-size: 24px; font-weight: bold; color: #1e293b; margin-top: 4px;">-</div>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h1 style="font-size: 24px; margin-bottom: 5px;" id="testTitle">લોડ કરી રહ્યા છીએ...</h1>
+                    <p style="opacity: 0.9; font-size: 14px;" id="testInfo">કુલ પ્રશ્નો: -</p>
+                </div>
+                <div class="timer" id="timer">00:00</div>
+            </div>
         </div>
-        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; text-align: center; border: 2px solid #e2e8f0;">
-          <small style="color: #64748b; font-weight: 600;">સમય</small>
-          <div id="info-time" style="font-size: 24px; font-weight: bold; color: #1e293b; margin-top: 4px;">-</div>
-        </div>
-        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; text-align: center; border: 2px solid #e2e8f0;">
-          <small style="color: #64748b; font-weight: 600;">ગુણ</small>
-          <div id="info-marks" style="font-size: 24px; font-weight: bold; color: #1e293b; margin-top: 4px;">-</div>
-        </div>
-      </div>
+
+        <div id="mainContent"></div>
     </div>
 
-    <button id="start-btn" class="primary hidden" onclick="startTest()">✨ Start Test Now</button>
-  </div>
-</div>
-
-<div id="quiz-screen" class="container hidden">
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px">
-    <span id="q-progress" style="font-weight:700;color:#334155;font-size:16px">Question 1/0</span>
-    <span id="timer">00:00</span>
-  </div>
-
-  <div class="card">
-    <div id="question-text" style="font-size:18px;margin-bottom:24px;font-weight:600;line-height:1.6;color:#1e293b"></div>
-    <div id="options-container"></div>
-  </div>
-
-  <div class="nav-btns">
-    <button class="gray" onclick="prevQuestion()" style="flex:1">← પાછળ</button>
-    <button class="primary" id="next-btn" onclick="nextQuestion()" style="flex:2">આગળ →</button>
-  </div>
-
-  <div class="q-nav" id="q-nav-grid"></div>
-
-  <button class="danger" style="margin-top:24px;background:#fee2e2;color:#dc2626;font-weight:700;border:2px solid #fecaca" onclick="confirmSubmit()">✓ Finish & Submit</button>
-</div>
-
-<div id="result-screen" class="container hidden">
-  <div class="card" style="text-align:center">
-    <h2 id="result-title" style="color:#1e293b">🎉 Test પૂરું થયું!</h2>
-    <div class="chart-container">
-      <canvas id="resultChart"></canvas>
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;" id="modalTitle"></h2>
+            <p style="margin-bottom: 20px; color: #64748b;" id="modalText"></p>
+            <button class="btn btn-primary" onclick="closeModal()">બંધ કરો</button>
+        </div>
     </div>
-    <div id="score-details" style="margin-bottom:24px"></div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-      <button class="primary" onclick="viewSolutions()">📖 Solutions</button>
-      <button class="primary" style="background:#8b5cf6" onclick="viewPerformance()">📊 Performance</button>
-    </div>
-    <button class="gray" style="margin-top:12px" onclick="goHome()">🏠 Back to Home</button>
-  </div>
 
-  <div id="solutions-container" class="hidden"></div>
-  
-  <div id="leaderboard-container" class="card" style="margin-top:24px">
-    <h3 style="color:#1e293b">🏆 Leaderboard</h3>
-    <div id="leaderboard-list">લોડ થઈ રહ્યું છે...</div>
-  </div>
-</div>
+    <script>
+        const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-<script>
-/* ========== CONFIGURATION ========== */
-const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const QUIZ_ID = new URLSearchParams(window.location.search).get('id') || 'DEMO_QUIZ_001';
+        
+        let user = null;
+        let quiz = null;
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let questionTimes = [];
+        let startTime = Date.now();
+        let timerInterval = null;
+        let questionStartTime = Date.now();
 
-const params = new URLSearchParams(window.location.search);
-const QUIZ_ID = params.get('id') || 'DEMO_QUIZ_001';
-const TIMEOUT_MS = 15000;
+        async function init() {
+            const { data: { user: authUser } } = await sb.auth.getUser();
+            if (!authUser) {
+                alert('લોગિન જરૂરી છે!');
+                window.location.href = 'index.html';
+                return;
+            }
+            user = authUser;
 
-let user = null;
-let questions = [];
-let currentIndex = 0;
-let userAnswers = {};
-let questionTimes = {};
-let timeLeft = 0;
-let timerInterval = null;
-let startTime = null;
-let questionStartTime = null;
-let isSubmitting = false;
-let testInfo = null;
+            // Load quiz and questions
+            const { data: quizData } = await sb.from('lrd_quizzes').select('*').eq('quiz_id', QUIZ_ID).single();
+            if (!quizData) {
+                showModal('❌', 'Error', 'Quiz નથી મળી!');
+                return;
+            }
+            quiz = quizData;
 
-const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms));
+            const { data: questionsData } = await sb.from('lrd_quiz_questions').select('*').eq('quiz_id', QUIZ_ID).order('question_number');
+            if (!questionsData || questionsData.length === 0) {
+                showModal('❌', 'Error', 'પ્રશ્નો નથી મળ્યા!');
+                return;
+            }
+            questions = questionsData;
+            userAnswers = new Array(questions.length).fill(null);
+            questionTimes = new Array(questions.length).fill(0);
 
-/* ========== INITIALIZATION ========== */
-async function init() {
-  const { data: { session }, error: authError } = await sb.auth.getSession();
-  if (!session) {
-    alertModal('🔒', 'લોગિન જરૂરી', 'ટેસ્ટ આપવા માટે કૃપા કરીને લોગિન કરો.');
-    setTimeout(() => window.location.href = 'index.html', 2000);
-    return;
-  }
-  user = session.user;
+            // Check if already attempted
+            const { data: existingAttempt } = await sb
+                .from('lrd_test_attempts')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('quiz_id', QUIZ_ID)
+                .maybeSingle();
 
-  try {
-    // 1. Fetch Mapping First
-    const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-    const finalTestId = mapping ? mapping.lrd_test_id : null;
+            if (existingAttempt) {
+                if (confirm('તમે આ ટેસ્ટ પહેલેથી આપી છે. ફરીથી આપવા માંગો છો?')) {
+                    await sb.from('lrd_test_attempts').delete().eq('id', existingAttempt.id);
+                } else {
+                    window.location.href = `performance-dashboard-v2.html?attempt_id=${existingAttempt.id}`;
+                    return;
+                }
+            }
 
-    if (!finalTestId) {
-      alertModal('⚠️', 'Error', 'આ Quiz માટે Test mapping નથી મળી.');
-      return;
-    }
+            document.getElementById('testTitle').textContent = quiz.title;
+            document.getElementById('testInfo').textContent = `કુલ ${questions.length} પ્રશ્નો | ${quiz.total_marks} ગુણ | ${quiz.duration_minutes} મિનિટ`;
 
-    // 2. Fetch Test Info
-    const { data: test } = await sb.from("lrd_tests").select("*").eq("id", finalTestId).maybeSingle();
-    testInfo = test || { title: 'Mock Test', total_marks: 100, target_score: 90, duration_minutes: 60 };
+            startTest();
+        }
 
-    // 3. Fetch Questions
-    const { data, error } = await Promise.race([
-      sb.from("lrd_questions").select("*").eq("quiz_id", QUIZ_ID).order('id', { ascending: true }),
-      timeout(TIMEOUT_MS)
-    ]);
-    if (error) throw error;
-    questions = data || [];
+        function startTest() {
+            startTime = Date.now();
+            questionStartTime = Date.now();
+            startTimer();
+            renderQuestion();
+        }
 
-    if (questions.length === 0) {
-      alertModal('⚠️', 'પ્રશ્નો નથી', 'આ Quiz માટે કોઈ પ્રશ્નો મળ્યા નથી.');
-      return;
-    }
+        function startTimer() {
+            const duration = quiz.duration_minutes * 60;
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = Math.max(0, duration - elapsed);
+                
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                document.getElementById('timer').textContent = 
+                    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
-    // 4. Check Existing Result
-    const { data: existingResult } = await Promise.race([
-      sb.from("lrd_test_results")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("test_id", finalTestId)
-        .maybeSingle(),
-      timeout(TIMEOUT_MS)
-    ]);
+                if (remaining === 0) {
+                    clearInterval(timerInterval);
+                    submitTest();
+                }
+            }, 1000);
+        }
 
-    if (existingResult) {
-      const totalQuestions = existingResult.easy_total + existingResult.hard_total;
-      const correctCount = existingResult.easy_correct + existingResult.hard_correct;
-      const wrongCount = totalQuestions - correctCount - existingResult.unanswered_count;
+        function renderQuestion() {
+            const q = questions[currentQuestionIndex];
+            const difficultyClass = q.difficulty_level?.toLowerCase() === 'easy' ? 'difficulty-easy' : 
+                                   q.difficulty_level?.toLowerCase() === 'medium' ? 'difficulty-medium' : 'difficulty-hard';
 
-      showResults({
-        result_id: existingResult.id,
-        total_score: existingResult.obtained_marks,
-        correct_count: correctCount,
-        wrong_count: wrongCount,
-        skipped_count: existingResult.unanswered_count,
-        time_taken_seconds: existingResult.total_time_taken_seconds
-      });
-    } else {
-      document.getElementById("setup-title").innerText = testInfo.title || 'Mock Test';
-      document.getElementById("setup-desc").innerText = "શું તમે તૈયાર છો?";
-      document.getElementById("info-qcount").innerText = questions.length;
-      document.getElementById("info-time").innerText = (testInfo.duration_minutes || questions.length) + " મિનિટ";
-      document.getElementById("info-marks").innerText = testInfo.total_marks || 100;
-      document.getElementById("test-info").classList.remove("hidden");
-      document.getElementById("start-btn").classList.remove("hidden");
-    }
-  } catch (err) {
-    console.error('Init error:', err);
-    alertModal('❌', 'Error', 'માહિતી લોડ કરવામાં સમસ્યા આવી. કૃપા કરીને ફરી પ્રયાસ કરો.');
-  }
-}
+            document.getElementById('mainContent').innerHTML = `
+                <div class="question-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <span style="font-weight: 600; color: #64748b;">પ્રશ્ન ${currentQuestionIndex + 1}/${questions.length}</span>
+                            <span class="difficulty-badge ${difficultyClass}" style="margin-left: 10px;">${q.difficulty_level || 'Medium'}</span>
+                        </div>
+                        <div style="font-size: 14px; color: #64748b;">
+                            <strong>${q.subject_name}</strong> • ${q.chapter_name}
+                        </div>
+                    </div>
 
-/* ========== TEST ENGINE ========== */
-function startTest() {
-  document.getElementById("setup-screen").classList.add("hidden");
-  document.getElementById("quiz-screen").classList.remove("hidden");
-  
-  const durationMinutes = testInfo.duration_minutes || questions.length;
-  timeLeft = durationMinutes * 60;
-  startTime = Date.now();
-  questionStartTime = Date.now();
-  
-  renderQuestion();
-  renderNav();
-  timerInterval = setInterval(updateTimer, 1000);
-}
+                    <p style="font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 20px; line-height: 1.6;">${q.question_text}</p>
 
-function updateTimer() {
-  if (timeLeft <= 0) { 
-    alertModal('⏰', 'સમય પૂરો', 'તમારો સમય પૂરો થયો. ટેસ્ટ સબમિટ થઈ રહી છે...');
-    setTimeout(submitTest, 1500);
-    return; 
-  }
-  timeLeft--;
-  const m = Math.floor(timeLeft / 60);
-  const s = timeLeft % 60;
-  document.getElementById("timer").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-}
+                    <div>
+                        ${['a', 'b', 'c', 'd', 'e'].filter(opt => q['option_' + opt]).map((opt, idx) => `
+                            <div class="option ${userAnswers[currentQuestionIndex] == (idx + 1) ? 'selected' : ''}" 
+                                 onclick="selectOption(${idx + 1})">
+                                <strong>${opt.toUpperCase()}.</strong> ${q['option_' + opt]}
+                            </div>
+                        `).join('')}
+                    </div>
 
-function renderQuestion() {
-  const q = questions[currentIndex];
-  document.getElementById("q-progress").innerText = `Question ${currentIndex + 1}/${questions.length}`;
-  
-  const diffBadge = q.difficulty_level ? `<span class="badge badge-${q.difficulty_level.toLowerCase()}">${q.difficulty_level}</span> ` : '';
-  document.getElementById("question-text").innerHTML = `${diffBadge}${q.question_text}`;
+                    <div style="display: flex; justify-content: space-between; margin-top: 30px; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="prevQuestion()" 
+                                ${currentQuestionIndex === 0 ? 'disabled style="opacity:0.5;"' : ''}>
+                            ← પહેલાનો
+                        </button>
+                        <button class="btn btn-danger" onclick="clearAnswer()">સાફ કરો</button>
+                        ${currentQuestionIndex === questions.length - 1 ?
+                            '<button class="btn btn-success" onclick="confirmSubmit()">Submit કરો ✓</button>' :
+                            '<button class="btn btn-primary" onclick="nextQuestion()">આગળનો →</button>'
+                        }
+                    </div>
+                </div>
 
-  const container = document.getElementById("options-container");
-  container.innerHTML = "";
+                <div class="question-card">
+                    <h3 style="margin-bottom: 15px; color: #475569;">નેવિગેશન</h3>
+                    <div class="nav-grid">
+                        ${questions.map((_, idx) => `
+                            <div class="nav-btn ${idx === currentQuestionIndex ? 'current' : ''} 
+                                               ${userAnswers[idx] !== null ? 'answered' : ''}"
+                                 onclick="goToQuestion(${idx})">
+                                ${idx + 1}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 15px; font-size: 14px; color: #64748b;">
+                        જવાબ આપ્યા: <strong>${userAnswers.filter(a => a !== null).length}</strong> | 
+                        બાકી: <strong>${userAnswers.filter(a => a === null).length}</strong>
+                    </div>
+                </div>
+            `;
+        }
 
-  const opts = [
-    {key:'1', text: q.option_a, label: 'A'},
-    {key:'2', text: q.option_b, label: 'B'},
-    {key:'3', text: q.option_c, label: 'C'},
-    {key:'4', text: q.option_d, label: 'D'}
-  ];
+        function selectOption(optionNum) {
+            // Save time spent on previous answer
+            if (userAnswers[currentQuestionIndex] !== null) {
+                const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+                questionTimes[currentQuestionIndex] += timeSpent;
+            }
+            
+            userAnswers[currentQuestionIndex] = optionNum;
+            questionStartTime = Date.now();
+            renderQuestion();
+        }
 
-  if (q.option_e) {
-    opts.push({key:'5', text: q.option_e, label: 'E'});
-  }
+        function clearAnswer() {
+            userAnswers[currentQuestionIndex] = null;
+            renderQuestion();
+        }
 
-  opts.forEach(o => {
-    const div = document.createElement("div");
-    div.className = `option ${userAnswers[currentIndex] === o.key ? 'selected' : ''}`;
-    div.innerHTML = `<strong style="font-size:17px">${o.label}.</strong> <span style="font-size:15px">${o.text}</span>`;
-    div.onclick = () => { 
-      // Save time for previous question
-      if (questionStartTime) {
-        const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-        questionTimes[currentIndex] = (questionTimes[currentIndex] || 0) + timeSpent;
-      }
-      
-      userAnswers[currentIndex] = o.key; 
-      renderQuestion(); 
-      renderNav();
-      
-      // Reset question timer
-      questionStartTime = Date.now();
-    };
-    container.appendChild(div);
-  });
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                saveQuestionTime();
+                currentQuestionIndex--;
+                questionStartTime = Date.now();
+                renderQuestion();
+            }
+        }
 
-  document.getElementById("next-btn").innerText = (currentIndex === questions.length - 1) ? "સબમિટ કરો" : "આગળ →";
-}
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                saveQuestionTime();
+                currentQuestionIndex++;
+                questionStartTime = Date.now();
+                renderQuestion();
+            }
+        }
 
-function renderNav() {
-  const grid = document.getElementById("q-nav-grid");
-  grid.innerHTML = "";
-  questions.forEach((_, i) => {
-    const d = document.createElement("div");
-    d.className = `q-num ${i === currentIndex ? 'active' : ''} ${userAnswers[i] ? 'answered' : ''}`;
-    d.innerText = i + 1;
-    d.onclick = () => { 
-      // Save time for current question before switching
-      if (questionStartTime) {
-        const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-        questionTimes[currentIndex] = (questionTimes[currentIndex] || 0) + timeSpent;
-      }
-      
-      currentIndex = i; 
-      renderQuestion(); 
-      renderNav();
-      
-      // Reset timer for new question
-      questionStartTime = Date.now();
-    };
-    grid.appendChild(d);
-  });
-}
+        function goToQuestion(idx) {
+            saveQuestionTime();
+            currentQuestionIndex = idx;
+            questionStartTime = Date.now();
+            renderQuestion();
+        }
 
-function prevQuestion() { 
-  if(currentIndex > 0) { 
-    // Save time for current question
-    if (questionStartTime) {
-      const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-      questionTimes[currentIndex] = (questionTimes[currentIndex] || 0) + timeSpent;
-    }
-    
-    currentIndex--; 
-    renderQuestion(); 
-    renderNav();
-    
-    // Reset timer
-    questionStartTime = Date.now();
-  } 
-}
+        function saveQuestionTime() {
+            const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+            questionTimes[currentQuestionIndex] += timeSpent;
+        }
 
-function nextQuestion() {
-  if(currentIndex < questions.length - 1) { 
-    // Save time for current question
-    if (questionStartTime) {
-      const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-      questionTimes[currentIndex] = (questionTimes[currentIndex] || 0) + timeSpent;
-    }
-    
-    currentIndex++; 
-    renderQuestion(); 
-    renderNav();
-    
-    // Reset timer
-    questionStartTime = Date.now();
-  }
-  else confirmSubmit();
-}
+        function confirmSubmit() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            const skipped = questions.length - answered;
+            
+            if (skipped > 0) {
+                if (confirm(`${skipped} પ્રશ્નો બાકી છે! Submit કરવા માંગો છો?`)) {
+                    submitTest();
+                }
+            } else {
+                submitTest();
+            }
+        }
 
-function confirmSubmit() { 
-  alertModal('❓', 'સબમિટ કરીએ?', 'શું તમે ખરેખર ટેસ્ટ સબમિટ કરવા માંગો છો?', true); 
-}
+        async function submitTest() {
+            clearInterval(timerInterval);
+            saveQuestionTime();
 
-async function submitTest() {
-  if (isSubmitting) return;
-  isSubmitting = true;
-  clearInterval(timerInterval);
+            const totalTime = Math.floor((Date.now() - startTime) / 1000);
+            
+            // Calculate stats
+            let correct = 0, wrong = 0, skipped = 0;
+            let easy_attempted = 0, easy_correct = 0;
+            let medium_attempted = 0, medium_correct = 0;
+            let hard_attempted = 0, hard_correct = 0;
+            let obtainedMarks = 0;
 
-  // Save time for last question
-  if (questionStartTime) {
-    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
-    questionTimes[currentIndex] = (questionTimes[currentIndex] || 0) + timeSpent;
-  }
+            questions.forEach((q, i) => {
+                const userAns = userAnswers[i];
+                const correctAns = parseInt(q.correct_option) || q.correct_option.toLowerCase().charCodeAt(0) - 96;
+                const difficulty = q.difficulty_level?.toLowerCase() || 'medium';
 
-  const finalTime = Math.floor((Date.now() - startTime) / 1000);
-  let correct = 0, wrong = 0, skipped = 0;
-  let easy_c = 0, easy_t = 0, hard_c = 0, hard_t = 0;
+                if (!userAns) {
+                    skipped++;
+                } else {
+                    const isCorrect = parseInt(userAns) === correctAns;
+                    
+                    if (isCorrect) {
+                        correct++;
+                        obtainedMarks += parseFloat(q.marks);
+                    } else {
+                        wrong++;
+                        obtainedMarks -= parseFloat(q.negative_marks);
+                    }
 
-  questions.forEach((q, i) => {
-    const a = userAnswers[i];
-    const isEasy = q.difficulty_level?.toLowerCase() === 'easy';
-    if(isEasy) easy_t++; else hard_t++;
+                    if (difficulty === 'easy') {
+                        easy_attempted++;
+                        if (isCorrect) easy_correct++;
+                    } else if (difficulty === 'hard') {
+                        hard_attempted++;
+                        if (isCorrect) hard_correct++;
+                    } else {
+                        medium_attempted++;
+                        if (isCorrect) medium_correct++;
+                    }
+                }
+            });
 
-    if(!a) {
-        skipped++;
-    } else {
-      // Convert correct_option to number for comparison
-      const correctOpt = isNaN(q.correct_option) ? 
-        q.correct_option.toLowerCase().charCodeAt(0) - 96 : // 'a' = 1, 'b' = 2, etc
-        Number(q.correct_option);
-      
-      if(Number(a) === correctOpt) {
-        correct++;
-        if(isEasy) easy_c++; else hard_c++;
-      } else {
-        wrong++;
-      }
-    }
-  });
+            obtainedMarks = Math.max(0, obtainedMarks);
+            const accuracy = questions.length > 0 ? (correct / questions.length) * 100 : 0;
+            const avgTime = totalTime / questions.length;
+            const speedCategory = avgTime < 30 ? 'fast' : avgTime > 60 ? 'slow' : 'average';
+            const concentration = Math.min(10, Math.max(1, Math.round(accuracy / 10)));
 
-  const score = correct - (wrong * 0.25);
-  const accuracy = (correct / (correct + wrong)) * 100 || 0;
-  const avgTimePerQuestion = finalTime / questions.length;
+            // Insert attempt
+            const { data: attemptData, error: attemptError } = await sb.from('lrd_test_attempts').insert({
+                user_id: user.id,
+                quiz_id: QUIZ_ID,
+                total_questions: questions.length,
+                attempted_questions: correct + wrong,
+                correct_answers: correct,
+                wrong_answers: wrong,
+                skipped_questions: skipped,
+                obtained_marks: obtainedMarks,
+                total_marks: quiz.total_marks,
+                accuracy_percentage: accuracy,
+                total_time_seconds: totalTime,
+                avg_time_per_question: avgTime,
+                easy_attempted, easy_correct,
+                medium_attempted, medium_correct,
+                hard_attempted, hard_correct,
+                speed_category,
+                concentration_rating: concentration,
+                completed_at: new Date().toISOString()
+            }).select().single();
 
-  // Calculate concentration rating (1-10)
-  let concentration = 5;
-  if (accuracy >= 90) concentration = 10;
-  else if (accuracy >= 80) concentration = 9;
-  else if (accuracy >= 70) concentration = 8;
-  else if (accuracy >= 60) concentration = 7;
-  else if (accuracy >= 50) concentration = 6;
-  else if (accuracy >= 40) concentration = 5;
-  else if (accuracy >= 30) concentration = 4;
-  else concentration = 3;
+            if (attemptError) {
+                showModal('❌', 'Error', 'Results save કરતી વખતે error આવી!');
+                return;
+            }
 
-  // Calculate improvement percentage (placeholder - would need previous test data)
-  const targetScore = testInfo.target_score || 90;
-  const improvement = Math.max(0, Math.round(((targetScore - score) / targetScore) * 100));
+            // Insert responses
+            const responses = questions.map((q, i) => {
+                const correctAns = parseInt(q.correct_option) || q.correct_option.toLowerCase().charCodeAt(0) - 96;
+                const userAns = userAnswers[i];
+                const isCorrect = userAns ? parseInt(userAns) === correctAns : false;
+                const marksObtained = !userAns ? 0 : isCorrect ? parseFloat(q.marks) : -parseFloat(q.negative_marks);
 
-  try {
-    const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-    const finalTestId = mapping ? mapping.lrd_test_id : null;
+                return {
+                    attempt_id: attemptData.id,
+                    question_id: q.id,
+                    subject_name: q.subject_name,
+                    chapter_name: q.chapter_name,
+                    difficulty_level: q.difficulty_level,
+                    user_answer: userAns ? String.fromCharCode(96 + parseInt(userAns)) : null,
+                    correct_answer: q.correct_option,
+                    is_correct: isCorrect,
+                    time_spent_seconds: questionTimes[i] || 0,
+                    marks_obtained: marksObtained
+                };
+            });
 
-    if (!finalTestId) {
-      alertModal('❌', 'Error', 'Test mapping નથી મળી.');
-      isSubmitting = false;
-      return;
-    }
+            await sb.from('lrd_test_responses').insert(responses);
 
-    // Get subject_id from first question's chapter
-    let subjectId = null;
-    if (questions[0]?.chapter_id) {
-      const { data: chapter } = await sb.from("lrd_chapters").select("subject_id").eq("id", questions[0].chapter_id).single();
-      subjectId = chapter?.subject_id || null;
-    }
+            // Update profile
+            await sb.from('profiles').update({
+                total_tests_taken: sb.raw('total_tests_taken + 1')
+            }).eq('id', user.id);
 
-    const { data: resData, error: resErr } = await sb.from("lrd_test_results").insert({
-      user_id: user.id,
-      test_id: finalTestId,
-      obtained_marks: score,
-      accuracy_percentage: accuracy,
-      total_time_taken_seconds: finalTime,
-      easy_correct: easy_c,
-      easy_total: easy_t,
-      hard_correct: hard_c,
-      hard_total: hard_t,
-      unanswered_count: skipped,
-      avg_time_per_question: avgTimePerQuestion.toFixed(2),
-      subject_id: subjectId,
-      concentration_rating: concentration,
-      improvement_percentage: improvement
-    }).select().single();
+            // Show results
+            showResults(attemptData);
+        }
 
-    if(resErr) throw resErr;
+        function showResults(attempt) {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="question-card" style="text-align: center;">
+                    <h2 style="color: #1e40af; margin-bottom: 20px;">✅ ટેસ્ટ પૂર્ણ થઈ!</h2>
+                    
+                    <div style="background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%); padding: 30px; border-radius: 16px; margin: 20px 0;">
+                        <div style="font-size: 48px; font-weight: 900; color: #1e40af; margin-bottom: 10px;">
+                            ${attempt.obtained_marks.toFixed(2)}/${attempt.total_marks}
+                        </div>
+                        <div style="font-size: 20px; color: #64748b;">
+                            Accuracy: ${attempt.accuracy_percentage.toFixed(1)}%
+                        </div>
+                    </div>
 
-    // Insert question responses with individual timings and chapter/subject info
-    const resp = questions.map((q, i) => {
-      const correctOpt = isNaN(q.correct_option) ? 
-        q.correct_option.toLowerCase().charCodeAt(0) - 96 : 
-        Number(q.correct_option);
-      
-      return {
-        result_id: resData.id,
-        question_id: q.id,
-        subject_id: q.subject_id || subjectId,
-        chapter_id: q.chapter_id,
-        user_selected_option: userAnswers[i] ? String.fromCharCode(96 + parseInt(userAnswers[i])) : null,
-        is_correct: userAnswers[i] ? (Number(userAnswers[i]) === correctOpt) : false,
-        time_spent_seconds: questionTimes[i] || Math.floor(avgTimePerQuestion)
-      };
-    });
-    
-    const { error: respErr } = await sb.from("lrd_question_responses").insert(resp);
-    if (respErr) console.error('Response insert error:', respErr);
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; text-align: left;">
+                        <div style="background: #f0fdf4; padding: 15px; border-radius: 12px;">
+                            <div style="color: #166534; font-size: 14px;">સાચા</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #22c55e;">${attempt.correct_answers}</div>
+                        </div>
+                        <div style="background: #fef2f2; padding: 15px; border-radius: 12px;">
+                            <div style="color: #991b1b; font-size: 14px;">ખોટા</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #ef4444;">${attempt.wrong_answers}</div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 15px; border-radius: 12px;">
+                            <div style="color: #475569; font-size: 14px;">સમય</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #64748b;">${Math.floor(attempt.total_time_seconds / 60)}m</div>
+                        </div>
+                        <div style="background: #fef3c7; padding: 15px; border-radius: 12px;">
+                            <div style="color: #92400e; font-size: 14px;">બાકી</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">${attempt.skipped_questions}</div>
+                        </div>
+                    </div>
 
-    // Update profile stats
-    const { data: profile } = await sb.from("profiles").select("total_tests_taken").eq("id", user.id).single();
-    if (profile) {
-      await sb.from("profiles").update({
-        total_tests_taken: (profile.total_tests_taken || 0) + 1
-      }).eq("id", user.id);
-    }
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="viewPerformance('${attempt.id}')">
+                            📊 Performance જુઓ
+                        </button>
+                        <button class="btn btn-success" onclick="viewSolutions()">
+                            📖 Solutions જુઓ
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
 
-    showResults({ 
-      result_id: resData.id,
-      total_score: score, 
-      correct_count: correct, 
-      wrong_count: wrong, 
-      skipped_count: skipped, 
-      time_taken_seconds: finalTime 
-    });
-  } catch (err) {
-    console.error(err);
-    alertModal('❌', 'Error', 'સેવ કરવામાં ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો.');
-    isSubmitting = false;
-  }
-}
+        function viewPerformance(attemptId) {
+            window.location.href = `performance-dashboard-v2.html?attempt_id=${attemptId}`;
+        }
 
-/* ========== RESULTS & UI HELPERS ========== */
-function showResults(data) {
-  document.getElementById("setup-screen").classList.add("hidden");
-  document.getElementById("quiz-screen").classList.add("hidden");
-  document.getElementById("result-screen").classList.remove("hidden");
+        function viewSolutions() {
+            let html = '<div class="question-card"><h2 style="margin-bottom: 20px;">Solutions</h2>';
+            
+            questions.forEach((q, i) => {
+                const correctAns = parseInt(q.correct_option) || q.correct_option.toLowerCase().charCodeAt(0) - 96;
+                const userAns = userAnswers[i];
+                const isCorrect = userAns && parseInt(userAns) === correctAns;
+                const answerColor = !userAns ? '#f59e0b' : isCorrect ? '#22c55e' : '#ef4444';
 
-  const m = Math.floor(data.time_taken_seconds / 60), s = data.time_taken_seconds % 60;
+                html += `
+                    <div style="background: #f8fafc; padding: 20px; margin: 15px 0; border-radius: 12px; border-left: 4px solid ${answerColor};">
+                        <div style="font-weight: 600; margin-bottom: 10px;">Q${i + 1}. ${q.question_text}</div>
+                        ${!userAns ? 
+                            '<div style="color: #f59e0b;">⚠️ આપેલ નથી</div>' :
+                            `<div style="color: ${answerColor};">તમારો જવાબ: ${q['option_' + String.fromCharCode(96 + parseInt(userAns))]}</div>`
+                        }
+                        <div style="color: #22c55e; margin-top: 5px;">✓ સાચો જવાબ: ${q['option_' + String.fromCharCode(96 + correctAns)]}</div>
+                        ${q.solution ? `<div style="margin-top: 10px; padding: 10px; background: #eff6ff; border-radius: 8px; color: #1e40af;">${q.solution}</div>` : ''}
+                    </div>
+                `;
+            });
 
-  document.getElementById("score-details").innerHTML = `
-    <div style="font-size:40px;font-weight:900;color:#22c55e;margin:10px 0">${data.total_score.toFixed(2)}</div>
-    <div style="color:#64748b;margin-bottom:20px;font-size:16px">તમારો સ્કોર</div>
-    <div style="display:flex;justify-content:space-around;font-weight:700;font-size:16px">
-      <div style="color:#22c55e">✔️ ${data.correct_count}</div>
-      <div style="color:#dc2626">❌ ${data.wrong_count}</div>
-      <div style="color:#64748b">⚪ ${data.skipped_count}</div>
-      <div style="color:#0ea5e9">⏱️ ${m}m ${s}s</div>
-    </div>
-  `;
+            html += '<button class="btn btn-primary" onclick="renderQuestion()">પાછા જાઓ</button></div>';
+            document.getElementById('mainContent').innerHTML = html;
+        }
 
-  new Chart(document.getElementById('resultChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['સાચા જવાબ', 'ખોટા જવાબ', 'બાકી રાખેલ'],
-      datasets: [{
-        data: [data.correct_count, data.wrong_count, data.skipped_count],
-        backgroundColor: ['#22c55e', '#dc2626', '#e5e7eb'],
-        borderWidth: 0
-      }]
-    },
-    options: { 
-      cutout: '75%', 
-      plugins: { 
-        legend: { 
-          display: true,
-          position: 'bottom',
-          labels: {
-            padding: 15,
-            font: { size: 13 }
-          }
-        } 
-      } 
-    }
-  });
+        function showModal(icon, title, text) {
+            document.getElementById('modalTitle').textContent = icon + ' ' + title;
+            document.getElementById('modalText').textContent = text;
+            document.getElementById('modal').style.display = 'block';
+        }
 
-  loadLeaderboard();
-}
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
 
-async function viewSolutions() {
-  const container = document.getElementById("solutions-container");
-  container.classList.remove("hidden");
-  container.innerHTML = "<h3 style='margin:24px 0 16px;color:#1e293b;font-size:22px'>📖 Solutions</h3>";
-  const options = ['a','b','c','d','e'];
-  
-  questions.forEach((q, i) => {
-    const userAns = userAnswers[i];
-    const correctOpt = isNaN(q.correct_option) ? 
-      q.correct_option.toLowerCase().charCodeAt(0) - 96 : 
-      Number(q.correct_option);
-    const isCorrect = userAns && Number(userAns) === correctOpt;
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <div style="margin-bottom:16px">
-        <span style="font-weight:700;color:#1e293b;font-size:16px">Q${i+1}.</span>
-        ${q.difficulty_level ? `<span class="badge badge-${q.difficulty_level.toLowerCase()}" style="margin-left:8px">${q.difficulty_level}</span>` : ''}
-      </div>
-      <p style="font-size:16px;line-height:1.6;color:#334155;margin-bottom:16px"><b>${q.question_text}</b></p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:14px">
-        <div style="padding:12px;border-radius:10px;background:${isCorrect ? '#f0fdf4' : '#fef2f2'};border:2px solid ${isCorrect ? '#22c55e' : '#dc2626'}">
-          <b style="display:block;margin-bottom:6px;color:#334155">તમારો જવાબ:</b> 
-          <span style="color:${isCorrect ? '#166534' : '#991b1b'}">${userAns ? q['option_'+options[userAns-1]] : 'નથી આપ્યો'}</span>
-        </div>
-        <div style="padding:12px;border-radius:10px;background:#f0fdf4;border:2px solid #22c55e">
-          <b style="display:block;margin-bottom:6px;color:#334155">સાચો જવાબ:</b> 
-          <span style="color:#166534">${q['option_'+options[correctOpt-1]]}</span>
-        </div>
-      </div>
-      ${q.solution ? `
-        <div style="margin-top:12px;padding:12px;background:#f1f5f9;border-radius:8px;border-left:4px solid #2563eb">
-          <b style="color:#1e40af;display:block;margin-bottom:6px">💡 Solution:</b>
-          <p style="margin:0;color:#475569;line-height:1.5">${q.solution}</p>
-        </div>
-      ` : ''}
-    `;
-    container.appendChild(div);
-  });
-  container.scrollIntoView({behavior:'smooth'});
-}
-
-async function loadLeaderboard() {
-  try {
-    const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-    const finalTestId = mapping ? mapping.lrd_test_id : null;
-    
-    if (!finalTestId) {
-      document.getElementById("leaderboard-list").innerHTML = '<p style="color:#64748b;text-align:center;padding:20px">Test mapping નથી મળી.</p>';
-      return;
-    }
-
-    const { data: results } = await sb.from("lrd_test_results")
-      .select("user_id, obtained_marks, profiles(full_name)")
-      .eq("test_id", finalTestId)
-      .order("obtained_marks", { ascending: false })
-      .limit(10);
-
-    if (!results || results.length === 0) {
-      document.getElementById("leaderboard-list").innerHTML = '<p style="color:#64748b;text-align:center;padding:20px">કોઈ રિઝલ્ટ નથી.</p>';
-      return;
-    }
-
-    document.getElementById("leaderboard-list").innerHTML = results.map((r, i) => {
-      const isCurrentUser = r.user_id === user.id;
-      return `
-      <div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #e5e7eb;align-items:center">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-weight:900;font-size:18px;color:${i < 3 ? '#f59e0b' : '#64748b'};min-width:30px">${i+1}.</span>
-          <span style="font-weight:${isCurrentUser ? 'bold' : '600'};color:${isCurrentUser ? '#2563eb' : '#334155'}">
-            ${isCurrentUser ? '🎯 તમે' : (r.profiles?.full_name || 'Student ' + (i+1))}
-          </span>
-        </div>
-        <b style="font-size:18px;color:#1e293b">${r.obtained_marks.toFixed(2)}</b>
-      </div>
-    `}).join('');
-  } catch (err) { 
-    console.error(err); 
-    document.getElementById("leaderboard-list").innerHTML = '<p style="color:#ef4444;text-align:center;padding:20px">લીડરબોર્ડ લોડ કરવામાં સમસ્યા.</p>';
-  }
-}
-
-async function viewPerformance() {
-  const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-  const finalTestId = mapping ? mapping.lrd_test_id : null;
-  
-  if (!finalTestId) {
-    alertModal('⚠️', 'Error', 'Test mapping નથી મળી.');
-    return;
-  }
-  
-  const { data: res } = await sb.from("lrd_test_results").select("id").eq("user_id", user.id).eq("test_id", finalTestId).order("created_at", {ascending: false}).limit(1).maybeSingle();
-  
-  if(res) {
-    window.location.href = `performance-dashboard.html?result_id=${res.id}`;
-  } else {
-    alertModal('⚠️', 'નથી મળ્યું', 'પરફોર્મન્સ ડેટા નથી મળ્યો.');
-  }
-}
-
-/* ========== MODAL HELPERS ========== */
-function alertModal(icon, title, text, showConfirm = false) {
-  document.getElementById("modal-icon").innerText = icon;
-  document.getElementById("modal-title").innerText = title;
-  document.getElementById("modal-text").innerText = text;
-  document.getElementById("modal-btn").innerText = showConfirm ? "હા, સબમિટ કરો" : "OK";
-  document.getElementById("modal-btn").onclick = showConfirm ? () => { closeModal(); submitTest(); } : closeModal;
-  document.getElementById("modal-overlay").style.display = "flex";
-}
-
-function closeModal() { 
-  document.getElementById("modal-overlay").style.display = "none"; 
-}
-
-function goHome() {
-  window.location.href = 'index.html';
-}
-
-init();
-</script>
+        init();
+    </script>
 </body>
 </html>
