@@ -158,8 +158,29 @@
                 // Fetch question responses for chapter analysis
                 const { data: responses } = await sb
                     .from('lrd_question_responses')
-                    .select('*, lrd_questions(chapter_id, difficulty_level)')
+                    .select('*')
                     .eq('result_id', resultId);
+
+                // Fetch all questions to get chapter and difficulty info
+                let questionsMap = {};
+                if (responses && responses.length > 0) {
+                    const questionIds = responses.map(r => r.question_id);
+                    const { data: questionDetails } = await sb
+                        .from('lrd_questions')
+                        .select('id, chapter_id, difficulty_level')
+                        .in('id', questionIds);
+                    
+                    if (questionDetails) {
+                        questionDetails.forEach(q => {
+                            questionsMap[q.id] = q;
+                        });
+                    }
+                    
+                    // Attach question details to responses
+                    responses.forEach(r => {
+                        r.lrd_questions = questionsMap[r.question_id];
+                    });
+                }
 
                 // Fetch chapters
                 const { data: chapters } = await sb
@@ -211,6 +232,11 @@
         function calculateChapterStats(responses, chapters) {
             const stats = {};
             
+            // Handle null or empty responses
+            if (!responses || responses.length === 0) {
+                return stats;
+            }
+            
             responses.forEach(resp => {
                 const chapterId = resp.lrd_questions?.chapter_id;
                 if (!chapterId) return;
@@ -254,6 +280,11 @@
 
         async function getRuleSuggestions(result, chapterStats) {
             const suggestions = [];
+
+            // If no chapter stats, return empty suggestions
+            if (!chapterStats || Object.keys(chapterStats).length === 0) {
+                return suggestions;
+            }
 
             // Calculate speed category
             const avgTime = result.avg_time_per_question;
@@ -312,6 +343,9 @@
                 }
                 subjectGroups[stat.subject_id].chapters.push(stat);
             });
+
+            // If no chapter data, show overall stats only
+            const hasChapterData = Object.keys(subjectGroups).length > 0;
 
             const html = `
 <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
@@ -396,6 +430,7 @@
     </div>
 
     <!-- Subject & Chapter Analysis -->
+    ${hasChapterData ? `
     <h3 style="font-size: 20px; font-weight: bold; color: #1e293b; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
         <i class="fas fa-book-open" style="color: #2563eb;"></i> વિષય અને ચેપ્ટરવાર એનાલિસિસ
     </h3>
@@ -445,6 +480,13 @@
             `;
         }).join('')}
     </div>
+    ` : `
+    <div style="background: #fef9c3; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin-bottom: 32px;">
+        <p style="color: #854d0e; margin: 0; font-weight: 600;">
+            <i class="fas fa-info-circle"></i> ચેપ્ટરવાર એનાલિસિસ માટે વધુ ડેટા જરૂરી છે.
+        </p>
+    </div>
+    `}
 
     <!-- Progress & Action Plan -->
     <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 32px;">
