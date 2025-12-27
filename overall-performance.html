@@ -545,6 +545,7 @@
         // Initialize
         async function init() {
             try {
+                // Check if user is logged in
                 const { data: { user }, error: authError } = await sb.auth.getUser();
                 
                 if (authError || !user) {
