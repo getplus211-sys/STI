@@ -158,8 +158,21 @@
                 // Fetch question responses for chapter analysis
                 const { data: responses } = await sb
                     .from('lrd_question_responses')
-                    .select('*, lrd_questions(chapter_id, difficulty_level)')
+                    .select('*')
                     .eq('result_id', resultId);
+
+                // Fetch all questions separately
+                const questionIds = responses?.map(r => r.question_id) || [];
+                const { data: questions } = questionIds.length > 0 ? await sb
+                    .from('lrd_questions')
+                    .select('id, chapter_id, difficulty_level')
+                    .in('id', questionIds) : { data: [] };
+
+                // Merge responses with question data
+                const responsesWithQuestions = responses?.map(resp => ({
+                    ...resp,
+                    lrd_questions: questions?.find(q => q.id === resp.question_id)
+                })) || [];
 
                 // Fetch chapters
                 const { data: chapters } = await sb
@@ -172,7 +185,7 @@
                     .select('*');
 
                 // Calculate chapter-wise performance
-                const chapterStats = calculateChapterStats(responses, chapters);
+                const chapterStats = calculateChapterStats(responsesWithQuestions, chapters);
 
                 // Fetch rule engine suggestions
                 const suggestions = await getRuleSuggestions(result, chapterStats);
