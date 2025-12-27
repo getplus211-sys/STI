@@ -98,45 +98,33 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 
   <div class="q-nav" id="q-nav-grid"></div>
 
-  <button class="danger" style="margin-top:24px;background:#fee2e2;color:#dc2626;font-weight:600" onclick="confirmSubmit()">Finish & Submit</button>
+  <div class="card" style="margin-top:15px">
+    <button class="danger" onclick="confirmSubmit()">Submit Test</button>
+  </div>
 </div>
 
 <div id="result-screen" class="container hidden">
   <div class="card" style="text-align:center">
-    <h2 id="result-title">Test Result</h2>
-    <div class="chart-container">
-      <canvas id="resultChart"></canvas>
-    </div>
-    <div id="score-details" style="margin-bottom:20px"></div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-      <button class="primary" onclick="viewSolutions()">View Solutions</button>
-      <button class="primary" style="background:#8b5cf6" onclick="viewPerformance()">Performance</button>
-    </div>
-    <button class="gray" style="margin-top:10px" onclick="location.reload()">Back to Home</button>
-  </div>
-
-  <div id="solutions-container" class="hidden"></div>
-  
-  <div id="leaderboard-container" class="card" style="margin-top:20px">
-    <h3>Leaderboard</h3>
-    <div id="leaderboard-list">લોડ થઈ રહ્યું છે...</div>
+    <h2>🎉 ટેસ્ટ પૂર્ણ!</h2>
+    <div id="score-details" style="margin:20px 0"></div>
+    <div class="chart-container"><canvas id="resultChart"></canvas></div>
+    <button class="primary" onclick="location.href='dashboard.html'">Dashboard પર જાઓ</button>
   </div>
 </div>
 
 <script>
-/* ========== CONFIGURATION ========== */
-const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const params = new URLSearchParams(window.location.search);
-const QUIZ_ID = params.get('id') || 'DEMO_QUIZ_001';
-const TIMEOUT_MS = 15000;
+const urlParams = new URLSearchParams(window.location.search);
+const QUIZ_ID = urlParams.get("quiz_id");
+const TIMEOUT_MS = 10000;
 
-let user = null;
 let questions = [];
 let currentIndex = 0;
-let userAnswers = {};
+let userAnswers = [];
+let user = null;
 let timeLeft = 0;
 let timerInterval = null;
 let startTime = null;
@@ -158,13 +146,38 @@ async function init() {
     const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
     const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
 
-    // 2. Fetch Questions
+    // 2. Fetch Questions WITH PROPER SUBJECT AND CHAPTER DETAILS
     const { data, error } = await Promise.race([
-      sb.from("lrd_questions").select("*").eq("quiz_id", QUIZ_ID).order('id', { ascending: true }),
+      sb.from("lrd_questions").select(`
+        *,
+        lrd_chapters (
+          id,
+          name,
+          chapter_code,
+          subject_id,
+          lrd_subjects (
+            id,
+            name,
+            subject_code
+          )
+        )
+      `).eq("quiz_id", QUIZ_ID).order('id', { ascending: true }),
       timeout(TIMEOUT_MS)
     ]);
+    
     if (error) throw error;
     questions = data || [];
+
+    // Process questions to add subject_id and chapter_id at top level
+    questions = questions.map(q => ({
+      ...q,
+      subject_id: q.lrd_chapters?.subject_id || null,
+      chapter_id: q.chapter_id || q.lrd_chapters?.id || null,
+      subject_name: q.lrd_chapters?.lrd_subjects?.name || 'Unknown',
+      chapter_name: q.lrd_chapters?.name || 'Unknown'
+    }));
+
+    console.log('Loaded questions with subject/chapter info:', questions.length);
 
     // 3. Check Existing Result in LRD table
     const { data: existingResult } = await Promise.race([
@@ -265,6 +278,7 @@ function nextQuestion() {
 
 function confirmSubmit() { alertModal('❓', 'સબમિટ?', 'શું તમે ટેસ્ટ પૂરી કરવા માંગો છો?', true); }
 
+/* ========== IMPROVED TEST SUBMISSION WITH PROPER subject_id AND chapter_id ========== */
 async function submitTest() {
   if (isSubmitting) return;
   isSubmitting = true;
@@ -293,9 +307,29 @@ async function submitTest() {
   const accuracy = (correct / (correct + wrong)) * 100 || 0;
 
   try {
+    // Get test mapping
     const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
     const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
 
+    // Determine subject_id from first question (સૌથી સામાન્ય subject)
+    const subjectCounts = {};
+    questions.forEach(q => {
+      if (q.subject_id) {
+        subjectCounts[q.subject_id] = (subjectCounts[q.subject_id] || 0) + 1;
+      }
+    });
+    
+    // Get most common subject_id
+    let mainSubjectId = null;
+    let maxCount = 0;
+    for (const [sid, count] of Object.entries(subjectCounts)) {
+      if (count > maxCount) {
+        maxCount = count;
+        mainSubjectId = sid;
+      }
+    }
+
+    // Create test result
     const { data: resData, error: resErr } = await sb.from("lrd_test_results").insert({
       user_id: user.id,
       test_id: finalTestId,
@@ -308,30 +342,107 @@ async function submitTest() {
       hard_total: hard_t,
       unanswered_count: skipped,
       avg_time_per_question: (finalTime / questions.length).toFixed(2),
-      subject_id: questions[0]?.subject_id,
-      concentration_rating: 3,
+      subject_id: mainSubjectId, // Main subject for this test
+      concentration_rating: calculateConcentration(accuracy, finalTime / questions.length),
       improvement_percentage: 0
     }).select().single();
 
     if(resErr) throw resErr;
 
-    // Responses
-    const resp = questions.map((q, i) => ({
-      result_id: resData.id,
-      question_id: q.id,
-      subject_id: q.subject_id,
-      chapter_id: q.chapter_id,
-      user_selected_option: userAnswers[i] ? String.fromCharCode(96 + parseInt(userAnswers[i])) : null,
-      is_correct: Number(userAnswers[i]) === Number(q.correct_option),
-      time_spent_seconds: Math.floor(finalTime / questions.length)
-    }));
-    await sb.from("lrd_question_responses").insert(resp);
+    console.log('Test result created:', resData.id);
 
-    showResults({ total_score: score, correct_count: correct, wrong_count: wrong, skipped_count: skipped, time_taken_seconds: finalTime });
+    // IMPROVED: Create question responses WITH PROPER subject_id and chapter_id
+    const responses = [];
+    
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      const userAnswer = userAnswers[i];
+      
+      // Determine subject_id and chapter_id for this question
+      let questionSubjectId = q.subject_id;
+      let questionChapterId = q.chapter_id;
+
+      // If still null, try to fetch from database
+      if (!questionSubjectId || !questionChapterId) {
+        try {
+          const { data: qDetails, error: qError } = await sb
+            .from('lrd_questions')
+            .select(`
+              chapter_id,
+              lrd_chapters (
+                id,
+                subject_id
+              )
+            `)
+            .eq('id', q.id)
+            .single();
+
+          if (!qError && qDetails) {
+            questionChapterId = questionChapterId || qDetails.chapter_id || qDetails.lrd_chapters?.id;
+            questionSubjectId = questionSubjectId || qDetails.lrd_chapters?.subject_id;
+          }
+        } catch (err) {
+          console.warn('Could not fetch chapter details for question', q.id);
+        }
+      }
+
+      responses.push({
+        result_id: resData.id,
+        question_id: q.id,
+        subject_id: questionSubjectId,  // યોગ્ય subject_id
+        chapter_id: questionChapterId,  // યોગ્ય chapter_id
+        user_selected_option: userAnswer ? String.fromCharCode(96 + parseInt(userAnswer)) : null,
+        is_correct: Number(userAnswer) === Number(q.correct_option),
+        time_spent_seconds: Math.floor(finalTime / questions.length),
+        created_at: new Date().toISOString()
+      });
+    }
+
+    // Batch insert responses
+    const { error: respErr } = await sb.from("lrd_question_responses").insert(responses);
+    
+    if (respErr) {
+      console.error('Response insert error:', respErr);
+      throw respErr;
+    }
+
+    console.log(`Successfully saved ${responses.length} question responses`);
+
+    // Show results
+    showResults({ 
+      total_score: score, 
+      correct_count: correct, 
+      wrong_count: wrong, 
+      skipped_count: skipped, 
+      time_taken_seconds: finalTime 
+    });
+
   } catch (err) {
-    console.error(err);
-    alertModal('❌', 'Error', 'સેવ કરવામાં ભૂલ આવી.');
+    console.error('Submit error:', err);
+    alertModal('❌', 'Error', 'સેવ કરવામાં ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો.');
+    isSubmitting = false;
   }
+}
+
+// Helper function to calculate concentration rating
+function calculateConcentration(accuracy, avgTimePerQuestion) {
+  let rating = 5; // Default medium
+  
+  if (accuracy >= 90 && avgTimePerQuestion < 45) {
+    rating = 10;
+  } else if (accuracy >= 80 && avgTimePerQuestion < 60) {
+    rating = 9;
+  } else if (accuracy >= 70) {
+    rating = 8;
+  } else if (accuracy >= 60) {
+    rating = 7;
+  } else if (accuracy >= 50) {
+    rating = 6;
+  } else if (accuracy < 40) {
+    rating = 4;
+  }
+  
+  return rating;
 }
 
 /* ========== RESULTS & UI HELPERS ========== */
@@ -348,91 +459,51 @@ function showResults(data) {
     <div style="display:flex;justify-content:space-around;font-weight:600">
       <div style="color:#22c55e">✔️ ${data.correct_count}</div>
       <div style="color:#dc2626">❌ ${data.wrong_count}</div>
-      <div style="color:#64748b">⚪ ${data.skipped_count}</div>
-      <div style="color:#0ea5e9">⏱️ ${m}m ${s}s</div>
+      <div style="color:#94a3b8">⏭️ ${data.skipped_count}</div>
     </div>
+    <div style="margin-top:10px;color:#64748b;font-size:14px">સમય: ${m}:${s < 10 ? '0' : ''}${s}</div>
   `;
 
-  new Chart(document.getElementById('resultChart'), {
+  const ctx = document.getElementById("resultChart");
+  new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: ['સાચા', 'ખોટા', 'બાકી'],
       datasets: [{
         data: [data.correct_count, data.wrong_count, data.skipped_count],
-        backgroundColor: ['#22c55e', '#dc2626', '#e5e7eb'],
+        backgroundColor: ['#22c55e', '#dc2626', '#94a3b8'],
         borderWidth: 0
       }]
     },
-    options: { cutout: '80%', plugins: { legend: { display: false } } }
+    options: {
+      cutout: '70%',
+      plugins: { legend: { position: 'bottom' } }
+    }
   });
-
-  loadLeaderboard();
 }
 
-async function viewSolutions() {
-  const container = document.getElementById("solutions-container");
-  container.classList.remove("hidden");
-  container.innerHTML = "<h3 style='margin:20px 0 10px'>Solutions</h3>";
-  const options = ['a','b','c','d','e'];
-  questions.forEach((q, i) => {
-    const userAns = userAnswers[i];
-    const isCorrect = userAns && Number(userAns) === Number(q.correct_option);
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <p><b>Q${i+1}.</b> ${q.question_text}</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px">
-        <div style="padding:10px;border-radius:8px;background:${isCorrect ? '#f0fdf4' : '#fef2f2'}">
-          <b>તમારો જવાબ:</b> ${userAns ? (userAns==5?'E':q['option_'+options[userAns-1]]) : 'નથી આપ્યો'}
-        </div>
-        <div style="padding:10px;border-radius:8px;background:#f0fdf4">
-          <b>સાચો જવાબ:</b> ${q['option_'+options[Number(q.correct_option)-1]]}
-        </div>
-      </div>
-    `;
-    container.appendChild(div);
-  });
-  container.scrollIntoView({behavior:'smooth'});
-}
-
-async function loadLeaderboard() {
-  try {
-    const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-    const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
-
-    const { data: results } = await sb.from("lrd_test_results")
-      .select("user_id, obtained_marks")
-      .eq("test_id", finalTestId)
-      .order("obtained_marks", { ascending: false }).limit(10);
-
-    document.getElementById("leaderboard-list").innerHTML = results.map((r, i) => `
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee">
-        <span>${i+1}. ${r.user_id === user.id ? '<b>તમે</b>' : 'User'}</span>
-        <b>${r.obtained_marks.toFixed(2)}</b>
-      </div>
-    `).join('');
-  } catch (err) { console.error(err); }
-}
-
-async function viewPerformance() {
-  const { data: mapping } = await sb.from("quiz_test_mapping").select("lrd_test_id").eq("quiz_id", QUIZ_ID).maybeSingle();
-  const finalTestId = mapping ? mapping.lrd_test_id : QUIZ_ID;
-  const { data: res } = await sb.from("lrd_test_results").select("id").eq("user_id", user.id).eq("test_id", finalTestId).maybeSingle();
-  if(res) window.location.href = `test-performance.html?result_id=${res.id}`;
-  else alertModal('⚠️', 'નથી મળ્યું', 'પરફોર્મન્સ ડેટા નથી.');
-}
-
-/* ========== MODAL HELPERS ========== */
-function alertModal(icon, title, text, showConfirm = false) {
+function alertModal(icon, title, text, isConfirm = false) {
   document.getElementById("modal-icon").innerText = icon;
   document.getElementById("modal-title").innerText = title;
   document.getElementById("modal-text").innerText = text;
-  document.getElementById("modal-btn").innerText = showConfirm ? "હા" : "OK";
-  document.getElementById("modal-btn").onclick = showConfirm ? () => { closeModal(); submitTest(); } : closeModal;
+  
+  const btn = document.getElementById("modal-btn");
+  if (isConfirm) {
+    btn.innerText = "હા, સબમિટ કરો";
+    btn.onclick = () => { closeModal(); submitTest(); };
+  } else {
+    btn.innerText = "OK";
+    btn.onclick = closeModal;
+  }
+  
   document.getElementById("modal-overlay").style.display = "flex";
 }
-function closeModal() { document.getElementById("modal-overlay").style.display = "none"; }
 
+function closeModal() {
+  document.getElementById("modal-overlay").style.display = "none";
+}
+
+// Initialize on load
 init();
 </script>
 </body>
