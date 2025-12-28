@@ -2,7 +2,7 @@
 <html lang="gu">
 <head>
 <meta charset="UTF-8">
-<title>Performance - LRD Beginners</title>
+<title>Performance Dashboard - LRD Beginners</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10,33 +10,40 @@
 body{margin:0;font-family:system-ui;background:#f1f5f9}
 .container{max-width:900px;margin:auto;padding:12px}
 .card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
-h2,h3,h4{margin:6px 0}
+h2,h3,h4{margin:6px 0 12px 0}
 button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cursor:pointer;margin-bottom:10px}
-.primary{background:#22c55e;color:#fff}
 .blue{background:#3b82f6;color:#fff}
-.badge{background:#22c55e;color:#fff;padding:5px 12px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:10px}
-.badge.free{background:#3b82f6}
+.badge{background:#3b82f6;color:#fff;padding:5px 12px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:10px}
 .student-header{display:flex;align-items:center;gap:15px;margin-bottom:20px}
 .avatar{width:80px;height:80px;background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:#2563eb}
-.student-info h2{font-size:20px;margin-bottom:5px}
-.student-meta{display:flex;gap:15px;font-size:14px;color:#6b7280}
+.student-meta{display:flex;gap:15px;font-size:14px;color:#6b7280;flex-wrap:wrap}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}
-.stat-card{background:#f8fafc;border-radius:12px;padding:20px;text-align:center}
-.stat-label{font-size:14px;color:#6b7280;margin-bottom:8px}
-.stat-value{font-size:32px;font-weight:bold;color:#1f2937}
-.section-title{font-size:18px;font-weight:bold;margin:20px 0 15px;border-left:4px solid #3b82f6;padding-left:12px}
-.subject-item{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#f8fafc;border-radius:8px;margin-bottom:10px}
-.subject-name{font-size:16px;font-weight:600}
-.subject-score{font-size:20px;font-weight:bold}
+.stat-card{background:#f8fafc;border-radius:12px;padding:15px;text-align:center}
+.stat-label{font-size:13px;color:#6b7280;margin-bottom:5px}
+.stat-value{font-size:28px;font-weight:bold;color:#1f2937}
+.section-title{font-size:16px;font-weight:bold;margin:20px 0 10px;border-left:4px solid #3b82f6;padding-left:10px;color:#1f2937}
+.subject-item{background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:10px}
+.subject-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.subject-name{font-size:15px;font-weight:600;color:#1f2937}
+.subject-score{font-size:22px;font-weight:bold}
 .score-excellent{color:#22c55e}
 .score-good{color:#3b82f6}
 .score-average{color:#f59e0b}
 .score-poor{color:#ef4444}
-.rec-card{background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 100%);color:#fff;border-radius:16px;padding:25px}
-.rec-title{font-size:20px;font-weight:bold;margin-bottom:15px}
-.rec-list{list-style:none;padding:0}
-.rec-list li{padding:8px 0 8px 25px;position:relative}
+.chapter-list{border-top:1px solid #e5e7eb;margin-top:8px;padding-top:8px}
+.chapter-item{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#64748b}
+.chapter-item .ch-name{flex:1}
+.chapter-item .ch-score{font-weight:600;margin-left:10px}
+.rec-card{background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 100%);color:#fff;border-radius:16px;padding:20px}
+.rec-title{font-size:18px;font-weight:bold;margin-bottom:15px}
+.rec-section{margin-bottom:15px}
+.rec-section h4{font-size:15px;margin-bottom:8px;opacity:0.95}
+.rec-list{list-style:none;padding:0;margin:0}
+.rec-list li{padding:5px 0 5px 22px;position:relative;font-size:14px;line-height:1.5}
 .rec-list li:before{content:"✓";position:absolute;left:0;color:#22c55e;font-weight:bold}
+.progress-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:5px}
+.progress-fill{height:100%;background:#22c55e;transition:width 0.5s ease}
+.loader{text-align:center;padding:40px}
 @media (max-width:600px){
 .stats-grid{grid-template-columns:1fr}
 .student-header{flex-direction:column;text-align:center}
@@ -45,8 +52,9 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 </head>
 <body>
 <div class="container" id="app">
-  <div class="card">
+  <div class="card loader">
     <h3>લોડ થઈ રહ્યું છે...</h3>
+    <p>કૃપા કરીને રાહ જુઓ</p>
   </div>
 </div>
 
@@ -62,7 +70,7 @@ let app = document.getElementById("app");
 let user, testResult, questionAttempts = [];
 
 if (!RESULT_ID) {
-  app.innerHTML = '<div class="card"><h3>⚠️ Invalid URL</h3></div>';
+  app.innerHTML = '<div class="card"><h3>⚠️ Invalid URL</h3><p>Result ID not found</p></div>';
 } else {
   init();
 }
@@ -71,21 +79,51 @@ async function init() {
   try {
     const { data: { user: u } } = await sb.auth.getUser();
     if (!u) {
-      app.innerHTML = '<div class="card"><h3>🔒 Login Required</h3></div>';
+      app.innerHTML = '<div class="card"><h3>🔒 Login Required</h3><p>કૃપા કરીને પહેલા લોગિન કરો</p></div>';
       return;
     }
     user = u;
 
-    const { data: result } = await sb.from("lrd_test_results").select("*").eq("id", RESULT_ID).single();
+    // Load test result
+    const { data: result, error: resultError } = await sb
+      .from("lrd_test_results")
+      .select("*")
+      .eq("id", RESULT_ID)
+      .single();
+    
+    if (resultError || !result) {
+      app.innerHTML = '<div class="card"><h3>❌ Result Not Found</h3><p>' + (resultError?.message || 'No data') + '</p></div>';
+      return;
+    }
     testResult = result;
 
-    const { data: attempts } = await sb.from("lrd_question_attempts")
-      .select("*, lrd_questions(*, lrd_subjects(name), lrd_chapters(name))")
+    // Load question attempts with full details
+    const { data: attempts, error: attemptsError } = await sb
+      .from("lrd_question_attempts")
+      .select(`
+        *,
+        lrd_questions (
+          *,
+          lrd_subjects (id, name, subject_code),
+          lrd_chapters (id, name, chapter_id)
+        )
+      `)
       .eq("test_result_id", RESULT_ID);
+    
+    if (attemptsError) {
+      console.error('Attempts error:', attemptsError);
+    }
+    
     questionAttempts = attempts || [];
+
+    if (questionAttempts.length === 0) {
+      app.innerHTML = '<div class="card"><h3>⚠️ No Data</h3><p>પ્રશ્નોનો ડેટા મળ્યો નથી</p></div>';
+      return;
+    }
 
     displayPerformance();
   } catch (err) {
+    console.error('Init error:', err);
     app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>' + err.message + '</p></div>';
   }
 }
@@ -94,9 +132,15 @@ function displayPerformance() {
   const date = new Date(testResult.completed_at).toLocaleDateString('en-GB').replace(/\//g, '-');
   const timePerQ = Math.floor(testResult.total_time_seconds / testResult.total_questions);
 
-  let diffStats = { easy: { correct: 0, total: 0 }, medium: { correct: 0, total: 0 }, hard: { correct: 0, total: 0 } };
+  // Calculate difficulty stats
+  let diffStats = {
+    easy: { correct: 0, total: 0 },
+    medium: { correct: 0, total: 0 },
+    hard: { correct: 0, total: 0 }
+  };
   
   questionAttempts.forEach(att => {
+    if (!att.lrd_questions) return;
     const diff = att.lrd_questions.difficulty_level;
     if (diff === 'સરળ') {
       diffStats.easy.total++;
@@ -104,56 +148,132 @@ function displayPerformance() {
     } else if (diff === 'મધ્યમ') {
       diffStats.medium.total++;
       if (att.is_correct) diffStats.medium.correct++;
-    } else {
+    } else if (diff === 'મુશ્કેલ') {
       diffStats.hard.total++;
       if (att.is_correct) diffStats.hard.correct++;
     }
   });
 
+  // Calculate subject and chapter wise stats
   const subjectMap = {};
+  
   questionAttempts.forEach(att => {
-    const subj = att.lrd_questions.lrd_subjects.name;
-    if (!subjectMap[subj]) {
-      subjectMap[subj] = { total: 0, correct: 0 };
+    if (!att.lrd_questions || !att.lrd_questions.lrd_subjects || !att.lrd_questions.lrd_chapters) return;
+    
+    const subjId = att.lrd_questions.lrd_subjects.id;
+    const subjName = att.lrd_questions.lrd_subjects.name;
+    const chapterId = att.lrd_questions.lrd_chapters.id;
+    const chapterName = att.lrd_questions.lrd_chapters.name;
+    
+    if (!subjectMap[subjId]) {
+      subjectMap[subjId] = {
+        name: subjName,
+        total: 0,
+        correct: 0,
+        chapters: {}
+      };
     }
-    subjectMap[subj].total++;
-    if (att.is_correct) subjectMap[subj].correct++;
+    
+    subjectMap[subjId].total++;
+    if (att.is_correct) subjectMap[subjId].correct++;
+    
+    if (!subjectMap[subjId].chapters[chapterId]) {
+      subjectMap[subjId].chapters[chapterId] = {
+        name: chapterName,
+        total: 0,
+        correct: 0
+      };
+    }
+    
+    subjectMap[subjId].chapters[chapterId].total++;
+    if (att.is_correct) subjectMap[subjId].chapters[chapterId].correct++;
   });
 
+  // Generate subject HTML with chapter breakdown
   let subjectHTML = '';
-  Object.entries(subjectMap).forEach(([name, data]) => {
-    const per = ((data.correct / data.total) * 100).toFixed(0);
-    const cls = per >= 80 ? 'score-excellent' : per >= 60 ? 'score-good' : per >= 40 ? 'score-average' : 'score-poor';
-    subjectHTML += `<div class="subject-item"><span class="subject-name">${name}</span><span class="subject-score ${cls}">${per}%</span></div>`;
+  Object.entries(subjectMap).forEach(([subjId, subjData]) => {
+    const subjPer = ((subjData.correct / subjData.total) * 100).toFixed(0);
+    const cls = subjPer >= 80 ? 'score-excellent' : subjPer >= 60 ? 'score-good' : subjPer >= 40 ? 'score-average' : 'score-poor';
+    
+    let chaptersHTML = '';
+    Object.entries(subjData.chapters).forEach(([chId, chData]) => {
+      const chPer = ((chData.correct / chData.total) * 100).toFixed(0);
+      const chCls = chPer >= 80 ? 'score-excellent' : chPer >= 60 ? 'score-good' : chPer >= 40 ? 'score-average' : 'score-poor';
+      chaptersHTML += `
+        <div class="chapter-item">
+          <span class="ch-name">${chData.name}</span>
+          <span class="ch-score ${chCls}">${chPer}%</span>
+        </div>
+      `;
+    });
+    
+    subjectHTML += `
+      <div class="subject-item">
+        <div class="subject-header">
+          <span class="subject-name">${subjData.name}</span>
+          <span class="subject-score ${cls}">${subjPer}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${subjPer}%"></div>
+        </div>
+        ${Object.keys(subjData.chapters).length > 0 ? `<div class="chapter-list">${chaptersHTML}</div>` : ''}
+      </div>
+    `;
   });
 
-  const improvementNeeded = (100 - parseFloat(testResult.percentage)).toFixed(0);
-
+  // Generate recommendations based on performance
+  const percentage = parseFloat(testResult.percentage);
   let recHTML = '';
-  if (testResult.percentage < 60) {
-    recHTML += '<h4>વધારે સમય આપો:</h4><ul class="rec-list">';
-    recHTML += '<li>રોજ 2-3 કલાક નિયમિત અભ્યાસ કરો</li>';
+  
+  if (percentage < 40) {
+    recHTML += '<div class="rec-section"><h4>🔴 તાત્કાલિક ધ્યાન આપો:</h4><ul class="rec-list">';
+    recHTML += '<li>બેસિક કોન્સેપ્ટ્સ ફરીથી સમજો અને મજબૂત કરો</li>';
+    recHTML += '<li>દરરોજ ઓછામાં ઓછા 3-4 કલાક અભ્યાસ કરો</li>';
     recHTML += '<li>નબળા વિષયો પર વિશેષ ધ્યાન આપો</li>';
-    recHTML += '<li>બેસિક કોન્સેપ્ટ્સ ફરીથી સમજો</li>';
-    recHTML += '</ul>';
-  } else if (testResult.percentage >= 60 && testResult.percentage < 80) {
-    recHTML += '<h4>વાંચન સુધારો:</h4><ul class="rec-list">';
-    recHTML += '<li>મધ્યમ અને મુશ્કેલ પ્રશ્નો પર પ્રેક્ટિસ વધારો</li>';
+    recHTML += '</ul></div>';
+  } else if (percentage >= 40 && percentage < 60) {
+    recHTML += '<div class="rec-section"><h4>🟠 વાંચન સુધારો:</h4><ul class="rec-list">';
+    recHTML += '<li>નબળા વિષયો પર વધુ સમય આપો</li>';
+    recHTML += '<li>નિયમિત પ્રેક્ટિસ અને રિવિઝન કરો</li>';
+    recHTML += '<li>મધ્યમ અને મુશ્કેલ પ્રશ્નો પર ધ્યાન આપો</li>';
+    recHTML += '</ul></div>';
+  } else if (percentage >= 60 && percentage < 80) {
+    recHTML += '<div class="rec-section"><h4>🟡 સારું - વધુ સુધારો:</h4><ul class="rec-list">';
+    recHTML += '<li>મુશ્કેલ પ્રશ્નો પર વધુ પ્રેક્ટિસ કરો</li>';
     recHTML += '<li>સ્પીડ અને એક્યુરસી બંને સુધારો</li>';
-    recHTML += '</ul>';
+    recHTML += '<li>નિયમિત મોક ટેસ્ટ લો</li>';
+    recHTML += '</ul></div>';
   } else {
-    recHTML += '<h4>તમારી મજબૂતાઈ:</h4><ul class="rec-list">';
+    recHTML += '<div class="rec-section"><h4>🟢 તમારી મજબૂતાઈ:</h4><ul class="rec-list">';
     recHTML += '<li>ઉત્તમ પ્રદર્શન! આ સ્તર જાળવો</li>';
     recHTML += '<li>નિયમિત રિવિઝન ચાલુ રાખો</li>';
-    recHTML += '</ul>';
+    recHTML += '<li>અન્ય વિદ્યાર્થીઓને મદદ કરો</li>';
+    recHTML += '</ul></div>';
   }
+
+  // Add weak subjects to recommendations
+  Object.entries(subjectMap).forEach(([subjId, subjData]) => {
+    const subjPer = ((subjData.correct / subjData.total) * 100);
+    if (subjPer < 40) {
+      recHTML += `<div class="rec-section"><h4>⚠️ ${subjData.name} - તાત્કાલિક ધ્યાન:</h4><ul class="rec-list">`;
+      Object.entries(subjData.chapters).forEach(([chId, chData]) => {
+        const chPer = ((chData.correct / chData.total) * 100);
+        if (chPer < 40) {
+          recHTML += `<li>${chData.name}: ${chPer.toFixed(0)}% - વધુ પ્રેક્ટિસ જરૂરી</li>`;
+        }
+      });
+      recHTML += '</ul></div>';
+    }
+  });
+
+  const improvementNeeded = (100 - percentage).toFixed(0);
 
   app.innerHTML = `
   <div class="card">
     <div class="student-header">
       <div class="avatar">RS</div>
-      <div class="student-info">
-        <h2>વિદ્યાર્થી Performance</h2>
+      <div>
+        <h2 style="margin:0 0 8px 0">Performance Dashboard</h2>
         <div class="student-meta">
           <span>લેવલ: <b>ગાંડ્સ</b></span>
           <span>રેંક: <b>#14</b></span>
@@ -165,13 +285,13 @@ function displayPerformance() {
 
   <div class="card">
     <h3>ટેસ્ટનું પરિણામ</h3>
-    <canvas id="pieChart"></canvas>
+    <canvas id="pieChart" style="max-height:250px"></canvas>
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">કુલ/મેળવેલ ગુણ</div>
-      <div class="stat-value">${testResult.total_questions} / ${testResult.score}</div>
+      <div class="stat-value">${testResult.total_questions}/${testResult.score}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">ચોકસાઈ</div>
@@ -220,21 +340,32 @@ function displayPerformance() {
   <button class="blue" onclick="window.location.href='select-test.html'">🏠 Back to Home</button>
   `;
 
-  const ctx = document.getElementById('pieChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['સાચા', 'ખોટા', 'બાકી'],
-      datasets: [{
-        data: [testResult.correct_answers, testResult.wrong_answers, testResult.skipped_questions],
-        backgroundColor: ['#22c55e', '#ef4444', '#e5e7eb']
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'bottom' } }
+  // Draw pie chart
+  setTimeout(() => {
+    const ctx = document.getElementById('pieChart');
+    if (ctx) {
+      new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['સાચા', 'ખોટા', 'બાકી'],
+          datasets: [{
+            data: [testResult.correct_answers, testResult.wrong_answers, testResult.skipped_questions],
+            backgroundColor: ['#22c55e', '#ef4444', '#e5e7eb']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { padding: 15, font: { size: 13 } }
+            }
+          }
+        }
+      });
     }
-  });
+  }, 100);
 }
 </script>
 </body>
