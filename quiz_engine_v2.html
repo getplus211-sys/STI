@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRD Quiz Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;600;700&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Hind Vadodara',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh}
+        .nav{background:rgba(255,255,255,0.95);padding:15px 20px;box-shadow:0 2px 20px rgba(0,0,0,0.1);position:sticky;top:0;z-index:100}
+        .nav-content{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+        .logo{display:flex;align-items:center;gap:15px}.logo-box{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:8px 12px;border-radius:10px;font-weight:bold;font-size:18px}
+        .timer{display:flex;align-items:center;gap:10px;padding:10px 20px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px}
+        .timer-val{font-size:28px;font-weight:900;color:#92400e}.timer-warning{background:linear-gradient(135deg,#fee2e2,#fecaca)!important;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}.q-nav{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;color:#1e293b}
+        .btn{padding:10px 20px;border:none;border-radius:10px;cursor:pointer;font-family:'Hind Vadodara',sans-serif;font-weight:600;font-size:14px;transition:all 0.3s}
+        .btn-submit{background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:white}.btn-submit:hover{transform:scale(1.05)}
+        .container{max-width:1400px;margin:20px auto;padding:0 20px}.layout{display:grid;grid-template-columns:1fr 300px;gap:20px}
+        .q-card{background:white;border-radius:20px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,0.1)}
+        .q-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:25px;padding-bottom:20px;border-bottom:2px solid #f1f5f9}
+        .q-num{font-size:24px;font-weight:800;color:#1e293b}.badge{padding:6px 15px;border-radius:20px;font-size:12px;font-weight:600}
+        .badge-easy{background:#dcfce7;color:#166534}.badge-medium{background:#fef3c7;color:#92400e}.badge-hard{background:#fee2e2;color:#991b1b}
+        .bookmark{background:none;border:none;font-size:28px;cursor:pointer;color:#fbbf24;transition:all 0.3s}.bookmark:hover{transform:scale(1.2)}
+        .bookmark.active{color:#f59e0b}.q-text{font-size:20px;line-height:1.6;color:#1e293b;margin-bottom:30px;font-weight:500}
+        .options{display:flex;flex-direction:column;gap:15px}.option{padding:18px 20px;border:3px solid #e5e7eb;border-radius:15px;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:15px;background:white}
+        .option:hover{border-color:#667eea;background:#f8f9ff;transform:translateX(5px)}.option.selected{border-color:#667eea;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .opt-letter{width:40px;height:40px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+        .option.selected .opt-letter{background:rgba(255,255,255,0.3);color:white}.opt-text{flex:1;font-size:16px;font-weight:500}
+        .nav-btns{display:flex;justify-content:space-between;margin-top:25px}.btn-nav{background:white;border:2px solid #e5e7eb;color:#1e293b;padding:12px 30px;font-size:16px}
+        .btn-nav:hover{border-color:#667eea;background:#f8f9ff}.btn-nav:disabled{opacity:0.5;cursor:not-allowed}.btn-clear{background:#fee2e2;color:#991b1b;border:2px solid #fecaca}
+        .sidebar{display:flex;flex-direction:column;gap:20px}.side-card{background:white;border-radius:20px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,0.1)}
+        .side-title{font-size:16px;font-weight:700;color:#1e293b;margin-bottom:15px;text-align:center}.q-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:15px}
+        .q-btn{width:100%;aspect-ratio:1;border:2px solid #e5e7eb;background:white;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;color:#64748b}
+        .q-btn:hover{border-color:#667eea;transform:scale(1.05)}.q-btn.answered{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-color:#667eea}
+        .q-btn.bookmarked{background:#fef3c7;border:2px solid #f59e0b;color:#92400e}.q-btn.current{border:3px solid #22c55e;box-shadow:0 0 0 2px rgba(34,197,94,0.2)}
+        .legend{padding-top:15px;border-top:2px solid #f1f5f9}.legend-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:#64748b}
+        .legend-box{width:30px;height:30px;border-radius:6px}.stats{padding-top:15px;border-top:2px solid #f1f5f9}.stat-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px}
+        .stat-label{color:#64748b}.stat-value{font-weight:700}.stat-value.answered{color:#22c55e}.stat-value.pending{color:#ef4444}.stat-value.bookmarked{color:#f59e0b}
+        .result-page{max-width:900px;margin:50px auto}.result-card{background:white;border-radius:25px;padding:50px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+        .result-icon{font-size:100px;margin-bottom:20px}.result-title{font-size:36px;font-weight:800;color:#1e293b;margin-bottom:30px}
+        .score{font-size:72px;font-weight:900;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:15px}
+        .percent{font-size:32px;font-weight:700;color:#64748b;margin-bottom:30px}.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:40px 0}
+        .result-stat{padding:25px;background:#f8fafc;border-radius:15px}.result-stat-icon{font-size:48px;margin-bottom:10px}.result-stat-label{font-size:13px;color:#64748b;margin-bottom:5px}
+        .result-stat-value{font-size:36px;font-weight:800}.result-stat.correct .result-stat-value{color:#22c55e}.result-stat.wrong .result-stat-value{color:#ef4444}
+        .result-stat.skipped .result-stat-value{color:#94a3b8}.result-actions{display:flex;gap:15px;margin-top:30px}.btn-large{flex:1;padding:18px;font-size:16px}
+    </style>
+</head>
+<body>
+    <div id="quizPage">
+        <div class="nav">
+            <div class="nav-content">
+                <div class="logo">
+                    <div class="logo-box">LRD</div>
+                    <div id="testTitle" style="font-size:18px;font-weight:700;color:#1e293b">લોડ થઈ રહ્યું છે...</div>
+                </div>
+                <div style="display:flex;gap:15px;align-items:center">
+                    <div class="timer" id="timerBox"><div class="timer-val" id="timer">00:00</div></div>
+                    <div class="q-nav"><span id="curr">0</span>/<span id="tot">0</span></div>
+                    <button class="btn btn-submit" onclick="submitQuiz()"><i class="fas fa-check-circle"></i> સબમિટ</button>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="layout">
+                <div class="q-card">
+                    <div class="q-header">
+                        <div>
+                            <div class="q-num">પ્રશ્ન <span id="qNum">0</span></div>
+                            <div id="badges" style="display:flex;gap:10px;margin-top:10px"></div>
+                        </div>
+                        <button class="bookmark" id="bookmarkBtn" onclick="toggleBookmark()"><i class="far fa-bookmark"></i></button>
+                    </div>
+                    <div class="q-text" id="qText"></div>
+                    <div class="options" id="opts"></div>
+                    <div class="nav-btns">
+                        <button class="btn btn-nav" id="prevBtn" onclick="prev()" disabled><i class="fas fa-chevron-left"></i> પહેલાંનો</button>
+                        <button class="btn btn-nav btn-clear" onclick="clearAns()"><i class="fas fa-eraser"></i> Clear</button>
+                        <button class="btn btn-nav" id="nextBtn" onclick="next()">આગળ <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="sidebar">
+                    <div class="side-card">
+                        <div class="side-title">પ્રશ્ન નેવિગેશન</div>
+                        <div class="q-grid" id="qGrid"></div>
+                        <div class="legend">
+                            <div class="legend-item"><div class="legend-box" style="background:white;border:2px solid #e5e7eb"></div><span>બાકી</span></div>
+                            <div class="legend-item"><div class="legend-box" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"></div><span>જવાબ આપ્યો</span></div>
+                            <div class="legend-item"><div class="legend-box" style="background:#fef3c7;border:2px solid #f59e0b"></div><span>Bookmark</span></div>
+                        </div>
+                    </div>
+                    <div class="side-card">
+                        <div class="side-title">Stats</div>
+                        <div class="stats">
+                            <div class="stat-row"><span class="stat-label">જવાબ આપ્યા</span><span class="stat-value answered" id="answeredStat">0</span></div>
+                            <div class="stat-row"><span class="stat-label">બાકી</span><span class="stat-value pending" id="pendingStat">0</span></div>
+                            <div class="stat-row"><span class="stat-label">Bookmarked</span><span class="stat-value bookmarked" id="bookmarkedStat">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="resultPage" style="display:none">
+        <div class="result-page">
+            <div class="result-card">
+                <div class="result-icon">🏆</div>
+                <div class="result-title">ક્વિઝ પૂર્ણ થઈ!</div>
+                <div class="score" id="scoreDisp">0/0</div>
+                <div class="percent" id="percentDisp">0%</div>
+                <div class="result-stats">
+                    <div class="result-stat correct"><div class="result-stat-icon">✓</div><div class="result-stat-label">સાચા</div><div class="result-stat-value" id="correctStat">0</div></div>
+                    <div class="result-stat wrong"><div class="result-stat-icon">✗</div><div class="result-stat-label">ખોટા</div><div class="result-stat-value" id="wrongStat">0</div></div>
+                    <div class="result-stat skipped"><div class="result-stat-icon">—</div><div class="result-stat-label">બાકી</div><div class="result-stat-value" id="skippedStat">0</div></div>
+                </div>
+                <div class="result-actions">
+                    <button class="btn btn-submit btn-large" onclick="window.location.href='lrd_dashboard_fixed.html'"><i class="fas fa-chart-line"></i> Dashboard</button>
+                    <button class="btn btn-nav btn-large" onclick="window.location.href='lrd_test_selection.html'"><i class="fas fa-list"></i> Tests</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const sb=window.supabase.createClient('https://bhmycvrbucmbbrpzeane.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4');
+        let user,test,qs=[],idx=0,ans=[],tmr,tLeft,start;
+        (async()=>{
+            const u=new URLSearchParams(window.location.search),tid=u.get('test_id');
+            if(!tid){alert('Test ID નથી');return}
+            const{data:{user:usr}}=await sb.auth.getUser();
+            if(!usr){alert('Login કરો');return}
+            user=usr;
+            const{data:tst}=await sb.from('lrd_tests').select('*').eq('id',tid).single();
+            if(!tst){alert('Test નથી મળી');return}
+            test=tst;
+            document.getElementById('testTitle').textContent=tst.title||'Test';
+            const{data:questions}=await sb.from('lrd_questions').select('*,lrd_subjects(name),lrd_chapters(name)').eq('subject_id',tst.subject_id).limit(tst.total_questions||10);
+            if(!questions||questions.length===0){alert('પ્રશ્નો નથી');return}
+            qs=questions;
+            ans=qs.map((_,i)=>({idx:i,ans:null,bm:false,time:0,start:Date.now()}));
+            document.getElementById('tot').textContent=qs.length;
+            tLeft=(tst.duration_minutes||15)*60;
+            start=Date.now();
+            startTimer();
+            render();
+            renderNav();
+            updateStats();
+        })();
+        function startTimer(){
+            updateTimer();
+            tmr=setInterval(()=>{
+                tLeft--;
+                if(tLeft<=0){clearInterval(tmr);alert('સમય પૂરો!');submitQuiz();return}
+                updateTimer();
+                if(tLeft===120){document.getElementById('timerBox').classList.add('timer-warning');alert('2 મિનિટ બાકી!')}
+            },1000)
+        }
+        function updateTimer(){
+            const m=Math.floor(tLeft/60),s=tLeft%60;
+            document.getElementById('timer').textContent=`${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`
+        }
+        function render(){
+            const q=qs[idx],a=ans[idx];
+            if(idx>0){const p=ans[idx-1];p.time+=Math.floor((Date.now()-p.start)/1000)}
+            a.start=Date.now();
+            document.getElementById('qNum').textContent=idx+1;
+            document.getElementById('curr').textContent=idx+1;
+            document.getElementById('qText').textContent=q.question_text;
+            const dif=q.difficulty_level||'મધ્યમ';
+            const bc=dif==='સરળ'?'badge-easy':dif==='હાર્ડ'?'badge-hard':'badge-medium';
+            document.getElementById('badges').innerHTML=`<span class="badge ${bc}">${dif}</span><span class="badge" style="background:#e0e7ff;color:#3730a3">${q.lrd_chapters?.name||'Chapter'}</span>`;
+            document.getElementById('bookmarkBtn').innerHTML=a.bm?'<i class="fas fa-bookmark"></i>':'<i class="far fa-bookmark"></i>';
+            const oc=document.getElementById('opts');oc.innerHTML='';
+            ['A','B','C','D','E'].filter(o=>q[`option_${o.toLowerCase()}`]).forEach(o=>{
+                const sel=a.ans===o,d=document.createElement('div');
+                d.className=`option ${sel?'selected':''}`;
+                d.innerHTML=`<div class="opt-letter">${o}</div><div class="opt-text">${q[`option_${o.toLowerCase()}`]}</div>`;
+                d.onclick=()=>{ans[idx].ans=o;render();renderNav();updateStats()};
+                oc.appendChild(d)
+            });
+            document.getElementById('prevBtn').disabled=idx===0;
+            document.getElementById('nextBtn').disabled=idx===qs.length-1;
+            renderNav()
+        }
+        function renderNav(){
+            const g=document.getElementById('qGrid');g.innerHTML='';
+            qs.forEach((_,i)=>{
+                const a=ans[i],b=document.createElement('button');
+                let c='q-btn ';
+                if(i===idx)c+='current ';
+                if(a.bm)c+='bookmarked';
+                else if(a.ans)c+='answered';
+                b.className=c;b.textContent=i+1;b.onclick=()=>{idx=i;render()};
+                g.appendChild(b)
+            })
+        }
+        function updateStats(){
+            const a=ans.filter(x=>x.ans!==null).length,b=ans.filter(x=>x.bm).length;
+            document.getElementById('answeredStat').textContent=a;
+            document.getElementById('pendingStat').textContent=qs.length-a;
+            document.getElementById('bookmarkedStat').textContent=b
+        }
+        function toggleBookmark(){ans[idx].bm=!ans[idx].bm;render();renderNav();updateStats()}
+        function clearAns(){ans[idx].ans=null;render();renderNav();updateStats()}
+        function prev(){if(idx>0){idx--;render()}}
+        function next(){if(idx<qs.length-1){idx++;render()}}
+        async function submitQuiz(){
+            const un=ans.filter(a=>a.ans===null).length;
+            if(un>0&&!confirm(`${un} પ્રશ્નો બાકી છે. સબમિટ કરો?`))return;
+            clearInterval(tmr);
+            const la=ans[idx];la.time+=Math.floor((Date.now()-la.start)/1000);
+            let c=0,w=0,sk=0;
+            const res=[];
+            for(let i=0;i<qs.length;i++){
+                const q=qs[i],a=ans[i],cor=a.ans===q.correct_option,att=a.ans!==null;
+                if(att){cor?c++:w++}else{sk++}
+                res.push({
+                    student_id:user.id,test_id:test.id,question_id:q.id,subject_id:q.subject_id,chapter_id:q.chapter_id,
+                    question_text:q.question_text,option_a:q.option_a,option_b:q.option_b,option_c:q.option_c,option_d:q.option_d,
+                    option_e:q.option_e,correct_option:q.correct_option,student_answer:a.ans,is_correct:cor,is_attempted:att,
+                    difficulty_level:q.difficulty_level,ideal_time_seconds:q.ideal_time_seconds||30,time_taken_seconds:a.time,
+                    marks_obtained:cor?1:0,marks_allocated:1,question_number:i+1,total_questions:qs.length,is_bookmarked:a.bm
+                })
+            }
+            await sb.from('lrd_results').insert(res);
+            document.getElementById('quizPage').style.display='none';
+            document.getElementById('resultPage').style.display='block';
+            document.getElementById('scoreDisp').textContent=`${c}/${qs.length}`;
+            document.getElementById('percentDisp').textContent=((c/qs.length)*100).toFixed(1)+'%';
+            document.getElementById('correctStat').textContent=c;
+            document.getElementById('wrongStat').textContent=w;
+            document.getElementById('skippedStat').textContent=sk
+        }
+    </script>
+</body>
+</html>
