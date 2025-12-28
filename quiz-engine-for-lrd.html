@@ -2,209 +2,224 @@
 <html lang="gu">
 <head>
 <meta charset="UTF-8">
-<title>LRD Quiz Engine - New System</title>
+<title>LRD Quiz Engine</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-    body{margin:0;font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b}
-    .container{max-width:800px;margin:auto;padding:15px}
-    .card{background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
-    .btn{border:none;border-radius:10px;padding:12px 20px;font-weight:600;cursor:pointer;transition:0.3s;width:100%}
-    .btn-primary{background:#2563eb;color:#fff}
-    .btn-success{background:#22c55e;color:#fff}
-    .btn-gray{background:#e2e8f0;color:#475569}
-    .option{border:2px solid #e2e8f0;border-radius:10px;padding:12px;margin:8px 0;cursor:pointer}
-    .option.selected{border-color:#2563eb;background:#eff6ff}
-    .hidden{display:none}
-    #timer{font-size:1.2rem;font-weight:bold;color:#dc2626}
-    .q-nav{display:grid;grid-template-columns:repeat(auto-fill, minmax(40px, 1fr));gap:8px;margin-top:15px}
-    .q-item{height:40px;display:flex;align-items:center;justify-content:center;background:#e2e8f0;border-radius:8px;cursor:pointer;font-weight:bold}
-    .q-item.active{background:#2563eb;color:#fff}
-    .q-item.answered{background:#22c55e;color:#fff}
+body{margin:0;font-family:system-ui;background:#f1f5f9}
+.container{max-width:900px;margin:auto;padding:14px}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 10px 25px rgba(0,0,0,.06)}
+button{border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;width:100%}
+.primary{background:#22c55e;color:#fff}
+.gray{background:#e5e7eb}
+.option{border:2px solid #e5e7eb;border-radius:12px;padding:14px;margin:10px 0;cursor:pointer}
+.option.selected{border-color:#22c55e;background:#f0fdf4}
+.hidden{display:none}
+#timer{font-weight:800;color:#dc2626}
+.q-nav{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:16px}
+.q-num{padding:10px;text-align:center;background:#e5e7eb;border-radius:10px;font-weight:700;cursor:pointer}
+.q-num.active{background:#22c55e;color:#fff}
+.q-num.answered{background:#8b5cf6;color:#fff}
 </style>
 </head>
+
 <body>
 
-<div id="setup-screen" class="container">
-    <div class="card" style="text-align:center">
-        <h2>LRD Mock Test</h2>
-        <p id="loading-text">માહિતી લોડ થઈ રહી છે...</p>
-        <button id="start-btn" class="btn btn-primary hidden" onclick="startTest()">ટેસ્ટ શરૂ કરો</button>
-    </div>
+<div class="container">
+
+<!-- SETUP -->
+<div id="setup" class="card">
+<h2 id="test-title">Quiz</h2>
+<p id="test-desc">Loading...</p>
+<button class="primary hidden" id="startBtn">Start Test</button>
 </div>
 
-<div id="quiz-screen" class="container hidden">
-    <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-        <span id="q-count">Question 1/0</span>
-        <span id="timer">00:00</span>
-    </div>
-    <div class="card">
-        <div id="question-text" style="font-size:1.1rem;font-weight:600;margin-bottom:15px"></div>
-        <div id="options-list"></div>
-    </div>
-    <div style="display:flex;gap:10px">
-        <button class="btn btn-gray" onclick="changeQuestion(-1)">પાછળ</button>
-        <button class="btn btn-primary" id="next-btn" onclick="changeQuestion(1)">આગળ</button>
-    </div>
-    <div class="q-nav" id="q-nav"></div>
-    <button class="btn btn-success" style="margin-top:20px" onclick="finishTest()">ટેસ્ટ સબમિટ કરો</button>
+<!-- QUIZ -->
+<div id="quiz" class="hidden">
+<div class="card" style="display:flex;justify-content:space-between">
+<b id="progress"></b>
+<span id="timer"></span>
 </div>
 
-<div id="result-screen" class="container hidden">
-    <div class="card" style="text-align:center">
-        <h2>રિઝલ્ટ</h2>
-        <div style="max-width:250px;margin:auto"><canvas id="resultChart"></canvas></div>
-        <div id="score-info" style="margin:20px 0"></div>
-        
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <button class="btn btn-primary" onclick="toggleSolutions()">📖 સોલ્યુશન</button>
-            <button class="btn btn-success" onclick="goToPerformance()">📊 પરફોર્મન્સ</button>
-        </div>
-        <button class="btn btn-gray" style="margin-top:10px" onclick="location.reload()">🏠 હોમ</button>
-    </div>
-    <div id="solutions" class="hidden"></div>
+<div class="card">
+<div id="question"></div>
+<div id="options"></div>
+</div>
+
+<div style="display:flex;gap:10px">
+<button class="gray" onclick="prevQ()">⬅ Prev</button>
+<button class="primary" onclick="nextQ()">Next ➡</button>
+</div>
+
+<div class="q-nav" id="nav"></div>
+
+<button class="primary" style="margin-top:20px;background:#dc2626" onclick="submitTest()">Finish & Submit</button>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="hidden">
+<div class="card" style="text-align:center">
+<h2>🎉 Result</h2>
+<canvas id="chart"></canvas>
+<div id="summary"></div>
+<button class="primary" onclick="showSolutions()">📖 Solutions</button>
+<button class="gray" onclick="location.reload()">🏠 Home</button>
+</div>
+<div id="solutions"></div>
+</div>
+
 </div>
 
 <script>
-const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
-const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+/* ========= SUPABASE ========= */
+const sb = supabase.createClient(
+  "https://bhmycvrbucmbbrpzeane.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4"
+);
 
-let questions = [];
-let currentIdx = 0;
-let userAnswers = {};
-let timeLeft = 0;
-let timer;
-let testStartTime;
+const quizId = new URLSearchParams(location.search).get("id");
+let user, questions=[], answers={}, index=0, time=0, timer;
 
-const quizId = new URLSearchParams(window.location.search).get('id') || 'TEST_01';
+/* ========= INIT ========= */
+(async()=>{
+const {data:{session}} = await sb.auth.getSession();
+if(!session){ alert("Login required"); return; }
+user=session.user;
 
-async function init() {
-    const { data, error } = await supabaseClient.from('lrd_quiz_questions').select('*').eq('quiz_id', quizId).order('question_number');
-    if (error || !data.length) {
-        document.getElementById('loading-text').innerText = "પ્રશ્નો મળ્યા નથી!";
-        return;
-    }
-    questions = data;
-    timeLeft = questions.length * 60; 
-    document.getElementById('loading-text').innerText = `${questions.length} પ્રશ્નો તૈયાર છે.`;
-    document.getElementById('start-btn').classList.remove('hidden');
+/* mapping */
+const {data:map} = await sb.from("quiz_test_mapping")
+.select("lrd_test_id").eq("quiz_id",quizId).maybeSingle();
+const testId = map?.lrd_test_id;
+
+/* test */
+const {data:test} = await sb.from("lrd_tests").select("*").eq("id",testId).single();
+document.getElementById("test-title").innerText=test.title;
+document.getElementById("test-desc").innerText=`${test.duration_minutes} Minutes | ${test.total_marks} Marks`;
+
+/* questions */
+const {data:q} = await sb.from("lrd_quiz_questions")
+.select("*").eq("quiz_id",quizId).order("question_number");
+questions=q;
+
+document.getElementById("startBtn").classList.remove("hidden");
+document.getElementById("startBtn").onclick=startTest;
+})();
+
+/* ========= TEST ========= */
+function startTest(){
+document.getElementById("setup").classList.add("hidden");
+document.getElementById("quiz").classList.remove("hidden");
+time=questions.length*60;
+timer=setInterval(()=>{
+time--;
+document.getElementById("timer").innerText=
+Math.floor(time/60)+":"+String(time%60).padStart(2,"0");
+if(time<=0) submitTest();
+},1000);
+render();
 }
 
-function startTest() {
-    testStartTime = new Date();
-    document.getElementById('setup-screen').classList.add('hidden');
-    document.getElementById('quiz-screen').classList.remove('hidden');
-    renderQuestion();
-    renderNav();
-    timer = setInterval(updateTimer, 1000);
+function render(){
+const q=questions[index];
+document.getElementById("progress").innerText=`Q ${index+1}/${questions.length}`;
+document.getElementById("question").innerHTML="<b>"+q.question_text+"</b>";
+const opt=document.getElementById("options");
+opt.innerHTML="";
+["a","b","c","d","e"].forEach((k,i)=>{
+if(q["option_"+k]){
+const d=document.createElement("div");
+d.className="option"+(answers[index]==k?" selected":"");
+d.innerText=q["option_"+k];
+d.onclick=()=>{answers[index]=k;render();nav();};
+opt.appendChild(d);
+}});
+nav();
 }
 
-function updateTimer() {
-    if (timeLeft <= 0) finishTest();
-    timeLeft--;
-    let m = Math.floor(timeLeft/60), s = timeLeft%60;
-    document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
+function nav(){
+const n=document.getElementById("nav"); n.innerHTML="";
+questions.forEach((_,i)=>{
+const d=document.createElement("div");
+d.className="q-num"+(i==index?" active":"")+(answers[i]?" answered":"");
+d.innerText=i+1;
+d.onclick=()=>{index=i;render();}
+n.appendChild(d);
+});
+}
+function nextQ(){ if(index<questions.length-1){index++;render();}}
+function prevQ(){ if(index>0){index--;render();}}
+
+/* ========= SUBMIT ========= */
+async function submitTest(){
+clearInterval(timer);
+
+let correct=0,wrong=0,skip=0;
+questions.forEach((q,i)=>{
+if(!answers[i]) skip++;
+else if(answers[i]===q.correct_option) correct++;
+else wrong++;
+});
+
+/* insert per question */
+const rows = questions.map((q,i)=>({
+student_id:user.id,
+test_id:q.quiz_id,
+question_id:q.id,
+subject_id:q.subject_id,
+chapter_id:q.chapter_id,
+question_text:q.question_text,
+option_a:q.option_a,
+option_b:q.option_b,
+option_c:q.option_c,
+option_d:q.option_d,
+option_e:q.option_e,
+correct_option:q.correct_option,
+student_answer:answers[i]||null,
+is_correct:answers[i]===q.correct_option,
+is_attempted:!!answers[i],
+question_number:q.question_number,
+total_questions:questions.length,
+marks_obtained:answers[i]===q.correct_option?q.marks:0,
+marks_allocated:q.marks
+}));
+
+await sb.from("lrd_results").insert(rows);
+
+showResult(correct,wrong,skip);
 }
 
-function renderQuestion() {
-    const q = questions[currentIdx];
-    document.getElementById('q-count').innerText = `Question ${currentIdx + 1}/${questions.length}`;
-    document.getElementById('question-text').innerText = q.question_text;
-    
-    const opts = document.getElementById('options-list');
-    opts.innerHTML = '';
-    ['a','b','c','d','e'].forEach(key => {
-        if(q[`option_${key}`]) {
-            const div = document.createElement('div');
-            div.className = `option ${userAnswers[currentIdx] === key ? 'selected' : ''}`;
-            div.innerText = `${key.toUpperCase()}. ${q[`option_${key}`]}`;
-            div.onclick = () => { userAnswers[currentIdx] = key; renderQuestion(); renderNav(); };
-            opts.appendChild(div);
-        }
-    });
-    document.getElementById('next-btn').innerText = currentIdx === questions.length -1 ? "પૂરું કરો" : "આગળ";
+/* ========= RESULT ========= */
+function showResult(c,w,s){
+document.getElementById("quiz").classList.add("hidden");
+document.getElementById("result").classList.remove("hidden");
+document.getElementById("summary").innerHTML=
+`✔ ${c} | ❌ ${w} | ⚪ ${s}`;
+
+new Chart(document.getElementById("chart"),{
+type:"doughnut",
+data:{labels:["Correct","Wrong","Skipped"],
+datasets:[{data:[c,w,s]}]}
+});
 }
 
-function renderNav() {
-    const nav = document.getElementById('q-nav');
-    nav.innerHTML = '';
-    questions.forEach((_, i) => {
-        const div = document.createElement('div');
-        div.className = `q-item ${i === currentIdx ? 'active' : ''} ${userAnswers[i] ? 'answered' : ''}`;
-        div.innerText = i + 1;
-        div.onclick = () => { currentIdx = i; renderQuestion(); renderNav(); };
-        nav.appendChild(div);
-    });
+/* ========= SOLUTIONS ========= */
+function showSolutions(){
+const box=document.getElementById("solutions");
+box.innerHTML="<h3>Solutions</h3>";
+questions.forEach((q,i)=>{
+box.innerHTML+=`
+<div class="card">
+<b>Q${i+1}</b>
+<p>${q.question_text}</p>
+<p>✔ Correct: ${q["option_"+q.correct_option]}</p>
+<p>💡 ${q.solution||""}</p>
+</div>`;
+});
 }
-
-function changeQuestion(step) {
-    currentIdx = Math.max(0, Math.min(questions.length - 1, currentIdx + step));
-    renderQuestion();
-    renderNav();
-}
-
-async function finishTest() {
-    clearInterval(timer);
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if(!user) { alert("કૃપા કરીને લોગિન કરો"); return; }
-
-    let correct = 0, attempted = 0;
-    questions.forEach((q, i) => {
-        if(userAnswers[i]) {
-            attempted++;
-            if(userAnswers[i] === q.correct_option.toLowerCase()) correct++;
-        }
-    });
-
-    const marks = correct - ((attempted - correct) * 0.25);
-    
-    // Save to lrd_results
-    const { data: res, error } = await supabaseClient.from('lrd_results').insert({
-        student_id: user.id,
-        test_id: questions[0].id, // Using first Q ID as ref
-        marks_obtained: marks,
-        is_correct: correct > 0,
-        time_taken_seconds: (new Date() - testStartTime) / 1000,
-        total_questions: questions.length
-    }).select().single();
-
-    showResults(correct, questions.length - correct, marks);
-}
-
-function showResults(c, w, m) {
-    document.getElementById('quiz-screen').classList.add('hidden');
-    document.getElementById('result-screen').classList.remove('hidden');
-    document.getElementById('score-info').innerHTML = `<h3>સ્કોર: ${m.toFixed(2)}</h3><p>સાચા: ${c} | ખોટા: ${w}</p>`;
-    
-    new Chart(document.getElementById('resultChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['સાચા', 'ખોટા'],
-            datasets: [{ data: [c, w], backgroundColor: ['#22c55e', '#dc2626'] }]
-        }
-    });
-}
-
-function toggleSolutions() {
-    const solDiv = document.getElementById('solutions');
-    solDiv.classList.toggle('hidden');
-    solDiv.innerHTML = '<h3>સોલ્યુશન્સ</h3>';
-    questions.forEach((q, i) => {
-        solDiv.innerHTML += `<div class="card"><b>Q${i+1}: ${q.question_text}</b><br>
-        <span style="color:green">સાચો જવાબ: ${q.correct_option.toUpperCase()}</span><br>
-        <small>${q.solution || ''}</small></div>`;
-    });
-}
-
-function goToPerformance() {
-    alert("પરફોર્મન્સ ડેશબોર્ડ પર જઈ રહ્યા છો...");
-    // window.location.href = "performance.html";
-}
-
-init();
 </script>
+
 </body>
 </html>
