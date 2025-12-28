@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Result - LRD Beginners</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans Gujarati', sans-serif; background: #f3f4f6; min-height: 100vh; }
+        .header { background: #2563eb; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: bold; }
+        .logo-badge { background: white; color: #2563eb; padding: 8px 12px; border-radius: 8px; }
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .result-card { background: white; border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center; }
+        .score-title { font-size: 28px; color: #1f2937; margin-bottom: 10px; }
+        .score-value { font-size: 48px; font-weight: bold; color: #10b981; margin-bottom: 30px; }
+        .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; text-align: left; }
+        .stat-item { font-size: 18px; color: #4b5563; padding: 10px; }
+        .stat-item strong { color: #1f2937; }
+        .chart-container { max-width: 400px; margin: 0 auto 40px; }
+        .chart-legend { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        .correct { background: #10b981; }
+        .wrong { background: #ef4444; }
+        .skipped { background: #e5e7eb; }
+        .e-option { background: #fbbf24; }
+        .buttons { display: flex; flex-direction: column; gap: 15px; }
+        .btn { padding: 16px 24px; border-radius: 12px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-decoration: none; display: block; text-align: center; }
+        .btn-leaderboard { background: #10b981; color: white; }
+        .btn-leaderboard:hover { background: #059669; }
+        .btn-solutions { background: #e5e7eb; color: #1f2937; }
+        .btn-solutions:hover { background: #d1d5db; }
+        .btn-performance { background: #3b82f6; color: white; }
+        .btn-performance:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo"><span class="logo-badge">LRD</span><span>Beginners</span></div>
+    </div>
+
+    <div class="container">
+        <div class="result-card">
+            <h1 class="score-title">Your Score:</h1>
+            <div class="score-value" id="scoreDisplay">0</div>
+
+            <div class="stats-row">
+                <div class="stat-item"><strong>Correct:</strong> <span id="correctCount">0</span></div>
+                <div class="stat-item"><strong>Wrong:</strong> <span id="wrongCount">0</span></div>
+                <div class="stat-item"><strong>Skipped:</strong> <span id="skippedCount">0</span></div>
+                <div class="stat-item"><strong>E Options:</strong> <span id="eOptionCount">0</span></div>
+            </div>
+
+            <div class="stat-item" style="text-align: center; margin-bottom: 30px;">
+                <strong>Time Taken:</strong> <span id="timeTaken">0m 0s</span>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="resultChart"></canvas>
+            </div>
+
+            <div class="chart-legend">
+                <div class="legend-item"><div class="legend-color correct"></div><span>Correct</span></div>
+                <div class="legend-item"><div class="legend-color wrong"></div><span>Wrong</span></div>
+                <div class="legend-item"><div class="legend-color skipped"></div><span>Skipped</span></div>
+                <div class="legend-item"><div class="legend-color e-option"></div><span>E</span></div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-leaderboard" onclick="viewLeaderboard()">View Leaderboard</button>
+                <button class="btn btn-solutions" onclick="viewSolutions()">View Answers / Solutions</button>
+                <button class="btn btn-performance" onclick="viewPerformance()">View Performance Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let resultId = null;
+
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            resultId = urlParams.get('result_id');
+            
+            if (!resultId) {
+                alert('Result ID not found');
+                window.location.href = 'select-test.html';
+                return;
+            }
+
+            await loadResult();
+        }
+
+        async function loadResult() {
+            const { data, error } = await supabaseClient
+                .from('lrd_test_results')
+                .select('*')
+                .eq('id', resultId)
+                .single();
+
+            if (error || !data) {
+                alert('Error loading result');
+                return;
+            }
+
+            displayResult(data);
+        }
+
+        function displayResult(result) {
+            document.getElementById('scoreDisplay').textContent = result.score;
+            document.getElementById('correctCount').textContent = result.correct_answers;
+            document.getElementById('wrongCount').textContent = result.wrong_answers;
+            document.getElementById('skippedCount').textContent = result.skipped_questions;
+            document.getElementById('eOptionCount').textContent = result.e_option_used;
+
+            const minutes = Math.floor(result.total_time_seconds / 60);
+            const seconds = result.total_time_seconds % 60;
+            document.getElementById('timeTaken').textContent = `${minutes}m ${seconds}s`;
+
+            drawChart(result);
+        }
+
+        function drawChart(result) {
+            const ctx = document.getElementById('resultChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correct', 'Wrong', 'Skipped', 'E Option'],
+                    datasets: [{
+                        data: [
+                            result.correct_answers,
+                            result.wrong_answers,
+                            result.skipped_questions,
+                            result.e_option_used
+                        ],
+                        backgroundColor: ['#10b981', '#ef4444', '#e5e7eb', '#fbbf24'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function viewLeaderboard() {
+            alert('Leaderboard feature coming soon!');
+        }
+
+        function viewSolutions() {
+            window.location.href = `solutions.html?result_id=${resultId}`;
+        }
+
+        function viewPerformance() {
+            window.location.href = `performance.html?result_id=${resultId}`;
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
