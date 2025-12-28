@@ -16,6 +16,7 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .gray{background:#e5e7eb;color:#333}
 .blue{background:#3b82f6;color:#fff}
 .danger{background:#dc2626;color:#fff}
+.warning{background:#f59e0b;color:#fff}
 .option{border:1px solid #ddd;border-radius:12px;padding:12px;margin:8px 0;cursor:pointer;transition:all 0.2s}
 .option:hover{border-color:#22c55e}
 .option.active{background:#22c55e;color:#fff;border-color:#22c55e}
@@ -31,6 +32,7 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .qbtn.skipped{background:#cbd5e1;color:#333;border-color:#cbd5e1}
 .badge{background:#22c55e;color:#fff;padding:5px 12px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:10px}
 .badge.free{background:#3b82f6}
+.badge.completed{background:#f59e0b}
 .nav-buttons{display:flex;gap:10px;margin-top:10px;margin-bottom:20px}
 .nav-buttons button{flex:1}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
@@ -68,6 +70,9 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .solution-opt.selected{background:#dbeafe;border:2px solid #3b82f6}
 .solution-opt.correct-ans{background:#dcfce7;border:2px solid #16a34a}
 .solution-opt.wrong-ans{background:#fee2e2;border:2px solid #dc2626}
+.alert-box{background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:15px;margin:15px 0}
+.alert-box h3{color:#92400e;margin-bottom:8px}
+.alert-box p{color:#78350f;margin:5px 0;line-height:1.6}
 </style>
 </head>
 <body>
@@ -98,6 +103,7 @@ const TEST_ID = urlParams.get('test_id');
 
 let app = document.getElementById("app");
 let user, questions = [], current = 0, answers = {}, startTime, timer, submitted = false, testResultId = null, currentTest = null;
+let existingResult = null;
 
 if (!TEST_ID) {
   app.innerHTML = '<div class="card"><h3>⚠️ Invalid URL</h3><p>Test ID not found</p></div>';
@@ -121,6 +127,21 @@ async function init() {
     }
     currentTest = test;
 
+    // Check if user has already attempted this test
+    const { data: previousAttempt } = await sb
+      .from("lrd_test_results")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("test_id", TEST_ID)
+      .single();
+
+    if (previousAttempt) {
+      existingResult = previousAttempt;
+      testResultId = previousAttempt.id;
+      showAlreadyAttempted(test, previousAttempt);
+      return;
+    }
+
     const { data: qs } = await sb.from("lrd_questions").select("*").eq("test_id", TEST_ID).order("question_order");
     questions = qs || [];
 
@@ -135,6 +156,120 @@ async function init() {
   }
 }
 
+function showAlreadyAttempted(test, result) {
+  const date = new Date(result.completed_at).toLocaleDateString('gu-IN');
+  const time = new Date(result.completed_at).toLocaleTimeString('gu-IN', {hour: '2-digit', minute: '2-digit'});
+  
+  app.innerHTML = `
+  <div class="card">
+    <span class="badge completed">✓ પૂર્ણ થયેલ</span>
+    <h2>${test.test_name}</h2>
+    
+    <div class="alert-box">
+      <h3>⚠️ તમે આ ટેસ્ટ પહેલાથી જ આપી ચુક્યા છો!</h3>
+      <p><b>તારીખ:</b> ${date} ${time}</p>
+      <p><b>તમારો સ્કોર:</b> ${result.score}/${result.total_questions}</p>
+      <p><b>ચોકસાઈ:</b> ${result.percentage}%</p>
+      <p style="margin-top:10px">દરેક ટેસ્ટ માત્ર એક જ વાર આપી શકાય છે. તમે તમારા પરિણામો અને solutions જોઈ શકો છો.</p>
+    </div>
+
+    <button class="primary" onclick="loadExistingResult()">📊 તમારા પરિણામો જુઓ</button>
+    <button class="gray" onclick="loadExistingSolutions()">📝 Solutions જુઓ</button>
+    <button class="blue" onclick="viewPerformance()">📈 Performance Dashboard</button>
+    <br>
+    <button class="warning" onclick="window.location.href='select-test.html'">← પાછા જાઓ</button>
+  </div>`;
+}
+
+async function loadExistingResult() {
+  const r = existingResult;
+  const m = Math.floor(r.total_time_seconds / 60);
+  const sec = r.total_time_seconds % 60;
+
+  app.innerHTML = `
+  <div class="card">
+    <span class="badge completed">✓ પૂર્ણ થયેલ</span>
+    <h2>Your Score: ${r.score}</h2>
+    <div style="margin:15px 0;line-height:1.8">
+      <p><b>Correct:</b> ${r.correct_answers} | <b>Wrong:</b> ${r.wrong_answers}</p>
+      <p><b>Skipped:</b> ${r.skipped_questions} | <b>E Options:</b> ${r.e_option_used}</p>
+      <p><b>Time Taken:</b> ${m}m ${sec}s</p>
+    </div>
+    <canvas id="chart"></canvas><br><br>
+    <button class="primary" onclick="loadLeaderboard()">🏆 View Leaderboard</button>
+    <button class="gray" onclick="loadExistingSolutions()">📝 View Solutions</button>
+    <button class="blue" onclick="viewPerformance()">📊 Performance Dashboard</button>
+  </div>`;
+
+  const chart = document.getElementById("chart");
+  new Chart(chart, {
+    type: "pie",
+    data: {
+      labels: ["Correct", "Wrong", "Skipped", "E"],
+      datasets: [{
+        data: [r.correct_answers, r.wrong_answers, r.skipped_questions, r.e_option_used],
+        backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+}
+
+async function loadExistingSolutions() {
+  app.innerHTML = '<div class="card loader"><div style="font-size:40px">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Solutions લોડ થઈ રહ્યા છે</p></div>';
+  
+  // Load questions and attempts
+  const { data: qs } = await sb.from("lrd_questions").select("*").eq("test_id", TEST_ID).order("question_order");
+  const { data: attempts } = await sb.from("lrd_question_attempts").select("*").eq("test_result_id", testResultId);
+  
+  const attemptsMap = {};
+  attempts.forEach(att => {
+    attemptsMap[att.question_id] = att;
+  });
+
+  let html = '<div class="card"><h2>📝 Solutions</h2></div>';
+
+  qs.forEach((q, idx) => {
+    const attempt = attemptsMap[q.id];
+    const userAns = attempt?.selected_answer;
+    const correctAns = q.correct_answer;
+    const isCorrect = attempt?.is_correct;
+    
+    const statusClass = userAns === 'SKIPPED' ? 'skipped' : isCorrect ? 'correct' : 'wrong';
+    const statusText = userAns === 'SKIPPED' ? 'બાકી' : isCorrect ? 'સાચો' : 'ખોટો';
+
+    html += `
+    <div class="solution-item">
+      <div class="solution-header">
+        <span class="solution-qnum">પ્રશ્ન ${idx + 1}</span>
+        <span class="solution-status ${statusClass}">${statusText}</span>
+      </div>
+      <div class="solution-question">${q.question_text}</div>
+      <div class="solution-options">
+        <div class="solution-opt ${userAns === 'A' ? (correctAns === 'A' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'A' ? 'correct-ans' : '')}">
+          A) ${q.option_a} ${correctAns === 'A' ? '✓' : ''}
+        </div>
+        <div class="solution-opt ${userAns === 'B' ? (correctAns === 'B' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'B' ? 'correct-ans' : '')}">
+          B) ${q.option_b} ${correctAns === 'B' ? '✓' : ''}
+        </div>
+        <div class="solution-opt ${userAns === 'C' ? (correctAns === 'C' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'C' ? 'correct-ans' : '')}">
+          C) ${q.option_c} ${correctAns === 'C' ? '✓' : ''}
+        </div>
+        <div class="solution-opt ${userAns === 'D' ? (correctAns === 'D' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'D' ? 'correct-ans' : '')}">
+          D) ${q.option_d} ${correctAns === 'D' ? '✓' : ''}
+        </div>
+        ${q.has_e_option ? `<div class="solution-opt ${userAns === 'E' ? (correctAns === 'E' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'E' ? 'correct-ans' : '')}">E) None ${correctAns === 'E' ? '✓' : ''}</div>` : ''}
+      </div>
+    </div>`;
+  });
+
+  html += '<button class="blue" onclick="loadExistingResult()">← પાછા જાઓ</button>';
+  app.innerHTML = html;
+}
+
 function showInstructions(test) {
   app.innerHTML = `
   <div class="card">
@@ -146,6 +281,7 @@ function showInstructions(test) {
       <p><b>કુલ માર્ક્સ:</b> ${test.total_marks}</p>
       <p><b>Negative Marking:</b> નહીં</p>
       <p><b>સમય મર્યાદા:</b> કોઈ નથી</p>
+      <p style="color:#f59e0b;font-weight:600;margin-top:10px">⚠️ આ ટેસ્ટ માત્ર એક જ વાર આપી શકાય છે</p>
     </div>
     <button class="primary" onclick="startTest()">Start Test Now</button>
   </div>`;
@@ -299,6 +435,7 @@ async function submitTest() {
   }
 
   testResultId = result.id;
+  existingResult = result;
 
   // Save question attempts
   for (let i = 0; i < questions.length; i++) {
@@ -317,19 +454,13 @@ async function submitTest() {
     });
   }
 
-  // Show success modal
+  // Show success modal with button to view results
   showModal(
     '❓',
     'ટેસ્ટ સબમિટ કરો?',
     'શું તમે ખરેખર આ ટેસ્ટ સબમિટ કરવા માંગો છો? તમે પછી કોઈ જવાબ બદલી શકશો નહીં.',
-    `<button class="modal-btn-cancel" onclick="hideModal()">રદ કરો</button>
-     <button class="modal-btn-confirm" onclick="hideModal();loadResult(${score}, ${correct}, ${wrong}, ${skip}, ${e}, ${timeTaken})">હા, સબમિટ કરો</button>`
+    `<button class="modal-btn-confirm" onclick="hideModal();loadResult(${score}, ${correct}, ${wrong}, ${skip}, ${e}, ${timeTaken})">હા, સબમિટ કરો</button>`
   );
-  
-  setTimeout(() => {
-    hideModal();
-    loadResult(score, correct, wrong, skip, e, timeTaken);
-  }, 1500);
 }
 
 function loadResult(score, c, w, s, e, time) {
@@ -347,7 +478,7 @@ function loadResult(score, c, w, s, e, time) {
     </div>
     <canvas id="chart"></canvas><br><br>
     <button class="primary" onclick="loadLeaderboard()">🏆 View Leaderboard</button>
-    <button class="gray" onclick="viewSolutions()">📝 View Answers / Solutions</button>
+    <button class="gray" onclick="loadExistingSolutions()">📝 View Answers / Solutions</button>
     <button class="blue" onclick="viewPerformance()">📊 Current Test Performance</button>
   </div>`;
 
@@ -369,7 +500,7 @@ function loadResult(score, c, w, s, e, time) {
 }
 
 async function loadLeaderboard() {
-  app.innerHTML = '<div class="card loader"><h3>લોડ થઈ રહ્યું છે...</h3></div>';
+  app.innerHTML = '<div class="card loader"><div style="font-size:40px">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Leaderboard લોડ થઈ રહ્યો છે</p></div>';
   
   const { data: results } = await sb
     .from("lrd_test_results")
@@ -404,59 +535,12 @@ async function loadLeaderboard() {
     html += '<div class="card"><p>કોઈ results નથી</p></div>';
   }
 
-  html += '<button class="blue" onclick="loadResult(' + testResult.score + ',' + testResult.correct_answers + ',' + testResult.wrong_answers + ',' + testResult.skipped_questions + ',' + testResult.e_option_used + ',' + testResult.total_time_seconds + ')">← પાછા જાઓ</button>';
-
-  app.innerHTML = html;
-}
-
-async function viewSolutions() {
-  app.innerHTML = '<div class="card loader"><h3>લોડ થઈ રહ્યું છે...</h3></div>';
-  
-  let html = '<div class="card"><h2>📝 Solutions</h2></div>';
-
-  questions.forEach((q, idx) => {
-    const userAns = answers[q.id];
-    const correctAns = q.correct_answer;
-    const isCorrect = userAns && ((userAns === 1 && correctAns === 'A') || (userAns === 2 && correctAns === 'B') || (userAns === 3 && correctAns === 'C') || (userAns === 4 && correctAns === 'D') || (userAns === 5 && correctAns === 'E'));
-    
-    const statusClass = !userAns ? 'skipped' : isCorrect ? 'correct' : 'wrong';
-    const statusText = !userAns ? 'બાકી' : isCorrect ? 'સાચો' : 'ખોટો';
-
-    html += `
-    <div class="solution-item">
-      <div class="solution-header">
-        <span class="solution-qnum">પ્રશ્ન ${idx + 1}</span>
-        <span class="solution-status ${statusClass}">${statusText}</span>
-      </div>
-      <div class="solution-question">${q.question_text}</div>
-      <div class="solution-options">
-        <div class="solution-opt ${userAns === 1 ? (correctAns === 'A' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'A' ? 'correct-ans' : '')}">
-          A) ${q.option_a} ${correctAns === 'A' ? '✓' : ''}
-        </div>
-        <div class="solution-opt ${userAns === 2 ? (correctAns === 'B' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'B' ? 'correct-ans' : '')}">
-          B) ${q.option_b} ${correctAns === 'B' ? '✓' : ''}
-        </div>
-        <div class="solution-opt ${userAns === 3 ? (correctAns === 'C' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'C' ? 'correct-ans' : '')}">
-          C) ${q.option_c} ${correctAns === 'C' ? '✓' : ''}
-        </div>
-        <div class="solution-opt ${userAns === 4 ? (correctAns === 'D' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'D' ? 'correct-ans' : '')}">
-          D) ${q.option_d} ${correctAns === 'D' ? '✓' : ''}
-        </div>
-        ${q.has_e_option ? `<div class="solution-opt ${userAns === 5 ? (correctAns === 'E' ? 'correct-ans' : 'wrong-ans') : (correctAns === 'E' ? 'correct-ans' : '')}">E) None ${correctAns === 'E' ? '✓' : ''}</div>` : ''}
-      </div>
-    </div>`;
-  });
-
-  const { data: result } = await sb.from("lrd_test_results").select("*").eq("id", testResultId).single();
-  const testResult = result;
-
-  html += `<button class="blue" onclick="loadResult(${testResult.score},${testResult.correct_answers},${testResult.wrong_answers},${testResult.skipped_questions},${testResult.e_option_used},${testResult.total_time_seconds})">← પાછા જાઓ</button>`;
-
+  html += '<button class="blue" onclick="loadExistingResult()">← પાછા જાઓ</button>';
   app.innerHTML = html;
 }
 
 function viewPerformance() {
-  window.location.href = `performance-working.html?result_id=${testResultId}`;
+  window.location.href = `performance.html?result_id=${testResultId}`;
 }
 
 function showModal(icon, title, text, buttons) {
@@ -470,8 +554,6 @@ function showModal(icon, title, text, buttons) {
 function hideModal() {
   document.getElementById('modal').classList.remove('show');
 }
-
-let testResult = null;
 </script>
 </body>
 </html>
