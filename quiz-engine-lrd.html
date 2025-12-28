@@ -358,7 +358,7 @@
 
         // Load test details
         async function loadTest(testId) {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('lrd_tests')
                 .select('*')
                 .eq('id', testId)
@@ -372,7 +372,7 @@
 
         // Load questions
         async function loadQuestions(testId) {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('lrd_questions')
                 .select(`
                     *,
@@ -440,7 +440,7 @@
             testStartTime = new Date();
             
             // Create test result record
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('lrd_test_results')
                 .insert({
                     user_id: currentUser.id,
@@ -622,7 +622,7 @@
             const percentage = ((correctAnswers / questions.length) * 100).toFixed(2);
 
             // Update test result
-            const { error: updateError } = await supabase
+            const { error: updateError } = await supabaseClient
                 .from('lrd_test_results')
                 .update({
                     attempted_questions: attemptedQuestions,
@@ -649,7 +649,7 @@
                 
                 const isCorrect = answer.selected === question.correct_answer;
                 
-                await supabase
+                await supabaseClient
                     .from('lrd_question_attempts')
                     .insert({
                         test_result_id: testResultId,
@@ -757,7 +757,7 @@
                 const accuracy = totalAttempted > 0 ? ((correct / totalAttempted) * 100).toFixed(2) : 0;
 
                 // Check if analytics record exists
-                const { data: existing } = await supabase
+                const { data: existing } = await supabaseClient
                     .from('lrd_performance_analytics')
                     .select('*')
                     .eq('user_id', currentUser.id)
@@ -767,7 +767,7 @@
 
                 if (existing) {
                     // Update existing record
-                    await supabase
+                    await supabaseClient
                         .from('lrd_performance_analytics')
                         .update({
                             total_questions_attempted: existing.total_questions_attempted + totalAttempted,
@@ -794,7 +794,7 @@
                         .eq('id', existing.id);
                 } else {
                     // Insert new record
-                    await supabase
+                    await supabaseClient
                         .from('lrd_performance_analytics')
                         .insert({
                             user_id: currentUser.id,
