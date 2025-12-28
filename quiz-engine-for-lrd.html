@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<title>LRD Quiz Engine - New System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body{margin:0;font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b}
+    .container{max-width:800px;margin:auto;padding:15px}
+    .card{background:#fff;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+    .btn{border:none;border-radius:10px;padding:12px 20px;font-weight:600;cursor:pointer;transition:0.3s;width:100%}
+    .btn-primary{background:#2563eb;color:#fff}
+    .btn-success{background:#22c55e;color:#fff}
+    .btn-gray{background:#e2e8f0;color:#475569}
+    .option{border:2px solid #e2e8f0;border-radius:10px;padding:12px;margin:8px 0;cursor:pointer}
+    .option.selected{border-color:#2563eb;background:#eff6ff}
+    .hidden{display:none}
+    #timer{font-size:1.2rem;font-weight:bold;color:#dc2626}
+    .q-nav{display:grid;grid-template-columns:repeat(auto-fill, minmax(40px, 1fr));gap:8px;margin-top:15px}
+    .q-item{height:40px;display:flex;align-items:center;justify-content:center;background:#e2e8f0;border-radius:8px;cursor:pointer;font-weight:bold}
+    .q-item.active{background:#2563eb;color:#fff}
+    .q-item.answered{background:#22c55e;color:#fff}
+</style>
+</head>
+<body>
+
+<div id="setup-screen" class="container">
+    <div class="card" style="text-align:center">
+        <h2>LRD Mock Test</h2>
+        <p id="loading-text">માહિતી લોડ થઈ રહી છે...</p>
+        <button id="start-btn" class="btn btn-primary hidden" onclick="startTest()">ટેસ્ટ શરૂ કરો</button>
+    </div>
+</div>
+
+<div id="quiz-screen" class="container hidden">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+        <span id="q-count">Question 1/0</span>
+        <span id="timer">00:00</span>
+    </div>
+    <div class="card">
+        <div id="question-text" style="font-size:1.1rem;font-weight:600;margin-bottom:15px"></div>
+        <div id="options-list"></div>
+    </div>
+    <div style="display:flex;gap:10px">
+        <button class="btn btn-gray" onclick="changeQuestion(-1)">પાછળ</button>
+        <button class="btn btn-primary" id="next-btn" onclick="changeQuestion(1)">આગળ</button>
+    </div>
+    <div class="q-nav" id="q-nav"></div>
+    <button class="btn btn-success" style="margin-top:20px" onclick="finishTest()">ટેસ્ટ સબમિટ કરો</button>
+</div>
+
+<div id="result-screen" class="container hidden">
+    <div class="card" style="text-align:center">
+        <h2>રિઝલ્ટ</h2>
+        <div style="max-width:250px;margin:auto"><canvas id="resultChart"></canvas></div>
+        <div id="score-info" style="margin:20px 0"></div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button class="btn btn-primary" onclick="toggleSolutions()">📖 સોલ્યુશન</button>
+            <button class="btn btn-success" onclick="goToPerformance()">📊 પરફોર્મન્સ</button>
+        </div>
+        <button class="btn btn-gray" style="margin-top:10px" onclick="location.reload()">🏠 હોમ</button>
+    </div>
+    <div id="solutions" class="hidden"></div>
+</div>
+
+<script>
+const SB_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+let questions = [];
+let currentIdx = 0;
+let userAnswers = {};
+let timeLeft = 0;
+let timer;
+let testStartTime;
+
+const quizId = new URLSearchParams(window.location.search).get('id') || 'TEST_01';
+
+async function init() {
+    const { data, error } = await supabaseClient.from('lrd_quiz_questions').select('*').eq('quiz_id', quizId).order('question_number');
+    if (error || !data.length) {
+        document.getElementById('loading-text').innerText = "પ્રશ્નો મળ્યા નથી!";
+        return;
+    }
+    questions = data;
+    timeLeft = questions.length * 60; 
+    document.getElementById('loading-text').innerText = `${questions.length} પ્રશ્નો તૈયાર છે.`;
+    document.getElementById('start-btn').classList.remove('hidden');
+}
+
+function startTest() {
+    testStartTime = new Date();
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.remove('hidden');
+    renderQuestion();
+    renderNav();
+    timer = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (timeLeft <= 0) finishTest();
+    timeLeft--;
+    let m = Math.floor(timeLeft/60), s = timeLeft%60;
+    document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
+}
+
+function renderQuestion() {
+    const q = questions[currentIdx];
+    document.getElementById('q-count').innerText = `Question ${currentIdx + 1}/${questions.length}`;
+    document.getElementById('question-text').innerText = q.question_text;
+    
+    const opts = document.getElementById('options-list');
+    opts.innerHTML = '';
+    ['a','b','c','d','e'].forEach(key => {
+        if(q[`option_${key}`]) {
+            const div = document.createElement('div');
+            div.className = `option ${userAnswers[currentIdx] === key ? 'selected' : ''}`;
+            div.innerText = `${key.toUpperCase()}. ${q[`option_${key}`]}`;
+            div.onclick = () => { userAnswers[currentIdx] = key; renderQuestion(); renderNav(); };
+            opts.appendChild(div);
+        }
+    });
+    document.getElementById('next-btn').innerText = currentIdx === questions.length -1 ? "પૂરું કરો" : "આગળ";
+}
+
+function renderNav() {
+    const nav = document.getElementById('q-nav');
+    nav.innerHTML = '';
+    questions.forEach((_, i) => {
+        const div = document.createElement('div');
+        div.className = `q-item ${i === currentIdx ? 'active' : ''} ${userAnswers[i] ? 'answered' : ''}`;
+        div.innerText = i + 1;
+        div.onclick = () => { currentIdx = i; renderQuestion(); renderNav(); };
+        nav.appendChild(div);
+    });
+}
+
+function changeQuestion(step) {
+    currentIdx = Math.max(0, Math.min(questions.length - 1, currentIdx + step));
+    renderQuestion();
+    renderNav();
+}
+
+async function finishTest() {
+    clearInterval(timer);
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if(!user) { alert("કૃપા કરીને લોગિન કરો"); return; }
+
+    let correct = 0, attempted = 0;
+    questions.forEach((q, i) => {
+        if(userAnswers[i]) {
+            attempted++;
+            if(userAnswers[i] === q.correct_option.toLowerCase()) correct++;
+        }
+    });
+
+    const marks = correct - ((attempted - correct) * 0.25);
+    
+    // Save to lrd_results
+    const { data: res, error } = await supabaseClient.from('lrd_results').insert({
+        student_id: user.id,
+        test_id: questions[0].id, // Using first Q ID as ref
+        marks_obtained: marks,
+        is_correct: correct > 0,
+        time_taken_seconds: (new Date() - testStartTime) / 1000,
+        total_questions: questions.length
+    }).select().single();
+
+    showResults(correct, questions.length - correct, marks);
+}
+
+function showResults(c, w, m) {
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.remove('hidden');
+    document.getElementById('score-info').innerHTML = `<h3>સ્કોર: ${m.toFixed(2)}</h3><p>સાચા: ${c} | ખોટા: ${w}</p>`;
+    
+    new Chart(document.getElementById('resultChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['સાચા', 'ખોટા'],
+            datasets: [{ data: [c, w], backgroundColor: ['#22c55e', '#dc2626'] }]
+        }
+    });
+}
+
+function toggleSolutions() {
+    const solDiv = document.getElementById('solutions');
+    solDiv.classList.toggle('hidden');
+    solDiv.innerHTML = '<h3>સોલ્યુશન્સ</h3>';
+    questions.forEach((q, i) => {
+        solDiv.innerHTML += `<div class="card"><b>Q${i+1}: ${q.question_text}</b><br>
+        <span style="color:green">સાચો જવાબ: ${q.correct_option.toUpperCase()}</span><br>
+        <small>${q.solution || ''}</small></div>`;
+    });
+}
+
+function goToPerformance() {
+    alert("પરફોર્મન્સ ડેશબોર્ડ પર જઈ રહ્યા છો...");
+    // window.location.href = "performance.html";
+}
+
+init();
+</script>
+</body>
+</html>
