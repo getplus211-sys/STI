@@ -3,1260 +3,546 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GovtExam Pro - Advanced Student Performance System</title>
+    <title>LRD Beginners - ક્વિઝ Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-        .card { 
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            margin-bottom: 20px;
-            transition: transform 0.3s;
-        }
-        .card:hover { transform: translateY(-5px); }
-        
-        .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 24px;
-            border-radius: 16px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-box::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: rgba(255,255,255,0.1);
-            transform: rotate(45deg);
-        }
-        
-        .progress-ring {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto;
-        }
-        .progress-ring-circle {
-            transition: stroke-dashoffset 0.5s;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .badge-success { background: #d4edda; color: #155724; }
-        .badge-warning { background: #fff3cd; color: #856404; }
-        .badge-danger { background: #f8d7da; color: #721c24; }
-        .badge-info { background: #d1ecf1; color: #0c5460; }
-        
-        .tab {
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .achievement-badge {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin: 0 auto 10px;
-            position: relative;
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .topic-card {
-            border: 2px solid #f0f0f0;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 15px 0;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .topic-card:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-            transform: translateX(10px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
-        }
-        
-        .notification-dot {
-            width: 8px;
-            height: 8px;
-            background: #f56565;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
-        }
-        
-        .recommendation-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 24px;
-            border-radius: 16px;
-            margin: 15px 0;
-            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.3);
-        }
-        
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        
-        .button-primary {
-            padding: 12px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        .button-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .section-title {
-            font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            color: #2d3748;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .streak-flame {
-            display: inline-block;
-            animation: flicker 1.5s infinite;
-        }
-        @keyframes flicker {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;600;700&display=swap');
+        body { font-family: 'Hind Vadodara', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(102,126,234,0.4); }
+        .quiz-option { transition: all 0.3s; cursor: pointer; border: 2px solid #e5e7eb; }
+        .quiz-option:hover { transform: translateX(5px); border-color: #667eea; }
+        .quiz-option.selected { background: #667eea; color: white; border-color: #667eea; }
+        .quiz-option.correct { background: #10B981; color: white; border-color: #10B981; }
+        .quiz-option.wrong { background: #EF4444; color: white; border-color: #EF4444; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .timer-warning { animation: pulse 1s infinite; color: #EF4444; }
+        .q-nav-btn { transition: all 0.2s; }
+        .q-nav-btn.answered { background: #667eea; color: white; }
+        .q-nav-btn.bookmarked { background: #FCD34D; color: #92400E; border: 2px solid #F59E0B; }
+        .q-nav-btn.current { border: 3px solid #10B981; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header with Student Info -->
-        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                <div>
-                    <h1 style="font-size: 32px; font-weight: 900; margin-bottom: 8px;">
-                        <i data-lucide="user-circle" style="display: inline-block; vertical-align: middle;"></i>
-                        શ્રી કૃષ્ણ પટેલ
-                    </h1>
-                    <p style="opacity: 0.95; font-size: 16px;">GPSC Class 1-2 Preparation | Batch 2026</p>
-                    <div style="margin-top: 10px; display: flex; gap: 15px; flex-wrap: wrap;">
-                        <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
-                            <span class="streak-flame">🔥</span> 18 Day Streak
-                        </span>
-                        <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
-                            ⚡ Level 12 Student
-                        </span>
-                        <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">
-                            🏆 Top 15% Performer
-                        </span>
+    <!-- QUIZ PAGE -->
+    <div id="quizPage">
+        <!-- Top Bar -->
+        <div class="glass sticky top-0 z-50 p-4">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-6">
+                    <div class="btn-primary text-white px-3 py-2 rounded-lg font-bold">LRD</div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold">ટેસ્ટ</p>
+                        <p id="testTitle" class="text-lg font-bold text-gray-800">લોડ થઈ રહ્યું છે...</p>
                     </div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 14px; opacity: 0.9;">છેલ્લું અપડેટ</div>
-                    <div style="font-size: 18px; font-weight: 700; margin-top: 5px;">23 Dec 2025, 2:30 PM</div>
-                    <button onclick="showNotifications()" style="margin-top: 10px; padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                        <i data-lucide="bell" style="display: inline-block; vertical-align: middle;"></i>
-                        <span class="notification-dot" style="margin-left: 5px;"></span>
-                        3 Alerts
+                <div class="flex gap-6 items-center">
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 uppercase font-bold">સમય બાકી</p>
+                        <p id="timerDisplay" class="text-3xl font-black text-blue-600">00:00</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 uppercase font-bold">પ્રશ્ન</p>
+                        <p class="text-2xl font-black text-gray-800"><span id="currentQ">0</span>/<span id="totalQ">0</span></p>
+                    </div>
+                    <button onclick="submitQuiz()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition">
+                        <i class="fas fa-check-circle mr-2"></i>સબમિટ
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Key Performance Indicators -->
-        <div class="grid-4">
-            <div class="stat-box">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Overall Progress</div>
-                <div class="progress-ring">
-                    <svg width="120" height="120">
-                        <circle cx="60" cy="60" r="54" stroke="#e0e0e0" stroke-width="8" fill="none"/>
-                        <circle class="progress-ring-circle" cx="60" cy="60" r="54" 
-                            stroke="white" stroke-width="8" fill="none"
-                            stroke-dasharray="339.292" stroke-dashoffset="94"/>
-                    </svg>
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; font-weight: 900;">72.4%</div>
-                </div>
-                <div style="font-size: 13px; margin-top: 10px; opacity: 0.95;">↑ 8.2% this month</div>
-            </div>
-
-            <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Questions Solved</div>
-                <div style="font-size: 42px; font-weight: 900; margin: 15px 0;">2,847</div>
-                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; font-size: 13px;">
-                    Target: 4,000 (71.2%)
-                </div>
-            </div>
-
-            <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Avg Accuracy</div>
-                <div style="font-size: 42px; font-weight: 900; margin: 15px 0;">68.5%</div>
-                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; font-size: 13px;">
-                    Need 75%+ for selection
-                </div>
-            </div>
-
-            <div class="stat-box" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Exam Prediction</div>
-                <div style="font-size: 42px; font-weight: 900; margin: 15px 0;">82/150</div>
-                <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; font-size: 13px;">
-                    Expected Score
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <h3 style="font-size: 20px; font-weight: 700; color: #2d3748;">Quick Actions</h3>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button onclick="startMockTest()" class="button-primary">
-                        <i data-lucide="clipboard-check" style="display: inline-block; vertical-align: middle;"></i>
-                        Start Mock Test
-                    </button>
-                    <button onclick="dailyChallenge()" style="padding: 12px 24px; background: #48bb78; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
-                        <i data-lucide="trophy" style="display: inline-block; vertical-align: middle;"></i>
-                        Daily Challenge
-                    </button>
-                    <button onclick="revisionMode()" style="padding: 12px 24px; background: #ed8936; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">
-                        <i data-lucide="refresh-cw" style="display: inline-block; vertical-align: middle;"></i>
-                        Quick Revision
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Performance Charts -->
-        <div class="grid-2">
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="trending-up" style="color: #667eea;"></i>
-                    Weekly Performance Trend
-                </div>
-                <div class="chart-container">
-                    <canvas id="weeklyChart"></canvas>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="pie-chart" style="color: #f59e0b;"></i>
-                    Subject Distribution
-                </div>
-                <div class="chart-container">
-                    <canvas id="subjectChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Subject-wise Detailed Analysis -->
-        <div class="card">
-            <div class="section-title">
-                <i data-lucide="bar-chart-3" style="color: #667eea;"></i>
-                Subject-wise Performance Analysis
-            </div>
-
-            <div style="margin: 20px 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div>
-                        <span style="font-weight: 700; font-size: 18px;">Quantitative Aptitude</span>
-                        <span class="badge badge-warning" style="margin-left: 10px;">Need Improvement</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 24px; font-weight: 800; color: #ed8936;">64%</div>
-                        <div style="font-size: 12px; color: #718096;">16/25 Topics Complete</div>
-                    </div>
-                </div>
-                <div style="height: 12px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                    <div style="width: 64%; height: 100%; background: linear-gradient(90deg, #ed8936, #dd6b20); transition: width 0.5s;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; color: #718096;">
-                    <span>640/1000 Questions</span>
-                    <span>Accuracy: 61%</span>
-                    <span>Avg Time: 2.5 min</span>
-                </div>
-                <button onclick="showSubjectDetails('quant')" style="margin-top: 15px; padding: 8px 20px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    View Detailed Analysis →
-                </button>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div>
-                        <span style="font-weight: 700; font-size: 18px;">Reasoning Ability</span>
-                        <span class="badge badge-success" style="margin-left: 10px;">Strong</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 24px; font-weight: 800; color: #48bb78;">82%</div>
-                        <div style="font-size: 12px; color: #718096;">15/18 Topics Complete</div>
-                    </div>
-                </div>
-                <div style="height: 12px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                    <div style="width: 82%; height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.5s;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; color: #718096;">
-                    <span>738/900 Questions</span>
-                    <span>Accuracy: 79%</span>
-                    <span>Avg Time: 1.8 min</span>
-                </div>
-                <button onclick="showSubjectDetails('reasoning')" style="margin-top: 15px; padding: 8px 20px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    View Detailed Analysis →
-                </button>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div>
-                        <span style="font-weight: 700; font-size: 18px;">General Studies</span>
-                        <span class="badge badge-danger" style="margin-left: 10px;">Critical</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 24px; font-weight: 800; color: #f56565;">56%</div>
-                        <div style="font-size: 12px; color: #718096;">12/20 Topics Complete</div>
-                    </div>
-                </div>
-                <div style="height: 12px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                    <div style="width: 56%; height: 100%; background: linear-gradient(90deg, #f56565, #c53030); transition: width 0.5s;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; color: #718096;">
-                    <span>560/1000 Questions</span>
-                    <span>Accuracy: 58%</span>
-                    <span>Avg Time: 2.0 min</span>
-                </div>
-                <button onclick="showSubjectDetails('gs')" style="margin-top: 15px; padding: 8px 20px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    View Detailed Analysis →
-                </button>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div>
-                        <span style="font-weight: 700; font-size: 18px;">English Language</span>
-                        <span class="badge badge-success" style="margin-left: 10px;">Good</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 24px; font-weight: 800; color: #48bb78;">76%</div>
-                        <div style="font-size: 12px; color: #718096;">10/12 Topics Complete</div>
-                    </div>
-                </div>
-                <div style="height: 12px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                    <div style="width: 76%; height: 100%; background: linear-gradient(90deg, #48bb78, #38a169); transition: width 0.5s;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; color: #718096;">
-                    <span>456/600 Questions</span>
-                    <span>Accuracy: 72%</span>
-                    <span>Avg Time: 1.5 min</span>
-                </div>
-                <button onclick="showSubjectDetails('english')" style="margin-top: 15px; padding: 8px 20px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    View Detailed Analysis →
-                </button>
-            </div>
-        </div>
-
-        <!-- Critical Weak Areas -->
-        <div class="card" style="border: 3px solid #f56565;">
-            <div class="section-title">
-                <i data-lucide="alert-triangle" style="color: #f56565;"></i>
-                Critical Weak Areas - તાત્કાલિક ધ્યાન આપો! 🚨
-            </div>
-
-            <div class="topic-card" style="background: #fff5f5; border-color: #f56565;">
-                <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px; flex-wrap: wrap;">
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 24px;">💰</span>
+        <div class="max-w-7xl mx-auto p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                
+                <!-- Question Panel -->
+                <div class="lg:col-span-3">
+                    <div class="glass rounded-2xl p-8 mb-6">
+                        <div class="flex justify-between items-start mb-6">
                             <div>
-                                <div style="font-weight: 700; font-size: 18px; color: #c53030;">Profit & Loss</div>
-                                <div style="font-size: 13px; color: #718096;">Quantitative Aptitude</div>
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">પ્રશ્ન <span id="qNum">0</span></h3>
+                                <div class="flex gap-2 items-center">
+                                    <span id="difficultyBadge" class="px-3 py-1 rounded-full text-sm font-bold"></span>
+                                    <span id="chapterBadge" class="px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700"></span>
+                                </div>
                             </div>
+                            <button onclick="bookmarkQuestion()" class="text-3xl hover:scale-110 transition">
+                                <i id="bookmarkIcon" class="far fa-bookmark text-yellow-500"></i>
+                            </button>
                         </div>
-                        <div style="display: flex; gap: 10px; margin: 10px 0;">
-                            <span class="badge badge-danger">34% Complete</span>
-                            <span class="badge badge-danger">52% Accuracy</span>
-                            <span class="badge" style="background: #fed7d7; color: #9b2c2c;">High Priority</span>
-                        </div>
-                        <div style="background: white; padding: 12px; border-radius: 8px; margin-top: 10px;">
-                            <div style="font-size: 13px; color: #2d3748; margin-bottom: 5px;"><b>Issue:</b> Discount + CP/SP calculation માં ભૂલ</div>
-                            <div style="font-size: 13px; color: #2d3748;"><b>Last Attempt:</b> 2 days ago • Errors: 8/15</div>
-                        </div>
+                        
+                        <p id="questionText" class="text-xl text-gray-700 mb-8 leading-relaxed"></p>
+                        
+                        <div id="optionsContainer" class="space-y-4"></div>
                     </div>
-                    <div>
-                        <button onclick="startWeakTopic('profit-loss')" style="padding: 10px 24px; background: #f56565; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 8px; width: 100%;">
-                            Fix Now →
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between gap-4">
+                        <button onclick="prevQuestion()" id="prevBtn" class="glass px-8 py-4 rounded-xl font-bold text-gray-700 hover:bg-gray-100 transition" disabled>
+                            <i class="fas fa-chevron-left mr-2"></i>પહેલાંનો
                         </button>
-                        <button onclick="showSolution('profit-loss')" style="padding: 8px 24px; background: white; color: #f56565; border: 2px solid #f56565; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
-                            View Solutions
+                        <button onclick="clearAnswer()" class="glass px-8 py-4 rounded-xl font-bold text-red-600 hover:bg-red-50 transition">
+                            <i class="fas fa-eraser mr-2"></i>Clear
                         </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="topic-card" style="background: #fff5f5; border-color: #f56565;">
-                <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px; flex-wrap: wrap;">
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 24px;">🏛️</span>
-                            <div>
-                                <div style="font-weight: 700; font-size: 18px; color: #c53030;">Indian Polity</div>
-                                <div style="font-size: 13px; color: #718096;">General Studies</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin: 10px 0;">
-                            <span class="badge badge-danger">42% Complete</span>
-                            <span class="badge badge-danger">55% Accuracy</span>
-                            <span class="badge" style="background: #fed7d7; color: #9b2c2c;">High Priority</span>
-                        </div>
-                        <div style="background: white; padding: 12px; border-radius: 8px; margin-top: 10px;">
-                            <div style="font-size: 13px; color: #2d3748; margin-bottom: 5px;"><b>Issue:</b> Articles, Amendments યાદ રાખવામાં સમસ્યા</div>
-                            <div style="font-size: 13px; color: #2d3748;"><b>Last Attempt:</b> 4 days ago • Errors: 12/20</div>
-                        </div>
-                    </div>
-                    <div>
-                        <button onclick="startWeakTopic('polity')" style="padding: 10px 24px; background: #f56565; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 8px; width: 100%;">
-                            Fix Now →
-                        </button>
-                        <button onclick="showSolution('polity')" style="padding: 8px 24px; background: white; color: #f56565; border: 2px solid #f56565; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
-                            View Solutions
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="topic-card" style="background: #fff5f5; border-color: #f56565;">
-                <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px; flex-wrap: wrap;">
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 24px;">📊</span>
-                            <div>
-                                <div style="font-weight: 700; font-size: 18px; color: #c53030;">Data Interpretation</div>
-                                <div style="font-size: 13px; color: #718096;">Quantitative Aptitude</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin: 10px 0;">
-                            <span class="badge badge-danger">38% Complete</span>
-                            <span class="badge badge-danger">49% Accuracy</span>
-                            <span class="badge" style="background: #fed7d7; color: #9b2c2c;">Critical</span>
-                        </div>
-                        <div style="background: white; padding: 12px; border-radius: 8px; margin-top: 10px;">
-                            <div style="font-size: 13px; color: #2d3748; margin-bottom: 5px;"><b>Issue:</b> Graph reading + calculation speed ધીમું</div>
-                            <div style="font-size: 13px; color: #2d3748;"><b>Last Attempt:</b> 1 day ago • Errors: 9/15 • Time: 3.5 min avg</div>
-                        </div>
-                    </div>
-                    <div>
-                        <button onclick="startWeakTopic('data-interpretation')" style="padding: 10px 24px; background: #f56565; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 8px; width: 100%;">
-                            Fix Now →
-                        </button>
-                        <button onclick="showSolution('data-interpretation')" style="padding: 8px 24px; background: white; color: #f56565; border: 2px solid #f56565; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
-                            View Solutions
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- AI Recommendations -->
-        <div class="grid-2">
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="zap" style="color: #f59e0b;"></i>
-                    Smart Recommendations
-                </div>
-
-                <div class="recommendation-card">
-                    <div style="display: flex; gap: 15px;">
-                        <div style="font-size: 36px;">🎯</div>
-                        <div>
-                            <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px;">આજની Priority</div>
-                            <div style="font-size: 14px; margin-bottom: 12px; opacity: 0.95;">
-                                પહેલા Profit & Loss (50 questions) કરો, પછી Polity revision (30 mins)
-                            </div>
-                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px;">
-                                <b>Expected Result:</b> 3-4 days માં 70% accuracy પહોંચો
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; padding: 20px; border-radius: 12px; margin: 15px 0;">
-                    <div style="display: flex; gap: 15px;">
-                        <div style="font-size: 36px;">⚡</div>
-                        <div>
-                            <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px;">Speed Training</div>
-                            <div style="font-size: 14px; margin-bottom: 12px; opacity: 0.95;">
-                                Daily 20 questions - Timer સાથે • Target: 1.5-2 mins/question
-                            </div>
-                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px;">
-                                <b>Current:</b> 2.5 mins • <b>Needed:</b> 0.5-1 min improvement
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 20px; border-radius: 12px; margin: 15px 0;">
-                    <div style="display: flex; gap: 15px;">
-                        <div style="font-size: 36px;">📝</div>
-                        <div>
-                            <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px;">Weekly Mock Test</div>
-                            <div style="font-size: 14px; margin-bottom: 12px; opacity: 0.95;">
-                                માત્ર 3 mock tests પૂરતા નથી! અઠવાડિયે 2 full tests જરૂરી
-                            </div>
-                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px;">
-                                <b>Next Mock:</b> સોમવાર 10:00 AM • Full Syllabus Test
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="calendar" style="color: #8b5cf6;"></i>
-                    7-Day Study Plan
-                </div>
-
-                <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                    <div style="font-weight: 700; font-size: 16px; margin-bottom: 10px;">📅 આજ - મંગળવાર</div>
-                    <div style="font-size: 14px; line-height: 1.8;">
-                        • સવાર: Profit & Loss (60 mins) - 40 questions<br>
-                        • બપોર: Polity Revision (45 mins)<br>
-                        • સાંજ: Speed Practice - 20 questions (30 mins)<br>
-                        • રાત્રે: Yesterday errors review (20 mins)
-                    </div>
-                </div>
-
-                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
-                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">બુધવાર</div>
-                    <div style="font-size: 13px; color: #4a5568;">Data Interpretation + Reasoning Practice</div>
-                </div>
-
-                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
-                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">ગુરુવાર</div>
-                    <div style="font-size: 13px; color: #4a5568;">Weak Topics Day - All 3 critical areas</div>
-                </div>
-
-                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
-                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">શુક્રવાર</div>
-                    <div style="font-size: 13px; color: #4a5568;">English + GK Current Affairs</div>
-                </div>
-
-                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #667eea;">
-                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">શનિવાર</div>
-                    <div style="font-size: 13px; color: #4a5568;">Mock Test + Analysis (3 hours)</div>
-                </div>
-
-                <div style="padding: 15px; background: #f7fafc; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #48bb78;">
-                    <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">રવિવાર</div>
-                    <div style="font-size: 13px; color: #4a5568;">Full Revision Day + New Topics</div>
-                </div>
-
-                <button onclick="startPlan()" class="button-primary" style="width: 100%; margin-top: 15px;">
-                    ✓ આ Plan શરૂ કરો
-                </button>
-            </div>
-        </div>
-
-        <!-- Achievements & Gamification -->
-        <div class="card">
-            <div class="section-title">
-                <i data-lucide="trophy" style="color: #f59e0b;"></i>
-                Achievements & Badges
-            </div>
-
-            <div class="grid-4">
-                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border-radius: 12px;">
-                    <div class="achievement-badge" style="background: rgba(255,255,255,0.3);">🔥</div>
-                    <div style="font-weight: 700; font-size: 16px; color: #7c2d12;">Streak Master</div>
-                    <div style="font-size: 13px; color: #92400e; margin-top: 5px;">18 Days Continuous</div>
-                </div>
-
-                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
-                    <div class="achievement-badge" style="background: rgba(255,255,255,0.2);">💯</div>
-                    <div style="font-weight: 700; font-size: 16px;">Perfect Score</div>
-                    <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">15/15 in 3 topics</div>
-                </div>
-
-                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 12px; color: white;">
-                    <div class="achievement-badge" style="background: rgba(255,255,255,0.2);">⚡</div>
-                    <div style="font-weight: 700; font-size: 16px;">Speed Demon</div>
-                    <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">50 quick solves</div>
-                </div>
-
-                <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; color: white;">
-                    <div class="achievement-badge" style="background: rgba(255,255,255,0.2);">🎯</div>
-                    <div style="font-weight: 700; font-size: 16px;">Target Crusher</div>
-                    <div style="font-size: 13px; opacity: 0.9; margin-top: 5px;">100% daily goals</div>
-                </div>
-            </div>
-
-            <div style="margin-top: 25px; padding: 20px; background: #f7fafc; border-radius: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="font-weight: 700; font-size: 16px; color: #2d3748;">Next Achievement Progress</div>
-                    <div style="font-size: 14px; color: #718096;">3/5 Completed</div>
-                </div>
-                <div style="height: 10px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                    <div style="width: 60%; height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
-                </div>
-                <div style="font-size: 13px; color: #4a5568; margin-top: 10px;">
-                    <b>"Question Master"</b> - Solve 3000 questions to unlock (153 remaining)
-                </div>
-            </div>
-        </div>
-
-        <!-- Time Management Analysis -->
-        <div class="grid-2">
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="clock" style="color: #3b82f6;"></i>
-                    Time Management Analysis
-                </div>
-
-                <div style="background: #eff6ff; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                        <div>
-                            <div style="font-size: 13px; color: #1e3a8a; margin-bottom: 5px;">Average Time Per Question</div>
-                            <div style="font-size: 28px; font-weight: 800; color: #1e40af;">2.5 mins</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 13px; color: #1e3a8a; margin-bottom: 5px;">Target Time</div>
-                            <div style="font-size: 28px; font-weight: 800; color: #48bb78;">1.5 mins</div>
-                        </div>
-                    </div>
-                    <div style="background: white; padding: 12px; border-radius: 8px;">
-                        <div style="font-size: 13px; color: #2d3748; margin-bottom: 5px;"><b>Status:</b> Need to improve speed by 40%</div>
-                        <div style="font-size: 13px; color: #2d3748;"><b>Suggestion:</b> Daily timed practice સાથે shortcuts શીખો</div>
-                    </div>
-                </div>
-
-                <div style="padding: 15px; background: #fef3c7; border-radius: 10px; margin-bottom: 10px;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #92400e;">⚠️ Slow Topics (>3 mins avg)</div>
-                    <div style="font-size: 13px; color: #78350f; line-height: 1.8;">
-                        • Data Interpretation: 3.5 mins<br>
-                        • Profit & Loss: 3.2 mins<br>
-                        • Time & Work: 2.8 mins
-                    </div>
-                </div>
-
-                <div style="padding: 15px; background: #dcfce7; border-radius: 10px;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #14532d;">✓ Fast Topics (<2 mins avg)</div>
-                    <div style="font-size: 13px; color: #166534; line-height: 1.8;">
-                        • Blood Relations: 1.2 mins<br>
-                        • Number Series: 1.5 mins<br>
-                        • Synonyms/Antonyms: 0.8 mins
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="target" style="color: #ec4899;"></i>
-                    Predictive Score Calculator
-                </div>
-
-                <div style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); color: white; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Expected Exam Score</div>
-                    <div style="font-size: 48px; font-weight: 900; margin: 10px 0;">82/150</div>
-                    <div style="font-size: 14px; opacity: 0.95; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
-                        Based on current performance trend
-                    </div>
-                </div>
-
-                <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac;">
-                    <div style="font-weight: 700; margin-bottom: 15px; color: #14532d; font-size: 16px;">📊 Score Breakdown Prediction</div>
-                    
-                    <div style="margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-size: 13px; color: #166534;">Quantitative</span>
-                            <span style="font-weight: 700; color: #166534;">19/40</span>
-                        </div>
-                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
-                            <div style="width: 48%; height: 100%; background: #22c55e;"></div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-size: 13px; color: #166534;">Reasoning</span>
-                            <span style="font-weight: 700; color: #166534;">29/35</span>
-                        </div>
-                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
-                            <div style="width: 83%; height: 100%; background: #22c55e;"></div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-size: 13px; color: #166534;">General Studies</span>
-                            <span style="font-weight: 700; color: #166534;">22/50</span>
-                        </div>
-                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
-                            <div style="width: 44%; height: 100%; background: #22c55e;"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-size: 13px; color: #166534;">English</span>
-                            <span style="font-weight: 700; color: #166534;">12/25</span>
-                        </div>
-                        <div style="height: 6px; background: #d1fae5; border-radius: 10px; overflow: hidden;">
-                            <div style="width: 48%; height: 100%; background: #22c55e;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #f59e0b;">
-                    <div style="font-size: 13px; color: #92400e; margin-bottom: 8px;">
-                        <b>⚡ To reach 100+ marks:</b>
-                    </div>
-                    <div style="font-size: 13px; color: #78350f; line-height: 1.8;">
-                        • Improve GS accuracy to 70% (+10 marks)<br>
-                        • Fix weak Quant topics (+8 marks)<br>
-                        • Speed up time management (+5 marks)
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Revision Tracker -->
-        <div class="card">
-            <div class="section-title">
-                <i data-lucide="refresh-cw" style="color: #8b5cf6;"></i>
-                Smart Revision Tracker - Spaced Repetition System
-            </div>
-
-            <div style="background: #faf5ff; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 2px solid #c084fc;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div>
-                        <div style="font-weight: 700; font-size: 18px; color: #6b21a8;">આજે Revision જરૂરી છે</div>
-                        <div style="font-size: 13px; color: #7c3aed; margin-top: 5px;">Memory retention માટે આ topics ને ફરીથી કરો</div>
-                    </div>
-                    <div style="background: #c084fc; color: white; padding: 10px 20px; border-radius: 20px; font-weight: 700;">
-                        7 Topics
-                    </div>
-                </div>
-
-                <div style="display: grid; gap: 10px;">
-                    <div style="background: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 600; color: #2d3748;">Percentage & Ratio</div>
-                            <div style="font-size: 12px; color: #718096;">Last revised: 7 days ago • 92% retention risk</div>
-                        </div>
-                        <button onclick="quickRevise('percentage')" style="padding: 8px 16px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            Quick Revise
-                        </button>
-                    </div>
-
-                    <div style="background: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 600; color: #2d3748;">Coding-Decoding</div>
-                            <div style="font-size: 12px; color: #718096;">Last revised: 5 days ago • 85% retention risk</div>
-                        </div>
-                        <button onclick="quickRevise('coding')" style="padding: 8px 16px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            Quick Revise
-                        </button>
-                    </div>
-
-                    <div style="background: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 600; color: #2d3748;">Indian History - Modern Period</div>
-                            <div style="font-size: 12px; color: #718096;">Last revised: 10 days ago • 95% retention risk ⚠️</div>
-                        </div>
-                        <button onclick="quickRevise('history')" style="padding: 8px 16px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            Urgent!
+                        <button onclick="nextQuestion()" id="nextBtn" class="glass px-8 py-4 rounded-xl font-bold text-gray-700 hover:bg-gray-100 transition">
+                            આગળ<i class="fas fa-chevron-right ml-2"></i>
                         </button>
                     </div>
                 </div>
 
-                <button onclick="showAllRevision()" style="margin-top: 15px; padding: 10px 24px; background: white; color: #8b5cf6; border: 2px solid #8b5cf6; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
-                    View All 7 Topics →
-                </button>
-            </div>
-        </div>
-
-        <!-- Error Pattern Analysis -->
-        <div class="card">
-            <div class="section-title">
-                <i data-lucide="alert-circle" style="color: #ef4444;"></i>
-                Common Error Patterns - તમે કયાં ભૂલ કરો છો?
-            </div>
-
-            <div class="grid-3">
-                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
-                    <div style="font-size: 32px; margin-bottom: 10px;">🧮</div>
-                    <div style="font-weight: 700; font-size: 16px; color: #92400e; margin-bottom: 8px;">Calculation Mistakes</div>
-                    <div style="font-size: 24px; font-weight: 800; color: #b45309; margin-bottom: 8px;">38%</div>
-                    <div style="font-size: 13px; color: #78350f; line-height: 1.6;">
-                        મોટેભાગે basic arithmetic errors.<br>
-                        <b>Solution:</b> Mental math practice daily
-                    </div>
-                </div>
-
-                <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6;">
-                    <div style="font-size: 32px; margin-bottom: 10px;">⏱️</div>
-                    <div style="font-weight: 700; font-size: 16px; color: #1e3a8a; margin-bottom: 8px;">Time Pressure Errors</div>
-                    <div style="font-size: 24px; font-weight: 800; color: #1e40af; margin-bottom: 8px;">28%</div>
-                    <div style="font-size: 13px; color: #1e3a8a; line-height: 1.6;">
-                        જલ્દીમાં question ખોટું વાંચો.<br>
-                        <b>Solution:</b> Read twice habit
-                    </div>
-                </div>
-
-                <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;">
-                    <div style="font-size: 32px; margin-bottom: 10px;">📖</div>
-                    <div style="font-weight: 700; font-size: 16px; color: #7f1d1d; margin-bottom: 8px;">Concept Confusion</div>
-                    <div style="font-size: 24px; font-weight: 800; color: #991b1b; margin-bottom: 8px;">24%</div>
-                    <div style="font-size: 13px; color: #7f1d1d; line-height: 1.6;">
-                        Similar topics માં confusion.<br>
-                        <b>Solution:</b> Formula chart બનાવો
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin-top: 20px; padding: 20px; background: #f7fafc; border-radius: 12px;">
-                <div style="font-weight: 700; margin-bottom: 15px; font-size: 16px; color: #2d3748;">
-                    📊 Most Repeated Mistakes (Last 30 Days)
-                </div>
-                <div style="display: grid; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 8px;">
-                        <span style="font-size: 14px; color: #2d3748;">Percentage to Decimal conversion</span>
-                        <span class="badge badge-danger">12 times</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 8px;">
-                        <span style="font-size: 14px; color: #2d3748;">Polity Articles confusion</span>
-                        <span class="badge badge-danger">10 times</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 8px;">
-                        <span style="font-size: 14px; color: #2d3748;">Time-Speed-Distance formula mix</span>
-                        <span class="badge badge-warning">8 times</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: white; border-radius: 8px;">
-                        <span style="font-size: 14px; color: #2d3748;">Blood relations - Generation confusion</span>
-                        <span class="badge badge-warning">7 times</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Comparison with Others -->
-        <div class="grid-2">
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="users" style="color: #06b6d4;"></i>
-                    Performance Comparison
-                </div>
-
-                <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                    <div style="font-weight: 700; font-size: 16px; color: #0c4a6e; margin-bottom: 15px;">તમારું Position</div>
-                    <div style="display: flex; justify-content: space-around; text-align: center;">
-                        <div>
-                            <div style="font-size: 32px; font-weight: 900; color: #0369a1;">Top 15%</div>
-                            <div style="font-size: 13px; color: #075985; margin-top: 5px;">All Students</div>
+                <!-- Sidebar: Question Navigation -->
+                <div class="lg:col-span-1">
+                    <div class="glass rounded-2xl p-6 sticky top-24">
+                        <h4 class="font-bold text-gray-800 mb-4 text-center">પ્રશ્ન નેવિગેશન</h4>
+                        <div id="questionNav" class="grid grid-cols-5 gap-2 mb-6"></div>
+                        
+                        <!-- Legend -->
+                        <div class="border-t pt-4 space-y-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded bg-gray-200"></div>
+                                <span class="text-gray-600">બાકી</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded bg-blue-600"></div>
+                                <span class="text-gray-600">જવાબ આપ્યો</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded bg-yellow-300 border-2 border-yellow-600"></div>
+                                <span class="text-gray-600">Bookmark</span>
+                            </div>
                         </div>
-                        <div>
-                            <div style="font-size: 32px; font-weight: 900; color: #0369a1;">Rank 42</div>
-                            <div style="font-size: 13px; color: #075985; margin-top: 5px;">Out of 280</div>
+
+                        <!-- Stats -->
+                        <div class="border-t mt-4 pt-4 space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">જવાબ આપ્યા:</span>
+                                <span id="answeredCount" class="font-bold text-green-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">બાકી:</span>
+                                <span id="unansweredCount" class="font-bold text-red-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Bookmarked:</span>
+                                <span id="bookmarkedCount" class="font-bold text-yellow-600">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div style="margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-size: 14px; color: #2d3748; font-weight: 600;">તમારી Accuracy</span>
-                        <span style="font-size: 14px; color: #667eea; font-weight: 700;">68.5%</span>
-                    </div>
-                    <div style="height: 8px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                        <div style="width: 68.5%; height: 100%; background: #667eea;"></div>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-size: 14px; color: #2d3748; font-weight: 600;">Batch Average</span>
-                        <span style="font-size: 14px; color: #ed8936; font-weight: 700;">62.3%</span>
-                    </div>
-                    <div style="height: 8px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                        <div style="width: 62.3%; height: 100%; background: #ed8936;"></div>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-size: 14px; color: #2d3748; font-weight: 600;">Top 10% Average</span>
-                        <span style="font-size: 14px; color: #48bb78; font-weight: 700;">84.2%</span>
-                    </div>
-                    <div style="height: 8px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                        <div style="width: 84.2%; height: 100%; background: #48bb78;"></div>
-                    </div>
-                </div>
-
-                <div style="background: #fff7ed; padding: 15px; border-radius: 10px; border: 2px solid #fb923c; margin-top: 20px;">
-                    <div style="font-size: 13px; color: #7c2d12; line-height: 1.8;">
-                        <b>💡 Insight:</b> Top performers કરતાં તમે 15.7% પાછળ છો. But good news - તમે average કરતાં આગળ છો! હવે તમારા weak areas fix કરો અને top 10% માં આવી શકો છો!
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="section-title">
-                    <i data-lucide="flame" style="color: #f59e0b;"></i>
-                    Daily Challenge
-                </div>
-
-                <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 48px; margin-bottom: 10px;">🎯</div>
-                    <div style="font-size: 20px; font-weight: 700; margin-bottom: 10px;">આજનો Challenge</div>
-                    <div style="font-size: 14px; opacity: 0.95; margin-bottom: 15px;">
-                        25 Mixed Questions • 30 Minutes • 80%+ Accuracy
-                    </div>
-                    <button onclick="startChallenge()" style="padding: 12px 32px; background: white; color: #f59e0b; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 16px;">
-                        Start Challenge
-                    </button>
-                </div>
-
-                <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
-                    <div style="font-weight: 700; margin-bottom: 15px; color: #14532d;">🏆 Challenge History (Last 7 Days)</div>
-                    <div style="display: grid; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 6px;">
-                            <span style="font-size: 13px; color: #166534;">આજ</span>
-                            <span class="badge" style="background: #dcfce7; color: #14532d;">Not Started</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 6px;">
-                            <span style="font-size: 13px; color: #166534;">Yesterday</span>
-                            <span class="badge badge-success">✓ 22/25 (88%)</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 6px;">
-                            <span style="font-size: 13px; color: #166534;">20 Dec</span>
-                            <span class="badge badge-success">✓ 21/25 (84%)</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 6px;">
-                            <span style="font-size: 13px; color: #166534;">19 Dec</span>
-                            <span class="badge badge-warning">⚠ 18/25 (72%)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="background: #fef3c7; padding: 15px; border-radius: 10px; text-align: center;">
-                    <div style="font-size: 13px; color: #78350f; margin-bottom: 8px;">
-                        <b>Week Completion Rate</b>
-                    </div>
-                    <div style="font-size: 32px; font-weight: 900; color: #92400e;">6/7 Days</div>
-                    <div style="font-size: 12px; color: #92400e; margin-top: 5px;">🔥 Amazing consistency!</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
-            <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px;">
-                💪 Keep Going! તમે સારું કરી રહ્યા છો!
-            </div>
-            <div style="font-size: 14px; opacity: 0.95; margin-bottom: 20px;">
-                Remember: Consistency > Intensity. Every day counts!
-            </div>
-            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                <button onclick="exportReport()" style="padding: 10px 24px; background: white; color: #667eea; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    <i data-lucide="download" style="display: inline-block; vertical-align: middle;"></i>
-                    Download Report
-                </button>
-                <button onclick="shareProgress()" style="padding: 10px 24px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    <i data-lucide="share-2" style="display: inline-block; vertical-align: middle;"></i>
-                    Share Progress
-                </button>
-                <button onclick="settings()" style="padding: 10px 24px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    <i data-lucide="settings" style="display: inline-block; vertical-align: middle;"></i>
-                    Settings
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal for Notifications -->
-    <div id="notificationModal" class="modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 24px; font-weight: 800; color: #2d3748;">
-                    <i data-lucide="bell" style="display: inline-block; vertical-align: middle; color: #667eea;"></i>
-                    Notifications & Alerts
-                </h2>
-                <button onclick="closeModal('notificationModal')" style="padding: 8px 16px; background: #e0e0e0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                    Close
+    <!-- RESULT PAGE -->
+    <div id="resultPage" style="display:none;">
+        <div class="max-w-4xl mx-auto p-8">
+            <div class="glass rounded-2xl p-12 text-center mb-8">
+                <div class="text-7xl mb-6"><i class="fas fa-trophy text-yellow-500"></i></div>
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">ક્વિઝ પૂર્ણ થઈ!</h2>
+                <p id="scoreDisplay" class="text-7xl font-black text-blue-600 my-8">0/0</p>
+                <p id="percentageDisplay" class="text-3xl font-bold text-gray-700 mb-2">0%</p>
+                <p id="remarkDisplay" class="text-xl font-semibold text-gray-600"></p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="glass rounded-2xl p-8 text-center">
+                    <i class="fas fa-check-circle text-5xl text-green-600 mb-4"></i>
+                    <p class="text-sm text-gray-500 mb-2">સાચા જવાબ</p>
+                    <p id="correctCount" class="text-4xl font-black text-green-600">0</p>
+                </div>
+                <div class="glass rounded-2xl p-8 text-center">
+                    <i class="fas fa-times-circle text-5xl text-red-600 mb-4"></i>
+                    <p class="text-sm text-gray-500 mb-2">ખોટા જવાબ</p>
+                    <p id="wrongCount" class="text-4xl font-black text-red-600">0</p>
+                </div>
+                <div class="glass rounded-2xl p-8 text-center">
+                    <i class="fas fa-minus-circle text-5xl text-gray-400 mb-4"></i>
+                    <p class="text-sm text-gray-500 mb-2">બાકી</p>
+                    <p id="skippedCount" class="text-4xl font-black text-gray-400">0</p>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-6 mb-8">
+                <h3 class="font-bold text-gray-800 mb-4 text-lg">સમય વિશ્લેષણ</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">કુલ સમય વપરાયો</p>
+                        <p id="totalTimeUsed" class="text-2xl font-black text-blue-600">0:00</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">સરેરાશ સમય/પ્રશ્ન</p>
+                        <p id="avgTimePerQ" class="text-2xl font-black text-purple-600">0s</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="viewDashboard()" class="flex-1 btn-primary text-white p-5 rounded-xl font-bold text-lg">
+                    <i class="fas fa-chart-line mr-2"></i>Performance Dashboard જુઓ
                 </button>
-            </div>
-
-            <div style="background: #fef3c7; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
-                <div style="display: flex; gap: 15px; align-items: start;">
-                    <span style="font-size: 32px;">⚠️</span>
-                    <div>
-                        <div style="font-weight: 700; font-size: 16px; color: #92400e; margin-bottom: 8px;">
-                            Mock Test Reminder
-                        </div>
-                        <div style="font-size: 14px; color: #78350f;">
-                            તમે છેલ્લા 10 દિવસમાં કોઈ mock test આપ્યો નથી. આગામી શનિવારે scheduled છે.
-                        </div>
-                        <button onclick="scheduleMock()" style="margin-top: 10px; padding: 8px 20px; background: #f59e0b; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            Schedule Now
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div style="background: #fee2e2; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #ef4444;">
-                <div style="display: flex; gap: 15px; align-items: start;">
-                    <span style="font-size: 32px;">🔴</span>
-                    <div>
-                        <div style="font-weight: 700; font-size: 16px; color: #7f1d1d; margin-bottom: 8px;">
-                            Weak Area Alert
-                        </div>
-                        <div style="font-size: 14px; color: #7f1d1d;">
-                            Profit & Loss માં accuracy 52% છે. આ topic પર urgent focus જરૂરી છે.
-                        </div>
-                        <button onclick="fixWeakArea()" style="margin-top: 10px; padding: 8px 20px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            Start Practice
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div style="background: #dbeafe; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6;">
-                <div style="display: flex; gap: 15px; align-items: start;">
-                    <span style="font-size: 32px;">🎯</span>
-                    <div>
-                        <div style="font-weight: 700; font-size: 16px; color: #1e3a8a; margin-bottom: 8px;">
-                            Daily Challenge Available
-                        </div>
-                        <div style="font-size: 14px; color: #1e3a8a;">
-                            આજનો challenge તમારા માટે તૈયાર છે. 30 minutes • 25 questions
-                        </div>
-                        <button onclick="startChallenge()" style="margin-top: 10px; padding: 8px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                            Start Challenge
-                        </button>
-                    </div>
-                </div>
+                <button onclick="backToTests()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white p-5 rounded-xl font-bold text-lg transition">
+                    <i class="fas fa-arrow-left mr-2"></i>ટેસ્ટ પસંદગી
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
+        const sb = window.supabase.createClient(
+            'https://bhmycvrbucmbbrpzeane.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4'
+        );
 
-        // Chart.js - Weekly Performance Chart
-        const weeklyCtx = document.getElementById('weeklyChart');
-        if (weeklyCtx) {
-            new Chart(weeklyCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Questions Solved',
-                        data: [45, 62, 58, 71, 68, 85, 52],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3
-                    }, {
-                        label: 'Accuracy %',
-                        data: [65, 70, 68, 72, 71, 75, 69],
-                        borderColor: '#48bb78',
-                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true, position: 'top' }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
+        let currentUser = null;
+        let currentTest = null;
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let timerInterval = null;
+        let timeRemaining = 0;
+        let testStartTime = null;
 
-        // Chart.js - Subject Distribution Chart
-        const subjectCtx = document.getElementById('subjectChart');
-        if (subjectCtx) {
-            new Chart(subjectCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Quantitative', 'Reasoning', 'General Studies', 'English'],
-                    datasets: [{
-                        data: [640, 738, 560, 456],
-                        backgroundColor: ['#667eea', '#48bb78', '#f56565', '#ed8936'],
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-        }
-
-        // Modal Functions
-        function showNotifications() {
-            document.getElementById('notificationModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Button Click Handlers
-        function startMockTest() {
-            alert('🎯 Mock Test શરૂ થઈ રહ્યો છે...\n\n⏱️ Duration: 150 minutes\n📝 Total Questions: 150\n\nAll the best!');
-        }
-
-        function dailyChallenge() {
-            alert('🏆 Daily Challenge Loading...\n\n📊 25 Mixed Questions\n⏱️ 30 Minutes\n🎯 Target: 80%+ Accuracy\n\nReady?');
-        }
-
-        function revisionMode() {
-            alert('🔄 Quick Revision Mode\n\n✓ 7 topics need revision today\n✓ Estimated time: 45 mins\n\nLet\'s refresh your memory!');
-        }
-
-        function startWeakTopic(topic) {
-            alert(`🎯 Starting Practice: ${topic}\n\n📚 50 questions ready\n⏱️ No time limit\n💡 Solutions included\n\nFocus and learn!`);
-        }
-
-        function showSolution(topic) {
-            alert(`📖 Showing detailed solutions for ${topic}\n\n✓ Step-by-step explanations\n✓ Shortcuts & tricks\n✓ Common mistakes to avoid`);
-        }
-
-        function showSubjectDetails(subject) {
-            alert(`📊 Detailed Analysis: ${subject}\n\nTopic-wise breakdown loading...\n\n✓ Performance metrics\n✓ Time analysis\n✓ Recommendations`);
-        }
-
-        function startPlan() {
-            alert('✅ 7-Day Study Plan Activated!\n\n📅 Daily reminders enabled\n🎯 Progress tracking started\n💪 You can do this!');
-        }
-
-        function quickRevise(topic) {
-            alert(`🔄 Quick Revision: ${topic}\n\n✓ 15 key questions\n✓ 10-15 minutes\n✓ Memory boost guaranteed!`);
-        }
-
-        function showAllRevision() {
-            alert('📚 All Revision Topics\n\n7 topics need your attention today.\nEstimated time: 1.5 hours\n\nPlan your day accordingly!');
-        }
-
-        function startChallenge() {
-            alert('🎯 Daily Challenge Starting!\n\n⏱️ Timer will start automatically\n📝 25 questions mixed difficulty\n🏆 Beat your yesterday\'s score!\n\nGood luck!');
-        }
-
-        function exportReport() {
-            alert('📥 Downloading Performance Report...\n\n✓ PDF format\n✓ Complete analysis\n✓ Graphs included\n\nFile will be ready in few seconds!');
-        }
-
-        function shareProgress() {
-            alert('📤 Share Your Progress\n\nChoose platform:\n• WhatsApp\n• Facebook\n• Instagram\n• Twitter\n\nInspire others with your journey!');
-        }
-
-        function settings() {
-            alert('⚙️ Settings\n\nConfigure:\n• Notifications\n• Study reminders\n• Goal targets\n• Privacy\n• Theme preferences');
-        }
-
-        function scheduleMock() {
-            alert('📅 Mock Test Scheduled!\n\nDate: This Saturday\nTime: 10:00 AM\nDuration: 150 mins\n\nReminder will be sent 1 day before!');
-        }
-
-        function fixWeakArea() {
-            alert('🔧 Starting Weak Area Practice\n\nProfit & Loss - 50 questions\nDifficulty: Adaptive\nFocus: Common mistakes\n\nLet\'s improve!');
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const testId = urlParams.get('test_id');
+            
+            if (!testId) {
+                alert('કોઈ ટેસ્ટ પસંદ નથી કરેલી!');
+                window.location.href = 'test_selection.html';
+                return;
             }
+            
+            await checkAuth();
+            await loadTest(testId);
+            startQuiz();
+        });
+
+        async function checkAuth() {
+            const { data: { user }, error } = await sb.auth.getUser();
+            if (error || !user) {
+                alert('તમે login નથી!');
+                window.location.href = 'test_selection.html';
+                return;
+            }
+            currentUser = user;
+        }
+
+        async function loadTest(testId) {
+            // Load test details
+            const { data: test, error: testError } = await sb
+                .from('lrd_tests')
+                .select('*')
+                .eq('id', testId)
+                .single();
+            
+            if (testError || !test) {
+                alert('ટેસ્ટ મળી નથી!');
+                window.location.href = 'test_selection.html';
+                return;
+            }
+            
+            currentTest = test;
+            document.getElementById('testTitle').textContent = test.title || 'Test';
+            
+            // Load questions for this test
+            // Note: You'll need to have a way to associate questions with tests
+            // For now, loading questions based on subject_id from test
+            const { data: questions, error: questionsError } = await sb
+                .from('lrd_questions')
+                .select(`
+                    *,
+                    lrd_subjects(name, subject_code),
+                    lrd_chapters(name)
+                `)
+                .eq('subject_id', test.subject_id)
+                .limit(test.total_questions || 10);
+            
+            if (questionsError || !questions || questions.length === 0) {
+                alert('આ ટેસ્ટ માટે પ્રશ્નો મળ્યા નથી!');
+                window.location.href = 'test_selection.html';
+                return;
+            }
+            
+            quizQuestions = questions;
+            document.getElementById('totalQ').textContent = questions.length;
+        }
+
+        function startQuiz() {
+            userAnswers = quizQuestions.map((_, i) => ({
+                questionIndex: i,
+                selectedAnswer: null,
+                isBookmarked: false,
+                timeSpent: 0,
+                startTime: Date.now()
+            }));
+            
+            timeRemaining = (currentTest.duration_minutes || 15) * 60;
+            testStartTime = Date.now();
+            
+            startTimer();
+            renderQuestion();
+            renderQuestionNav();
+            updateStats();
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert('⏰ સમય પૂરો થયો!');
+                    submitQuiz();
+                    return;
+                }
+                updateTimerDisplay();
+                
+                if (timeRemaining === 120) {
+                    document.getElementById('timerDisplay').classList.add('timer-warning');
+                    alert('⚠️ માત્ર 2 મિનિટ બાકી!');
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function renderQuestion() {
+            const q = quizQuestions[currentQuestionIndex];
+            const answer = userAnswers[currentQuestionIndex];
+            
+            // Update time for previous question
+            if (currentQuestionIndex > 0) {
+                const prevAnswer = userAnswers[currentQuestionIndex - 1];
+                prevAnswer.timeSpent += Math.floor((Date.now() - prevAnswer.startTime) / 1000);
+            }
+            answer.startTime = Date.now();
+            
+            document.getElementById('qNum').textContent = currentQuestionIndex + 1;
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionText').textContent = q.question_text;
+            
+            // Difficulty badge
+            const badge = document.getElementById('difficultyBadge');
+            badge.textContent = q.difficulty_level || 'મધ્યમ';
+            badge.className = 'px-3 py-1 rounded-full text-sm font-bold ' + 
+                (q.difficulty_level === 'સરળ' ? 'bg-green-100 text-green-700' :
+                 q.difficulty_level === 'હાર્ડ' ? 'bg-red-100 text-red-700' :
+                 'bg-yellow-100 text-yellow-700');
+            
+            // Chapter badge
+            document.getElementById('chapterBadge').textContent = q.lrd_chapters?.name || 'Chapter';
+            
+            // Bookmark
+            document.getElementById('bookmarkIcon').className = 
+                answer.isBookmarked ? 'fas fa-bookmark text-yellow-500' : 'far fa-bookmark text-yellow-500';
+            
+            // Options
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            const options = ['A', 'B', 'C', 'D', 'E'].filter(opt => q[`option_${opt.toLowerCase()}`]);
+            
+            options.forEach(opt => {
+                const isSelected = answer.selectedAnswer === opt;
+                const div = document.createElement('div');
+                div.className = `quiz-option glass p-5 rounded-xl font-semibold text-lg ${isSelected ? 'selected' : ''}`;
+                div.innerHTML = `<span class="font-bold text-xl mr-4">${opt}.</span> ${q[`option_${opt.toLowerCase()}`]}`;
+                div.onclick = () => selectOption(opt);
+                container.appendChild(div);
+            });
+            
+            // Navigation buttons
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            document.getElementById('nextBtn').disabled = currentQuestionIndex === quizQuestions.length - 1;
+            
+            renderQuestionNav();
+        }
+
+        function selectOption(option) {
+            userAnswers[currentQuestionIndex].selectedAnswer = option;
+            renderQuestion();
+            updateStats();
+        }
+
+        function clearAnswer() {
+            userAnswers[currentQuestionIndex].selectedAnswer = null;
+            renderQuestion();
+            updateStats();
+        }
+
+        function bookmarkQuestion() {
+            userAnswers[currentQuestionIndex].isBookmarked = !userAnswers[currentQuestionIndex].isBookmarked;
+            renderQuestion();
+            updateStats();
+        }
+
+        function renderQuestionNav() {
+            const nav = document.getElementById('questionNav');
+            nav.innerHTML = '';
+            quizQuestions.forEach((_, i) => {
+                const answer = userAnswers[i];
+                const btn = document.createElement('button');
+                let className = 'q-nav-btn w-10 h-10 rounded-lg font-bold ';
+                
+                if (i === currentQuestionIndex) {
+                    className += 'current ';
+                }
+                
+                if (answer.isBookmarked) {
+                    className += 'bookmarked';
+                } else if (answer.selectedAnswer) {
+                    className += 'answered';
+                } else {
+                    className += 'bg-gray-200 text-gray-700';
+                }
+                
+                btn.className = className;
+                btn.textContent = i + 1;
+                btn.onclick = () => goToQuestion(i);
+                nav.appendChild(btn);
+            });
+        }
+
+        function updateStats() {
+            const answered = userAnswers.filter(a => a.selectedAnswer !== null).length;
+            const bookmarked = userAnswers.filter(a => a.isBookmarked).length;
+            
+            document.getElementById('answeredCount').textContent = answered;
+            document.getElementById('unansweredCount').textContent = quizQuestions.length - answered;
+            document.getElementById('bookmarkedCount').textContent = bookmarked;
+        }
+
+        function goToQuestion(index) {
+            currentQuestionIndex = index;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        async function submitQuiz() {
+            const answered = userAnswers.filter(a => a.selectedAnswer !== null).length;
+            const unanswered = quizQuestions.length - answered;
+            
+            if (unanswered > 0) {
+                const confirmMsg = `તમે ${unanswered} પ્રશ્નોના જવાબ આપ્યા નથી. શું તમે સબમિટ કરવા માંગો છો?`;
+                if (!confirm(confirmMsg)) return;
+            }
+            
+            clearInterval(timerInterval);
+            
+            // Final time calculation
+            const lastAnswer = userAnswers[currentQuestionIndex];
+            lastAnswer.timeSpent += Math.floor((Date.now() - lastAnswer.startTime) / 1000);
+            
+            // Calculate results
+            let correct = 0, wrong = 0, skipped = 0;
+            const resultsToInsert = [];
+            
+            for (let i = 0; i < quizQuestions.length; i++) {
+                const q = quizQuestions[i];
+                const answer = userAnswers[i];
+                const isCorrect = answer.selectedAnswer === q.correct_option;
+                const isAttempted = answer.selectedAnswer !== null;
+                
+                if (isAttempted) {
+                    isCorrect ? correct++ : wrong++;
+                } else {
+                    skipped++;
+                }
+                
+                resultsToInsert.push({
+                    student_id: currentUser.id,
+                    test_id: currentTest.id,
+                    question_id: q.id,
+                    subject_id: q.subject_id,
+                    chapter_id: q.chapter_id,
+                    question_text: q.question_text,
+                    option_a: q.option_a,
+                    option_b: q.option_b,
+                    option_c: q.option_c,
+                    option_d: q.option_d,
+                    option_e: q.option_e,
+                    correct_option: q.correct_option,
+                    student_answer: answer.selectedAnswer,
+                    is_correct: isCorrect,
+                    is_attempted: isAttempted,
+                    difficulty_level: q.difficulty_level,
+                    ideal_time_seconds: q.ideal_time_seconds || 30,
+                    time_taken_seconds: answer.timeSpent,
+                    marks_obtained: isCorrect ? 1 : 0,
+                    marks_allocated: 1,
+                    question_number: i + 1,
+                    total_questions: quizQuestions.length,
+                    is_bookmarked: answer.isBookmarked
+                });
+            }
+            
+            // Save to database
+            const { error } = await sb.from('lrd_results').insert(resultsToInsert);
+            if (error) {
+                console.error('Error saving results:', error);
+                alert('Error: ' + error.message);
+            }
+            
+            // Show results
+            showResults(correct, wrong, skipped);
+        }
+
+        function showResults(correct, wrong, skipped) {
+            document.getElementById('quizPage').style.display = 'none';
+            document.getElementById('resultPage').style.display = 'block';
+            
+            const total = quizQuestions.length;
+            const percentage = ((correct / total) * 100).toFixed(1);
+            
+            document.getElementById('scoreDisplay').textContent = `${correct}/${total}`;
+            document.getElementById('percentageDisplay').textContent = percentage + '%';
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('wrongCount').textContent = wrong;
+            document.getElementById('skippedCount').textContent = skipped;
+            
+            // Remark
+            const remark = 
+                percentage >= 90 ? '🎖️ Outstanding! તમે અદ્દભુત છો!' :
+                percentage >= 75 ? '🏆 Excellent! ખૂબ સરસ!' :
+                percentage >= 60 ? '👍 સારું! Continue કરો!' :
+                percentage >= 40 ? '📈 સરેરાશ - વધુ practice કરો!' :
+                '💪 મહેનત કરો, સફળતા મળશે!';
+            document.getElementById('remarkDisplay').textContent = remark;
+            
+            // Time stats
+            const totalTimeUsed = ((currentTest.duration_minutes * 60) - timeRemaining);
+            const minutes = Math.floor(totalTimeUsed / 60);
+            const seconds = totalTimeUsed % 60;
+            document.getElementById('totalTimeUsed').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('avgTimePerQ').textContent = Math.round(totalTimeUsed / total) + 's';
+        }
+
+        function viewDashboard() {
+            window.location.href = 'lrd_dashboard_fixed.html';
+        }
+
+        function backToTests() {
+            window.location.href = 'test_selection.html';
         }
     </script>
 </body>
