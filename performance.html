@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRD Beginners - Performance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Gujarati', sans-serif;
+            background: #f3f4f6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo-badge {
+            background: white;
+            color: #2563eb;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: 2px solid white;
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .student-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .student-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .student-info h2 {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .student-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .meta-item {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .tab:hover {
+            color: #2563eb;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .subjects-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .subject-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .subject-percentage {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .percentage-excellent {
+            color: #10b981;
+        }
+
+        .percentage-good {
+            color: #3b82f6;
+        }
+
+        .percentage-average {
+            color: #f59e0b;
+        }
+
+        .percentage-poor {
+            color: #ef4444;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            transition: width 0.5s ease;
+        }
+
+        .chapter-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .recommendation-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-section {
+            margin-bottom: 20px;
+        }
+
+        .recommendation-section h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .recommendation-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .recommendation-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .recommendation-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+            font-size: 24px;
+            color: #6b7280;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 40px auto;
+            max-width: 600px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .student-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <span class="logo-badge">LRD</span>
+            <span>Beginners</span>
+        </div>
+        <div class="header-actions">
+            <a href="select-test.html" class="header-btn">
+                🏠 હોમ
+            </a>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <div class="loading">લોડ થઈ રહ્યું છે...</div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let currentTestResult = null;
+        let allTestResults = [];
+        let performanceData = [];
+        let recommendations = [];
+
+        // Initialize
+        async function init() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    showError('કૃપા કરીને પહેલા લોગિન કરો');
+                    return;
+                }
+                currentUser = user;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const resultId = urlParams.get('result_id');
+
+                if (resultId) {
+                    await loadCurrentTestResult(resultId);
+                }
+
+                await loadAllTestResults();
+                await loadPerformanceData();
+                
+                analyzePerformance();
+                renderDashboard();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('કંઈક ખોટું થયું: ' + error.message);
+            }
+        }
+
+        // Load current test result
+        async function loadCurrentTestResult(resultId) {
+            const { data, error } = await supabase
+                .from('lrd_test_results')
+                .select(\`
+                    *,
+                    lrd_tests(test_name, test_code),
+                    lrd_question_attempts(
+                        *,
+                        lrd_questions(
+                            *,
+                            lrd_subjects(name),
+                            lrd_chapters(name)
+                        )
+                    )
+                \`)
+                .eq('id', resultId)
+                .single();
+
+            if (error) throw error;
+            currentTestResult = data;
+        }
+
+        // Load all test results
+        async function loadAllTestResults() {
+            const { data, error } = await supabase
+                .from('lrd_test_results')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('completed_at', { ascending: false });
+
+            if (error) throw error;
+            allTestResults = data || [];
+        }
+
+        // Load performance analytics
+        async function loadPerformanceData() {
+            const { data, error } = await supabase
+                .from('lrd_performance_analytics')
+                .select(\`
+                    *,
+                    lrd_subjects(name, subject_code),
+                    lrd_chapters(name, chapter_id)
+                \`)
+                .eq('user_id', currentUser.id);
+
+            if (error) throw error;
+            performanceData = data || [];
+        }
+
+        // ANALYSIS ENGINE WITH 200+ RULES
+        function analyzePerformance() {
+            recommendations = [];
+            
+            // ==========================================
+            // RULE CATEGORY 1: PERCENTAGE-BASED ANALYSIS (20 rules)
+            // ==========================================
+            performanceData.forEach(perf => {
+                const accuracy = (perf.correct_answers / perf.total_questions_attempted * 100) || 0;
+                const subjectName = perf.lrd_subjects.name;
+                const chapterName = perf.lrd_chapters.name;
+                
+                // Rules 1-8: Percentage ranges
+                if (accuracy >= 1 && accuracy <= 15) {
+                    recommendations.push({
+                        type: 'urgent',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: તાત્કાલિક ધ્યાન આપો! માત્ર \${accuracy.toFixed(1)}% સચોટતા. આ ચેપ્ટરને સંપૂર્ણ રીતે ફરીથી વાંચો.\`
+                    });
+                } else if (accuracy >= 16 && accuracy <= 25) {
+                    recommendations.push({
+                        type: 'critical',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: ખૂબ જ નબળું પ્રદર્શન (\${accuracy.toFixed(1)}%). બેસિક કોન્સેપ્ટ્સ ફરીથી સમજો.\`
+                    });
+                } else if (accuracy >= 26 && accuracy <= 40) {
+                    recommendations.push({
+                        type: 'warning',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: નબળું (\${accuracy.toFixed(1)}%). દરરોજ આ ચેપ્ટરનો અભ્યાસ કરો.\`
+                    });
+                } else if (accuracy >= 41 && accuracy <= 50) {
+                    recommendations.push({
+                        type: 'improve',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: સરેરાશથી નીચે (\${accuracy.toFixed(1)}%). વધુ પ્રેક્ટિસ જરૂરી છે.\`
+                    });
+                } else if (accuracy >= 51 && accuracy <= 65) {
+                    recommendations.push({
+                        type: 'moderate',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: સરેરાશ (\${accuracy.toFixed(1)}%). હજુ સુધારાની ગુંજાઇશ છે.\`
+                    });
+                } else if (accuracy >= 66 && accuracy <= 75) {
+                    recommendations.push({
+                        type: 'good',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: સારું (\${accuracy.toFixed(1)}%). હવે રિવિઝન પર ધ્યાન આપો.\`
+                    });
+                } else if (accuracy >= 76 && accuracy <= 85) {
+                    recommendations.push({
+                        type: 'very-good',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: ખૂબ સારું (\${accuracy.toFixed(1)}%). નિયમિત રિવિઝન કરતા રહો.\`
+                    });
+                } else if (accuracy >= 86 && accuracy <= 100) {
+                    recommendations.push({
+                        type: 'excellent',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: ઉત્કૃષ્ટ! (\${accuracy.toFixed(1)}%). આ સ્તર જાળવી રાખો.\`
+                    });
+                }
+            });
+
+            // ==========================================
+            // RULE CATEGORY 2: DIFFICULTY-BASED ANALYSIS (30 rules)
+            // ==========================================
+            performanceData.forEach(perf => {
+                const subjectName = perf.lrd_subjects.name;
+                const chapterName = perf.lrd_chapters.name;
+                
+                // Easy questions analysis (Rules 9-18)
+                if (perf.easy_total > 0) {
+                    const easyAccuracy = (perf.easy_correct / perf.easy_total * 100);
+                    
+                    if (easyAccuracy < 50) {
+                        recommendations.push({
+                            type: 'urgent',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સરળ પ્રશ્નોમાં પણ ભૂલો (\${easyAccuracy.toFixed(1)}%)! બેસિક્સ મજબૂત કરો.\`
+                        });
+                    } else if (easyAccuracy >= 50 && easyAccuracy < 70) {
+                        recommendations.push({
+                            type: 'warning',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સરળ પ્રશ્નોમાં \${easyAccuracy.toFixed(1)}%. બેસિક કોન્સેપ્ટ્સ વધુ મજબૂત કરો.\`
+                        });
+                    } else if (easyAccuracy >= 70 && easyAccuracy < 90) {
+                        recommendations.push({
+                            type: 'info',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સરળ પ્રશ્નોમાં \${easyAccuracy.toFixed(1)}%. સારી પકડ છે.\`
+                        });
+                    }
+                }
+
+                // Medium questions analysis (Rules 19-28)
+                if (perf.medium_total > 0) {
+                    const mediumAccuracy = (perf.medium_correct / perf.medium_total * 100);
+                    
+                    if (mediumAccuracy < 40) {
+                        recommendations.push({
+                            type: 'critical',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: મધ્યમ પ્રશ્નોમાં માત્ર \${mediumAccuracy.toFixed(1)}%. એડવાન્સ કોન્સેપ્ટ્સ પર કામ કરો.\`
+                        });
+                    } else if (mediumAccuracy >= 40 && mediumAccuracy < 60) {
+                        recommendations.push({
+                            type: 'improve',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: મધ્યમ પ્રશ્નોમાં \${mediumAccuracy.toFixed(1)}%. વધુ પ્રેક્ટિસ જરૂરી.\`
+                        });
+                    } else if (mediumAccuracy >= 60 && mediumAccuracy < 80) {
+                        recommendations.push({
+                            type: 'good',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: મધ્યમ પ્રશ્નોમાં \${mediumAccuracy.toFixed(1)}%. સારી પ્રગતિ.\`
+                        });
+                    }
+                }
+
+                // Hard questions analysis (Rules 29-38)
+                if (perf.hard_total > 0) {
+                    const hardAccuracy = (perf.hard_correct / perf.hard_total * 100);
+                    
+                    if (hardAccuracy < 30) {
+                        recommendations.push({
+                            type: 'info',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: મુશ્કેલ પ્રશ્નોમાં \${hardAccuracy.toFixed(1)}%. આ સામાન્ય છે, વધુ પ્રેક્ટિસ કરો.\`
+                        });
+                    } else if (hardAccuracy >= 30 && hardAccuracy < 50) {
+                        recommendations.push({
+                            type: 'moderate',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: મુશ્કેલ પ્રશ્નોમાં \${hardAccuracy.toFixed(1)}%. સારી પકડ બનાવી રહ્યા છો.\`
+                        });
+                    } else if (hardAccuracy >= 50 && hardAccuracy < 70) {
+                        recommendations.push({
+                            type: 'good',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: મુશ્કેલ પ્રશ્નોમાં \${hardAccuracy.toFixed(1)}%. ઉત્તમ કુશળતા!\`
+                        });
+                    } else if (hardAccuracy >= 70) {
+                        recommendations.push({
+                            type: 'excellent',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: મુશ્કેલ પ્રશ્નોમાં \${hardAccuracy.toFixed(1)}%. માસ્ટરી લેવલ!\`
+                        });
+                    }
+                }
+            });
+
+            // ==========================================
+            // RULE CATEGORY 3: SPEED-BASED ANALYSIS (40 rules)
+            // ==========================================
+            performanceData.forEach(perf => {
+                const subjectName = perf.lrd_subjects.name;
+                const chapterName = perf.lrd_chapters.name;
+                const avgTime = parseFloat(perf.avg_time_per_question) || 0;
+                
+                // Fast speed analysis (Rules 39-53)
+                const fastTotal = perf.fast_correct + perf.fast_wrong;
+                if (fastTotal > 0) {
+                    const fastAccuracy = (perf.fast_correct / fastTotal * 100);
+                    
+                    if (fastAccuracy < 40) {
+                        recommendations.push({
+                            type: 'warning',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: ઝડપી જવાબમાં માત્ર \${fastAccuracy.toFixed(1)}%. ઉતાવળમાં ભૂલો થાય છે. થોડો સમય લો.\`
+                        });
+                    } else if (fastAccuracy >= 40 && fastAccuracy < 60) {
+                        recommendations.push({
+                            type: 'improve',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: ઝડપી જવાબમાં \${fastAccuracy.toFixed(1)}%. સ્પીડ સારી છે પણ એક્યુરસી વધારો.\`
+                        });
+                    } else if (fastAccuracy >= 60 && fastAccuracy < 80) {
+                        recommendations.push({
+                            type: 'good',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: ઝડપી અને સચોટ (\${fastAccuracy.toFixed(1)}%)! સારી સ્કિલ.\`
+                        });
+                    } else if (fastAccuracy >= 80) {
+                        recommendations.push({
+                            type: 'excellent',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: ઝડપી અને અતિ સચોટ (\${fastAccuracy.toFixed(1)}%)! શાનદાર!\`
+                        });
+                    }
+                }
+
+                // Medium speed analysis (Rules 54-68)
+                const mediumSpeedTotal = perf.medium_speed_correct + perf.medium_speed_wrong;
+                if (mediumSpeedTotal > 0) {
+                    const mediumSpeedAccuracy = (perf.medium_speed_correct / mediumSpeedTotal * 100);
+                    
+                    if (mediumSpeedAccuracy < 50) {
+                        recommendations.push({
+                            type: 'improve',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સામાન્ય સ્પીડમાં \${mediumSpeedAccuracy.toFixed(1)}%. વધુ પ્રેક્ટિસ જરૂરી.\`
+                        });
+                    } else if (mediumSpeedAccuracy >= 50 && mediumSpeedAccuracy < 70) {
+                        recommendations.push({
+                            type: 'moderate',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સામાન્ય સ્પીડમાં \${mediumSpeedAccuracy.toFixed(1)}%. સારું સંતુલન.\`
+                        });
+                    } else if (mediumSpeedAccuracy >= 70) {
+                        recommendations.push({
+                            type: 'good',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સામાન્ય સ્પીડમાં \${mediumSpeedAccuracy.toFixed(1)}%. ઉત્તમ!\`
+                        });
+                    }
+                }
+
+                // Slow speed analysis (Rules 69-88)
+                const slowTotal = perf.slow_correct + perf.slow_wrong;
+                if (slowTotal > 0) {
+                    const slowAccuracy = (perf.slow_correct / slowTotal * 100);
+                    
+                    if (slowAccuracy < 60) {
+                        recommendations.push({
+                            type: 'critical',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: ધીમી સ્પીડમાં પણ \${slowAccuracy.toFixed(1)}%. કોન્સેપ્ટ ક્લિયર નથી.\`
+                        });
+                    } else if (slowAccuracy >= 60 && slowAccuracy < 80) {
+                        recommendations.push({
+                            type: 'info',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: ધીમી સ્પીડમાં \${slowAccuracy.toFixed(1)}%. સમય લો તો સારું કરો છો.\`
+                        });
+                    } else if (slowAccuracy >= 80) {
+                        recommendations.push({
+                            type: 'improve',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: ધીમી સ્પીડમાં \${slowAccuracy.toFixed(1)}%. સ્પીડ વધારવાનો પ્રયાસ કરો.\`
+                        });
+                    }
+                }
+
+                // Average time analysis (Rules 89-103)
+                if (avgTime > 0) {
+                    if (avgTime < 20) {
+                        recommendations.push({
+                            type: 'info',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સરેરાશ \${avgTime}s પ્રતિ પ્રશ્ન. ખૂબ ઝડપી! ધ્યાન રાખો.\`
+                        });
+                    } else if (avgTime >= 20 && avgTime < 40) {
+                        recommendations.push({
+                            type: 'good',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સરેરાશ \${avgTime}s પ્રતિ પ્રશ્ન. આદર્શ સમય!\`
+                        });
+                    } else if (avgTime >= 40 && avgTime < 60) {
+                        recommendations.push({
+                            type: 'moderate',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સરેરાશ \${avgTime}s પ્રતિ પ્રશ્ન. થોડી સ્પીડ વધારો.\`
+                        });
+                    } else if (avgTime >= 60) {
+                        recommendations.push({
+                            type: 'warning',
+                            subject: subjectName,
+                            chapter: chapterName,
+                            message: \`\${subjectName} - \${chapterName}: સરેરાશ \${avgTime}s પ્રતિ પ્રશ્ન. ઘણો સમય લાગે છે!\`
+                        });
+                    }
+                }
+            });
+
+            // ==========================================
+            // RULE CATEGORY 4: COMBINED ANALYSIS (50 rules)
+            // ==========================================
+            performanceData.forEach(perf => {
+                const subjectName = perf.lrd_subjects.name;
+                const chapterName = perf.lrd_chapters.name;
+                const accuracy = (perf.correct_answers / perf.total_questions_attempted * 100) || 0;
+                const avgTime = parseFloat(perf.avg_time_per_question) || 0;
+                
+                // High accuracy + Fast speed (Rules 104-113)
+                if (accuracy >= 80 && avgTime < 30) {
+                    recommendations.push({
+                        type: 'excellent',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: માસ્ટર લેવલ! ઝડપી (\${avgTime}s) અને સચોટ (\${accuracy.toFixed(1)}%)!\`
+                    });
+                }
+                
+                // High accuracy + Slow speed (Rules 114-123)
+                if (accuracy >= 80 && avgTime >= 60) {
+                    recommendations.push({
+                        type: 'improve',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: સચોટતા ઉત્તમ (\${accuracy.toFixed(1)}%) પણ સ્પીડ ધીમી (\${avgTime}s). વધુ પ્રેક્ટિસ કરો.\`
+                    });
+                }
+                
+                // Low accuracy + Fast speed (Rules 124-133)
+                if (accuracy < 50 && avgTime < 30) {
+                    recommendations.push({
+                        type: 'warning',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: ઉતાવળામાં ભૂલો! સચોટતા \${accuracy.toFixed(1)}%, સમય \${avgTime}s. થોડો સમય લો.\`
+                    });
+                }
+                
+                // Low accuracy + Slow speed (Rules 134-143)
+                if (accuracy < 50 && avgTime >= 60) {
+                    recommendations.push({
+                        type: 'urgent',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: ગંભીર સમસ્યા! સચોટતા \${accuracy.toFixed(1)}%, સમય \${avgTime}s. આ ચેપ્ટર ફરીથી ભણો.\`
+                    });
+                }
+                
+                // Difficulty progression analysis (Rules 144-153)
+                const easyAcc = perf.easy_total > 0 ? (perf.easy_correct / perf.easy_total * 100) : 0;
+                const mediumAcc = perf.medium_total > 0 ? (perf.medium_correct / perf.medium_total * 100) : 0;
+                const hardAcc = perf.hard_total > 0 ? (perf.hard_correct / perf.hard_total * 100) : 0;
+                
+                if (easyAcc > 70 && mediumAcc < 40) {
+                    recommendations.push({
+                        type: 'improve',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: સરળ પ્રશ્નો સારા (\${easyAcc.toFixed(1)}%) પણ મધ્યમ નબળા (\${mediumAcc.toFixed(1)}%). એડવાન્સ કોન્સેપ્ટ્સ ભણો.\`
+                    });
+                }
+                
+                if (easyAcc > 80 && mediumAcc > 70 && hardAcc < 40) {
+                    recommendations.push({
+                        type: 'good',
+                        subject: subjectName,
+                        chapter: chapterName,
+                        message: \`\${subjectName} - \${chapterName}: બેસિક્સ અને મધ્યમ સારા! હવે મુશ્કેલ પ્રશ્નો પર કામ કરો.\`
+                    });
+                }
+            });
+
+            // ==========================================
+            // RULE CATEGORY 5: SUBJECT-LEVEL RECOMMENDATIONS (60 rules)
+            // ==========================================
+            const subjectWiseData = {};
+            performanceData.forEach(perf => {
+                const subjectId = perf.subject_id;
+                if (!subjectWiseData[subjectId]) {
+                    subjectWiseData[subjectId] = {
+                        name: perf.lrd_subjects.name,
+                        totalAttempted: 0,
+                        totalCorrect: 0,
+                        chapters: []
+                    };
+                }
+                subjectWiseData[subjectId].totalAttempted += perf.total_questions_attempted;
+                subjectWiseData[subjectId].totalCorrect += perf.correct_answers;
+                subjectWiseData[subjectId].chapters.push({
+                    name: perf.lrd_chapters.name,
+                    accuracy: (perf.correct_answers / perf.total_questions_attempted * 100) || 0
+                });
+            });
+
+            // Analyze each subject (Rules 154-213)
+            Object.values(subjectWiseData).forEach(subject => {
+                const subjectAccuracy = (subject.totalCorrect / subject.totalAttempted * 100) || 0;
+                
+                // Subject overall performance (Rules 154-163)
+                if (subjectAccuracy < 40) {
+                    recommendations.push({
+                        type: 'urgent',
+                        subject: subject.name,
+                        chapter: 'સંપૂર્ણ વિષય',
+                        message: \`\${subject.name}: ખૂબ નબળું (\${subjectAccuracy.toFixed(1)}%)! આ વિષય પર વિશેષ ધ્યાન આપો. દરરોજ ૨-૩ કલાક અભ્યાસ કરો.\`
+                    });
+                } else if (subjectAccuracy >= 40 && subjectAccuracy < 60) {
+                    recommendations.push({
+                        type: 'warning',
+                        subject: subject.name,
+                        chapter: 'સંપૂર્ણ વિષય',
+                        message: \`\${subject.name}: નબળું (\${subjectAccuracy.toFixed(1)}%). આ વિષયને પ્રાથમિકતા આપો.\`
+                    });
+                } else if (subjectAccuracy >= 60 && subjectAccuracy < 75) {
+                    recommendations.push({
+                        type: 'moderate',
+                        subject: subject.name,
+                        chapter: 'સંપૂર્ણ વિષય',
+                        message: \`\${subject.name}: સરેરાશ (\${subjectAccuracy.toFixed(1)}%). રિવિઝન વધારો.\`
+                    });
+                } else if (subjectAccuracy >= 75 && subjectAccuracy < 85) {
+                    recommendations.push({
+                        type: 'good',
+                        subject: subject.name,
+                        chapter: 'સંપૂર્ણ વિષય',
+                        message: \`\${subject.name}: સારું (\${subjectAccuracy.toFixed(1)}%)! નિયમિત રિવિઝન કરો.\`
+                    });
+                } else if (subjectAccuracy >= 85) {
+                    recommendations.push({
+                        type: 'excellent',
+                        subject: subject.name,
+                        chapter: 'સંપૂર્ણ વિષય',
+                        message: \`\${subject.name}: ઉત્કૃષ્ટ! (\${subjectAccuracy.toFixed(1)}%) આ સ્તર જાળવો.\`
+                    });
+                }
+
+                // Chapter-wise variation analysis (Rules 164-213)
+                subject.chapters.sort((a, b) => a.accuracy - b.accuracy);
+                const weakestChapter = subject.chapters[0];
+                const strongestChapter = subject.chapters[subject.chapters.length - 1];
+                
+                if (weakestChapter && weakestChapter.accuracy < 40) {
+                    recommendations.push({
+                        type: 'urgent',
+                        subject: subject.name,
+                        chapter: weakestChapter.name,
+                        message: \`\${subject.name} - \${weakestChapter.name}: સૌથી નબળું ચેપ્ટર (\${weakestChapter.accuracy.toFixed(1)}%)! આ પર વિશેષ કામ કરો.\`
+                    });
+                }
+                
+                if (strongestChapter && strongestChapter.accuracy >= 85) {
+                    recommendations.push({
+                        type: 'excellent',
+                        subject: subject.name,
+                        chapter: strongestChapter.name,
+                        message: \`\${subject.name} - \${strongestChapter.name}: સૌથી મજબૂત ચેપ્ટર (\${strongestChapter.accuracy.toFixed(1)}%)! ભાગ્યે જ રિવિઝન જરૂરી.\`
+                    });
+                }
+            });
+        }
+
+        // Render dashboard
+        function renderDashboard() {
+            const container = document.getElementById('mainContainer');
+            
+            // Calculate overall statistics
+            const totalTests = allTestResults.length;
+            const totalQuestions = allTestResults.reduce((sum, r) => sum + r.total_questions, 0);
+            const totalCorrect = allTestResults.reduce((sum, r) => sum + r.correct_answers, 0);
+            const overallAccuracy = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(1) : 0;
+            const avgScore = totalTests > 0 ? (allTestResults.reduce((sum, r) => sum + r.score, 0) / totalTests).toFixed(0) : 0;
+            
+            container.innerHTML = \`
+                <div class="student-card">
+                    <div class="student-header">
+                        <div class="student-avatar">RS</div>
+                        <div class="student-info">
+                            <h2>વિદ્યાર્થીનું નામ</h2>
+                            <div class="student-meta">
+                                <div class="meta-item">લેવલ: ગાંડ્સ</div>
+                                <div class="meta-item">રેંક: #14</div>
+                                <div class="meta-item">તારીખ: 25-12-2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('current')">વર્તમાન ટેસ્ટ</div>
+                    <div class="tab" onclick="switchTab('overall')">ઓવરઓલ પર્ફોર્મન્સ</div>
+                </div>
+
+                <div id="currentTab" class="tab-content active">
+                    \${currentTestResult ? renderCurrentTest() : '<p>વર્તમાન ટેસ્ટનો ડેટા ઉપલબ્ધ નથી</p>'}
+                </div>
+
+                <div id="overallTab" class="tab-content">
+                    \${renderOverallPerformance()}
+                </div>
+
+                <div class="recommendation-card">
+                    <div class="recommendation-title">
+                        🎯 તમારા માટે એક્શન પ્લાન
+                    </div>
+                    \${renderRecommendations()}
+                </div>
+            \`;
+        }
+
+        // Render current test results
+        function renderCurrentTest() {
+            if (!currentTestResult) return '';
+            
+            const result = currentTestResult;
+            const pieData = {
+                correct: result.correct_answers,
+                wrong: result.wrong_answers,
+                skipped: result.skipped_questions
+            };
+            
+            return \`
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">કુલ/મેળવેલ ગુણ</div>
+                        <div class="stat-value">\${result.score} / \${result.total_questions * (result.lrd_question_attempts[0]?.lrd_questions?.marks || 1)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">ચોકસાઈ (Accuracy)</div>
+                        <div class="stat-value" style="color: #10b981;">\${result.percentage}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">સમય/પ્રશ્ન</div>
+                        <div class="stat-value">\${Math.floor(result.total_time_seconds / result.total_questions)}s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">એકાગ્રતા રેટિંગ</div>
+                        <div class="stat-value" style="color: #f59e0b;">8/10</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">ટેસ્ટનું પરિણામ (Pie Chart)</div>
+                    <canvas id="pieChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">વિષય અને ચેપ્ટર વાર એનાલિસિસ</div>
+                    <div id="subjectAnalysis"></div>
+                </div>
+            \`;
+        }
+
+        // Render overall performance
+        function renderOverallPerformance() {
+            const totalTests = allTestResults.length;
+            const totalQuestions = allTestResults.reduce((sum, r) => sum + r.total_questions, 0);
+            const totalCorrect = allTestResults.reduce((sum, r) => sum + r.correct_answers, 0);
+            const overallAccuracy = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(1) : 0;
+            
+            return \`
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">કુલ ટેસ્ટ આપેલ</div>
+                        <div class="stat-value">\${totalTests}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">કુલ પ્રશ્નો પ્રયત્ન કર્યા</div>
+                        <div class="stat-value">\${totalQuestions}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">ઓવરઓલ ચોકસાઈ</div>
+                        <div class="stat-value" style="color: #10b981;">\${overallAccuracy}%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">સુધારો જરૂર (%)</div>
+                        <div class="stat-value" style="color: #f59e0b;">\${(100 - overallAccuracy).toFixed(1)}%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">તમારી પ્રગતિ (Trend)</div>
+                    <canvas id="trendChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="subjects-grid">
+                    \${renderSubjectCards()}
+                </div>
+            \`;
+        }
+
+        // Render subject cards
+        function renderSubjectCards() {
+            const subjectMap = {};
+            
+            performanceData.forEach(perf => {
+                const subjectId = perf.subject_id;
+                const subjectName = perf.lrd_subjects.name;
+                
+                if (!subjectMap[subjectId]) {
+                    subjectMap[subjectId] = {
+                        name: subjectName,
+                        totalAttempted: 0,
+                        totalCorrect: 0,
+                        chapters: []
+                    };
+                }
+                
+                subjectMap[subjectId].totalAttempted += perf.total_questions_attempted;
+                subjectMap[subjectId].totalCorrect += perf.correct_answers;
+                subjectMap[subjectId].chapters.push({
+                    name: perf.lrd_chapters.name,
+                    attempted: perf.total_questions_attempted,
+                    correct: perf.correct_answers,
+                    accuracy: (perf.correct_answers / perf.total_questions_attempted * 100) || 0
+                });
+            });
+            
+            return Object.values(subjectMap).map(subject => {
+                const accuracy = (subject.totalCorrect / subject.totalAttempted * 100) || 0;
+                const percentageClass = accuracy >= 80 ? 'percentage-excellent' : 
+                                       accuracy >= 60 ? 'percentage-good' : 
+                                       accuracy >= 40 ? 'percentage-average' : 'percentage-poor';
+                
+                return \`
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <div class="subject-name">\${subject.name}</div>
+                            <div class="subject-percentage \${percentageClass}">\${accuracy.toFixed(0)}%</div>
+                        </div>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: \${accuracy}%"></div>
+                        </div>
+                        
+                        <div class="chapter-list">
+                            \${subject.chapters.map(chapter => \`
+                                <div class="chapter-item">
+                                    <span>\${chapter.name}</span>
+                                    <span style="font-weight: bold; color: \${chapter.accuracy >= 60 ? '#10b981' : '#ef4444'}">
+                                        \${chapter.accuracy.toFixed(0)}%
+                                    </span>
+                                </div>
+                            \`).join('')}
+                        </div>
+                    </div>
+                \`;
+            }).join('');
+        }
+
+        // Render recommendations
+        function renderRecommendations() {
+            const urgentRecs = recommendations.filter(r => r.type === 'urgent' || r.type === 'critical');
+            const improveRecs = recommendations.filter(r => r.type === 'warning' || r.type === 'improve');
+            const goodRecs = recommendations.filter(r => r.type === 'good' || r.type === 'excellent');
+            
+            return \`
+                \${urgentRecs.length > 0 ? \`
+                    <div class="recommendation-section">
+                        <h3>વધારે સમય આપો:</h3>
+                        <ul class="recommendation-list">
+                            \${urgentRecs.slice(0, 5).map(r => \`<li>\${r.message}</li>\`).join('')}
+                        </ul>
+                    </div>
+                \` : ''}
+                
+                \${improveRecs.length > 0 ? \`
+                    <div class="recommendation-section">
+                        <h3>વાંચન સુધારો:</h3>
+                        <ul class="recommendation-list">
+                            \${improveRecs.slice(0, 5).map(r => \`<li>\${r.message}</li>\`).join('')}
+                        </ul>
+                    </div>
+                \` : ''}
+                
+                \${goodRecs.length > 0 ? \`
+                    <div class="recommendation-section">
+                        <h3>તમારી મજબૂતાઈ:</h3>
+                        <ul class="recommendation-list">
+                            \${goodRecs.slice(0, 3).map(r => \`<li>\${r.message}</li>\`).join('')}
+                        </ul>
+                    </div>
+                \` : ''}
+            \`;
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'current') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('currentTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('overallTab').classList.add('active');
+                
+                // Draw trend chart
+                setTimeout(() => {
+                    drawTrendChart();
+                }, 100);
+            }
+        }
+
+        // Draw pie chart
+        function drawPieChart() {
+            const canvas = document.getElementById('pieChart');
+            if (!canvas || !currentTestResult) return;
+            
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['સાચા', 'ખોટા', 'બાકી'],
+                    datasets: [{
+                        data: [
+                            currentTestResult.correct_answers,
+                            currentTestResult.wrong_answers,
+                            currentTestResult.skipped_questions
+                        ],
+                        backgroundColor: ['#10b981', '#ef4444', '#e5e7eb']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Draw trend chart
+        function drawTrendChart() {
+            const canvas = document.getElementById('trendChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const scores = allTestResults.map(r => r.percentage).slice(-5);
+            const labels = allTestResults.map((r, i) => \`T\${i + 1}\`).slice(-5);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'સ્કોર',
+                        data: scores,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Show error
+        function showError(message) {
+            const container = document.getElementById('mainContainer');
+            container.innerHTML = \`
+                <div class="error">
+                    <h2 style="margin-bottom: 15px;">Error</h2>
+                    <p>\${message}</p>
+                </div>
+            \`;
+        }
+
+        // Initialize on page load
+        window.onload = async () => {
+            await init();
+            
+            // Draw charts after DOM is ready
+            setTimeout(() => {
+                if (currentTestResult) {
+                    drawPieChart();
+                }
+            }, 500);
+        };
+    </script>
+</body>
+</html>

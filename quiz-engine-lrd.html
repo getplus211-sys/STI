@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRD Beginners - Quiz Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Gujarati', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo-badge {
+            background: white;
+            color: #2563eb;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .home-btn {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .free-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .question-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .timer {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 22px;
+            line-height: 1.6;
+            color: #1f2937;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 18px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            color: #374151;
+        }
+
+        .option:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #3b82f6;
+            background: #dbeafe;
+            font-weight: 600;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-prev {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-prev:hover {
+            background: #4b5563;
+            transform: translateX(-3px);
+        }
+
+        .btn-next {
+            background: #10b981;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-next:hover {
+            background: #059669;
+            transform: translateX(3px);
+        }
+
+        .btn-submit {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #dc2626;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 20px;
+            color: white;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .instructions {
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .instructions h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .instructions li {
+            padding: 8px 0;
+            color: #4b5563;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .instructions li:before {
+            content: "•";
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .start-btn {
+            width: 100%;
+            background: #10b981;
+            padding: 18px;
+            font-size: 20px;
+        }
+
+        .start-btn:hover {
+            background: #059669;
+        }
+
+        .start-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .quiz-card {
+                padding: 20px;
+            }
+            
+            .question-text {
+                font-size: 18px;
+            }
+            
+            .option {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <span class="logo-badge">LRD</span>
+            <span>Beginners</span>
+        </div>
+        <div class="home-btn" onclick="window.location.href='index.html'">
+            <span>🏠</span>
+            <span>હોમ</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="quiz-card" id="quizContainer">
+            <div class="loading">લોડ થઈ રહ્યું છે...</div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Global Variables
+        let currentUser = null;
+        let currentTest = null;
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let testStartTime = null;
+        let questionStartTime = null;
+        let timerInterval = null;
+        let testResultId = null;
+
+        // Initialize
+        async function init() {
+            try {
+                // Check authentication
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = user;
+
+                // Get test ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const testId = urlParams.get('test_id');
+                
+                if (!testId) {
+                    showError('ટેસ્ટ ID મળી નથી');
+                    return;
+                }
+
+                // Load test data
+                await loadTest(testId);
+                await loadQuestions(testId);
+                
+                // Show instructions
+                showInstructions();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('કંઈક ખોટું થયું: ' + error.message);
+            }
+        }
+
+        // Load test details
+        async function loadTest(testId) {
+            const { data, error } = await supabase
+                .from('lrd_tests')
+                .select('*')
+                .eq('id', testId)
+                .single();
+
+            if (error) throw error;
+            if (!data) throw new Error('ટેસ્ટ મળી નથી');
+            
+            currentTest = data;
+        }
+
+        // Load questions
+        async function loadQuestions(testId) {
+            const { data, error } = await supabase
+                .from('lrd_questions')
+                .select(`
+                    *,
+                    lrd_subjects(name),
+                    lrd_chapters(name)
+                `)
+                .eq('test_id', testId)
+                .order('question_order', { ascending: true });
+
+            if (error) throw error;
+            if (!data || data.length === 0) throw new Error('પ્રશ્નો મળ્યા નથી');
+            
+            questions = data;
+            
+            // Initialize user answers array
+            userAnswers = questions.map(() => ({
+                selected: null,
+                timeSpent: 0,
+                startTime: null
+            }));
+        }
+
+        // Show instructions
+        function showInstructions() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <div class="free-badge">
+                    🎉 FREE TEST
+                </div>
+                
+                <h1 style="font-size: 28px; margin-bottom: 20px; color: #1f2937;">
+                    ${currentTest.test_name}
+                </h1>
+                
+                <div class="instructions">
+                    <h2>Instructions:</h2>
+                    <ul>
+                        <li><strong>Total Questions: ${currentTest.total_questions}</strong></li>
+                        <li><strong>No Time Limit</strong> - Take your time!</li>
+                        <li><strong>No Negative Marking</strong> - Only correct answers add points.</li>
+                        <li>E option: Available if needed.</li>
+                        <li>Your time will be tracked for leaderboard ranking.</li>
+                        <li>✅ <strong>No payment required - 100% Free!</strong></li>
+                    </ul>
+                </div>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="agreeCheckbox">
+                    <label for="agreeCheckbox" style="font-size: 16px;">I agree to the terms and conditions.</label>
+                </div>
+                
+                <button class="btn start-btn" id="startBtn" disabled onclick="startTest()">
+                    Start Test Now
+                </button>
+            `;
+
+            // Enable start button when checkbox is checked
+            document.getElementById('agreeCheckbox').addEventListener('change', function() {
+                document.getElementById('startBtn').disabled = !this.checked;
+            });
+        }
+
+        // Start test
+        async function startTest() {
+            testStartTime = new Date();
+            
+            // Create test result record
+            const { data, error } = await supabase
+                .from('lrd_test_results')
+                .insert({
+                    user_id: currentUser.id,
+                    test_id: currentTest.id,
+                    total_questions: questions.length,
+                    started_at: testStartTime.toISOString(),
+                    completed_at: testStartTime.toISOString() // Will update on submit
+                })
+                .select()
+                .single();
+
+            if (error) {
+                showError('ટેસ્ટ શરૂ કરવામાં સમસ્યા: ' + error.message);
+                return;
+            }
+
+            testResultId = data.id;
+            currentQuestionIndex = 0;
+            showQuestion();
+            startTimer();
+        }
+
+        // Show question
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            const answer = userAnswers[currentQuestionIndex];
+            
+            // Set question start time if not set
+            if (!answer.startTime) {
+                answer.startTime = new Date();
+            }
+
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <div class="free-badge">
+                    🎉 FREE TEST
+                </div>
+                
+                <div class="question-header">
+                    <div class="question-number">Q ${currentQuestionIndex + 1}/${questions.length}</div>
+                    <div class="timer" id="timer">
+                        ⏱️ <span id="timerDisplay">0:00</span>
+                    </div>
+                </div>
+                
+                <div class="question-text">
+                    ${question.question_text}
+                </div>
+                
+                <div class="options">
+                    <div class="option ${answer.selected === 'A' ? 'selected' : ''}" onclick="selectAnswer('A')">
+                        ભાગ 1
+                    </div>
+                    <div class="option ${answer.selected === 'B' ? 'selected' : ''}" onclick="selectAnswer('B')">
+                        ભાગ 2
+                    </div>
+                    <div class="option ${answer.selected === 'C' ? 'selected' : ''}" onclick="selectAnswer('C')">
+                        ભાગ 3
+                    </div>
+                    <div class="option ${answer.selected === 'D' ? 'selected' : ''}" onclick="selectAnswer('D')">
+                        ભાગ 4
+                    </div>
+                    ${question.has_e_option ? `
+                        <div class="option ${answer.selected === 'E' ? 'selected' : ''}" onclick="selectAnswer('E')">
+                            None
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="navigation">
+                    ${currentQuestionIndex > 0 ? `
+                        <button class="btn btn-prev" onclick="previousQuestion()">
+                            ← પાછળ
+                        </button>
+                    ` : '<div></div>'}
+                    
+                    ${currentQuestionIndex < questions.length - 1 ? `
+                        <button class="btn btn-next" onclick="nextQuestion()">
+                            આગળ →
+                        </button>
+                    ` : `
+                        <button class="btn btn-submit" onclick="submitTest()">
+                            Submit Test
+                        </button>
+                    `}
+                </div>
+            `;
+        }
+
+        // Select answer
+        function selectAnswer(option) {
+            const answer = userAnswers[currentQuestionIndex];
+            answer.selected = option;
+            
+            // Update UI
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        // Previous question
+        function previousQuestion() {
+            saveQuestionTime();
+            currentQuestionIndex--;
+            showQuestion();
+        }
+
+        // Next question
+        function nextQuestion() {
+            saveQuestionTime();
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        // Save question time
+        function saveQuestionTime() {
+            const answer = userAnswers[currentQuestionIndex];
+            if (answer.startTime) {
+                const endTime = new Date();
+                const timeSpent = Math.floor((endTime - answer.startTime) / 1000);
+                answer.timeSpent += timeSpent;
+                answer.startTime = null;
+            }
+        }
+
+        // Start timer
+        function startTimer() {
+            let seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                const display = document.getElementById('timerDisplay');
+                if (display) {
+                    display.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // Submit test
+        async function submitTest() {
+            if (!confirm('શું તમે ખરેખર ટેસ્ટ સબમિટ કરવા માંગો છો?')) {
+                return;
+            }
+
+            saveQuestionTime();
+            clearInterval(timerInterval);
+
+            const testEndTime = new Date();
+            const totalTimeSeconds = Math.floor((testEndTime - testStartTime) / 1000);
+
+            // Calculate results
+            let correctAnswers = 0;
+            let wrongAnswers = 0;
+            let skippedQuestions = 0;
+            let eOptionUsed = 0;
+
+            questions.forEach((question, index) => {
+                const answer = userAnswers[index];
+                
+                if (!answer.selected) {
+                    skippedQuestions++;
+                } else {
+                    if (answer.selected === 'E') {
+                        eOptionUsed++;
+                    }
+                    
+                    if (answer.selected === question.correct_answer) {
+                        correctAnswers++;
+                    } else {
+                        wrongAnswers++;
+                    }
+                }
+            });
+
+            const attemptedQuestions = questions.length - skippedQuestions;
+            const score = correctAnswers * (questions[0]?.marks || 1);
+            const percentage = ((correctAnswers / questions.length) * 100).toFixed(2);
+
+            // Update test result
+            const { error: updateError } = await supabase
+                .from('lrd_test_results')
+                .update({
+                    attempted_questions: attemptedQuestions,
+                    correct_answers: correctAnswers,
+                    wrong_answers: wrongAnswers,
+                    skipped_questions: skippedQuestions,
+                    e_option_used: eOptionUsed,
+                    score: score,
+                    percentage: percentage,
+                    total_time_seconds: totalTimeSeconds,
+                    completed_at: testEndTime.toISOString()
+                })
+                .eq('id', testResultId);
+
+            if (updateError) {
+                showError('પરિણામ સેવ કરવામાં સમસ્યા: ' + updateError.message);
+                return;
+            }
+
+            // Save individual question attempts
+            for (let i = 0; i < questions.length; i++) {
+                const question = questions[i];
+                const answer = userAnswers[i];
+                
+                const isCorrect = answer.selected === question.correct_answer;
+                
+                await supabase
+                    .from('lrd_question_attempts')
+                    .insert({
+                        test_result_id: testResultId,
+                        question_id: question.id,
+                        user_id: currentUser.id,
+                        selected_answer: answer.selected || 'SKIPPED',
+                        is_correct: answer.selected ? isCorrect : null,
+                        time_taken_seconds: answer.timeSpent,
+                        question_order: i + 1
+                    });
+            }
+
+            // Update performance analytics
+            await updatePerformanceAnalytics();
+
+            // Show results and redirect
+            showResults(correctAnswers, wrongAnswers, skippedQuestions, eOptionUsed, totalTimeSeconds);
+        }
+
+        // Update performance analytics
+        async function updatePerformanceAnalytics() {
+            // Group by subject and chapter
+            const subjectChapterMap = {};
+
+            questions.forEach((question, index) => {
+                const answer = userAnswers[index];
+                const key = `${question.subject_id}-${question.chapter_id}`;
+                
+                if (!subjectChapterMap[key]) {
+                    subjectChapterMap[key] = {
+                        subject_id: question.subject_id,
+                        chapter_id: question.chapter_id,
+                        questions: []
+                    };
+                }
+                
+                subjectChapterMap[key].questions.push({
+                    difficulty: question.difficulty_level,
+                    selected: answer.selected,
+                    correct: question.correct_answer,
+                    timeSpent: answer.timeSpent
+                });
+            });
+
+            // Update or insert analytics for each subject-chapter combination
+            for (const key in subjectChapterMap) {
+                const data = subjectChapterMap[key];
+                
+                let totalAttempted = 0;
+                let correct = 0;
+                let wrong = 0;
+                let skipped = 0;
+                
+                let easyCorrect = 0, easyWrong = 0, easyTotal = 0;
+                let mediumCorrect = 0, mediumWrong = 0, mediumTotal = 0;
+                let hardCorrect = 0, hardWrong = 0, hardTotal = 0;
+                
+                let totalTime = 0;
+                let fastCorrect = 0, fastWrong = 0;
+                let mediumSpeedCorrect = 0, mediumSpeedWrong = 0;
+                let slowCorrect = 0, slowWrong = 0;
+
+                data.questions.forEach(q => {
+                    if (!q.selected) {
+                        skipped++;
+                        return;
+                    }
+                    
+                    totalAttempted++;
+                    totalTime += q.timeSpent;
+                    
+                    const isCorrect = q.selected === q.correct;
+                    if (isCorrect) correct++;
+                    else wrong++;
+                    
+                    // Difficulty breakdown
+                    if (q.difficulty === 'સરળ') {
+                        easyTotal++;
+                        if (isCorrect) easyCorrect++;
+                        else easyWrong++;
+                    } else if (q.difficulty === 'મધ્યમ') {
+                        mediumTotal++;
+                        if (isCorrect) mediumCorrect++;
+                        else mediumWrong++;
+                    } else if (q.difficulty === 'મુશ્કેલ') {
+                        hardTotal++;
+                        if (isCorrect) hardCorrect++;
+                        else hardWrong++;
+                    }
+                    
+                    // Speed analysis (assuming <30s is fast, 30-60s is medium, >60s is slow)
+                    if (q.timeSpent < 30) {
+                        if (isCorrect) fastCorrect++;
+                        else fastWrong++;
+                    } else if (q.timeSpent <= 60) {
+                        if (isCorrect) mediumSpeedCorrect++;
+                        else mediumSpeedWrong++;
+                    } else {
+                        if (isCorrect) slowCorrect++;
+                        else slowWrong++;
+                    }
+                });
+
+                const avgTime = totalAttempted > 0 ? (totalTime / totalAttempted).toFixed(2) : 0;
+                const accuracy = totalAttempted > 0 ? ((correct / totalAttempted) * 100).toFixed(2) : 0;
+
+                // Check if analytics record exists
+                const { data: existing } = await supabase
+                    .from('lrd_performance_analytics')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('subject_id', data.subject_id)
+                    .eq('chapter_id', data.chapter_id)
+                    .single();
+
+                if (existing) {
+                    // Update existing record
+                    await supabase
+                        .from('lrd_performance_analytics')
+                        .update({
+                            total_questions_attempted: existing.total_questions_attempted + totalAttempted,
+                            correct_answers: existing.correct_answers + correct,
+                            wrong_answers: existing.wrong_answers + wrong,
+                            skipped_questions: existing.skipped_questions + skipped,
+                            easy_correct: existing.easy_correct + easyCorrect,
+                            easy_wrong: existing.easy_wrong + easyWrong,
+                            easy_total: existing.easy_total + easyTotal,
+                            medium_correct: existing.medium_correct + mediumCorrect,
+                            medium_wrong: existing.medium_wrong + mediumWrong,
+                            medium_total: existing.medium_total + mediumTotal,
+                            hard_correct: existing.hard_correct + hardCorrect,
+                            hard_wrong: existing.hard_wrong + hardWrong,
+                            hard_total: existing.hard_total + hardTotal,
+                            fast_correct: existing.fast_correct + fastCorrect,
+                            fast_wrong: existing.fast_wrong + fastWrong,
+                            medium_speed_correct: existing.medium_speed_correct + mediumSpeedCorrect,
+                            medium_speed_wrong: existing.medium_speed_wrong + mediumSpeedWrong,
+                            slow_correct: existing.slow_correct + slowCorrect,
+                            slow_wrong: existing.slow_wrong + slowWrong,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', existing.id);
+                } else {
+                    // Insert new record
+                    await supabase
+                        .from('lrd_performance_analytics')
+                        .insert({
+                            user_id: currentUser.id,
+                            subject_id: data.subject_id,
+                            chapter_id: data.chapter_id,
+                            total_questions_attempted: totalAttempted,
+                            correct_answers: correct,
+                            wrong_answers: wrong,
+                            skipped_questions: skipped,
+                            easy_correct: easyCorrect,
+                            easy_wrong: easyWrong,
+                            easy_total: easyTotal,
+                            medium_correct: mediumCorrect,
+                            medium_wrong: mediumWrong,
+                            medium_total: mediumTotal,
+                            hard_correct: hardCorrect,
+                            hard_wrong: hardWrong,
+                            hard_total: hardTotal,
+                            avg_time_per_question: avgTime,
+                            accuracy_percentage: accuracy,
+                            fast_correct: fastCorrect,
+                            fast_wrong: fastWrong,
+                            medium_speed_correct: mediumSpeedCorrect,
+                            medium_speed_wrong: mediumSpeedWrong,
+                            slow_correct: slowCorrect,
+                            slow_wrong: slowWrong
+                        });
+                }
+            }
+        }
+
+        // Show results
+        function showResults(correct, wrong, skipped, eOption, totalTime) {
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <h1 style="font-size: 32px; margin-bottom: 30px; color: #1f2937;">Your Score: ${correct}</h1>
+                
+                <div style="font-size: 18px; margin-bottom: 15px;">
+                    <strong>Correct:</strong> ${correct} | <strong>Wrong:</strong> ${wrong}
+                </div>
+                
+                <div style="font-size: 18px; margin-bottom: 15px;">
+                    <strong>Skipped:</strong> ${skipped} | <strong>E Options:</strong> ${eOption}
+                </div>
+                
+                <div style="font-size: 18px; margin-bottom: 30px;">
+                    <strong>Time Taken:</strong> ${minutes}m ${seconds}s
+                </div>
+                
+                <button class="btn start-btn" onclick="window.location.href='performance.html?result_id=${testResultId}'">
+                    View Performance Dashboard
+                </button>
+            `;
+        }
+
+        // Show error
+        function showError(message) {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <div class="error">
+                    <h2 style="margin-bottom: 15px;">Error</h2>
+                    <p>${message}</p>
+                    <button class="btn start-btn" onclick="window.location.href='select-test.html'" style="margin-top: 20px;">
+                        Back to Test Selection
+                    </button>
+                </div>
+            `;
+        }
+
+        // Initialize on page load
+        window.onload = init;
+    </script>
+</body>
+</html>
