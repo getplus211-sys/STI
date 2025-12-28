@@ -3,257 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LRD Beginners - Performance Dashboard</title>
+    <title>Performance - LRD Beginners</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Noto Sans Gujarati', sans-serif; background: #f3f4f6; min-height: 100vh; }
-        .header { background: #2563eb; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body { font-family: 'Noto Sans Gujarati', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        
+        .header { background: #2563eb; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; margin-bottom: 20px; }
         .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: bold; }
-        .logo-badge { background: white; color: #2563eb; padding: 8px 12px; border-radius: 8px; font-weight: bold; }
-        .header-btn { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; cursor: pointer; border: 2px solid white; color: white; text-decoration: none; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
-        .student-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-        .stat-label { color: #6b7280; font-size: 14px; margin-bottom: 8px; }
+        .logo-badge { background: white; color: #2563eb; padding: 8px 12px; border-radius: 8px; }
+        .home-btn { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; border: 2px solid white; color: white; text-decoration: none; }
+        
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        /* Student Card */
+        .student-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .student-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .avatar { width: 80px; height: 80px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; color: #2563eb; }
+        .student-info h2 { font-size: 20px; margin-bottom: 5px; }
+        .student-meta { display: flex; gap: 15px; font-size: 14px; color: #6b7280; }
+        
+        /* Pie Chart Section */
+        .chart-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .chart-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; text-align: center; }
+        .chart-container { max-width: 350px; margin: 0 auto; }
+        
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .stat-label { font-size: 14px; color: #6b7280; margin-bottom: 8px; }
         .stat-value { font-size: 32px; font-weight: bold; color: #1f2937; }
-        .chart-container { background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-        .chart-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 20px; }
-        .recommendation-card { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; }
-        .recommendation-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .recommendation-list { list-style: none; padding-left: 0; }
-        .recommendation-list li { padding: 8px 0; padding-left: 25px; position: relative; }
-        .recommendation-list li:before { content: "✓"; position: absolute; left: 0; color: #10b981; font-weight: bold; }
-        .loading { text-align: center; padding: 80px 20px; font-size: 24px; color: #6b7280; }
-        .subjects-grid { display: grid; gap: 20px; }
-        .subject-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-        .subject-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .subject-name { font-size: 18px; font-weight: bold; color: #1f2937; }
-        .subject-percentage { font-size: 24px; font-weight: bold; }
-        .percentage-excellent { color: #10b981; }
-        .percentage-good { color: #3b82f6; }
-        .percentage-average { color: #f59e0b; }
-        .percentage-poor { color: #ef4444; }
-        .progress-bar { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-bottom: 15px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); transition: width 0.5s ease; }
-        .tabs { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; }
-        .tab { padding: 12px 24px; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; transition: all 0.3s ease; }
-        .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .stat-sub { font-size: 14px; color: #10b981; margin-top: 5px; }
+        
+        /* Subject Analysis */
+        .analysis-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; border-left: 4px solid #3b82f6; padding-left: 12px; }
+        .subject-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f9fafb; border-radius: 8px; margin-bottom: 10px; }
+        .subject-name { font-size: 16px; font-weight: 600; }
+        .subject-score { font-size: 20px; font-weight: bold; }
+        .score-excellent { color: #10b981; }
+        .score-good { color: #3b82f6; }
+        .score-average { color: #f59e0b; }
+        .score-poor { color: #ef4444; }
+        
+        /* Chapter Details */
+        .chapter-list { margin-top: 10px; padding-left: 20px; }
+        .chapter-item { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #6b7280; }
+        
+        /* Trend Chart */
+        .trend-card { background: white; border-radius: 16px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Recommendation Card */
+        .recommendation-card { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .rec-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .rec-section { margin-bottom: 20px; }
+        .rec-section h3 { font-size: 16px; margin-bottom: 10px; opacity: 0.9; }
+        .rec-list { list-style: none; }
+        .rec-list li { padding: 8px 0 8px 25px; position: relative; }
+        .rec-list li:before { content: "✓"; position: absolute; left: 0; color: #10b981; font-weight: bold; }
+        
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .student-header { flex-direction: column; text-align: center; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo"><span class="logo-badge">LRD</span><span>Beginners</span></div>
-        <a href="select-test.html" class="header-btn">🏠 હોમ</a>
+        <a href="select-test.html" class="home-btn">🏠 હોમ</a>
     </div>
-    <div class="container" id="mainContainer"><div class="loading">લોડ થઈ રહ્યું છે...</div></div>
+
+    <div class="container">
+        <!-- Student Card -->
+        <div class="student-card">
+            <div class="student-header">
+                <div class="avatar">RS</div>
+                <div class="student-info">
+                    <h2>વિદ્યાર્થીનું નામ</h2>
+                    <div class="student-meta">
+                        <span>લેવલ: <strong>ગાંડ્સ</strong></span>
+                        <span>રેંક: <strong>#14</strong></span>
+                        <span>તારીખ: <strong id="testDate">25-12-2025</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="chart-card">
+            <div class="chart-title">ટેસ્ટનું પરિણામ (Pie Chart)</div>
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">કુલ/મેળવેલ ગુણ</div>
+                <div class="stat-value" id="scoreDisplay">100 / 98</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">ચોકસાઈ (Accuracy)</div>
+                <div class="stat-value" style="color: #10b981;" id="accuracyDisplay">82.5%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">સમય/પ્રશ્ન</div>
+                <div class="stat-value" id="timePerQuestion">42s</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">એકાગ્રતા રેટિંગ</div>
+                <div class="stat-value" style="color: #f59e0b;" id="concentrationRating">8/10</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">સરળ (સાચા/કુલ)</div>
+                <div class="stat-value" id="easyStats">45/50</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">અધારો (સાચા/કુલ)</div>
+                <div class="stat-value" id="hardStats">12/25</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">ટાર્ગેટ સ્કોર</div>
+                <div class="stat-value" id="targetScore">60</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">સુધારો જરૂર (%)</div>
+                <div class="stat-value" style="color: #f59e0b;" id="improvementNeeded">12%</div>
+            </div>
+            <div class="stat-card" style="grid-column: span 2;">
+                <div class="stat-label">બાકી પ્રશ્નો</div>
+                <div class="stat-value" id="remainingQuestions">05</div>
+            </div>
+        </div>
+
+        <!-- Subject Analysis -->
+        <div class="analysis-card">
+            <div class="section-title">વિષય અને ચેપ્ટર વાર એનાલિસિસ</div>
+            <div id="subjectAnalysis">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+
+        <!-- Trend Chart -->
+        <div class="trend-card">
+            <div class="chart-title">તમારી પ્રગતિ (Trend)</div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendation-card">
+            <div class="rec-title">🎯 તમારા માટે એક્શન પ્લાન</div>
+            <div id="recommendations">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
+
         let currentUser = null;
-        let currentTestResult = null;
-        let allTestResults = [];
-        let performanceData = [];
-        let recommendations = [];
+        let testResult = null;
+        let questionAttempts = [];
 
         async function init() {
             try {
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) {
-                    document.getElementById('mainContainer').innerHTML = '<div class="loading">કૃપા કરીને પહેલા લોગિન કરો</div>';
+                    alert('કૃપા કરીને લોગિન કરો');
                     return;
                 }
                 currentUser = user;
-                
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const resultId = urlParams.get('result_id');
-                if (resultId) await loadCurrentTestResult(resultId);
                 
-                await loadAllTestResults();
-                await loadPerformanceData();
-                analyzePerformance();
-                renderDashboard();
+                if (!resultId) {
+                    alert('Result ID not found');
+                    return;
+                }
+
+                await loadData(resultId);
+                displayData();
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('mainContainer').innerHTML = '<div class="loading">કંઈક ખોટું થયું</div>';
             }
         }
 
-        async function loadCurrentTestResult(resultId) {
-            const { data, error } = await supabaseClient
-                .from('lrd_test_results')
-                .select('*, lrd_tests(test_name), lrd_question_attempts(*, lrd_questions(*, lrd_subjects(name), lrd_chapters(name)))')
-                .eq('id', resultId)
-                .single();
-            if (!error) currentTestResult = data;
-        }
-
-        async function loadAllTestResults() {
-            const { data } = await supabaseClient
+        async function loadData(resultId) {
+            // Load test result
+            const { data: result } = await supabaseClient
                 .from('lrd_test_results')
                 .select('*')
-                .eq('user_id', currentUser.id)
-                .order('completed_at', { ascending: false });
-            allTestResults = data || [];
+                .eq('id', resultId)
+                .single();
+            testResult = result;
+
+            // Load question attempts with details
+            const { data: attempts } = await supabaseClient
+                .from('lrd_question_attempts')
+                .select('*, lrd_questions(*, lrd_subjects(name), lrd_chapters(name))')
+                .eq('test_result_id', resultId);
+            questionAttempts = attempts || [];
         }
 
-        async function loadPerformanceData() {
-            const { data } = await supabaseClient
-                .from('lrd_performance_analytics')
-                .select('*, lrd_subjects(name, subject_code), lrd_chapters(name, chapter_id)')
-                .eq('user_id', currentUser.id);
-            performanceData = data || [];
+        function displayData() {
+            if (!testResult) return;
+
+            // Update date
+            const date = new Date(testResult.completed_at);
+            document.getElementById('testDate').textContent = date.toLocaleDateString('en-GB').replace(/\//g, '-');
+
+            // Update score
+            const totalMarks = testResult.total_questions;
+            document.getElementById('scoreDisplay').textContent = `${totalMarks} / ${testResult.score}`;
+            document.getElementById('accuracyDisplay').textContent = testResult.percentage + '%';
+
+            // Time per question
+            const timePerQ = Math.floor(testResult.total_time_seconds / testResult.total_questions);
+            document.getElementById('timePerQuestion').textContent = timePerQ + 's';
+
+            // Calculate difficulty stats
+            const difficultyStats = calculateDifficultyStats();
+            document.getElementById('easyStats').textContent = `${difficultyStats.easy.correct}/${difficultyStats.easy.total}`;
+            document.getElementById('hardStats').textContent = `${difficultyStats.hard.correct}/${difficultyStats.hard.total}`;
+
+            // Remaining questions
+            document.getElementById('remainingQuestions').textContent = String(testResult.skipped_questions).padStart(2, '0');
+
+            // Improvement needed
+            const improvementNeeded = (100 - parseFloat(testResult.percentage)).toFixed(0);
+            document.getElementById('improvementNeeded').textContent = improvementNeeded + '%';
+
+            // Draw charts
+            drawPieChart();
+            drawTrendChart();
+
+            // Display subject analysis
+            displaySubjectAnalysis();
+
+            // Display recommendations
+            displayRecommendations();
         }
 
-        function analyzePerformance() {
-            recommendations = [];
-            performanceData.forEach(perf => {
-                const accuracy = (perf.correct_answers / perf.total_questions_attempted * 100) || 0;
-                const subj = perf.lrd_subjects.name;
-                const chap = perf.lrd_chapters.name;
-                
-                if (accuracy < 40) {
-                    recommendations.push({type: 'urgent', subject: subj, chapter: chap, message: subj + ' - ' + chap + ': તાત્કાલિક ધ્યાન આપો! માત્ર ' + accuracy.toFixed(1) + '% સચોટતા.'});
-                } else if (accuracy >= 40 && accuracy < 60) {
-                    recommendations.push({type: 'warning', subject: subj, chapter: chap, message: subj + ' - ' + chap + ': નબળું (' + accuracy.toFixed(1) + '%). વધુ અભ્યાસ જરૂરી.'});
-                } else if (accuracy >= 60 && accuracy < 75) {
-                    recommendations.push({type: 'moderate', subject: subj, chapter: chap, message: subj + ' - ' + chap + ': સરેરાશ (' + accuracy.toFixed(1) + '%). રિવિઝન વધારો.'});
-                } else if (accuracy >= 75 && accuracy < 85) {
-                    recommendations.push({type: 'good', subject: subj, chapter: chap, message: subj + ' - ' + chap + ': સારું (' + accuracy.toFixed(1) + '%)! રિવિઝન ચાલુ રાખો.'});
-                } else {
-                    recommendations.push({type: 'excellent', subject: subj, chapter: chap, message: subj + ' - ' + chap + ': ઉત્કૃષ્ટ! (' + accuracy.toFixed(1) + '%) આ સ્તર જાળવો.'});
+        function calculateDifficultyStats() {
+            const stats = {
+                easy: { correct: 0, total: 0 },
+                medium: { correct: 0, total: 0 },
+                hard: { correct: 0, total: 0 }
+            };
+
+            questionAttempts.forEach(attempt => {
+                const difficulty = attempt.lrd_questions.difficulty_level;
+                if (difficulty === 'સરળ') {
+                    stats.easy.total++;
+                    if (attempt.is_correct) stats.easy.correct++;
+                } else if (difficulty === 'મધ્યમ') {
+                    stats.medium.total++;
+                    if (attempt.is_correct) stats.medium.correct++;
+                } else if (difficulty === 'મુશ્કેલ') {
+                    stats.hard.total++;
+                    if (attempt.is_correct) stats.hard.correct++;
                 }
             });
-        }
 
-        function renderDashboard() {
-            const totalTests = allTestResults.length;
-            const totalQuestions = allTestResults.reduce((sum, r) => sum + r.total_questions, 0);
-            const totalCorrect = allTestResults.reduce((sum, r) => sum + r.correct_answers, 0);
-            const overallAccuracy = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(1) : 0;
-            
-            let html = '<div class="student-card"><h2>વિદ્યાર્થી પર્ફોર્મન્સ ડેશબોર્ડ</h2></div>';
-            
-            html += '<div class="tabs">';
-            html += '<div class="tab active" onclick="switchTab(\'current\')">વર્તમાન ટેસ્ટ</div>';
-            html += '<div class="tab" onclick="switchTab(\'overall\')">ઓવરઓલ પર્ફોર્મન્સ</div>';
-            html += '</div>';
-            
-            html += '<div id="currentTab" class="tab-content active">';
-            if (currentTestResult) {
-                html += '<div class="stats-grid">';
-                html += '<div class="stat-card"><div class="stat-label">સ્કોર</div><div class="stat-value">' + currentTestResult.score + '</div></div>';
-                html += '<div class="stat-card"><div class="stat-label">ચોકસાઈ</div><div class="stat-value" style="color: #10b981;">' + currentTestResult.percentage + '%</div></div>';
-                html += '<div class="stat-card"><div class="stat-label">સાચા જવાબ</div><div class="stat-value" style="color: #10b981;">' + currentTestResult.correct_answers + '</div></div>';
-                html += '<div class="stat-card"><div class="stat-label">ખોટા જવાબ</div><div class="stat-value" style="color: #ef4444;">' + currentTestResult.wrong_answers + '</div></div>';
-                html += '</div>';
-                html += '<div class="chart-container"><div class="chart-title">ટેસ્ટ પરિણામ</div><canvas id="pieChart" width="400" height="200"></canvas></div>';
-            } else {
-                html += '<p>વર્તમાન ટેસ્ટનો ડેટા ઉપલબ્ધ નથી</p>';
-            }
-            html += '</div>';
-            
-            html += '<div id="overallTab" class="tab-content">';
-            html += '<div class="stats-grid">';
-            html += '<div class="stat-card"><div class="stat-label">કુલ ટેસ્ટ</div><div class="stat-value">' + totalTests + '</div></div>';
-            html += '<div class="stat-card"><div class="stat-label">ઓવરઓલ ચોકસાઈ</div><div class="stat-value" style="color: #10b981;">' + overallAccuracy + '%</div></div>';
-            html += '<div class="stat-card"><div class="stat-label">કુલ પ્રશ્નો</div><div class="stat-value">' + totalQuestions + '</div></div>';
-            html += '<div class="stat-card"><div class="stat-label">કુલ સાચા</div><div class="stat-value" style="color: #10b981;">' + totalCorrect + '</div></div>';
-            html += '</div>';
-            html += renderSubjectCards();
-            html += '</div>';
-            
-            html += '<div class="recommendation-card">';
-            html += '<div class="recommendation-title">🎯 તમારા માટે સલાહ</div>';
-            html += renderRecommendations();
-            html += '</div>';
-            
-            document.getElementById('mainContainer').innerHTML = html;
-            
-            setTimeout(() => {
-                if (currentTestResult) drawPieChart();
-            }, 500);
-        }
-
-        function renderSubjectCards() {
-            const subjectMap = {};
-            performanceData.forEach(perf => {
-                const sid = perf.subject_id;
-                if (!subjectMap[sid]) {
-                    subjectMap[sid] = {name: perf.lrd_subjects.name, totalAttempted: 0, totalCorrect: 0, chapters: []};
-                }
-                subjectMap[sid].totalAttempted += perf.total_questions_attempted;
-                subjectMap[sid].totalCorrect += perf.correct_answers;
-                subjectMap[sid].chapters.push({
-                    name: perf.lrd_chapters.name,
-                    accuracy: (perf.correct_answers / perf.total_questions_attempted * 100) || 0
-                });
-            });
-            
-            let html = '<div class="subjects-grid">';
-            Object.values(subjectMap).forEach(subject => {
-                const accuracy = (subject.totalCorrect / subject.totalAttempted * 100) || 0;
-                const pclass = accuracy >= 80 ? 'percentage-excellent' : accuracy >= 60 ? 'percentage-good' : accuracy >= 40 ? 'percentage-average' : 'percentage-poor';
-                html += '<div class="subject-card">';
-                html += '<div class="subject-header"><div class="subject-name">' + subject.name + '</div>';
-                html += '<div class="subject-percentage ' + pclass + '">' + accuracy.toFixed(0) + '%</div></div>';
-                html += '<div class="progress-bar"><div class="progress-fill" style="width: ' + accuracy + '%"></div></div>';
-                html += '</div>';
-            });
-            html += '</div>';
-            return html;
-        }
-
-        function renderRecommendations() {
-            const urgent = recommendations.filter(r => r.type === 'urgent' || r.type === 'warning');
-            const good = recommendations.filter(r => r.type === 'good' || r.type === 'excellent');
-            let html = '';
-            if (urgent.length > 0) {
-                html += '<div style="margin-bottom: 15px;"><h3 style="font-size: 16px; margin-bottom: 10px;">વધારે સમય આપો:</h3><ul class="recommendation-list">';
-                urgent.slice(0, 5).forEach(r => html += '<li>' + r.message + '</li>');
-                html += '</ul></div>';
-            }
-            if (good.length > 0) {
-                html += '<div><h3 style="font-size: 16px; margin-bottom: 10px;">તમારી મજબૂતાઈ:</h3><ul class="recommendation-list">';
-                good.slice(0, 3).forEach(r => html += '<li>' + r.message + '</li>');
-                html += '</ul></div>';
-            }
-            return html;
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            if (tab === 'current') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('currentTab').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('overallTab').classList.add('active');
-            }
+            return stats;
         }
 
         function drawPieChart() {
-            const canvas = document.getElementById('pieChart');
-            if (!canvas || !currentTestResult) return;
-            new Chart(canvas.getContext('2d'), {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['સાચા', 'ખોટા', 'સ્કિપ્ડ'],
+                    labels: ['સાચા', 'ખોટા', 'બાકી'],
                     datasets: [{
-                        data: [currentTestResult.correct_answers, currentTestResult.wrong_answers, currentTestResult.skipped_questions],
+                        data: [testResult.correct_answers, testResult.wrong_answers, testResult.skipped_questions],
                         backgroundColor: ['#10b981', '#ef4444', '#e5e7eb']
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
             });
+        }
+
+        function drawTrendChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5'],
+                    datasets: [{
+                        label: 'સ્કોર',
+                        data: [55, 62, 59, 70, parseFloat(testResult.percentage)],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+
+        function displaySubjectAnalysis() {
+            const subjectMap = {};
+            
+            questionAttempts.forEach(attempt => {
+                const subjectName = attempt.lrd_questions.lrd_subjects.name;
+                const chapterName = attempt.lrd_questions.lrd_chapters.name;
+                
+                if (!subjectMap[subjectName]) {
+                    subjectMap[subjectName] = {
+                        total: 0,
+                        correct: 0,
+                        chapters: {}
+                    };
+                }
+                
+                subjectMap[subjectName].total++;
+                if (attempt.is_correct) subjectMap[subjectName].correct++;
+                
+                if (!subjectMap[subjectName].chapters[chapterName]) {
+                    subjectMap[subjectName].chapters[chapterName] = { total: 0, correct: 0 };
+                }
+                subjectMap[subjectName].chapters[chapterName].total++;
+                if (attempt.is_correct) subjectMap[subjectName].chapters[chapterName].correct++;
+            });
+
+            let html = '';
+            Object.entries(subjectMap).forEach(([subject, data]) => {
+                const percentage = ((data.correct / data.total) * 100).toFixed(0);
+                const scoreClass = percentage >= 80 ? 'score-excellent' : percentage >= 60 ? 'score-good' : percentage >= 40 ? 'score-average' : 'score-poor';
+                
+                html += `
+                    <div class="subject-item">
+                        <div>
+                            <div class="subject-name">${subject}</div>
+                            <div class="chapter-list">
+                                ${Object.entries(data.chapters).map(([chapter, chData]) => {
+                                    const chPer = ((chData.correct / chData.total) * 100).toFixed(0);
+                                    return `<div class="chapter-item"><span>${chapter}</span><span>${chPer}%</span></div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        <div class="subject-score ${scoreClass}">${percentage}%</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('subjectAnalysis').innerHTML = html;
+        }
+
+        function displayRecommendations() {
+            const percentage = parseFloat(testResult.percentage);
+            let html = '';
+
+            if (percentage < 60) {
+                html += `
+                    <div class="rec-section">
+                        <h3>વધારે સમય આપો:</h3>
+                        <ul class="rec-list">
+                            <li>રોજ 2-3 કલાક નિયમિત અભ્યાસ કરો</li>
+                            <li>નબળા વિષયો પર વિશેષ ધ્યાન આપો</li>
+                            <li>બેસિક કોન્સેપ્ટ્સ ફરીથી સમજો</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            if (percentage >= 60 && percentage < 80) {
+                html += `
+                    <div class="rec-section">
+                        <h3>વાંચન સુધારો:</h3>
+                        <ul class="rec-list">
+                            <li>મધ્યમ અને મુશ્કેલ પ્રશ્નો પર પ્રેક્ટિસ વધારો</li>
+                            <li>સ્પીડ અને એક્યુરસી બંને સુધારો</li>
+                            <li>રિવિઝન નિયમિત કરો</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            if (percentage >= 80) {
+                html += `
+                    <div class="rec-section">
+                        <h3>તમારી મજબૂતાઈ:</h3>
+                        <ul class="rec-list">
+                            <li>ઉત્તમ પ્રદર્શન! આ સ્તર જાળવો</li>
+                            <li>નિયમિત રિવિઝન ચાલુ રાખો</li>
+                            <li>મુશ્કેલ પ્રશ્નો પર વધુ પ્રેક્ટિસ કરો</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            document.getElementById('recommendations').innerHTML = html;
         }
 
         window.onload = init;
