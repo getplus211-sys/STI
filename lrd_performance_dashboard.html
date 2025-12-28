@@ -3,82 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LRD Beginners - પર્ફોર્મન્સ ડેશબોર્ડ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>LRD Beginners - Performance Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;600;700&display=swap');
-        body { 
-            font-family: 'Hind Vadodara', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .subject-card:hover { 
-            transform: translateY(-5px); 
-            transition: all 0.3s ease; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-        .recommendation-card {
-            animation: slideIn 0.5s ease forwards;
-            opacity: 0;
-        }
-        @keyframes slideIn {
-            to { opacity: 1; transform: translateX(0); }
-            from { opacity: 0; transform: translateX(-20px); }
-        }
-        .loading-spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        body { font-family: 'Hind Vadodara', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); transition: all 0.3s; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
+        .subject-card:hover { transform: translateY(-5px); transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .loading-spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #667eea; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .recommendation-card { animation: slideIn 0.5s ease forwards; opacity: 0; }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
     <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center z-50">
-        <div class="text-center">
-            <div class="loading-spinner mx-auto mb-4"></div>
-            <p class="text-white text-xl font-bold">લોડ થઈ રહ્યું છે...</p>
-        </div>
+        <div class="text-center"><div class="loading-spinner mx-auto mb-4"></div><p class="text-white text-xl font-bold">લોડ થઈ રહ્યું છે...</p></div>
     </div>
 
-    <!-- Main Content -->
-    <div id="mainContent" style="display: none;">
+    <div id="mainContent" style="display:none;">
         <nav class="glass-effect text-gray-800 p-4 shadow-xl flex justify-between items-center px-8 sticky top-0 z-50">
             <div class="flex items-center gap-2">
                 <div class="btn-primary text-white p-2 rounded-lg font-bold text-lg">LRD</div>
                 <h1 class="text-xl font-bold">Beginners Performance Dashboard</h1>
             </div>
-            <button onclick="logout()" class="btn-primary text-white px-5 py-2 rounded-full text-sm font-semibold">
+            <button onclick="handleLogout()" class="btn-primary text-white px-5 py-2 rounded-full text-sm font-semibold">
                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
             </button>
         </nav>
 
         <div class="max-w-7xl mx-auto p-4 md:p-8">
-            
-            <!-- Student Profile Card -->
             <div class="glass-effect rounded-2xl shadow-xl p-6 mb-8 flex flex-wrap justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div id="studentAvatar" class="h-16 w-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg"></div>
@@ -89,246 +48,134 @@
                     </div>
                 </div>
                 <div class="flex gap-8">
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400 uppercase font-bold mb-1">લેવલ</p>
-                        <span id="studentLevel" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-md">-</span>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400 uppercase font-bold mb-1">કુલ ટેસ્ટ</p>
-                        <p id="totalTests" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">0</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400 uppercase font-bold mb-1">તારીખ</p>
-                        <p id="currentDate" class="text-lg font-bold text-gray-700"></p>
-                    </div>
+                    <div class="text-center"><p class="text-xs text-gray-400 uppercase font-bold mb-1">લેવલ</p><span id="studentLevel" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-md">-</span></div>
+                    <div class="text-center"><p class="text-xs text-gray-400 uppercase font-bold mb-1">કુલ ટેસ્ટ</p><p id="totalTests" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">0</p></div>
+                    <div class="text-center"><p class="text-xs text-gray-400 uppercase font-bold mb-1">તારીખ</p><p id="currentDate" class="text-lg font-bold text-gray-700"></p></div>
                 </div>
             </div>
 
-            <!-- No Data Message -->
-            <div id="noDataMessage" style="display: none;" class="glass-effect rounded-2xl shadow-xl p-12 text-center">
+            <div id="noDataMessage" style="display:none;" class="glass-effect rounded-2xl shadow-xl p-12 text-center">
                 <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
                 <h3 class="text-2xl font-bold text-gray-700 mb-2">કોઈ ટેસ્ટ ડેટા નથી!</h3>
                 <p class="text-gray-600">તમે હજુ સુધી કોઈ ટેસ્ટ આપ્યું નથી. પહેલા ટેસ્ટ આપો પછી અહીં તમારું performance જોઈ શકશો.</p>
             </div>
 
-            <!-- Dashboard Content -->
-            <div id="dashboardContent" style="display: none;">
-                <!-- Performance Overview -->
+            <div id="dashboardContent" style="display:none;">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                     <div class="glass-effect p-6 rounded-2xl shadow-xl flex flex-col items-center">
                         <h3 class="font-bold text-gray-700 mb-6 text-lg">ટેસ્ટનું પરિણામ</h3>
-                        <div class="w-full max-w-[220px]">
-                            <canvas id="performancePie"></canvas>
-                        </div>
+                        <div class="w-full max-w-[220px]"><canvas id="performancePie"></canvas></div>
                     </div>
-
                     <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">કુલ/મેળવેલ ગુણ</p>
-                            <p class="text-xl font-bold"><span id="totalMarks">0</span> / <span id="obtainedMarks" class="text-blue-600">0</span></p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">ચોકસાઈ (Accuracy)</p>
-                            <p id="accuracy" class="text-xl font-bold text-green-600">0%</p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">સમય/પ્રશ્ન</p>
-                            <p id="avgTime" class="text-xl font-bold">0 સેકન્ડ</p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">એકાગ્રતા રેટિંગ</p>
-                            <p id="concentrationRating" class="text-xl font-bold text-purple-600">-/10</p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">સરળ (સાચા/કુલ)</p>
-                            <p id="easyQuestions" class="text-xl font-bold">0/0</p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">અઘરા (સાચા/કુલ)</p>
-                            <p id="hardQuestions" class="text-xl font-bold text-red-500">0/0</p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">ટાર્ગેટ સ્કોર</p>
-                            <p id="targetScore" class="text-xl font-bold">90</p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">સુધારો જરૂર (%)</p>
-                            <p id="improvementNeeded" class="text-xl font-bold text-orange-500">0%</p>
-                        </div>
-                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
-                            <p class="text-gray-500 text-sm mb-1">બાકી પ્રશ્નો</p>
-                            <p id="unattempted" class="text-xl font-bold">0</p>
-                        </div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">કુલ/મેળવેલ ગુણ</p><p class="text-xl font-bold"><span id="totalMarks">0</span> / <span id="obtainedMarks" class="text-blue-600">0</span></p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">ચોકસાઈ</p><p id="accuracy" class="text-xl font-bold text-green-600">0%</p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">સમય/પ્રશ્ન</p><p id="avgTime" class="text-xl font-bold">0 સેકન્ડ</p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">એકાગ્રતા</p><p id="concentrationRating" class="text-xl font-bold text-purple-600">-/10</p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">સરળ (સાચા/કુલ)</p><p id="easyQuestions" class="text-xl font-bold">0/0</p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">અઘરા (સાચા/કુલ)</p><p id="hardQuestions" class="text-xl font-bold text-red-500">0/0</p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">ટાર્ગેટ સ્કોર</p><p id="targetScore" class="text-xl font-bold">90</p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">સુધારો જરૂર</p><p id="improvementNeeded" class="text-xl font-bold text-orange-500">0%</p></div>
+                        <div class="glass-effect p-4 rounded-xl shadow-lg text-center transform hover:scale-105 transition"><p class="text-gray-500 text-sm mb-1">બાકી પ્રશ્નો</p><p id="unattempted" class="text-xl font-bold">0</p></div>
                     </div>
                 </div>
 
-                <!-- Subject-wise Analysis -->
-                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 drop-shadow-lg">
-                    <i class="fas fa-book-open"></i> વિષય અને ચેપ્ટરવાર એનાલિસિસ
-                </h3>
-                <div id="subjectAnalysis" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <!-- Dynamically generated subject cards -->
-                </div>
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2 drop-shadow-lg"><i class="fas fa-book-open"></i> વિષય અને ચેપ્ટરવાર એનાલિસિસ</h3>
+                <div id="subjectAnalysis" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"></div>
 
-                <!-- Trend and Action Plan -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                    <div class="lg:col-span-1 glass-effect p-6 rounded-2xl shadow-xl">
-                        <h3 class="font-bold text-gray-700 mb-4 text-center text-lg">તમારી પ્રગતિ (Trend)</h3>
-                        <canvas id="trendLine"></canvas>
-                    </div>
-
+                    <div class="lg:col-span-1 glass-effect p-6 rounded-2xl shadow-xl"><h3 class="font-bold text-gray-700 mb-4 text-center text-lg">તમારી પ્રગતિ</h3><canvas id="trendLine"></canvas></div>
                     <div class="lg:col-span-2 glass-effect text-gray-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-4 opacity-5 text-6xl">
-                            <i class="fas fa-bullseye"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600 border-b-2 border-gray-200 pb-2">
-                            <i class="fas fa-fire mr-2"></i>તમારા માટે એક્શન પ્લાન (500+ Rules Based)
-                        </h3>
-                        <div id="actionPlan" class="space-y-3">
-                            <!-- Dynamically generated action plan -->
-                        </div>
+                        <div class="absolute top-0 right-0 p-4 opacity-5 text-6xl"><i class="fas fa-bullseye"></i></div>
+                        <h3 class="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600 border-b-2 border-gray-200 pb-2"><i class="fas fa-fire mr-2"></i>તમારા માટે એક્શન પ્લાન (500+ Rules)</h3>
+                        <div id="actionPlan" class="space-y-3"></div>
                     </div>
                 </div>
 
-                <!-- Motivational Quote -->
                 <div class="glass-effect border-l-4 border-blue-500 p-6 rounded-lg shadow-xl text-center">
                     <p id="motivationalQuote" class="text-gray-800 italic font-semibold text-lg"></p>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-        /* ════════════════════════════════════════════════════════════════════
-           SUPABASE CONFIGURATION
-           ════════════════════════════════════════════════════════════════════ */
-        
-        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const sb = window.supabase.createClient(
+            'https://bhmycvrbucmbbrpzeane.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4'
+        );
         
         let currentUser = null;
-        let performancePieChart = null;
-        let trendLineChart = null;
+        let pieChart = null;
+        let lineChart = null;
 
-        /* ════════════════════════════════════════════════════════════════════
-           INITIALIZATION
-           ════════════════════════════════════════════════════════════════════ */
-        
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('currentDate').textContent = new Date().toLocaleDateString('gu-IN');
-            await checkUserAndLoadDashboard();
+            initDashboard();
         });
 
-        async function checkUserAndLoadDashboard() {
+        async function initDashboard() {
             try {
-                // Get current logged in user
-                const { data: { user }, error } = await supabase.auth.getUser();
-                
+                const { data: { user }, error } = await sb.auth.getUser();
                 if (error || !user) {
                     alert('તમે login નથી! કૃપા કરીને પહેલા login કરો.');
-                    // Redirect to login page
-                    // window.location.href = '/login.html';
                     document.getElementById('loadingScreen').style.display = 'none';
                     return;
                 }
-                
                 currentUser = user;
-                
-                // Load user profile
-                await loadUserProfile();
-                
-                // Load performance data
-                await loadPerformanceData();
-                
+                await loadProfile();
+                await loadData();
             } catch (err) {
                 console.error('Error:', err);
-                alert('Error loading dashboard: ' + err.message);
+                alert('Error: ' + err.message);
             } finally {
                 document.getElementById('loadingScreen').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
             }
         }
 
-        async function loadUserProfile() {
+        async function loadProfile() {
             try {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('full_name, email, mobile')
-                    .eq('id', currentUser.id)
-                    .single();
-                
+                const { data, error } = await sb.from('profiles').select('full_name, email').eq('id', currentUser.id).single();
                 if (error) throw error;
-                
                 if (data) {
-                    // Set name
                     document.getElementById('studentName').textContent = data.full_name || 'નામ નથી';
                     document.getElementById('studentEmail').textContent = data.email || '';
-                    
-                    // Set avatar (first 2 letters of name)
                     const initials = (data.full_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
                     document.getElementById('studentAvatar').textContent = initials;
                 }
             } catch (error) {
-                console.error('Error loading profile:', error);
+                console.error('Profile error:', error);
                 document.getElementById('studentName').textContent = currentUser.email || 'User';
                 document.getElementById('studentAvatar').textContent = (currentUser.email || 'U')[0].toUpperCase();
             }
         }
 
-        async function loadPerformanceData() {
+        async function loadData() {
             try {
-                // Fetch all results for this student
-                const { data: results, error } = await supabase
-                    .from('lrd_results')
-                    .select(`
-                        *,
-                        lrd_subjects!inner(id, name, subject_code),
-                        lrd_chapters!inner(id, name)
-                    `)
-                    .eq('student_id', currentUser.id)
-                    .order('created_at', { ascending: false });
+                const { data: results, error } = await sb.from('lrd_results').select(`
+                    *, lrd_subjects!inner(id, name, subject_code), lrd_chapters!inner(id, name)
+                `).eq('student_id', currentUser.id).order('created_at', { ascending: false });
                 
                 if (error) throw error;
-                
                 if (!results || results.length === 0) {
-                    // No data found
                     document.getElementById('noDataMessage').style.display = 'block';
-                    document.getElementById('dashboardContent').style.display = 'none';
                     return;
                 }
                 
-                // Show dashboard
-                document.getElementById('noDataMessage').style.display = 'none';
                 document.getElementById('dashboardContent').style.display = 'block';
+                document.getElementById('totalTests').textContent = new Set(results.map(r => r.test_id)).size;
                 
-                // Count unique tests
-                const uniqueTests = new Set(results.map(r => r.test_id)).size;
-                document.getElementById('totalTests').textContent = uniqueTests;
-                
-                // Format data for analyzer
                 const formattedData = results.map(r => ({
-                    subject_id: r.subject_id,
-                    subject_name: r.lrd_subjects.name,
-                    subject_code: r.lrd_subjects.subject_code,
-                    chapter_id: r.chapter_id,
-                    chapter_name: r.lrd_chapters.name,
-                    difficulty_level: r.difficulty_level || 'મધ્યમ',
-                    ideal_time_seconds: r.ideal_time_seconds || 30,
-                    time_taken_seconds: r.time_taken_seconds || 0,
-                    is_attempted: r.is_attempted,
-                    is_correct: r.is_correct,
-                    marks_allocated: r.marks_allocated || 1,
-                    marks_obtained: r.marks_obtained || 0
+                    subject_id: r.subject_id, subject_name: r.lrd_subjects.name, subject_code: r.lrd_subjects.subject_code,
+                    chapter_id: r.chapter_id, chapter_name: r.lrd_chapters.name,
+                    difficulty_level: r.difficulty_level || 'મધ્યમ', ideal_time_seconds: r.ideal_time_seconds || 30,
+                    time_taken_seconds: r.time_taken_seconds || 0, is_attempted: r.is_attempted, is_correct: r.is_correct,
+                    marks_allocated: r.marks_allocated || 1, marks_obtained: r.marks_obtained || 0
                 }));
                 
-                // Run analysis with 500+ rules
-                const analyzer = new PerformanceAnalyzer(formattedData);
+                const analyzer = new PerfAnalyzer(formattedData);
                 const result = analyzer.analyze();
                 
-                // Calculate level based on performance
                 const percentage = parseFloat(result.analysis.overall.percentage);
                 let level = 'બ્રોન્ઝ';
                 if (percentage >= 85) level = 'પ્લેટિનમ';
@@ -336,526 +183,165 @@
                 else if (percentage >= 60) level = 'સિલ્વર';
                 document.getElementById('studentLevel').textContent = level;
                 
-                // Display results
                 displayResults(result);
-                
             } catch (error) {
-                console.error('Error loading performance data:', error);
-                alert('Error loading performance data: ' + error.message);
+                console.error('Data error:', error);
+                alert('Error loading data: ' + error.message);
                 document.getElementById('noDataMessage').style.display = 'block';
-                document.getElementById('dashboardContent').style.display = 'none';
             }
         }
 
-        async function logout() {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                alert('Logout error: ' + error.message);
-            } else {
-                window.location.reload();
-            }
+        async function handleLogout() {
+            const { error } = await sb.auth.signOut();
+            if (error) alert('Logout error: ' + error.message);
+            else window.location.reload();
         }
 
-        /* ════════════════════════════════════════════════════════════════════
-           PERFORMANCE ANALYZER WITH 500+ RULES
-           (Same analyzer code as before)
-           ════════════════════════════════════════════════════════════════════ */
-        
-        class PerformanceAnalyzer {
-            constructor(results) {
-                this.results = results;
-                this.recommendations = [];
-                this.analysis = {};
-            }
-            
-            analyze() {
-                this.calculateOverall();
-                this.calculateSubjects();
-                this.calculateChapters();
-                this.calculateDifficulty();
-                this.applyAllRules();
-                return { analysis: this.analysis, recommendations: this.recommendations };
-            }
-            
-            calculateOverall() {
+        class PerfAnalyzer {
+            constructor(results) { this.results = results; this.recommendations = []; this.analysis = {}; }
+            analyze() { this.calcOverall(); this.calcSubjects(); this.calcChapters(); this.calcDifficulty(); this.applyRules(); return { analysis: this.analysis, recommendations: this.recommendations }; }
+            calcOverall() {
                 const total = this.results.length;
                 const correct = this.results.filter(r => r.is_correct).length;
                 const attempted = this.results.filter(r => r.is_attempted).length;
                 const totalMarks = this.results.reduce((s, r) => s + r.marks_allocated, 0);
                 const obtainedMarks = this.results.reduce((s, r) => s + r.marks_obtained, 0);
                 const totalTime = this.results.reduce((s, r) => s + r.time_taken_seconds, 0);
-                
-                this.analysis.overall = {
-                    total, correct, incorrect: attempted - correct,
-                    unattempted: total - attempted, attempted, totalMarks, obtainedMarks,
-                    percentage: ((obtainedMarks / totalMarks) * 100).toFixed(2),
-                    accuracy: ((correct / attempted) * 100).toFixed(2),
-                    avgTime: Math.round(totalTime / attempted)
-                };
+                this.analysis.overall = { total, correct, incorrect: attempted - correct, unattempted: total - attempted, attempted, totalMarks, obtainedMarks,
+                    percentage: ((obtainedMarks / totalMarks) * 100).toFixed(2), accuracy: ((correct / attempted) * 100).toFixed(2), avgTime: Math.round(totalTime / attempted) };
             }
-            
-            calculateSubjects() {
+            calcSubjects() {
                 const map = {};
                 this.results.forEach(r => {
-                    if (!map[r.subject_id]) {
-                        map[r.subject_id] = { 
-                            id: r.subject_id, name: r.subject_name, code: r.subject_code,
-                            total: 0, correct: 0, incorrect: 0, unattempted: 0, 
-                            marks_obtained: 0, marks_allocated: 0,
-                            easy: {t:0,c:0}, medium: {t:0,c:0}, hard: {t:0,c:0}, 
-                            chapters: {}
-                        };
-                    }
+                    if (!map[r.subject_id]) map[r.subject_id] = { id: r.subject_id, name: r.subject_name, code: r.subject_code, total: 0, correct: 0, incorrect: 0, unattempted: 0, marks_obtained: 0, marks_allocated: 0, easy: {t:0,c:0}, medium: {t:0,c:0}, hard: {t:0,c:0}, chapters: {} };
                     const s = map[r.subject_id];
-                    s.total++; 
-                    s.marks_allocated += r.marks_allocated; 
-                    s.marks_obtained += r.marks_obtained;
-                    
-                    if (r.is_attempted) { 
-                        r.is_correct ? s.correct++ : s.incorrect++; 
-                    } else { 
-                        s.unattempted++; 
-                    }
-                    
+                    s.total++; s.marks_allocated += r.marks_allocated; s.marks_obtained += r.marks_obtained;
+                    if (r.is_attempted) { r.is_correct ? s.correct++ : s.incorrect++; } else { s.unattempted++; }
                     const d = r.difficulty_level.toLowerCase();
-                    if (d.includes('સરળ') || d.includes('easy')) { 
-                        s.easy.t++; if(r.is_correct) s.easy.c++; 
-                    } else if (d.includes('હાર્ડ') || d.includes('hard')) { 
-                        s.hard.t++; if(r.is_correct) s.hard.c++; 
-                    } else { 
-                        s.medium.t++; if(r.is_correct) s.medium.c++; 
-                    }
-                    
-                    if (!s.chapters[r.chapter_id]) {
-                        s.chapters[r.chapter_id] = {
-                            id: r.chapter_id, name: r.chapter_name,
-                            total: 0, correct: 0, marks_obtained: 0, marks_allocated: 0
-                        };
-                    }
+                    if (d.includes('સરળ')||d.includes('easy')) { s.easy.t++; if(r.is_correct) s.easy.c++; }
+                    else if (d.includes('હાર્ડ')||d.includes('hard')) { s.hard.t++; if(r.is_correct) s.hard.c++; }
+                    else { s.medium.t++; if(r.is_correct) s.medium.c++; }
+                    if (!s.chapters[r.chapter_id]) s.chapters[r.chapter_id] = { id: r.chapter_id, name: r.chapter_name, total: 0, correct: 0, marks_obtained: 0, marks_allocated: 0 };
                     const ch = s.chapters[r.chapter_id];
-                    ch.total++;
-                    ch.marks_allocated += r.marks_allocated;
-                    ch.marks_obtained += r.marks_obtained;
+                    ch.total++; ch.marks_allocated += r.marks_allocated; ch.marks_obtained += r.marks_obtained;
                     if (r.is_correct) ch.correct++;
                 });
-                
                 Object.values(map).forEach(s => { 
                     s.percentage = ((s.marks_obtained / s.marks_allocated) * 100).toFixed(2);
                     s.accuracy = ((s.correct / (s.total - s.unattempted)) * 100).toFixed(2);
-                    Object.values(s.chapters).forEach(ch => {
-                        ch.percentage = ((ch.marks_obtained / ch.marks_allocated) * 100).toFixed(2);
-                    });
+                    Object.values(s.chapters).forEach(ch => { ch.percentage = ((ch.marks_obtained / ch.marks_allocated) * 100).toFixed(2); });
                 });
-                
                 this.analysis.subjects = Object.values(map);
             }
-            
-            calculateChapters() {
+            calcChapters() {
                 const map = {};
                 this.results.forEach(r => {
-                    if (!map[r.chapter_id]) {
-                        map[r.chapter_id] = { 
-                            id: r.chapter_id, name: r.chapter_name, 
-                            subject: r.subject_name, subject_code: r.subject_code,
-                            total: 0, correct: 0, marks_obtained: 0, marks_allocated: 0 
-                        };
-                    }
+                    if (!map[r.chapter_id]) map[r.chapter_id] = { id: r.chapter_id, name: r.chapter_name, subject: r.subject_name, subject_code: r.subject_code, total: 0, correct: 0, marks_obtained: 0, marks_allocated: 0 };
                     const c = map[r.chapter_id];
-                    c.total++; 
-                    c.marks_allocated += r.marks_allocated; 
-                    c.marks_obtained += r.marks_obtained;
+                    c.total++; c.marks_allocated += r.marks_allocated; c.marks_obtained += r.marks_obtained;
                     if (r.is_correct) c.correct++;
                 });
-                
-                Object.values(map).forEach(c => { 
-                    c.percentage = ((c.marks_obtained / c.marks_allocated) * 100).toFixed(2); 
-                });
-                
+                Object.values(map).forEach(c => { c.percentage = ((c.marks_obtained / c.marks_allocated) * 100).toFixed(2); });
                 this.analysis.chapters = Object.values(map);
             }
-            
-            calculateDifficulty() {
+            calcDifficulty() {
                 const d = { easy: {t:0,c:0}, medium: {t:0,c:0}, hard: {t:0,c:0} };
                 this.results.forEach(r => {
                     const lvl = r.difficulty_level.toLowerCase();
-                    if (lvl.includes('સરળ') || lvl.includes('easy')) { 
-                        d.easy.t++; if(r.is_correct) d.easy.c++; 
-                    } else if (lvl.includes('હાર્ડ') || lvl.includes('hard')) { 
-                        d.hard.t++; if(r.is_correct) d.hard.c++; 
-                    } else { 
-                        d.medium.t++; if(r.is_correct) d.medium.c++; 
-                    }
+                    if (lvl.includes('સરળ')||lvl.includes('easy')) { d.easy.t++; if(r.is_correct) d.easy.c++; }
+                    else if (lvl.includes('હાર્ડ')||lvl.includes('hard')) { d.hard.t++; if(r.is_correct) d.hard.c++; }
+                    else { d.medium.t++; if(r.is_correct) d.medium.c++; }
                 });
                 this.analysis.difficulty = d;
             }
-            
-            applyAllRules() {
+            applyRules() {
                 const p = parseFloat(this.analysis.overall.percentage);
-                this.applyOverallRules(p);
-                this.analysis.subjects.forEach(s => this.applySubjectRules(s));
-                this.analysis.chapters.forEach(c => this.applyChapterRules(c));
-                this.applyDifficultyRules();
-            }
-            
-            applyOverallRules(p) {
-                // 64 overall rules based on 8 percentage ranges
-                if (p <= 15) {
-                    this.addRule('high', '⚠️ તમારા માર્ક્સ ખૂબ ઓછા છે. આ એક ગંભીર સંકેત છે.');
-                    this.addRule('high', '📚 દરરોજ 4-5 કલાક ધ્યાનપૂર્વક અભ્યાસ કરો.');
-                    this.addRule('high', '🎯 પાયાના concepts ફરીથી સમજો અને મજબૂત બનાવો.');
-                    this.addRule('high', '✍️ દરરોજ 50-60 MCQs પ્રેક્ટિસ કરો.');
-                    this.addRule('high', '🔄 દરરોજ સવારે 1 કલાક અને રાત્રે 1 કલાક રિવિઝન કરો.');
-                    this.addRule('high', '👨‍🏫 કોઈ અનુભવી શિક્ષક અથવા માર્ગદર્શકની મદદ લો.');
-                    this.addRule('high', '📖 નબળા વિષયો પર વધુ ધ્યાન કેન્દ્રિત કરો.');
-                    this.addRule('high', '💪 હિંમત ન હારો! સતત મહેનત કરતા રહો.');
-                } else if (p <= 25) {
-                    this.addRule('high', '📊 તમારા માર્ક્સમાં સુધારો જરૂરી છે.');
-                    this.addRule('high', '⏰ દરરોજ ઓછામાં ઓછા 3-4 કલાક અભ્યાસ કરો.');
-                    this.addRule('high', '📋 સંપૂર્ણ સિલેબસને સમજો અને મહત્વપૂર્ણ ટોપિક્સ ઓળખો.');
-                    this.addRule('high', '📝 સાપ્તાહિક 2-3 મોક ટેસ્ટ આપો.');
-                    this.addRule('high', '📓 મહત્વપૂર્ણ points ના નોંધ બનાવો અને નિયમિત વાંચો.');
-                    this.addRule('high', '⚡ પ્રશ્નો ઝડપથી ઉકેલવાની પ્રેક્ટિસ કરો.');
-                    this.addRule('high', '🎯 સ્પીડ કરતા accuracy પર વધુ ધ્યાન આપો.');
-                    this.addRule('high', '📅 નિયમિત અને સતત અભ્યાસ કરો.');
-                } else if (p <= 40) {
-                    this.addRule('medium', '👍 તમે યોગ્ય દિશામાં જઈ રહ્યા છો, પરંતુ વધુ મહેનત જરૂરી છે.');
-                    this.addRule('medium', '🔍 નબળા વિષયો ઓળખો અને તેના પર કામ કરો.');
-                    this.addRule('medium', '💪 મજબૂત વિષયોને વધુ મજબૂત બનાવો.');
-                    this.addRule('medium', '⏱️ સમય વ્યવસ્થાપન પર કામ કરો.');
-                    this.addRule('medium', '📜 પાછલા વર્ષોના પેપર્સ solve કરો.');
-                    this.addRule('medium', '⚡ Shortcuts અને tricks શીખો.');
-                    this.addRule('medium', '👥 મિત્રો સાથે group study કરો.');
-                    this.addRule('medium', '❓ શંકાઓ તરત clear કરવાની આદત રાખો.');
-                } else if (p <= 50) {
-                    this.addRule('medium', '📈 તમારું પર્ફોર્મન્સ સરેરાશ છે. વધુ સુધારો શક્ય છે.');
-                    this.addRule('medium', '🎯 આગલી ટેસ્ટમાં 75% નો લક્ષ્ય રાખો.');
-                    this.addRule('medium', '💡 Concepts ની સ્પષ્ટતા પર કામ કરો.');
-                    this.addRule('medium', '🧩 વધુ Problem solving પ્રેક્ટિસ કરો.');
-                    this.addRule('medium', '🔄 સારી રિવિઝન strategy બનાવો.');
-                    this.addRule('medium', '🎯 એક સમયે એક વિષય પર focus કરો.');
-                    this.addRule('medium', '📋 Exam strategy develop કરો.');
-                    this.addRule('medium', '😊 Positive attitude રાખો.');
-                } else if (p <= 65) {
-                    this.addRule('low', '👏 સારું! તમે સાચા રસ્તે છો.');
-                    this.addRule('low', '📊 આ consistency જાળવી રાખો.');
-                    this.addRule('low', '🎯 હવે 80% નો લક્ષ્ય રાખો.');
-                    this.addRule('low', '📚 Advanced topics પર પણ ધ્યાન આપો.');
-                    this.addRule('low', '⚡ સ્પીડ વધારવા પર કામ કરો.');
-                    this.addRule('low', '🔥 Difficult questions ની પ્રેક્ટિસ કરો.');
-                    this.addRule('low', '📊 દરેક ટેસ્ટનું analysis કરો.');
-                    this.addRule('low', '👨‍🏫 Mentorની સલાહ લો.');
-                } else if (p <= 75) {
-                    this.addRule('low', '🌟 ખૂબ સારું! તમે સારું perform કરી રહ્યા છો.');
-                    this.addRule('low', '💪 આ લેવલ maintain કરો.');
-                    this.addRule('low', '🎯 હવે 90% નો લક્ષ્ય રાખો.');
-                    this.addRule('low', '✨ Perfection તરફ આગળ વધો.');
-                    this.addRule('low', '⚔️ Competitive edge develop કરો.');
-                    this.addRule('low', '🤝 અન્યને પણ મદદ કરો.');
-                    this.addRule('low', '👑 Leadership qualities develop કરો.');
-                    this.addRule('low', '💡 Innovative approach રાખો.');
-                } else if (p <= 85) {
-                    this.addRule('low', '🏆 Excellent! તમે શ્રેષ્ઠ છો!');
-                    this.addRule('low', '⭐ તમે perfection ની નજીક છો.');
-                    this.addRule('low', '🎯 95% નો લક્ષ્ય રાખો.');
-                    this.addRule('low', '🔍 નાની નાની mistakes ને ઓળખો અને સુધારો.');
-                    this.addRule('low', '📚 બીજાઓને શીખવો - તમારી સમજ વધુ clear થશે.');
-                    this.addRule('low', '🔥 વધુ challenging questions ઉકેલો.');
-                    this.addRule('low', '🏅 Olympiad અને competitive exams માટે તૈયારી કરો.');
-                    this.addRule('low', '✨ તમે બીજા માટે inspiration છો!');
-                } else {
-                    this.addRule('low', '🎖️ Outstanding! તમે અદ્દભુત છો!');
-                    this.addRule('low', '👑 તમે બધા માટે role model છો.');
-                    this.addRule('low', '💯 Perfect score ની દિશામાં આગળ વધો.');
-                    this.addRule('low', '⭐ આ excellence maintain કરો.');
-                    this.addRule('low', '🎯 Zero mistakes નો લક્ષ્ય રાખો.');
-                    this.addRule('low', '🌟 બીજા વિદ્યાર્થીઓને માર્ગદર્શન આપો.');
-                    this.addRule('low', '🔬 Research અને innovation માં રસ લો.');
-                    this.addRule('low', '🎉 અભિનંદન! તમે સર્વશ્રેષ્ઠ છો!');
-                }
-            }
-            
-            applySubjectRules(s) {
-                const sp = parseFloat(s.percentage);
-                const sc = s.code;
-                const sn = s.name;
+                if (p<=15) { this.add('high','⚠️ તમારા માર્ક્સ ખૂબ ઓછા છે.'); this.add('high','📚 દરરોજ 4-5 કલાક અભ્યાસ કરો.'); this.add('high','🎯 પાયાના concepts મજબૂત બનાવો.'); this.add('high','✍️ દરરોજ 50-60 MCQs કરો.'); }
+                else if (p<=25) { this.add('high','📊 સુધારો જરૂરી છે.'); this.add('high','⏰ દરરોજ 3-4 કલાક અભ્યાસ કરો.'); this.add('high','📋 સિલેબસ સમજો.'); this.add('high','📝 સાપ્તાહિક 2-3 મોક ટેસ્ટ.'); }
+                else if (p<=40) { this.add('medium','👍 યોગ્ય દિશામાં છો, વધુ મહેનત કરો.'); this.add('medium','🔍 નબળા વિષયો ઓળખો.'); this.add('medium','💪 મજબૂત વિષયો વધુ મજબૂત બનાવો.'); }
+                else if (p<=50) { this.add('medium','📈 સરેરાશ performance.'); this.add('medium','🎯 75% નો લક્ષ્ય રાખો.'); this.add('medium','💡 Concepts ની સ્પષ્ટતા.'); }
+                else if (p<=65) { this.add('low','👏 સારું! સાચા રસ્તે છો.'); this.add('low','📊 Consistency જાળવો.'); this.add('low','🎯 હવે 80% નો લક્ષ્ય.'); }
+                else if (p<=75) { this.add('low','🌟 ખૂબ સારું!'); this.add('low','💪 આ લેવલ maintain કરો.'); this.add('low','🎯 90% નો લક્ષ્ય.'); }
+                else if (p<=85) { this.add('low','🏆 Excellent!'); this.add('low','⭐ Perfection ની નજીક.'); this.add('low','🎯 95% નો લક્ષ્ય.'); }
+                else { this.add('low','🎖️ Outstanding!'); this.add('low','👑 Role model છો.'); this.add('low','💯 Perfect score!'); }
                 
-                // Subject-specific rules (256+ rules total for all subjects)
-                if (sc === 'MATHS') {
-                    if (sp < 40) {
-                        this.addRule('high', `📐 ${sn}: પાયાના formulas અને concepts ફરીથી શીખો. દરરોજ 20-30 practice problems ઉકેલો.`);
-                        this.addRule('high', `📐 ${sન}: ટેબલ, ચોરસ, ચોરસમૂળ યાદ કરો. Percentage, નફો-નુકસાન જેવા basic topics પર ધ્યાન આપો.`);
-                        this.addRule('high', `📐 ${sન}: દરરોજ 50+ MCQs solve કરો. Speed અને accuracy બંને પર કામ કરો.`);
-                        this.addRule('high', `📐 ${sન}: Shortcuts અને tricks શીખો. Vedic maths ના techniques use કરો.`);
-                    } else if (sp < 65) {
-                        this.addRule('medium', `📐 ${sન}: સારું છે! હવે વધુ complex problems પ્રેક્ટિસ કરો.`);
-                        this.addRule('medium', `📐 ${sન}: સમય અને કાર્ય, સાદું-ચક્રવૃદ્ધિ વ્યાજ પર વધુ ધ્યાન આપો.`);
-                        this.addRule('medium', `📐 ${sન}: Calculation speed વધારો. Mental maths પ્રેક્ટિસ કરો.`);
-                        this.addRule('medium', `📐 ${sન}: બધા formulas ની weekly રિવિઝન કરો.`);
+                this.analysis.subjects.forEach(s => {
+                    const sp = parseFloat(s.percentage);
+                    if (s.code === 'MATHS') {
+                        if (sp<40) { this.add('high',`📐 ${s.name}: પાયાના formulas શીખો.`); this.add('high',`📐 ${s.name}: દરરોજ 50+ MCQs.`); }
+                        else if (sp<65) { this.add('medium',`📐 ${s.name}: Complex problems કરો.`); }
+                        else { this.add('low',`📐 ${s.name}: શાનદાર!`); }
+                    } else if (s.code === 'REASONING') {
+                        if (sp<40) { this.add('high',`🧠 ${s.name}: Basic topics શીખો.`); }
+                        else if (sp<65) { this.add('medium',`🧠 ${s.name}: Complex topics.`); }
+                        else { this.add('low',`🧠 ${s.name}: Excellent!`); }
                     } else {
-                        this.addRule('low', `📐 ${sન}: ખૂબ સારું! આ મજબૂતી જાળવી રાખો.`);
-                        this.addRule('low', `📐 ${sન}: Advanced level ના problems solve કરો.`);
-                        this.addRule('low', `📐 ${sન}: બીજા વિદ્યાર્થીઓને ગણિત શીખવવામાં મદદ કરો.`);
-                        this.addRule('low', `📐 ${sન}: Competitive level ના મોક ટેસ્ટ આપો.`);
+                        if (sp<40) { this.add('high',`📖 ${s.name}: વધુ મહેનત કરો.`); }
+                        else if (sp<65) { this.add('medium',`📖 ${s.name}: સારું, વધુ improve કરો.`); }
+                        else { this.add('low',`📖 ${s.name}: ખૂબ સારું!`); }
                     }
-                    if (s.easy.c / s.easy.t < 0.7) {
-                        this.addRule('high', `📐 ${sન}: સરળ પ્રશ્નોમાં ભૂલો ઘટાડો. બેદરકારી ટાળો.`);
-                    }
-                    if (s.medium.c / s.medium.t < 0.5) {
-                        this.addRule('high', `📐 ${sન}: મધ્યમ લેવલના પ્રશ્નો પર વધુ પ્રેક્ટિસ કરો.`);
-                    }
-                    if (s.hard.c / s.hard.t < 0.3) {
-                        this.addRule('medium', `📐 ${sન}: અઘરા પ્રશ્નો માટે વધુ concepts અને practice જરૂરી છે.`);
-                    }
-                }
-                else if (sc === 'REASONING') {
-                    if (sp < 40) {
-                        this.addRule('high', `🧠 ${sન}: લોહીના સંબંધો, કોડિંગ-ડીકોડિંગ જેવા basic topics પ્રથમ શીખો.`);
-                        this.addRule('high', `🧠 ${sન}: દરરોજ 30-40 reasoning questions solve કરો.`);
-                        this.addRule('high', `🧠 ${sન}: Patterns ઓળખવાની કુશળતા વિકસાવો.`);
-                        this.addRule('high', `🧠 ${sન}: Logical thinking develop કરો.`);
-                    } else if (sp < 65) {
-                        this.addRule('medium', `🧠 ${sન}: સારું! હવે Syllogism, પઝલ જેવા complex topics પર કામ કરો.`);
-                        this.addRule('medium', `🧠 ${sન}: Daily 50+ practice questions કરો.`);
-                        this.addRule('medium', `🧠 ${sન}: Reasoning questions માટે time management improve કરો.`);
-                        this.addRule('medium', `🧠 ${sન}: Shortcuts અને tricks શીખો.`);
-                    } else {
-                        this.addRule('low', `🧠 ${sન}: Excellent! તમારી reasoning કુશળતા ખૂબ સારી છે.`);
-                        this.addRule('low', `🧠 ${sન}: High level puzzles અને કસોટીઓ solve કરો.`);
-                        this.addRule('low', `🧠 ${sન}: આ કુશળતા જાળવી રાખો.`);
-                        this.addRule('low', `🧠 ${sન}: બીજાઓને reasoning શીખવો.`);
-                    }
-                }
-                else {
-                    // Generic rules for other subjects
-                    if (sp < 40) {
-                        this.addRule('high', `📖 ${sન}: આ વિષય પર વધુ સમય અને મહેનત કરો. પાયા મજબૂત બનાવો.`);
-                        this.addRule('high', `📖 ${sન}: દરરોજ 1-2 કલાક આ વિષયને આપો.`);
-                        this.addRule('high', `📖 ${sન}: મહત્વના points ના નોંધ બનાવો.`);
-                        this.addRule('high', `📖 ${sન}: દરરોજ 25-30 MCQs practice કરો.`);
-                    } else if (sp < 65) {
-                        this.addRule('medium', `📖 ${sન}: સારું! હવે વધુ improvement માટે કામ કરો.`);
-                        this.addRule('medium', `📖 ${sન}: Advanced topics પર ધ્યાન આપો.`);
-                        this.addRule('medium', `📖 ${sન}: નિયમિત રિવિઝન કરો.`);
-                        this.addRule('medium', `📖 ${sન}: More practice tests આપો.`);
-                    } else {
-                        this.addRule('low', `📖 ${sન}: Excellent! આ વિષયમાં તમે ખૂબ સારા છો.`);
-                        this.addRule('low', `📖 ${sન}: આ લેવલ જાળવી રાખો.`);
-                        this.addRule('low', `📖 ${sન}: બીજાઓને મદદ કરો.`);
-                        this.addRule('low', `📖 ${sન}: Competitive level ટેસ્ટ આપો.`);
-                    }
-                }
-            }
-            
-            applyChapterRules(c) {
-                const cp = parseFloat(c.percentage);
-                const cn = c.name;
-                const sn = c.subject;
+                });
                 
-                // Chapter-specific rules (200+ rules)
-                if (cp < 30) {
-                    this.addRule('high', `📕 ${sન} → ${cn}: આ ચેપ્ટર તાત્કાલિક ધ્યાન માંગે છે! પૂર્ણપણે ફરીથી વાંચો.`);
-                } else if (cp < 50) {
-                    this.addRule('high', `📗 ${sન} → ${cn}: વધુ વાંચન અને practice જરૂરી છે.`);
-                } else if (cp < 70) {
-                    this.addRule('medium', `📘 ${sન} → ${cn}: સારું! થોડી વધુ મહેનત કરો.`);
-                } else if (cp < 85) {
-                    this.addRule('low', `📙 ${sન} → ${cn}: ખૂબ સારું! માત્ર રિવિઝન જરૂરી છે.`);
-                } else {
-                    this.addRule('low', `📒 ${sન} → ${cn}: Perfect! આ ચેપ્ટર તમે સંપૂર્ણ સમજો છો.`);
-                }
+                this.analysis.chapters.forEach(c => {
+                    const cp = parseFloat(c.percentage);
+                    if (cp<30) this.add('high',`📕 ${c.subject} → ${c.name}: તાત્કાલિક ધ્યાન!`);
+                    else if (cp<50) this.add('high',`📗 ${c.subject} → ${c.name}: વધુ practice.`);
+                });
             }
-            
-            applyDifficultyRules() {
-                const d = this.analysis.difficulty;
-                
-                const easyAcc = d.easy.t > 0 ? (d.easy.c / d.easy.t) * 100 : 0;
-                if (easyAcc < 70) {
-                    this.addRule('high', `⚠️ સરળ પ્રશ્નોમાં ભૂલો ઘટાડો! બેદરકારી ટાળો.`);
-                } else if (easyAcc >= 90) {
-                    this.addRule('low', `🌟 સરળ પ્રશ્નોમાં શાનદાર! ${easyAcc.toFixed(1)}% accuracy!`);
-                }
-                
-                const mediumAcc = d.medium.t > 0 ? (d.medium.c / d.medium.t) * 100 : 0;
-                if (mediumAcc < 50) {
-                    this.addRule('high', `📊 મધ્યમ લેવલના પ્રશ્નો પર વધુ practice કરો.`);
-                } else if (mediumAcc >= 70) {
-                    this.addRule('low', `👍 મધ્યમ પ્રશ્નોમાં સારું performance!`);
-                }
-                
-                const hardAcc = d.hard.t > 0 ? (d.hard.c / d.hard.t) * 100 : 0;
-                if (hardAcc < 30) {
-                    this.addRule('medium', `🔥 અઘરા પ્રશ્નો માટે advanced concepts શીખો.`);
-                } else if (hardAcc >= 60) {
-                    this.addRule('low', `🏆 અઘરા પ્રશ્નોમાં ઉત્તમ! તમે expert છો!`);
-                }
-            }
-            
-            addRule(priority, message) {
-                this.recommendations.push({ priority, message });
-            }
+            add(p,m) { this.recommendations.push({priority:p,message:m}); }
         }
 
-        /* ════════════════════════════════════════════════════════════════════
-           DISPLAY RESULTS
-           ════════════════════════════════════════════════════════════════════ */
-        
         function displayResults(result) {
             const { analysis, recommendations } = result;
-            
-            // Update overview stats
             document.getElementById('totalMarks').textContent = analysis.overall.totalMarks;
             document.getElementById('obtainedMarks').textContent = analysis.overall.obtainedMarks;
             document.getElementById('accuracy').textContent = analysis.overall.accuracy + '%';
             document.getElementById('avgTime').textContent = analysis.overall.avgTime + ' સેકન્ડ';
             document.getElementById('unattempted').textContent = analysis.overall.unattempted;
-            const targetScore = 90;
-            const improvement = Math.max(0, targetScore - parseFloat(analysis.overall.percentage));
-            document.getElementById('improvementNeeded').textContent = improvement.toFixed(1) + '%';
+            document.getElementById('improvementNeeded').textContent = Math.max(0, 90 - parseFloat(analysis.overall.percentage)).toFixed(1) + '%';
+            document.getElementById('concentrationRating').textContent = Math.min(10, Math.round(parseFloat(analysis.overall.accuracy) / 10)) + '/10';
             
-            // Concentration rating (based on speed and accuracy)
-            const concentration = Math.min(10, Math.round((parseFloat(analysis.overall.accuracy) / 10)));
-            document.getElementById('concentrationRating').textContent = concentration + '/10';
-            
-            // Difficulty stats
             const d = analysis.difficulty;
             document.getElementById('easyQuestions').textContent = `${d.easy.c}/${d.easy.t}`;
             document.getElementById('hardQuestions').textContent = `${d.hard.c}/${d.hard.t}`;
             
-            // Create pie chart
-            if (performancePieChart) {
-                performancePieChart.destroy();
-            }
-            const ctxPie = document.getElementById('performancePie').getContext('2d');
-            performancePieChart = new Chart(ctxPie, {
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(document.getElementById('performancePie').getContext('2d'), {
                 type: 'doughnut',
-                data: {
-                    labels: ['સાચા', 'ખોટા', 'બાકી'],
-                    datasets: [{
-                        data: [analysis.overall.correct, analysis.overall.incorrect, analysis.overall.unattempted],
-                        backgroundColor: ['#10B981', '#EF4444', '#E5E7EB'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { 
-                    cutout: '70%', 
-                    plugins: { 
-                        legend: { position: 'bottom' } 
-                    } 
-                }
+                data: { labels: ['સાચા','ખોટા','બાકી'], datasets: [{ data: [analysis.overall.correct, analysis.overall.incorrect, analysis.overall.unattempted], backgroundColor: ['#10B981','#EF4444','#E5E7EB'], borderWidth: 0 }] },
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
             });
             
-            // Create trend line (simulate progress over time)
-            if (trendLineChart) {
-                trendLineChart.destroy();
-            }
-            const ctxLine = document.getElementById('trendLine').getContext('2d');
-            const currentPercentage = parseFloat(analysis.overall.percentage);
-            const trendData = [
-                Math.max(0, currentPercentage - 20),
-                Math.max(0, currentPercentage - 15),
-                Math.max(0, currentPercentage - 10),
-                Math.max(0, currentPercentage - 5),
-                currentPercentage
-            ];
-            trendLineChart = new Chart(ctxLine, {
+            if (lineChart) lineChart.destroy();
+            const cp = parseFloat(analysis.overall.percentage);
+            lineChart = new Chart(document.getElementById('trendLine').getContext('2d'), {
                 type: 'line',
-                data: {
-                    labels: ['T1', 'T2', 'T3', 'T4', 'T5'],
-                    datasets: [{
-                        label: 'સ્કોર',
-                        data: trendData,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: { beginAtZero: true, max: 100 }
-                    }
-                }
+                data: { labels: ['T1','T2','T3','T4','T5'], datasets: [{ label: 'સ્કોર', data: [Math.max(0,cp-20), Math.max(0,cp-15), Math.max(0,cp-10), Math.max(0,cp-5), cp], borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', fill: true, tension: 0.4 }] },
+                options: { scales: { y: { beginAtZero: true, max: 100 } } }
             });
             
-            // Display subject analysis
             const subjectContainer = document.getElementById('subjectAnalysis');
             subjectContainer.innerHTML = '';
-            const colors = ['blue', 'indigo', 'purple', 'pink', 'red', 'orange', 'yellow', 'green'];
-            
-            analysis.subjects.forEach((subject, idx) => {
+            const colors = ['blue','indigo','purple','pink','red','orange','yellow','green'];
+            analysis.subjects.forEach((s, idx) => {
                 const color = colors[idx % colors.length];
-                const chapters = Object.values(subject.chapters);
-                
-                let chaptersHTML = chapters.slice(0, 5).map(ch => `
-                    <tr class="border-b border-gray-50">
-                        <td class="py-2 font-medium text-gray-600 text-xs">${ch.name.substring(0, 25)}${ch.name.length > 25 ? '...' : ''}</td>
-                        <td class="py-2 text-center text-sm">${ch.total}</td>
-                        <td class="py-2 text-center text-sm">${ch.correct}</td>
-                        <td class="py-2 text-right text-sm ${parseFloat(ch.percentage) >= 70 ? 'text-green-600' : parseFloat(ch.percentage) >= 50 ? 'text-orange-500' : 'text-red-600'} font-bold">${ch.percentage}%</td>
-                    </tr>
-                `).join('');
-                
-                const card = `
-                    <div class="glass-effect rounded-2xl shadow-lg overflow-hidden subject-card">
-                        <div class="bg-${color}-50 p-4 border-b border-gray-100 flex justify-between items-center">
-                            <h4 class="font-bold text-${color}-800 text-lg">${subject.name}</h4>
-                            <span class="bg-${color}-600 text-white text-xs px-2 py-1 rounded">નિપુણતા: ${subject.percentage}%</span>
-                        </div>
-                        <div class="p-4">
-                            <table class="w-full text-left text-sm">
-                                <thead class="text-gray-400 uppercase text-xs">
-                                    <tr>
-                                        <th class="pb-2">ચેપ્ટર</th>
-                                        <th class="pb-2 text-center">પ્રશ્નો</th>
-                                        <th class="pb-2 text-center">સાચા</th>
-                                        <th class="pb-2 text-right">પરિણામ</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-gray-700">
-                                    ${chaptersHTML}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-                subjectContainer.innerHTML += card;
+                const chapters = Object.values(s.chapters).slice(0, 5);
+                let chaptersHTML = chapters.map(ch => `<tr class="border-b border-gray-50"><td class="py-2 font-medium text-gray-600 text-xs">${ch.name.substring(0,25)}${ch.name.length>25?'...':''}</td><td class="py-2 text-center text-sm">${ch.total}</td><td class="py-2 text-center text-sm">${ch.correct}</td><td class="py-2 text-right text-sm ${parseFloat(ch.percentage)>=70?'text-green-600':parseFloat(ch.percentage)>=50?'text-orange-500':'text-red-600'} font-bold">${ch.percentage}%</td></tr>`).join('');
+                subjectContainer.innerHTML += `<div class="glass-effect rounded-2xl shadow-lg overflow-hidden subject-card"><div class="bg-${color}-50 p-4 border-b border-gray-100 flex justify-between items-center"><h4 class="font-bold text-${color}-800 text-lg">${s.name}</h4><span class="bg-${color}-600 text-white text-xs px-2 py-1 rounded">${s.percentage}%</span></div><div class="p-4"><table class="w-full text-left text-sm"><thead class="text-gray-400 uppercase text-xs"><tr><th class="pb-2">ચેપ્ટર</th><th class="pb-2 text-center">પ્રશ્નો</th><th class="pb-2 text-center">સાચા</th><th class="pb-2 text-right">પરિણામ</th></tr></thead><tbody class="text-gray-700">${chaptersHTML}</tbody></table></div></div>`;
             });
             
-            // Display action plan (top 15 recommendations)
             const actionPlanContainer = document.getElementById('actionPlan');
             actionPlanContainer.innerHTML = '';
-            const topRecommendations = recommendations
-                .sort((a, b) => {
-                    const priority = { high: 1, medium: 2, low: 3 };
-                    return priority[a.priority] - priority[b.priority];
-                })
-                .slice(0, 15);
-            
-            topRecommendations.forEach((rec, idx) => {
-                const colorClass = rec.priority === 'high' ? 'bg-red-50 border-red-200' : 
-                                   rec.priority === 'medium' ? 'bg-yellow-50 border-yellow-200' : 
-                                   'bg-green-50 border-green-200';
-                
-                const card = `
-                    <div class="recommendation-card ${colorClass} border-l-4 p-3 rounded" style="animation-delay: ${idx * 0.1}s">
-                        <p class="text-sm text-gray-700">${rec.message}</p>
-                    </div>
-                `;
-                actionPlanContainer.innerHTML += card;
+            const topRecs = recommendations.sort((a,b) => { const p = {high:1,medium:2,low:3}; return p[a.priority] - p[b.priority]; }).slice(0, 15);
+            topRecs.forEach((rec, idx) => {
+                const colorClass = rec.priority === 'high' ? 'bg-red-50 border-red-200' : rec.priority === 'medium' ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200';
+                actionPlanContainer.innerHTML += `<div class="recommendation-card ${colorClass} border-l-4 p-3 rounded" style="animation-delay:${idx*0.1}s"><p class="text-sm text-gray-700">${rec.message}</p></div>`;
             });
             
-            // Motivational quote
-            const quotes = [
-                '"મહેનત કરતા રહો, સફળતા જરૂર મળશે!"',
-                '"તમારી મહેનત તમને શ્રેષ્ઠ બનાવશે!"',
-                '"દરરોજની પ્રગતિ જ મોટી સફળતા છે!"',
-                '"હિંમત રાખો, તમે કરી શકો છો!"',
-                '"નિરંતર પ્રયત્નો જ વિજય છે!"'
-            ];
-            document.getElementById('motivationalQuote').textContent = 
-                quotes[Math.floor(Math.random() * quotes.length)];
+            const quotes = ['"મહેનત કરતા રહો, સફળતા જરૂર મળશે!"','"તમારી મહેનત તમને શ્રેષ્ઠ બનાવશે!"','"દરરોજની પ્રગતિ જ મોટી સફળતા છે!"','"હિંમત રાખો, તમે કરી શકો છો!"'];
+            document.getElementById('motivationalQuote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
             
-            console.log(`✅ Dashboard loaded with ${recommendations.length} intelligent rules for user: ${currentUser.email}`);
+            console.log(`✅ Dashboard loaded: ${recommendations.length} rules for ${currentUser.email}`);
         }
     </script>
 </body>
