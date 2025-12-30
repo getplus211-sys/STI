@@ -89,8 +89,8 @@ body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
 .level-range{font-size:12px;color:#64748b}
 @media (max-width:600px){
 .charts-grid{grid-template-columns:1fr}
-.stats-grid{grid-template-columns:1fr}
-.subjects-grid{grid-template-columns:1fr}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.subjects-grid{grid-template-columns:repeat(2,1fr)}
 .student-header{flex-direction:column;text-align:center}
 body{padding-top:70px}
 .page-title{font-size:14px}
@@ -100,7 +100,11 @@ body{padding-top:70px}
 .student-name{font-size:22px}
 .student-meta{justify-content:center}
 .subject-bottom{flex-direction:column}
-.subject-per{font-size:18px}
+.subject-per{font-size:16px}
+.subject-name{font-size:13px}
+.view-btn{font-size:11px;padding:5px 10px}
+.stat-label{font-size:11px}
+.stat-value{font-size:22px}
 }
 </style>
 </head>
@@ -138,7 +142,7 @@ function hideModal() {
 function showChartInfo(type) {
   const messages = {
     overall: 'આ chart તમારા બધા tests નો combined પરિણામ બતાવે છે - સાચા, ખોટા અને બાકી પ્રશ્નો.',
-    subjects: 'આ chart બતાવે છે કે તમારા overall performance માંથી દરેક વિષય કેટલો ટકો છે. તમે કયા વિષય માં વધુ સમય ખર્ચ્યો છે તે જોઈ શકો છો.'
+    subjects: 'આ ચાર્ટ બતાવે છે કે તમારા overall performance માંથી કયા વિષય કેટલા ટકા છે. તમને જે આવડે છે એમાંથી કયો વિષય તમને વધારે આવડે છે.'
   };
   
   document.getElementById('modalIcon').innerText = 'ℹ️';
@@ -285,6 +289,25 @@ function getPercentageColor(per) {
   return 'per-poor';
 }
 
+function getSubjectCode(name) {
+  const subjectMap = {
+    'ગણિત': 'MATHS',
+    'રિઝનિંગ': 'REASONING',
+    'ભારતનું બંધારણ': 'CONSTITUTION',
+    'ભારતનો ઇતિહાસ': 'INDIAN_HISTORY',
+    'ગુજરાતનો ઇતિહાસ': 'GUJARAT_HISTORY',
+    'ભારતનો વારસો': 'INDIAN_CULTURE',
+    'ગુજરાતનો વારસો': 'GUJARAT_CULTURE',
+    'ગુજરાતી વ્યાકરણ': 'GUJARATI_GRAMMAR',
+    'ભારતની ભૂગોળ': 'INDIAN_GEOGRAPHY',
+    'ગુજરાતની ભૂગોળ': 'GUJARAT_GEOGRAPHY',
+    'ભારતનું અર્થતંત્ર': 'INDIAN_ECONOMY',
+    'સામાન્ય વિજ્ઞાન અને ટેક્નોલોજી': 'SCIENCE_TECH',
+    'અંગ્રેજી વ્યાકરણ': 'ENGLISH_GRAMMAR'
+  };
+  return subjectMap[name] || 'GENERAL';
+}
+
 function calculateOverallData() {
   let totalQuestions = 0, totalCorrect = 0, totalWrong = 0, totalSkipped = 0, totalTime = 0;
   
@@ -388,34 +411,120 @@ function displayOverallPerformance() {
     `;
   });
 
-  // Generate recommendations
+  // Generate recommendations with study time and dynamic subject advice
   let recCards = '';
+  
+  // Study Time Recommendation based on overall performance
+  if (overallData.overallPercentage < 85) {
+    const studyHours = overallData.overallPercentage < 50 ? '12-14' : 
+                       overallData.overallPercentage < 70 ? '10-12' : '8-10';
+    recCards += `
+    <div class="rec-card">
+      <div class="rec-title">📚 દૈનિક અભ્યાસ સમય ભલામણ</div>
+      <ul class="rec-list">
+        <li>દરરોજ ઓછામાં ઓછા ${studyHours} કલાક અભ્યાસ કરો</li>
+        <li>સવારે 4-5 કલાક, બપોરે 3-4 કલાક અને સાંજે 3-4 કલાક</li>
+        <li>દર 1.5-2 કલાકે 15 મિનિટ નો break લો</li>
+        <li>શાંત વાતાવરણમાં focused study કરો</li>
+      </ul>
+    </div>`;
+  }
+  
+  // Subject-wise recommendations with specific advice
+  const subjectAdvice = {
+    'MATHS': {
+      weak: ['દરરોજ 50-60 પ્રશ્નો practice કરો', 'બેસિક arithmetic અને tables મજબૂત કરો', 'Shortcuts અને formulas યાદ કરો', 'Previous year ના પ્રશ્નો વારંવાર ઉકેલો'],
+      average: ['મુશ્કેલ સવાલો પર વધુ પ્રેક્ટિસ કરો', 'Speed અને accuracy બંને પર કામ કરો', 'Mock tests નિયમિત લો', 'Time management સુધારો']
+    },
+    'REASONING': {
+      weak: ['દરરોજ વિવિધ પ્રકારના પ્રશ્નો practice કરો', 'Patterns અને sequences સમજો', 'Logical thinking develop કરો', 'Puzzles અને brain teasers ઉકેલો'],
+      average: ['જટિલ reasoning પર ધ્યાન આપો', 'Different question types માં expertise મેળવો', 'Speed વધારવા માટે shortcuts શીખો']
+    },
+    'CONSTITUTION': {
+      weak: ['મુખ્ય articles અને amendments યાદ કરો', 'દરરોજ 5-10 articles વાંચો અને નોંધો બનાવો', 'Constitutional provisions સમજો', 'Current affairs સાથે link કરો'],
+      average: ['Deep understanding માટે વધુ વાંચન કરો', 'Case studies અને examples સાથે શીખો', 'Mock tests આપો']
+    },
+    'INDIAN_HISTORY': {
+      weak: ['Timeline આધારિત અભ્યાસ કરો', 'મહત્વના events અને dates યાદ કરો', 'દરરોજ એક period નો અભ્યાસ કરો', 'Maps અને diagrams નો ઉપયોગ કરો'],
+      average: ['In-depth study કરો major events નો', 'Connections બનાવો events વચ્ચે', 'Multiple sources વાંચો']
+    },
+    'GUJARAT_HISTORY': {
+      weak: ['ગુજરાતના મુખ્ય શાસકો અને events યાદ કરો', 'Timeline બનાવો અને daily review કરો', 'Local history સાથે connect કરો'],
+      average: ['Detailed study કરો important periods નો', 'Cultural aspects પર પણ ધ્યાન આપો']
+    },
+    'INDIAN_CULTURE': {
+      weak: ['Major festivals, traditions અને customs યાદ કરો', 'Art forms અને architecture વિશે વાંચો', 'Visual learning નો ઉપયોગ કરો'],
+      average: ['Regional variations સમજો', 'Historical context સાથે શીખો']
+    },
+    'GUJARAT_CULTURE': {
+      weak: ['ગુજરાતની પરંપરાઓ અને તહેવારો યાદ કરો', 'Folk arts અને crafts વિશે જાણો', 'Local cultural events માં interest લો'],
+      average: ['Detailed knowledge મેળવો various aspects નો', 'Comparative study કરો']
+    },
+    'GUJARATI_GRAMMAR': {
+      weak: ['દરરોજ 30 મિનિટ grammar practice કરો', 'Rules સમજો અને examples બનાવો', 'Reading comprehension પર કામ કરો', 'Writing practice વધારો'],
+      average: ['Advanced grammar topics પર ધ્યાન આપો', 'Error correction exercises કરો']
+    },
+    'INDIAN_GEOGRAPHY': {
+      weak: ['Maps દરરોજ practice કરો', 'Physical અને political features યાદ કરો', 'States, capitals, rivers યાદ કરો', 'Climate zones સમજો'],
+      average: ['Economic geography પર ધ્યાન આપો', 'Current geographical issues સાથે link કરો']
+    },
+    'GUJARAT_GEOGRAPHY': {
+      weak: ['ગુજરાતના districts અને cities યાદ કરો', 'Rivers, mountains map પર locate કરો', 'Climate અને vegetation સમજો'],
+      average: ['Industrial belts અને economic zones શીખો', 'Development projects વિશે update રહો']
+    },
+    'INDIAN_ECONOMY': {
+      weak: ['Basic economic concepts સમજો', 'Major sectors અને their contribution યાદ કરો', 'Budget અને policies વાંચો', 'Economic terminology શીખો'],
+      average: ['Current economic affairs પર નજર રાખો', 'Economic surveys અને reports વાંચો']
+    },
+    'SCIENCE_TECH': {
+      weak: ['દરરોજ science facts અને concepts વાંચો', 'Recent discoveries અને innovations શીખો', 'Basic physics, chemistry, biology revision કરો', 'Technology trends follow કરો'],
+      average: ['Advanced topics explore કરો', 'Scientific reasoning develop કરો']
+    },
+    'ENGLISH_GRAMMAR': {
+      weak: ['Daily 30 minutes grammar practice કરો', 'Tenses, parts of speech મજબૂત કરો', 'Reading comprehension exercises કરો', 'Vocabulary building કરો'],
+      average: ['Advanced grammar અને usage શીખો', 'Error spotting practice કરો']
+    }
+  };
+  
   Object.entries(overallData.subjectMap).forEach(([subjId, subjData]) => {
     const subjPer = ((subjData.correct / subjData.total) * 100);
+    const subjectCode = getSubjectCode(subjData.name);
+    const advice = subjectAdvice[subjectCode] || { weak: ['નિયમિત અભ્યાસ અને practice કરો'], average: ['સતત સુધારો ચાલુ રાખો'] };
     
     if (subjPer < 60) {
+      const tips = advice.weak || [];
       recCards += `
       <div class="rec-card">
-        <div class="rec-title">📚 ${subjData.name} - સુધારો જરૂરી</div>
+        <div class="rec-title">🔴 ${subjData.name} - તાત્કાલિક ધ્યાન આપો</div>
         <ul class="rec-list">
-          <li>આ વિષય પર વધુ ધ્યાન આપો અને દરરોજ 3-4 કલાક અભ્યાસ કરો</li>
-          <li>બેસિક કોન્સેપ્ટ્સ મજબૂત કરો અને નિયમિત પ્રેક્ટિસ કરો</li>
-          <li>Previous years ના પ્રશ્નો ઉકેલો અને mock tests લો</li>
-          <li>શિક્ષક અથવા મિત્રોની મદદ લો જ્યાં શંકા હોય</li>
+          ${tips.map(tip => `<li>${tip}</li>`).join('')}
         </ul>
       </div>`;
     } else if (subjPer >= 60 && subjPer < 80) {
+      const tips = advice.average || [];
       recCards += `
       <div class="rec-card">
-        <div class="rec-title">🟡 ${subjData.name} - સારું પ્રદર્શન</div>
+        <div class="rec-title">🟡 ${subjData.name} - સારું પ્રદર્શન, થોડો વધુ પ્રયાસ</div>
         <ul class="rec-list">
-          <li>તમારું પ્રદર્શન સારું છે, નિયમિત રિવિઝન ચાલુ રાખો</li>
-          <li>મુશ્કેલ પ્રશ્નો પર વધુ પ્રેક્ટિસ કરો</li>
-          <li>Speed અને accuracy બંને સુધારવા પર કામ કરો</li>
+          ${tips.map(tip => `<li>${tip}</li>`).join('')}
         </ul>
       </div>`;
     }
   });
+  
+  // KAPiLa Institute Ad
+  recCards += `
+  <div class="rec-card" style="background:linear-gradient(135deg,#059669 0%,#10b981 100%)">
+    <div class="rec-title">🎓 KAPiLa Institute</div>
+    <ul class="rec-list">
+      <li>તમારી સફળતા અમારો ધ્યેય - KAPiLa Institute તમને શ્રેષ્ઠ તૈયારી પ્રદાન કરે છે</li>
+      <li>અનુભવી શિક્ષકો, comprehensive study material અને regular mock tests</li>
+      <li>Individual attention અને personalized guidance દરેક વિદ્યાર્થી માટે</li>
+      <li>આપના સપનાને સાકાર કરવા માટે અમે તૈયાર છીએ</li>
+      <li>📞 સંપર્ક કરો અને તમારી તૈયારી શરૂ કરો!</li>
+    </ul>
+  </div>`;
+  
 
   app.innerHTML = `
   <div class="sticky-header">
@@ -483,7 +592,7 @@ function displayOverallPerformance() {
     </div>
     <div class="stat-card">
       <div class="stat-label">Target Score</div>
-      <div class="stat-value ${targetClass}">${targetPer}%</div>
+      <div class="stat-value ${targetClass}">${targetPer}% (${overallData.overallPercentage}%)</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">બાકી પ્રશ્નો</div>
@@ -551,6 +660,17 @@ function displayOverallPerformance() {
             legend: {
               position: 'bottom',
               labels: { padding: 10, font: { size: 11 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return label + ': ' + percentage + '%';
+                }
+              }
             }
           }
         }
