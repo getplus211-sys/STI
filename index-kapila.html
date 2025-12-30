@@ -15,8 +15,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .brand-name{font-size:18px;font-weight:bold;color:#ea580c;line-height:1.2}
 .brand-subtitle{font-size:10px;color:#ea580c}
 .header-right{display:flex;align-items:center;gap:8px}
-.menu-btn{width:40px;height:40px;background:#f3f4f6;border-radius:8px;border:none;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
 .register-btn{background:#2563eb;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:bold;border:none;cursor:pointer}
+.menu-btn{width:40px;height:40px;background:#f3f4f6;border-radius:8px;border:none;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
 .user-name{font-size:12px;font-weight:bold;color:#1f2937}
 
 /* Sticky Footer */
@@ -37,6 +37,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .menu-header{padding:20px;background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff}
 .menu-header h3{font-size:18px;margin-bottom:4px}
 .menu-header p{font-size:12px;opacity:0.9}
+.menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:24px;width:32px;height:32px;border-radius:8px;cursor:pointer}
 .menu-items{padding:12px 0}
 .menu-item{padding:16px 20px;border-bottom:1px solid #f3f4f6;cursor:pointer;display:flex;align-items:center;gap:12px}
 .menu-item:hover{background:#f9fafb}
@@ -46,28 +47,31 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px}
 .modal.show{display:flex}
 .modal-content{background:#fff;border-radius:16px;max-width:400px;width:100%;padding:24px;max-height:80vh;overflow-y:auto}
-.modal-title{font-size:20px;font-weight:bold;margin-bottom:16px;text-align:center}
+.modal-header{display:flex;align-items:center;margin-bottom:20px}
+.modal-logo{width:50px;height:50px;background:linear-gradient(135deg,#ea580c,#dc2626);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-right:12px}
+.modal-title-wrap{flex:1}
+.modal-brand{font-size:18px;font-weight:bold;color:#ea580c}
+.modal-subtitle{font-size:11px;color:#6b7280}
 .form-group{margin-bottom:16px}
 .form-label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151}
 .form-input{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
 .btn-primary{width:100%;background:#2563eb;color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:bold;border:none;cursor:pointer}
+.btn-primary:hover{background:#1d4ed8}
 .btn-secondary{width:100%;background:#f3f4f6;color:#1f2937;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:8px}
 .tabs{display:flex;border-bottom:2px solid #e5e7eb;margin-bottom:20px}
 .tab{flex:1;padding:12px;text-align:center;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
 .tab.active{color:#2563eb;border-bottom-color:#2563eb}
 .tab-content{display:none}
 .tab-content.active{display:block}
-
-/* Notification Popup */
-.notification-popup{position:fixed;top:70px;right:16px;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);max-width:300px;z-index:2500;padding:16px;display:none}
-.notification-popup.show{display:block;animation:slideIn 0.3s}
-@keyframes slideIn{from{transform:translateX(320px)}to{transform:translateX(0)}}
-.notification-item{padding:12px;border-bottom:1px solid #f3f4f6;cursor:pointer}
-.notification-item:last-child{border-bottom:none}
-.notification-item:hover{background:#f9fafb}
-.notification-title{font-size:13px;font-weight:bold;margin-bottom:4px}
-.notification-text{font-size:11px;color:#6b7280}
-.no-notifications{text-align:center;color:#9ca3af;font-size:13px;padding:20px}
+.success-popup{background:#fff;border-radius:16px;padding:30px;text-align:center;max-width:350px}
+.success-icon{font-size:60px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:bold;margin-bottom:8px}
+.success-text{font-size:14px;color:#6b7280;margin-bottom:20px}
+.contact-info{background:#f9fafb;padding:12px;border-radius:8px;margin:8px 0;display:flex;align-items:center;gap:12px}
+.contact-icon{font-size:24px}
+.contact-details{flex:1;text-align:left}
+.contact-label{font-size:11px;color:#6b7280}
+.contact-value{font-size:14px;font-weight:600;color:#1f2937}
 </style>
 </head>
 <body>
@@ -79,8 +83,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
     <div class="brand-subtitle">Digital Learning Platform</div>
   </div>
   <div class="header-right">
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
     <button id="registerBtn" class="register-btn" onclick="openAuthModal()">Register</button>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
     <span id="userNameDisplay" class="user-name" style="display:none"></span>
   </div>
 </header>
@@ -89,25 +93,24 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 <div class="container" id="content">
   <div style="text-align:center;padding:40px 20px;color:#6b7280">
     <h3>લોડ થઈ રહ્યું છે...</h3>
-    <p style="font-size:13px;margin-top:8px">કૃપા કરીને રાહ જુઓ</p>
   </div>
 </div>
 
 <!-- Sticky Footer -->
 <footer class="footer">
-  <button class="footer-btn active" onclick="navigate('home')">
+  <button class="footer-btn active" onclick="navigateFooter('home')">
     <span>🏠</span>
     <span class="footer-label">Home</span>
   </button>
-  <button class="footer-btn" onclick="navigate('performance')">
+  <button class="footer-btn" onclick="navigateFooter('performance')">
     <span>📊</span>
     <span class="footer-label">Performance</span>
   </button>
-  <button class="footer-btn" onclick="navigate('contact')">
+  <button class="footer-btn" onclick="navigateFooter('contact')">
     <span>📞</span>
     <span class="footer-label">Contact</span>
   </button>
-  <button class="footer-btn" onclick="toggleNotifications()">
+  <button class="footer-btn" onclick="navigateFooter('notification')">
     <span>🔔</span>
     <span class="footer-label">Notifications</span>
     <span id="notificationBadge" class="notification-badge" style="display:none">0</span>
@@ -118,27 +121,24 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
   <div class="menu-header">
-    <h3>Menu</h3>
-    <p>KAPiLa Institute</p>
+    <button class="menu-close" onclick="toggleMenu()">×</button>
+    <h3>KAPiLa Institute</h3>
+    <p>Digital Learning Platform</p>
   </div>
   <div class="menu-items">
+    <div class="menu-item" onclick="menuNavigate('about')">
+      <span class="menu-icon">ℹ️</span>
+      <span>About Us</span>
+    </div>
     <div class="menu-item" onclick="menuNavigate('home')">
       <span class="menu-icon">🏠</span>
       <span>Home</span>
     </div>
-    <div class="menu-item" onclick="menuNavigate('tests')">
-      <span class="menu-icon">📝</span>
-      <span>My Tests</span>
+    <div class="menu-item" onclick="menuNavigate('contact')">
+      <span class="menu-icon">📞</span>
+      <span>Contact Us</span>
     </div>
-    <div class="menu-item" onclick="menuNavigate('performance')">
-      <span class="menu-icon">📊</span>
-      <span>Performance</span>
-    </div>
-    <div class="menu-item" onclick="menuNavigate('profile')">
-      <span class="menu-icon">👤</span>
-      <span>Profile</span>
-    </div>
-    <div class="menu-item" onclick="handleLogout()">
+    <div class="menu-item" id="logoutMenuItem" style="display:none" onclick="handleLogout()">
       <span class="menu-icon">🚪</span>
       <span>Logout</span>
     </div>
@@ -148,7 +148,14 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 <!-- Auth Modal -->
 <div class="modal" id="authModal">
   <div class="modal-content">
-    <h2 class="modal-title">Login / Register</h2>
+    <div class="modal-header">
+      <div class="modal-logo">🎓</div>
+      <div class="modal-title-wrap">
+        <div class="modal-brand">KAPiLa Institute</div>
+        <div class="modal-subtitle">Digital Learning Platform</div>
+      </div>
+    </div>
+    
     <div class="tabs">
       <div class="tab active" onclick="switchAuthTab('login')">Login</div>
       <div class="tab" onclick="switchAuthTab('register')">Register</div>
@@ -176,12 +183,16 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
           <input type="text" class="form-input" id="registerName" required>
         </div>
         <div class="form-group">
+          <label class="form-label">Mobile Number</label>
+          <input type="tel" class="form-input" id="registerMobile" pattern="[0-9]{10}" placeholder="10 digit mobile number" required>
+        </div>
+        <div class="form-group">
           <label class="form-label">Email</label>
           <input type="email" class="form-input" id="registerEmail" required>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" class="form-input" id="registerPassword" required>
+          <input type="password" class="form-input" id="registerPassword" minlength="6" required>
         </div>
         <button type="submit" class="btn-primary">Register</button>
         <button type="button" class="btn-secondary" onclick="closeAuthModal()">Cancel</button>
@@ -190,11 +201,42 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
   </div>
 </div>
 
-<!-- Notification Popup -->
-<div class="notification-popup" id="notificationPopup">
-  <h3 style="font-size:15px;font-weight:bold;margin-bottom:12px">Notifications</h3>
-  <div id="notificationList">
-    <div class="no-notifications">કોઈ notifications નથી</div>
+<!-- Success Modal -->
+<div class="modal" id="successModal">
+  <div class="success-popup">
+    <div class="modal-header">
+      <div class="modal-logo">🎓</div>
+      <div class="modal-title-wrap">
+        <div class="modal-brand">KAPiLa Institute</div>
+        <div class="modal-subtitle">Digital Learning Platform</div>
+      </div>
+    </div>
+    <div class="success-icon" id="successIcon">✅</div>
+    <div class="success-title" id="successTitle">Success!</div>
+    <div class="success-text" id="successText">Message</div>
+    <button class="btn-primary" onclick="closeSuccessModal()">બંધ કરો</button>
+  </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="modal" id="contactModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-logo">🎓</div>
+      <div class="modal-title-wrap">
+        <div class="modal-brand">KAPiLa Institute</div>
+        <div class="modal-subtitle">Digital Learning Platform</div>
+      </div>
+    </div>
+    <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px;text-align:center">📞 Contact Us</h3>
+    <p style="text-align:center;color:#6b7280;font-size:13px;margin-bottom:20px">+91 6353511804</p>
+    <a href="https://wa.me/916353511804?text=Hello%20KAPiLa%20Institute" target="_blank" style="display:block;width:100%;background:#22c55e;color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:bold;text-decoration:none;margin-bottom:12px;font-size:14px">
+      WhatsApp
+    </a>
+    <a href="tel:+916353511804" style="display:block;width:100%;background:#2563eb;color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:bold;text-decoration:none;font-size:14px">
+      Call
+    </a>
+    <button class="btn-secondary" onclick="closeContactModal()" style="margin-top:12px">બંધ કરો</button>
   </div>
 </div>
 
@@ -205,86 +247,81 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let currentUser = null;
 
-// Load page on init
 async function init() {
-  checkAuth();
-  loadHomePage();
+  await checkAuth();
+  await loadHomePage();
 }
 
-// Check authentication
 async function checkAuth() {
   const { data: { user } } = await sb.auth.getUser();
   if (user) {
     currentUser = user;
     document.getElementById('registerBtn').style.display = 'none';
     document.getElementById('userNameDisplay').style.display = 'block';
+    document.getElementById('logoutMenuItem').style.display = 'flex';
     
-    // Load user profile
     const { data: profile } = await sb.from('profiles').select('full_name').eq('id', user.id).single();
-    document.getElementById('userNameDisplay').innerText = profile?.full_name || user.email;
+    document.getElementById('userNameDisplay').innerText = profile?.full_name || user.email.split('@')[0];
+  } else {
+    document.getElementById('registerBtn').style.display = 'block';
+    document.getElementById('userNameDisplay').style.display = 'none';
+    document.getElementById('logoutMenuItem').style.display = 'none';
   }
 }
 
-// Load home page blocks
 async function loadHomePage() {
   try {
-    const { data, error } = await sb
-      .from('home_page_blocks')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-    
+    const { data, error } = await sb.from('home_page_blocks').select('*').eq('is_active', true).order('display_order');
     if (error) throw error;
     
-    let html = '';
-    if (data && data.length > 0) {
-      data.forEach(block => {
-        html += block.block_html;
-      });
-    } else {
-      html = '<div style="text-align:center;padding:40px 20px"><h3>કોઈ content નથી</h3><p style="font-size:13px;margin-top:8px">Admin દ્વારા blocks add કરવાના છે</p></div>';
-    }
-    
-    document.getElementById('content').innerHTML = html;
+    document.getElementById('content').innerHTML = data && data.length > 0 
+      ? data.map(block => block.block_html).join('') 
+      : '<div style="text-align:center;padding:40px 20px"><h3>કોઈ content નથી</h3></div>';
   } catch (err) {
     console.error('Error:', err);
-    document.getElementById('content').innerHTML = '<div style="text-align:center;padding:40px 20px;color:#ef4444"><h3>Error</h3><p style="font-size:13px;margin-top:8px">' + err.message + '</p></div>';
+    document.getElementById('content').innerHTML = '<div style="text-align:center;padding:40px 20px;color:#ef4444"><h3>Error</h3><p>' + err.message + '</p></div>';
   }
 }
 
-// Toggle side menu
-function toggleMenu() {
-  const menu = document.getElementById('sideMenu');
-  const overlay = document.getElementById('menuOverlay');
-  menu.classList.toggle('open');
-  overlay.classList.toggle('show');
+function checkAuthAndNavigate(url) {
+  if (!currentUser) {
+    openAuthModal();
+    return;
+  }
+  window.location.href = url;
 }
 
-// Menu navigation
+function toggleMenu() {
+  document.getElementById('sideMenu').classList.toggle('open');
+  document.getElementById('menuOverlay').classList.toggle('show');
+}
+
 function menuNavigate(page) {
   toggleMenu();
-  navigate(page);
+  if (page === 'home') {
+    window.location.href = 'index-kapila.html';
+  } else if (page === 'about') {
+    alert('About Us: KAPiLa Institute - તમારી સફળતા અમારો ધ્યેય');
+  } else if (page === 'contact') {
+    showContactPopup();
+  }
 }
 
-// Footer navigation
-function navigate(page) {
+function navigateFooter(page) {
   document.querySelectorAll('.footer-btn').forEach(btn => btn.classList.remove('active'));
   event.target.closest('.footer-btn').classList.add('active');
   
-  switch(page) {
-    case 'home':
-      window.location.href = 'index.html';
-      break;
-    case 'performance':
-      window.location.href = 'overall-performance.html';
-      break;
-    case 'contact':
-      alert('Contact: +91 6353511804');
-      break;
+  if (page === 'home') {
+    window.location.href = 'index-kapila.html';
+  } else if (page === 'performance') {
+    checkAuthAndNavigate('overall-performance.html');
+  } else if (page === 'contact') {
+    showContactPopup();
+  } else if (page === 'notification') {
+    alert('Notifications: કોઈ નવા notifications નથી');
   }
 }
 
-// Auth Modal
 function openAuthModal() {
   document.getElementById('authModal').classList.add('show');
 }
@@ -296,12 +333,10 @@ function closeAuthModal() {
 function switchAuthTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  
   event.target.classList.add('active');
   document.getElementById(tab + 'Tab').classList.add('active');
 }
 
-// Login
 async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value;
@@ -310,71 +345,77 @@ async function handleLogin(e) {
   const { error } = await sb.auth.signInWithPassword({ email, password });
   
   if (error) {
-    alert('Error: ' + error.message);
+    alert('Login Error: ' + error.message);
   } else {
     closeAuthModal();
-    window.location.reload();
+    showSuccessPopup('🎉', 'Login Successful!', 'Welcome to KAPiLa Institute');
+    setTimeout(() => window.location.reload(), 2000);
   }
 }
 
-// Register
 async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById('registerName').value;
+  const mobile = document.getElementById('registerMobile').value;
   const email = document.getElementById('registerEmail').value;
   const password = document.getElementById('registerPassword').value;
   
-  const { error } = await sb.auth.signUp({ 
+  // First create auth user
+  const { data: authData, error: authError } = await sb.auth.signUp({ 
     email, 
-    password,
-    options: {
-      data: { full_name: name }
-    }
+    password
   });
   
-  if (error) {
-    alert('Error: ' + error.message);
-  } else {
-    alert('Registration successful! Please check your email.');
-    closeAuthModal();
+  if (authError) {
+    alert('Registration Error: ' + authError.message);
+    return;
   }
+  
+  // Then update profile with full_name and mobile
+  if (authData.user) {
+    const { error: profileError } = await sb
+      .from('profiles')
+      .update({ 
+        full_name: name,
+        mobile: mobile,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', authData.user.id);
+    
+    if (profileError) {
+      console.error('Profile update error:', profileError);
+    }
+  }
+  
+  closeAuthModal();
+  showSuccessPopup('✅', 'Registration Successful!', 'Welcome to KAPiLa Institute! Please check your email.');
 }
 
-// Logout
 async function handleLogout() {
   await sb.auth.signOut();
-  window.location.reload();
+  showSuccessPopup('👋', 'Logout Successful!', 'આપનો આભાર! ફરી મળીશું.');
+  setTimeout(() => window.location.reload(), 2000);
 }
 
-// Notifications
-function toggleNotifications() {
-  const popup = document.getElementById('notificationPopup');
-  popup.classList.toggle('show');
-  
-  // Load notifications (you can add database query here)
-  loadNotifications();
+function showSuccessPopup(icon, title, text) {
+  document.getElementById('successIcon').innerText = icon;
+  document.getElementById('successTitle').innerText = title;
+  document.getElementById('successText').innerText = text;
+  document.getElementById('successModal').classList.add('show');
 }
 
-function loadNotifications() {
-  // Example notification
-  const list = document.getElementById('notificationList');
-  list.innerHTML = `
-    <div class="notification-item">
-      <div class="notification-title">🎉 New Test Available</div>
-      <div class="notification-text">LRD Mock Test 5 હવે available છે</div>
-    </div>
-    <div class="notification-item">
-      <div class="notification-title">📊 Performance Updated</div>
-      <div class="notification-text">તમારા છેલ્લા test નું result ready છે</div>
-    </div>
-  `;
-  
-  // Update badge
-  document.getElementById('notificationBadge').style.display = 'block';
-  document.getElementById('notificationBadge').innerText = '2';
+function closeSuccessModal() {
+  document.getElementById('successModal').classList.remove('show');
 }
 
-// Initialize
+function showContactPopup() {
+  document.getElementById('contactModal').classList.add('show');
+}
+
+function closeContactModal() {
+  document.getElementById('contactModal').classList.remove('show');
+}
+
 init();
 </script>
 </body>
