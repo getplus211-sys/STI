@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<title>Overall Performance Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
+.container{max-width:900px;margin:auto;padding:12px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.sticky-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#d946ef 100%);box-shadow:0 2px 10px rgba(0,0,0,.15);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.sticky-header-content{max-width:800px;color:#fff}
+.page-title{margin:0;font-size:16px;font-weight:700;color:#fff}
+.home-btn{background:rgba(255,255,255,0.2);color:#fff;border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.home-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px)}
+.student-card{background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);border:2px solid #bae6fd;position:relative;overflow:hidden}
+.student-card::before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(59,130,246,0.1) 0%,transparent 70%);animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.student-header{display:flex;align-items:center;gap:15px;margin-bottom:20px;position:relative;z-index:1}
+.avatar{width:90px;height:90px;background:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;color:#fff;box-shadow:0 8px 20px rgba(59,130,246,0.4);border:4px solid #fff}
+.student-meta{display:flex;gap:12px;font-size:14px;flex-wrap:wrap;margin-top:8px}
+.student-name{color:#1e293b;font-size:26px;font-weight:700;margin:0 0 8px 0;text-shadow:0 2px 4px rgba(0,0,0,0.1)}
+.meta-badge{background:#fff;padding:6px 12px;border-radius:20px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:5px}
+.level-badge{font-weight:700;padding:8px 16px;border-radius:25px;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.15);cursor:pointer;transition:all 0.2s}
+.level-badge:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.2)}
+.level-initial{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.level-starter{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff}
+.level-good{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.level-better{background:linear-gradient(135deg,#eab308,#ca8a04);color:#fff}
+.level-nice{background:linear-gradient(135deg,#84cc16,#65a30d);color:#fff}
+.level-verygood{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.level-verynice{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.level-excellent{background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff}
+.level-excellentplus{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
+.level-perfect{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 4px 12px rgba(139,92,246,0.4)}50%{box-shadow:0 4px 20px rgba(139,92,246,0.8)}}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}
+.stat-card{background:#f8fafc;border-radius:12px;padding:15px;text-align:center;position:relative}
+.stat-card.clickable{cursor:pointer;transition:all 0.2s}
+.stat-card.clickable:hover{background:#e0e7ff;transform:translateY(-2px)}
+.stat-label{font-size:13px;color:#6b7280;margin-bottom:5px}
+.stat-value{font-size:28px;font-weight:bold;color:#1f2937}
+.section-title{font-size:18px;font-weight:bold;margin:20px 0 10px;color:#1f2937}
+.subject-item{background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center}
+.subject-name{font-size:16px;font-weight:600;color:#1f2937}
+.subject-right{display:flex;align-items:center;gap:10px}
+.subject-per{font-size:22px;font-weight:bold}
+.view-btn{background:#3b82f6;color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.view-btn:hover{background:#2563eb;transform:translateY(-2px)}
+.per-excellent{color:#22c55e}
+.per-verygood{color:#10b981}
+.per-good{color:#3b82f6}
+.per-average{color:#f59e0b}
+.per-poor{color:#ef4444}
+.progress-bar{width:100%;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;transition:width 0.5s ease}
+.rec-card{background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 100%);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
+.rec-title{font-size:18px;font-weight:bold;margin-bottom:15px}
+.rec-list{list-style:none;padding:0;margin:0}
+.rec-list li{padding:5px 0 5px 22px;position:relative;font-size:14px;line-height:1.5}
+.rec-list li:before{content:"✓";position:absolute;left:0;color:#22c55e;font-weight:bold}
+.loader{text-align:center;padding:40px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal.show{display:flex}
+.modal-content{background:#fff;border-radius:20px;max-width:420px;width:90%;max-height:85vh;overflow-y:auto;padding:25px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalPop 0.3s ease}
+@keyframes modalPop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-icon{font-size:40px;margin-bottom:10px;text-align:center}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:15px;color:#1e293b;text-align:center}
+.modal-body{text-align:left}
+.modal-btn{background:#3b82f6;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:15px}
+.chapter-item{padding:10px 0;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
+.chapter-name{font-size:14px;color:#374151;flex:1}
+.chapter-per{font-size:16px;font-weight:bold}
+.target-good{color:#22c55e}
+.target-average{color:#f59e0b}
+.target-poor{color:#ef4444}
+@media (max-width:600px){
+.stats-grid{grid-template-columns:1fr}
+.student-header{flex-direction:column;text-align:center}
+body{padding-top:70px}
+.page-title{font-size:14px}
+.home-btn{padding:6px 12px;font-size:12px}
+.sticky-header{padding:8px 12px}
+.avatar{width:70px;height:70px;font-size:32px}
+.student-name{font-size:22px}
+.student-meta{justify-content:center}
+.subject-item{flex-direction:column;gap:10px;text-align:center}
+.subject-right{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="card loader">
+    <h3>લોડ થઈ રહ્યું છે...</h3>
+    <p>કૃપા કરીને રાહ જુઓ</p>
+  </div>
+</div>
+
+<div id="modal" class="modal" onclick="if(event.target.id === 'modal') hideModal()">
+  <div class="modal-content">
+    <div class="modal-icon" id="modalIcon">ℹ️</div>
+    <div class="modal-title" id="modalTitle">Title</div>
+    <div class="modal-body" id="modalBody">Content</div>
+    <button class="modal-btn" onclick="hideModal()">બંધ કરો</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let app = document.getElementById("app");
+let user, allResults = [], allAttempts = [];
+let userName = '', overallData = {};
+
+function hideModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+async function init() {
+  try {
+    const { data: { user: u } } = await sb.auth.getUser();
+    if (!u) {
+      app.innerHTML = '<div class="card"><h3>🔒 Login Required</h3><p>કૃપા કરીને પહેલા લોગિન કરો</p></div>';
+      return;
+    }
+    user = u;
+
+    // Load user profile
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+    
+    userName = profile?.full_name || "Student";
+
+    // Load all test results for this user
+    const { data: results } = await sb
+      .from("lrd_test_results")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("completed_at", { ascending: false });
+    
+    if (!results || results.length === 0) {
+      app.innerHTML = '<div class="card"><h3>⚠️ No Tests Found</h3><p>તમે હજુ સુધી કોઈ ટેસ્ટ આપી નથી</p></div>';
+      return;
+    }
+    
+    allResults = results;
+
+    // Load all question attempts for these results
+    const resultIds = results.map(r => r.id);
+    const { data: attempts } = await sb
+      .from("lrd_question_attempts")
+      .select(`
+        *,
+        lrd_questions (
+          *,
+          lrd_subjects (id, name, subject_code),
+          lrd_chapters (id, name, chapter_id)
+        )
+      `)
+      .in("test_result_id", resultIds);
+    
+    allAttempts = attempts || [];
+
+    calculateOverallData();
+    displayOverallPerformance();
+  } catch (err) {
+    console.error('Init error:', err);
+    app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>' + err.message + '</p></div>';
+  }
+}
+
+function getPerformanceLevel(percentage) {
+  if (percentage <= 10) return "Initial";
+  if (percentage <= 20) return "Starter";
+  if (percentage <= 30) return "Good";
+  if (percentage <= 40) return "Better";
+  if (percentage <= 50) return "Nice";
+  if (percentage <= 60) return "Very Good";
+  if (percentage <= 70) return "Very Nice";
+  if (percentage <= 80) return "Excellent";
+  if (percentage <= 90) return "Excellent+";
+  return "Perfect";
+}
+
+function calculateConcentrationRating(avgTimePerQ, accuracy) {
+  if (accuracy <= 0) return "1.0";
+  
+  let rating = 10;
+  
+  if (avgTimePerQ > 10) rating -= 0.5;
+  if (avgTimePerQ > 15) rating -= 1;
+  if (avgTimePerQ > 20) rating -= 1;
+  if (avgTimePerQ > 25) rating -= 1.5;
+  if (avgTimePerQ > 30) rating -= 2;
+  if (avgTimePerQ > 35) rating -= 3;
+  
+  if (accuracy < 90) rating -= 0.5;
+  if (accuracy < 80) rating -= 1;
+  if (accuracy < 70) rating -= 1.5;
+  if (accuracy < 60) rating -= 2;
+  if (accuracy < 50) rating -= 2;
+  if (accuracy < 40) rating -= 2.5;
+  if (accuracy < 30) rating -= 2.5;
+  if (accuracy < 20) rating -= 3;
+  if (accuracy < 10) rating -= 3;
+  
+  return Math.max(1, Math.min(10, rating)).toFixed(1);
+}
+
+function getPercentageColor(per) {
+  if (per >= 85) return 'per-excellent';
+  if (per >= 70) return 'per-verygood';
+  if (per >= 55) return 'per-good';
+  if (per >= 40) return 'per-average';
+  return 'per-poor';
+}
+
+function calculateOverallData() {
+  // Overall stats
+  let totalQuestions = 0, totalCorrect = 0, totalWrong = 0, totalSkipped = 0, totalTime = 0;
+  
+  allResults.forEach(r => {
+    totalQuestions += r.total_questions;
+    totalCorrect += r.correct_answers;
+    totalWrong += r.wrong_answers;
+    totalSkipped += r.skipped_questions;
+    totalTime += r.total_time_seconds;
+  });
+
+  const overallPercentage = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(2) : 0;
+  const avgTimePerQ = totalQuestions > 0 ? Math.floor(totalTime / totalQuestions) : 0;
+  
+  // Subject-wise overall stats
+  const subjectMap = {};
+  
+  allAttempts.forEach(att => {
+    if (!att.lrd_questions || !att.lrd_questions.lrd_subjects || !att.lrd_questions.lrd_chapters) return;
+    
+    const subjId = att.lrd_questions.lrd_subjects.id;
+    const subjName = att.lrd_questions.lrd_subjects.name;
+    const chapterId = att.lrd_questions.lrd_chapters.id;
+    const chapterName = att.lrd_questions.lrd_chapters.name;
+    
+    if (!subjectMap[subjId]) {
+      subjectMap[subjId] = {
+        name: subjName,
+        total: 0,
+        correct: 0,
+        chapters: {}
+      };
+    }
+    
+    subjectMap[subjId].total++;
+    if (att.is_correct) subjectMap[subjId].correct++;
+    
+    if (!subjectMap[subjId].chapters[chapterId]) {
+      subjectMap[subjId].chapters[chapterId] = {
+        name: chapterName,
+        total: 0,
+        correct: 0
+      };
+    }
+    
+    subjectMap[subjId].chapters[chapterId].total++;
+    if (att.is_correct) subjectMap[subjId].chapters[chapterId].correct++;
+  });
+
+  overallData = {
+    totalQuestions,
+    totalCorrect,
+    totalWrong,
+    totalSkipped,
+    totalTime,
+    overallPercentage: parseFloat(overallPercentage),
+    avgTimePerQ,
+    subjectMap,
+    level: getPerformanceLevel(parseFloat(overallPercentage)),
+    concentrationRating: calculateConcentrationRating(avgTimePerQ, parseFloat(overallPercentage))
+  };
+}
+
+function displayOverallPerformance() {
+  const firstLetter = userName.charAt(0).toUpperCase();
+  const levelClass = overallData.level.toLowerCase().replace('+', 'plus').replace(' ', '');
+  const lastTestDate = new Date(allResults[0].completed_at).toLocaleDateString('en-GB').replace(/\//g, '-');
+  
+  // Calculate overall rank (simplified - based on total score)
+  const overallRank = 1; // You can calculate this by comparing with other users
+  
+  // Target score color
+  const targetPer = 80;
+  const targetClass = overallData.overallPercentage >= targetPer ? 'target-good' : 
+                      overallData.overallPercentage >= targetPer - 10 ? 'target-average' : 'target-poor';
+
+  // Generate subject HTML
+  let subjectHTML = '';
+  Object.entries(overallData.subjectMap).forEach(([subjId, subjData]) => {
+    const subjPer = ((subjData.correct / subjData.total) * 100).toFixed(1);
+    const subjPerColor = getPercentageColor(parseFloat(subjPer));
+    
+    subjectHTML += `
+      <div class="subject-item">
+        <div>
+          <div class="subject-name">${subjData.name}</div>
+          <div class="progress-bar">
+            <div class="progress-fill ${subjPerColor}" style="width:${subjPer}%;background:currentColor"></div>
+          </div>
+        </div>
+        <div class="subject-right">
+          <span class="subject-per ${subjPerColor}">${subjPer}%</span>
+          <button class="view-btn" onclick="showChapterDetails('${subjId}', '${subjData.name}')">View Full</button>
+        </div>
+      </div>
+    `;
+  });
+
+  // Generate recommendations
+  let recCards = '';
+  Object.entries(overallData.subjectMap).forEach(([subjId, subjData]) => {
+    const subjPer = ((subjData.correct / subjData.total) * 100);
+    
+    if (subjPer < 60) {
+      recCards += `
+      <div class="rec-card">
+        <div class="rec-title">📚 ${subjData.name} - સુધારો જરૂરી</div>
+        <ul class="rec-list">
+          <li>આ વિષય પર વધુ ધ્યાન આપો અને દરરોજ 3-4 કલાક અભ્યાસ કરો</li>
+          <li>બેસિક કોન્સેપ્ટ્સ મજબૂત કરો અને નિયમિત પ્રેક્ટિસ કરો</li>
+          <li>Previous years ના પ્રશ્નો ઉકેલો અને mock tests લો</li>
+          <li>શિક્ષક અથવા મિત્રોની મદદ લો જ્યાં શંકા હોય</li>
+        </ul>
+      </div>`;
+    } else if (subjPer >= 60 && subjPer < 80) {
+      recCards += `
+      <div class="rec-card">
+        <div class="rec-title">🟡 ${subjData.name} - સારું પ્રદર્શન</div>
+        <ul class="rec-list">
+          <li>તમારું પ્રદર્શન સારું છે, નિયમિત રિવિઝન ચાલુ રાખો</li>
+          <li>મુશ્કેલ પ્રશ્નો પર વધુ પ્રેક્ટિસ કરો</li>
+          <li>Speed અને accuracy બંને સુધારવા પર કામ કરો</li>
+        </ul>
+      </div>`;
+    }
+  });
+
+  app.innerHTML = `
+  <div class="sticky-header">
+    <div class="sticky-header-content">
+      <div class="page-title">Overall Performance Dashboard</div>
+    </div>
+    <a href="index.html" class="home-btn">🏠 Home</a>
+  </div>
+
+  <div class="card student-card">
+    <div class="student-header">
+      <div class="avatar">${firstLetter}</div>
+      <div style="flex:1">
+        <h2 class="student-name">${userName}</h2>
+        <div class="student-meta">
+          <span class="meta-badge level-badge level-${levelClass}">📊 ${overallData.level}</span>
+          <span class="meta-badge" style="color:#f59e0b">🏆 Rank: #${overallRank}</span>
+          <span class="meta-badge" style="color:#6366f1">📅 છેલ્લી ટેસ્ટ: ${lastTestDate}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Overall પરિણામ</h3>
+    <canvas id="pieChart" style="max-height:250px"></canvas>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">કુલ પ્રશ્નો</div>
+      <div class="stat-value">${overallData.totalQuestions}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">મેળવેલ ગુણ</div>
+      <div class="stat-value" style="color:#22c55e">${overallData.totalCorrect}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Overall ચોકસાઈ</div>
+      <div class="stat-value" style="color:#3b82f6">${overallData.overallPercentage}%</div>
+    </div>
+    <div class="stat-card clickable">
+      <div class="stat-label">એકાગ્રતા રેટિંગ</div>
+      <div class="stat-value" style="color:#f59e0b">${overallData.concentrationRating}/10</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">સમય/પ્રશ્ન</div>
+      <div class="stat-value">${overallData.avgTimePerQ}s</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ખોટા જવાબ</div>
+      <div class="stat-value" style="color:#ef4444">${overallData.totalWrong}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Target Score</div>
+      <div class="stat-value ${targetClass}">${targetPer}%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">બાકી પ્રશ્નો</div>
+      <div class="stat-value">${overallData.totalSkipped}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>તમારી પ્રગતિ (છેલ્લી 5 ટેસ્ટ)</h3>
+    <canvas id="trendChart" style="max-height:250px"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="section-title">📊 વિષય વાર Overall Analysis</div>
+    ${subjectHTML}
+  </div>
+
+  ${recCards}
+  `;
+
+  // Draw pie chart
+  setTimeout(() => {
+    const ctx = document.getElementById('pieChart');
+    if (ctx) {
+      new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['સાચા', 'ખોટા', 'બાકી'],
+          datasets: [{
+            data: [overallData.totalCorrect, overallData.totalWrong, overallData.totalSkipped],
+            backgroundColor: ['#22c55e', '#ef4444', '#e5e7eb']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { padding: 15, font: { size: 13 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Draw trend chart (last 5 tests)
+    const trendCtx = document.getElementById('trendChart');
+    if (trendCtx) {
+      const last5 = allResults.slice(0, 5).reverse();
+      const labels = last5.map((_, idx) => `T${idx + 1}`);
+      const scores = last5.map(t => parseFloat(t.percentage));
+      
+      new Chart(trendCtx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'સ્કોર %',
+            data: scores,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  }, 100);
+}
+
+function showChapterDetails(subjId, subjName) {
+  const subjData = overallData.subjectMap[subjId];
+  
+  let chaptersHTML = '<div style="margin-top:15px">';
+  Object.entries(subjData.chapters).forEach(([chId, chData]) => {
+    const chPer = ((chData.correct / chData.total) * 100).toFixed(1);
+    const chPerColor = getPercentageColor(parseFloat(chPer));
+    
+    chaptersHTML += `
+      <div class="chapter-item">
+        <span class="chapter-name">${chData.name}</span>
+        <span class="chapter-per ${chPerColor}">${chPer}%</span>
+      </div>
+    `;
+  });
+  chaptersHTML += '</div>';
+  
+  document.getElementById('modalIcon').innerText = '📚';
+  document.getElementById('modalTitle').innerText = subjName + ' - Chapter-wise Performance';
+  document.getElementById('modalBody').innerHTML = chaptersHTML;
+  document.getElementById('modal').classList.add('show');
+}
+
+init();
+</script>
+</body>
+</html>
