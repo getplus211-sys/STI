@@ -13,27 +13,30 @@ body{margin:0;font-family:system-ui;background:#f1f5f9}
 h2,h3,h4{margin:6px 0 12px 0}
 button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cursor:pointer;margin-bottom:10px}
 .blue{background:#3b82f6;color:#fff}
-.badge{background:#3b82f6;color:#fff;padding:5px 12px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:10px}
+.badge{background:#3b82f6;color:#fff;padding:5px 12px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:10px;float:right}
 .student-header{display:flex;align-items:center;gap:15px;margin-bottom:20px}
 .avatar{width:80px;height:80px;background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;color:#2563eb}
 .student-meta{display:flex;gap:15px;font-size:14px;color:#6b7280;flex-wrap:wrap}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}
-.stat-card{background:#f8fafc;border-radius:12px;padding:15px;text-align:center}
+.stat-card{background:#f8fafc;border-radius:12px;padding:15px;text-align:center;position:relative}
+.stat-card.clickable{cursor:pointer;transition:all 0.2s}
+.stat-card.clickable:hover{background:#e0e7ff;transform:translateY(-2px)}
 .stat-label{font-size:13px;color:#6b7280;margin-bottom:5px}
 .stat-value{font-size:28px;font-weight:bold;color:#1f2937}
-.section-title{font-size:16px;font-weight:bold;margin:20px 0 10px;border-left:4px solid #3b82f6;padding-left:10px;color:#1f2937}
-.subject-item{background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:10px}
-.subject-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.subject-name{font-size:15px;font-weight:600;color:#1f2937}
-.subject-score{font-size:22px;font-weight:bold}
-.score-excellent{color:#22c55e}
-.score-good{color:#3b82f6}
-.score-average{color:#f59e0b}
-.score-poor{color:#ef4444}
-.chapter-list{border-top:1px solid #e5e7eb;margin-top:8px;padding-top:8px}
-.chapter-item{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#64748b}
-.chapter-item .ch-name{flex:1}
-.chapter-item .ch-score{font-weight:600;margin-left:10px}
+.section-title{font-size:18px;font-weight:bold;margin:20px 0 10px;color:#1f2937}
+.subject-card{background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px}
+.subject-title{font-size:16px;font-weight:bold;color:#1f2937;margin-bottom:10px}
+.analysis-table{width:100%;border-collapse:collapse;margin-top:10px}
+.analysis-table th{background:#e0e7ff;color:#1e40af;padding:10px;text-align:left;font-size:14px;font-weight:600}
+.analysis-table td{padding:10px;font-size:14px;border-bottom:1px solid #e5e7eb}
+.analysis-table td:first-child{font-weight:500;color:#374151}
+.analysis-table td:nth-child(2),.analysis-table td:nth-child(3){text-align:center;color:#6b7280}
+.analysis-table td:last-child{text-align:center;font-weight:bold;font-size:16px}
+.per-excellent{color:#22c55e}
+.per-verygood{color:#10b981}
+.per-good{color:#3b82f6}
+.per-average{color:#f59e0b}
+.per-poor{color:#ef4444}
 .rec-card{background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 100%);color:#fff;border-radius:16px;padding:20px}
 .rec-title{font-size:18px;font-weight:bold;margin-bottom:15px}
 .rec-section{margin-bottom:15px}
@@ -41,12 +44,20 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .rec-list{list-style:none;padding:0;margin:0}
 .rec-list li{padding:5px 0 5px 22px;position:relative;font-size:14px;line-height:1.5}
 .rec-list li:before{content:"✓";position:absolute;left:0;color:#22c55e;font-weight:bold}
-.progress-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:5px}
-.progress-fill{height:100%;background:#22c55e;transition:width 0.5s ease}
 .loader{text-align:center;padding:40px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal.show{display:flex}
+.modal-content{background:#fff;border-radius:20px;max-width:420px;width:90%;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalPop 0.3s ease;text-align:center}
+@keyframes modalPop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-icon{font-size:50px;margin-bottom:15px}
+.modal-title{font-size:20px;font-weight:700;margin-bottom:10px;color:#1e293b}
+.modal-text{font-size:14px;color:#64748b;line-height:1.6;margin-bottom:20px;white-space:pre-line}
+.modal-btn{background:#3b82f6;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
 @media (max-width:600px){
 .stats-grid{grid-template-columns:1fr}
 .student-header{flex-direction:column;text-align:center}
+.analysis-table{font-size:12px}
+.analysis-table th,.analysis-table td{padding:8px 5px}
 }
 </style>
 </head>
@@ -55,6 +66,15 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
   <div class="card loader">
     <h3>લોડ થઈ રહ્યું છે...</h3>
     <p>કૃપા કરીને રાહ જુઓ</p>
+  </div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-icon" id="modalIcon">ℹ️</div>
+    <div class="modal-title" id="modalTitle">Title</div>
+    <div class="modal-text" id="modalText">Message</div>
+    <button class="modal-btn" onclick="hideModal()">સમજાયું</button>
   </div>
 </div>
 
@@ -67,12 +87,24 @@ const urlParams = new URLSearchParams(window.location.search);
 const RESULT_ID = urlParams.get('result_id');
 
 let app = document.getElementById("app");
-let user, testResult, questionAttempts = [];
+let user, testResult, questionAttempts = [], previousTests = [];
+let userName = '', userRank = 0;
 
 if (!RESULT_ID) {
   app.innerHTML = '<div class="card"><h3>⚠️ Invalid URL</h3><p>Result ID not found</p></div>';
 } else {
   init();
+}
+
+function showModal(icon, title, text) {
+  document.getElementById('modalIcon').innerText = icon;
+  document.getElementById('modalTitle').innerText = title;
+  document.getElementById('modalText').innerText = text;
+  document.getElementById('modal').classList.add('show');
+}
+
+function hideModal() {
+  document.getElementById('modal').classList.remove('show');
 }
 
 async function init() {
@@ -83,6 +115,15 @@ async function init() {
       return;
     }
     user = u;
+
+    // Load user profile for name
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+    
+    userName = profile?.full_name || "Student";
 
     // Load test result
     const { data: result, error: resultError } = await sb
@@ -96,6 +137,29 @@ async function init() {
       return;
     }
     testResult = result;
+
+    // Calculate rank
+    const { data: allResults } = await sb
+      .from("lrd_test_results")
+      .select("user_id, score, total_time_seconds")
+      .eq("test_id", result.test_id)
+      .order("score", { ascending: false })
+      .order("total_time_seconds", { ascending: true });
+    
+    if (allResults) {
+      const myIndex = allResults.findIndex(r => r.user_id === user.id);
+      userRank = myIndex + 1;
+    }
+
+    // Load previous 5 tests for trend graph
+    const { data: prevTests } = await sb
+      .from("lrd_test_results")
+      .select("score, percentage, completed_at")
+      .eq("user_id", user.id)
+      .order("completed_at", { ascending: false })
+      .limit(5);
+    
+    previousTests = prevTests || [];
 
     // Load question attempts with full details
     const { data: attempts, error: attemptsError } = await sb
@@ -128,9 +192,64 @@ async function init() {
   }
 }
 
+function getPerformanceLevel(percentage) {
+  if (percentage <= 10) return "Initial";
+  if (percentage <= 20) return "Starter";
+  if (percentage <= 30) return "Good";
+  if (percentage <= 40) return "Better";
+  if (percentage <= 50) return "Nice";
+  if (percentage <= 60) return "Very Good";
+  if (percentage <= 70) return "Very Nice";
+  if (percentage <= 80) return "Excellent";
+  if (percentage <= 90) return "Excellent+";
+  return "Perfect";
+}
+
+function calculateConcentrationRating(avgTimePerQ, accuracy) {
+  // Target: <=35 seconds per question
+  // Perfect: <=10s with 90%+ accuracy = 10/10
+  // Excellent: 10-20s with 85%+ accuracy = 8-9/10
+  // Good: 20-30s with 75%+ accuracy = 6-7/10
+  // Average: 30-35s with 60%+ accuracy = 4-5/10
+  // Poor: >35s or low accuracy = 1-3/10
+  
+  let rating = 10;
+  
+  // Time factor
+  if (avgTimePerQ > 10) rating -= 0.5;
+  if (avgTimePerQ > 15) rating -= 1;
+  if (avgTimePerQ > 20) rating -= 1;
+  if (avgTimePerQ > 25) rating -= 1.5;
+  if (avgTimePerQ > 30) rating -= 2;
+  if (avgTimePerQ > 35) rating -= 3;
+  
+  // Accuracy factor
+  if (accuracy < 90) rating -= 0.5;
+  if (accuracy < 85) rating -= 0.5;
+  if (accuracy < 80) rating -= 1;
+  if (accuracy < 70) rating -= 1;
+  if (accuracy < 60) rating -= 1.5;
+  
+  return Math.max(1, Math.min(10, rating)).toFixed(1);
+}
+
+function getPercentageColor(per) {
+  if (per >= 85) return 'per-excellent';
+  if (per >= 70) return 'per-verygood';
+  if (per >= 55) return 'per-good';
+  if (per >= 40) return 'per-average';
+  return 'per-poor';
+}
+
 function displayPerformance() {
   const date = new Date(testResult.completed_at).toLocaleDateString('en-GB').replace(/\//g, '-');
   const timePerQ = Math.floor(testResult.total_time_seconds / testResult.total_questions);
+  const percentage = parseFloat(testResult.percentage);
+  const level = getPerformanceLevel(percentage);
+  const concentrationRating = calculateConcentrationRating(timePerQ, percentage);
+  
+  // Get first letter of name for avatar
+  const firstLetter = userName.charAt(0).toUpperCase();
 
   // Calculate difficulty stats
   let diffStats = {
@@ -189,95 +308,127 @@ function displayPerformance() {
     if (att.is_correct) subjectMap[subjId].chapters[chapterId].correct++;
   });
 
-  // Generate subject HTML with chapter breakdown
+  // Generate subject-wise analysis tables
   let subjectHTML = '';
   Object.entries(subjectMap).forEach(([subjId, subjData]) => {
     const subjPer = ((subjData.correct / subjData.total) * 100).toFixed(0);
-    const cls = subjPer >= 80 ? 'score-excellent' : subjPer >= 60 ? 'score-good' : subjPer >= 40 ? 'score-average' : 'score-poor';
+    const subjPerColor = getPercentageColor(parseFloat(subjPer));
     
-    let chaptersHTML = '';
+    let tableRows = '';
     Object.entries(subjData.chapters).forEach(([chId, chData]) => {
       const chPer = ((chData.correct / chData.total) * 100).toFixed(0);
-      const chCls = chPer >= 80 ? 'score-excellent' : chPer >= 60 ? 'score-good' : chPer >= 40 ? 'score-average' : 'score-poor';
-      chaptersHTML += `
-        <div class="chapter-item">
-          <span class="ch-name">${chData.name}</span>
-          <span class="ch-score ${chCls}">${chPer}%</span>
-        </div>
+      const chPerColor = getPercentageColor(parseFloat(chPer));
+      tableRows += `
+        <tr>
+          <td>${chData.name}</td>
+          <td>${chData.total}</td>
+          <td>${chData.correct}</td>
+          <td class="${chPerColor}">${chPer}%</td>
+        </tr>
       `;
     });
     
     subjectHTML += `
-      <div class="subject-item">
-        <div class="subject-header">
-          <span class="subject-name">${subjData.name}</span>
-          <span class="subject-score ${cls}">${subjPer}%</span>
+      <div class="subject-card">
+        <div class="subject-title">${subjData.name}
+          <span class="badge ${subjPerColor}">નિર્ણય: ${subjPer}%</span>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${subjPer}%"></div>
-        </div>
-        ${Object.keys(subjData.chapters).length > 0 ? `<div class="chapter-list">${chaptersHTML}</div>` : ''}
+        <table class="analysis-table">
+          <thead>
+            <tr>
+              <th>ચેપ્ટર</th>
+              <th>પ્રશ્નો</th>
+              <th>સાચા</th>
+              <th>પરિણામ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
       </div>
     `;
   });
 
-  // Generate recommendations based on performance
-  const percentage = parseFloat(testResult.percentage);
+  // Generate improved recommendations
   let recHTML = '';
   
-  if (percentage < 40) {
-    recHTML += '<div class="rec-section"><h4>🔴 તાત્કાલિક ધ્યાન આપો:</h4><ul class="rec-list">';
-    recHTML += '<li>બેસિક કોન્સેપ્ટ્સ ફરીથી સમજો અને મજબૂત કરો</li>';
-    recHTML += '<li>દરરોજ ઓછામાં ઓછા 3-4 કલાક અભ્યાસ કરો</li>';
-    recHTML += '<li>નબળા વિષયો પર વિશેષ ધ્યાન આપો</li>';
-    recHTML += '</ul></div>';
-  } else if (percentage >= 40 && percentage < 60) {
-    recHTML += '<div class="rec-section"><h4>🟠 વાંચન સુધારો:</h4><ul class="rec-list">';
-    recHTML += '<li>નબળા વિષયો પર વધુ સમય આપો</li>';
-    recHTML += '<li>નિયમિત પ્રેક્ટિસ અને રિવિઝન કરો</li>';
-    recHTML += '<li>મધ્યમ અને મુશ્કેલ પ્રશ્નો પર ધ્યાન આપો</li>';
-    recHTML += '</ul></div>';
-  } else if (percentage >= 60 && percentage < 80) {
-    recHTML += '<div class="rec-section"><h4>🟡 સારું - વધુ સુધારો:</h4><ul class="rec-list">';
-    recHTML += '<li>મુશ્કેલ પ્રશ્નો પર વધુ પ્રેક્ટિસ કરો</li>';
-    recHTML += '<li>સ્પીડ અને એક્યુરસી બંને સુધારો</li>';
-    recHTML += '<li>નિયમિત મોક ટેસ્ટ લો</li>';
-    recHTML += '</ul></div>';
-  } else {
-    recHTML += '<div class="rec-section"><h4>🟢 તમારી મજબૂતાઈ:</h4><ul class="rec-list">';
-    recHTML += '<li>ઉત્તમ પ્રદર્શન! આ સ્તર જાળવો</li>';
-    recHTML += '<li>નિયમિત રિવિઝન ચાલુ રાખો</li>';
-    recHTML += '<li>અન્ય વિદ્યાર્થીઓને મદદ કરો</li>';
+  // Base study recommendation for <85%
+  if (percentage < 85) {
+    recHTML += '<div class="rec-section"><h4>📚 અભ્યાસ સમય ભલામણ:</h4><ul class="rec-list">';
+    recHTML += '<li>દરરોજ ઓછામાં ઓછા 10-12 કલાક અભ્યાસ કરો</li>';
+    recHTML += '<li>સવારે 3-4 કલાક, બપોરે 3-4 કલાક અને રાત્રે 3-4 કલાક વહેંચો</li>';
+    recHTML += '<li>નિયમિતતા અને discipline જાળવો</li>';
     recHTML += '</ul></div>';
   }
 
-  // Add weak subjects to recommendations
+  // Subject-wise recommendations (15%+ questions and <50% accuracy)
   Object.entries(subjectMap).forEach(([subjId, subjData]) => {
     const subjPer = ((subjData.correct / subjData.total) * 100);
-    if (subjPer < 40) {
-      recHTML += `<div class="rec-section"><h4>⚠️ ${subjData.name} - તાત્કાલિક ધ્યાન:</h4><ul class="rec-list">`;
-      Object.entries(subjData.chapters).forEach(([chId, chData]) => {
-        const chPer = ((chData.correct / chData.total) * 100);
-        if (chPer < 40) {
-          recHTML += `<li>${chData.name}: ${chPer.toFixed(0)}% - વધુ પ્રેક્ટિસ જરૂરી</li>`;
-        }
-      });
+    const subjShare = (subjData.total / testResult.total_questions) * 100;
+    
+    if (subjShare >= 15 && subjPer < 50) {
+      recHTML += `<div class="rec-section"><h4>🔴 ${subjData.name} - તાત્કાલિક ધ્યાન:</h4><ul class="rec-list">`;
+      recHTML += `<li>આ વિષય દરરોજ ઓછામાં ઓછા 3-4 કલાક અભ્યાસ કરો</li>`;
+      recHTML += `<li>બેસિક કોન્સેપ્ટ્સ મજબૂત કરો અને નિયમિત પ્રેક્ટિસ કરો</li>`;
+      recHTML += `<li>નબળા ચેપ્ટર્સ પર વિશેષ ફોકસ આપો</li>`;
       recHTML += '</ul></div>';
     }
   });
+
+  // General study plan
+  recHTML += '<div class="rec-section"><h4>📖 દૈનિક અભ્યાસ યોજના:</h4><ul class="rec-list">';
+  recHTML += '<li>દરરોજ 3-4 વિષયોનો અભ્યાસ કરો</li>';
+  recHTML += '<li>દરેક વિષયને 2-2.5 કલાક સમય આપો</li>';
+  recHTML += '<li>નિયમિત રિવિઝન અને મોક ટેસ્ટ લો</li>';
+  recHTML += '</ul></div>';
+
+  // Chapter-wise recommendations (<70% threshold)
+  let weakChapters = [];
+  
+  Object.entries(subjectMap).forEach(([subjId, subjData]) => {
+    Object.entries(subjData.chapters).forEach(([chId, chData]) => {
+      const chPer = ((chData.correct / chData.total) * 100);
+      if (chPer < 70) {
+        weakChapters.push({ 
+          subject: subjData.name, 
+          chapter: chData.name, 
+          percentage: chPer 
+        });
+      }
+    });
+  });
+
+  if (weakChapters.length > 0) {
+    recHTML += '<div class="rec-section"><h4>⚠️ નબળા ચેપ્ટર્સ (70% થી ઓછા):</h4><ul class="rec-list">';
+    weakChapters.forEach(ch => {
+      recHTML += `<li>${ch.subject}: ${ch.chapter} (${ch.percentage.toFixed(0)}%) - દરરોજ પ્રેક્ટિસ અને રિવિઝન કરો</li>`;
+    });
+    recHTML += '</ul></div>';
+  }
+
+  // KAPiLa's Extra Suggestions
+  recHTML += '<div class="rec-section"><h4>💡 KAPiLa\'s Extra Suggestions:</h4><ul class="rec-list">';
+  recHTML += '<li>તમારા મિત્રો સાથે નબળા વિષયો પર ચર્ચા કરો</li>';
+  recHTML += '<li>જે વિષય તમને ઓછો આવડે છે તેની ચર્ચા કરો અને સમજો</li>';
+  recHTML += '<li>જે વિષય તમારા મિત્રને ઓછો આવડે છે તો તમે તેને શીખવાડો</li>';
+  recHTML += '<li>રોજ રાત્રે સૂતાં પહેલાં દિવસ દરમિયાન જે વાંચ્યું છે તેનું મનન કરો</li>';
+  recHTML += '<li>તે ટોપિક યાદ કરો - આ એક સૌથી મોટી જડીબુટ્ટી છે!</li>';
+  recHTML += '<li>ગ્રુપ સ્ટડી કરવાથી સમજ વધુ સ્પષ્ટ થાય છે</li>';
+  recHTML += '</ul></div>';
 
   const improvementNeeded = (100 - percentage).toFixed(0);
 
   app.innerHTML = `
   <div class="card">
     <div class="student-header">
-      <div class="avatar">RS</div>
+      <div class="avatar">${firstLetter}</div>
       <div>
-        <h2 style="margin:0 0 8px 0">Performance Dashboard</h2>
+        <h2 style="margin:0 0 8px 0">${userName}</h2>
         <div class="student-meta">
-          <span>લેવલ: <b>ગાંડ્સ</b></span>
-          <span>રેંક: <b>#14</b></span>
-          <span>તારીખ: <b>${date}</b></span>
+          <span>Level: <b>${level}</b></span>
+          <span>Rank: <b>#${userRank}</b></span>
+          <span>Date: <b>${date}</b></span>
         </div>
       </div>
     </div>
@@ -290,8 +441,8 @@ function displayPerformance() {
 
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label">કુલ/મેળવેલ ગુણ</div>
-      <div class="stat-value">${testResult.total_questions}/${testResult.score}</div>
+      <div class="stat-label">મેળવેલ/કુલ ગુણ</div>
+      <div class="stat-value">${testResult.score}/${testResult.total_questions}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">ચોકસાઈ</div>
@@ -301,9 +452,9 @@ function displayPerformance() {
       <div class="stat-label">સમય/પ્રશ્ન</div>
       <div class="stat-value">${timePerQ}s</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">એકાગ્રતા રેટિંગ</div>
-      <div class="stat-value" style="color:#f59e0b">8/10</div>
+    <div class="stat-card clickable" onclick="showConcentrationInfo()">
+      <div class="stat-label">એકાગ્રતા રેટિંગ ℹ️</div>
+      <div class="stat-value" style="color:#f59e0b">${concentrationRating}/10</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">સરળ (સાચા/કુલ)</div>
@@ -328,7 +479,12 @@ function displayPerformance() {
   </div>
 
   <div class="card">
-    <div class="section-title">વિષય અને ચેપ્ટર વાર એનાલિસિસ</div>
+    <h3>તમારી પ્રગતિ (Trend)</h3>
+    <canvas id="trendChart" style="max-height:250px"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="section-title">📊 વિષય અને ચેપ્ટર વાર એનાલિસિસ</div>
     ${subjectHTML}
   </div>
 
@@ -365,7 +521,67 @@ function displayPerformance() {
         }
       });
     }
+
+    // Draw trend chart (last 5 tests)
+    const trendCtx = document.getElementById('trendChart');
+    if (trendCtx && previousTests.length > 0) {
+      const labels = previousTests.map((_, idx) => `T${previousTests.length - idx}`).reverse();
+      const scores = previousTests.map(t => parseFloat(t.percentage)).reverse();
+      
+      new Chart(trendCtx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'સ્કોર %',
+            data: scores,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
   }, 100);
+}
+
+function showConcentrationInfo() {
+  showModal(
+    'ℹ️',
+    'એકાગ્રતા રેટિંગ',
+    'આ રેટિંગ તમારી સ્પીડ અને ચોકસાઈ બંને પર આધારિત છે.\n\n' +
+    '🎯 ટાર્ગેટ: દરેક પ્રશ્ન ≤ 35 સેકંડમાં\n\n' +
+    '• Perfect (10/10): ≤10s + 90%+ accuracy\n' +
+    '• Excellent (8-9/10): 10-20s + 85%+ accuracy\n' +
+    '• Good (6-7/10): 20-30s + 75%+ accuracy\n' +
+    '• Average (4-5/10): 30-35s + 60%+ accuracy\n' +
+    '• Poor (1-3/10): >35s અથવા ઓછી accuracy\n\n' +
+    'જો તમે બધા પ્રશ્નો સાચા કરો પણ વધુ સમય લો તો, એકાગ્રતા સુધારવાની જરૂર છે. ઝડપ અને ચોકસાઈ બંને જરૂરી છે!'
+  );
 }
 </script>
 </body>
