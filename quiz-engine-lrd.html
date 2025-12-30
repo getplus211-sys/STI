@@ -144,14 +144,15 @@ async function init() {
     }
     currentTest = test;
 
-    // Check if user has already attempted this test
-    const { data: previousAttempt } = await sb
+    // Check if user has already attempted this test (ONE TEST PER STUDENT)
+    const { data: previousAttempt, error: attemptError } = await sb
       .from("lrd_test_results")
       .select("*")
       .eq("user_id", user.id)
       .eq("test_id", TEST_ID)
-      .single();
+      .maybeSingle();
 
+    // If user has already taken this test, show their previous result
     if (previousAttempt) {
       existingResult = previousAttempt;
       testResultId = previousAttempt.id;
