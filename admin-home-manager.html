@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<title>Home Page Manager - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:#f1f5f9;padding:20px}
+.container{max-width:1400px;margin:auto}
+h1{margin-bottom:30px;color:#1e293b}
+.tabs{display:flex;gap:10px;margin-bottom:30px;border-bottom:2px solid #e5e7eb}
+.tab{padding:15px 30px;background:none;border:none;font-size:16px;font-weight:600;cursor:pointer;color:#64748b;transition:all 0.3s}
+.tab.active{color:#3b82f6;border-bottom:3px solid #3b82f6;margin-bottom:-2px}
+.tab:hover{color:#3b82f6}
+.content{background:#fff;padding:30px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,0.08)}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-weight:600;margin-bottom:8px;color:#1e293b}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:8px;font-size:14px}
+.form-group textarea{min-height:100px;resize:vertical}
+.btn{padding:12px 24px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-success{background:#22c55e;color:#fff}
+.btn-danger{background:#ef4444;color:#fff}
+.items-list{margin-top:30px}
+.item{background:#f8fafc;padding:20px;border-radius:12px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center}
+.item-info h3{font-size:16px;margin-bottom:5px;color:#1e293b}
+.item-info p{font-size:14px;color:#64748b}
+.item-actions{display:flex;gap:10px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🏠 Home Page Manager</h1>
+  
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('hero')">Hero Section</button>
+    <button class="tab" onclick="switchTab('announcements')">Announcements</button>
+    <button class="tab" onclick="switchTab('stats')">Statistics</button>
+    <button class="tab" onclick="switchTab('blocks')">Feature Blocks</button>
+    <button class="tab" onclick="switchTab('subjects')">Subject Corner</button>
+  </div>
+
+  <div class="content" id="content">
+    <p>લોડ થઈ રહ્યું છે...</p>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let currentTab = 'hero';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  loadTabContent(tab);
+}
+
+async function loadTabContent(tab) {
+  const content = document.getElementById('content');
+  
+  switch(tab) {
+    case 'hero':
+      await loadHeroSection();
+      break;
+    case 'announcements':
+      await loadAnnouncements();
+      break;
+    case 'stats':
+      await loadStatistics();
+      break;
+    case 'blocks':
+      await loadBlocks();
+      break;
+    case 'subjects':
+      await loadSubjects();
+      break;
+  }
+}
+
+async function loadHeroSection() {
+  const { data } = await sb.from('home_hero_section').select('*').order('display_order');
+  
+  let html = `
+    <h2>Hero Section</h2>
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" id="hero-title" placeholder="મુખ્ય શીર્ષક">
+    </div>
+    <div class="form-group">
+      <label>Subtitle</label>
+      <input type="text" id="hero-subtitle" placeholder="ઉપશીર્ષક">
+    </div>
+    <div class="form-group">
+      <label>CTA Text</label>
+      <input type="text" id="hero-cta-text" placeholder="બટન ટેક્સ્ટ">
+    </div>
+    <div class="form-group">
+      <label>CTA Link</label>
+      <input type="text" id="hero-cta-link" placeholder="લિંક URL">
+    </div>
+    <button class="btn btn-primary" onclick="saveHero()">Save Hero Section</button>
+    
+    <div class="items-list">
+      <h3>Existing Items</h3>
+  `;
+  
+  if (data) {
+    data.forEach(item => {
+      html += `
+        <div class="item">
+          <div class="item-info">
+            <h3>${item.title}</h3>
+            <p>${item.subtitle || ''}</p>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-danger" onclick="deleteItem('home_hero_section', '${item.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+}
+
+async function saveHero() {
+  const data = {
+    title: document.getElementById('hero-title').value,
+    subtitle: document.getElementById('hero-subtitle').value,
+    cta_text: document.getElementById('hero-cta-text').value,
+    cta_link: document.getElementById('hero-cta-link').value,
+    is_active: true,
+    display_order: 1
+  };
+  
+  const { error } = await sb.from('home_hero_section').insert(data);
+  if (error) alert('Error: ' + error.message);
+  else {
+    alert('Saved!');
+    loadHeroSection();
+  }
+}
+
+async function loadBlocks() {
+  const { data } = await sb.from('home_blocks').select('*').order('display_order');
+  
+  let html = `
+    <h2>Feature Blocks</h2>
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" id="block-title" placeholder="શીર્ષક">
+    </div>
+    <div class="form-group">
+      <label>Subtitle</label>
+      <input type="text" id="block-subtitle" placeholder="ઉપશીર્ષક">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="block-description" placeholder="વર્ણન"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Icon (Emoji)</label>
+      <input type="text" id="block-icon" placeholder="📦">
+    </div>
+    <div class="form-group">
+      <label>Link Text</label>
+      <input type="text" id="block-link-text" placeholder="વધુ જાણો">
+    </div>
+    <div class="form-group">
+      <label>Link URL</label>
+      <input type="text" id="block-link-url" placeholder="page.html">
+    </div>
+    <button class="btn btn-primary" onclick="saveBlock()">Add Block</button>
+    
+    <div class="items-list">
+      <h3>Existing Blocks</h3>
+  `;
+  
+  if (data) {
+    data.forEach(item => {
+      html += `
+        <div class="item">
+          <div class="item-info">
+            <h3>${item.icon || ''} ${item.title}</h3>
+            <p>${item.description || ''}</p>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-danger" onclick="deleteItem('home_blocks', '${item.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+  
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+}
+
+async function saveBlock() {
+  const data = {
+    block_type: 'feature',
+    title: document.getElementById('block-title').value,
+    subtitle: document.getElementById('block-subtitle').value,
+    description: document.getElementById('block-description').value,
+    icon: document.getElementById('block-icon').value,
+    link_text: document.getElementById('block-link-text').value,
+    link_url: document.getElementById('block-link-url').value,
+    is_active: true,
+    display_order: 999
+  };
+  
+  const { error } = await sb.from('home_blocks').insert(data);
+  if (error) alert('Error: ' + error.message);
+  else {
+    alert('Saved!');
+    loadBlocks();
+  }
+}
+
+async function deleteItem(table, id) {
+  if (!confirm('Delete?')) return;
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) alert('Error: ' + error.message);
+  else {
+    alert('Deleted!');
+    loadTabContent(currentTab);
+  }
+}
+
+// Similar functions for other tabs...
+// Load initial content
+loadHeroSection();
+</script>
+</body>
+</html>
