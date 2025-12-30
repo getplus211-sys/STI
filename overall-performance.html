@@ -36,6 +36,10 @@ body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
 .level-excellentplus{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
 .level-perfect{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;animation:glow 2s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:0 4px 12px rgba(139,92,246,0.4)}50%{box-shadow:0 4px 20px rgba(139,92,246,0.8)}}
+.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:20px}
+.chart-title{font-size:16px;font-weight:600;color:#1f2937;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.info-icon{width:22px;height:22px;background:#3b82f6;color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;font-weight:bold;flex-shrink:0}
+.info-icon:hover{background:#2563eb;transform:scale(1.1)}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}
 .stat-card{background:#f8fafc;border-radius:12px;padding:15px;text-align:center;position:relative}
 .stat-card.clickable{cursor:pointer;transition:all 0.2s}
@@ -43,18 +47,19 @@ body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
 .stat-label{font-size:13px;color:#6b7280;margin-bottom:5px}
 .stat-value{font-size:28px;font-weight:bold;color:#1f2937}
 .section-title{font-size:18px;font-weight:bold;margin:20px 0 10px;color:#1f2937}
-.subject-item{background:#f8fafc;border-radius:12px;padding:15px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center}
-.subject-name{font-size:16px;font-weight:600;color:#1f2937}
-.subject-right{display:flex;align-items:center;gap:10px}
-.subject-per{font-size:22px;font-weight:bold}
-.view-btn{background:#3b82f6;color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.subjects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.subject-item{background:#f8fafc;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:10px}
+.subject-name{font-size:15px;font-weight:600;color:#1f2937}
+.subject-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.subject-per{font-size:20px;font-weight:bold}
+.view-btn{background:#3b82f6;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap}
 .view-btn:hover{background:#2563eb;transform:translateY(-2px)}
 .per-excellent{color:#22c55e}
 .per-verygood{color:#10b981}
 .per-good{color:#3b82f6}
 .per-average{color:#f59e0b}
 .per-poor{color:#ef4444}
-.progress-bar{width:100%;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-bar{width:100%;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:6px}
 .progress-fill{height:100%;transition:width 0.5s ease}
 .rec-card{background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 100%);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
 .rec-title{font-size:18px;font-weight:bold;margin-bottom:15px}
@@ -69,6 +74,7 @@ body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
 .modal-icon{font-size:40px;margin-bottom:10px;text-align:center}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:15px;color:#1e293b;text-align:center}
 .modal-body{text-align:left}
+.modal-text{font-size:14px;color:#64748b;line-height:1.6;margin-bottom:15px}
 .modal-btn{background:#3b82f6;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:15px}
 .chapter-item{padding:10px 0;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
 .chapter-name{font-size:14px;color:#374151;flex:1}
@@ -76,8 +82,15 @@ body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
 .target-good{color:#22c55e}
 .target-average{color:#f59e0b}
 .target-poor{color:#ef4444}
+.level-info-modal{max-width:380px}
+.level-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+.level-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;background:#f8fafc}
+.level-item .level-badge{padding:5px 10px;font-size:12px;margin:0;float:none;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+.level-range{font-size:12px;color:#64748b}
 @media (max-width:600px){
+.charts-grid{grid-template-columns:1fr}
 .stats-grid{grid-template-columns:1fr}
+.subjects-grid{grid-template-columns:1fr}
 .student-header{flex-direction:column;text-align:center}
 body{padding-top:70px}
 .page-title{font-size:14px}
@@ -86,8 +99,8 @@ body{padding-top:70px}
 .avatar{width:70px;height:70px;font-size:32px}
 .student-name{font-size:22px}
 .student-meta{justify-content:center}
-.subject-item{flex-direction:column;gap:10px;text-align:center}
-.subject-right{flex-direction:column}
+.subject-bottom{flex-direction:column}
+.subject-per{font-size:18px}
 }
 </style>
 </head>
@@ -119,6 +132,58 @@ let userName = '', overallData = {};
 
 function hideModal() {
   document.getElementById('modal').classList.remove('show');
+  document.getElementById('modal').querySelector('.modal-content').classList.remove('level-info-modal');
+}
+
+function showChartInfo(type) {
+  const messages = {
+    overall: 'આ chart તમારા બધા tests નો combined પરિણામ બતાવે છે - સાચા, ખોટા અને બાકી પ્રશ્નો.',
+    subjects: 'આ chart બતાવે છે કે તમારા overall performance માંથી દરેક વિષય કેટલો ટકો છે. તમે કયા વિષય માં વધુ સમય ખર્ચ્યો છે તે જોઈ શકો છો.'
+  };
+  
+  document.getElementById('modalIcon').innerText = 'ℹ️';
+  document.getElementById('modalTitle').innerText = type === 'overall' ? 'Overall પરિણામ' : 'વિષય વાર વિતરણ';
+  document.getElementById('modalBody').innerHTML = `<div class="modal-text">${messages[type]}</div>`;
+  document.getElementById('modal').classList.add('show');
+}
+
+function showConcentrationInfo() {
+  document.getElementById('modalIcon').innerText = 'ℹ️';
+  document.getElementById('modalTitle').innerText = 'એકાગ્રતા રેટિંગ';
+  document.getElementById('modalBody').innerHTML = '<div class="modal-text">આ રેટિંગ તમારી સ્પીડ અને ચોકસાઈ બંને પર આધારિત છે.\n\nજો તમે બધા પ્રશ્નો સાચા કરો પણ વધુ સમય લો તો, એકાગ્રતા તમારી ઓછી જ ગણાશે. ઝડપ અને ચોકસાઈ ઉપર એકાગ્રતાનું માપન થાય છે.</div>';
+  document.getElementById('modal').classList.add('show');
+}
+
+function showLevelInfo() {
+  const levelData = [
+    { name: 'Initial', range: '1-10%', class: 'level-initial' },
+    { name: 'Starter', range: '11-20%', class: 'level-starter' },
+    { name: 'Good', range: '21-30%', class: 'level-good' },
+    { name: 'Better', range: '31-40%', class: 'level-better' },
+    { name: 'Nice', range: '41-50%', class: 'level-nice' },
+    { name: 'Very Good', range: '51-60%', class: 'level-verygood' },
+    { name: 'Very Nice', range: '61-70%', class: 'level-verynice' },
+    { name: 'Excellent', range: '71-80%', class: 'level-excellent' },
+    { name: 'Excellent+', range: '81-90%', class: 'level-excellentplus' },
+    { name: 'Perfect', range: '91-100%', class: 'level-perfect' }
+  ];
+  
+  let levelHTML = '<div class="level-grid">';
+  levelData.forEach(level => {
+    levelHTML += `
+      <div class="level-item">
+        <span class="level-badge ${level.class}">${level.name}</span>
+        <span class="level-range">${level.range}</span>
+      </div>
+    `;
+  });
+  levelHTML += '</div>';
+  
+  document.getElementById('modalIcon').innerText = '📊';
+  document.getElementById('modalTitle').innerText = 'Performance Levels';
+  document.getElementById('modalBody').innerHTML = '<div class="modal-text">તમારા પ્રદર્શનના આધારે levels:</div>' + levelHTML;
+  document.getElementById('modal').querySelector('.modal-content').classList.add('level-info-modal');
+  document.getElementById('modal').classList.add('show');
 }
 
 async function init() {
@@ -130,7 +195,6 @@ async function init() {
     }
     user = u;
 
-    // Load user profile
     const { data: profile } = await sb
       .from("profiles")
       .select("full_name")
@@ -139,7 +203,6 @@ async function init() {
     
     userName = profile?.full_name || "Student";
 
-    // Load all test results for this user
     const { data: results } = await sb
       .from("lrd_test_results")
       .select("*")
@@ -153,7 +216,6 @@ async function init() {
     
     allResults = results;
 
-    // Load all question attempts for these results
     const resultIds = results.map(r => r.id);
     const { data: attempts } = await sb
       .from("lrd_question_attempts")
@@ -224,7 +286,6 @@ function getPercentageColor(per) {
 }
 
 function calculateOverallData() {
-  // Overall stats
   let totalQuestions = 0, totalCorrect = 0, totalWrong = 0, totalSkipped = 0, totalTime = 0;
   
   allResults.forEach(r => {
@@ -238,7 +299,6 @@ function calculateOverallData() {
   const overallPercentage = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(2) : 0;
   const avgTimePerQ = totalQuestions > 0 ? Math.floor(totalTime / totalQuestions) : 0;
   
-  // Subject-wise overall stats
   const subjectMap = {};
   
   allAttempts.forEach(att => {
@@ -292,13 +352,21 @@ function displayOverallPerformance() {
   const levelClass = overallData.level.toLowerCase().replace('+', 'plus').replace(' ', '');
   const lastTestDate = new Date(allResults[0].completed_at).toLocaleDateString('en-GB').replace(/\//g, '-');
   
-  // Calculate overall rank (simplified - based on total score)
-  const overallRank = 1; // You can calculate this by comparing with other users
+  const overallRank = 1;
   
-  // Target score color
   const targetPer = 80;
   const targetClass = overallData.overallPercentage >= targetPer ? 'target-good' : 
                       overallData.overallPercentage >= targetPer - 10 ? 'target-average' : 'target-poor';
+
+  // Subject data for pie chart
+  const subjectLabels = [];
+  const subjectData = [];
+  const subjectColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#f97316', '#84cc16'];
+  
+  Object.entries(overallData.subjectMap).forEach(([subjId, subjData], idx) => {
+    subjectLabels.push(subjData.name);
+    subjectData.push(subjData.total);
+  });
 
   // Generate subject HTML
   let subjectHTML = '';
@@ -308,13 +376,11 @@ function displayOverallPerformance() {
     
     subjectHTML += `
       <div class="subject-item">
-        <div>
-          <div class="subject-name">${subjData.name}</div>
-          <div class="progress-bar">
-            <div class="progress-fill ${subjPerColor}" style="width:${subjPer}%;background:currentColor"></div>
-          </div>
+        <div class="subject-name">${subjData.name}</div>
+        <div class="progress-bar">
+          <div class="progress-fill ${subjPerColor}" style="width:${subjPer}%;background:currentColor"></div>
         </div>
-        <div class="subject-right">
+        <div class="subject-bottom">
           <span class="subject-per ${subjPerColor}">${subjPer}%</span>
           <button class="view-btn" onclick="showChapterDetails('${subjId}', '${subjData.name}')">View Full</button>
         </div>
@@ -365,17 +431,29 @@ function displayOverallPerformance() {
       <div style="flex:1">
         <h2 class="student-name">${userName}</h2>
         <div class="student-meta">
-          <span class="meta-badge level-badge level-${levelClass}">📊 ${overallData.level}</span>
+          <span class="meta-badge level-badge level-${levelClass}" onclick="showLevelInfo()">📊 ${overallData.level}</span>
           <span class="meta-badge" style="color:#f59e0b">🏆 Rank: #${overallRank}</span>
-          <span class="meta-badge" style="color:#6366f1">📅 છેલ્લી ટેસ્ટ: ${lastTestDate}</span>
+          <span class="meta-badge" style="color:#6366f1">📅 છેલ્લી: ${lastTestDate}</span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <h3>Overall પરિણામ</h3>
-    <canvas id="pieChart" style="max-height:250px"></canvas>
+  <div class="charts-grid">
+    <div class="card">
+      <div class="chart-title">
+        <span>Overall પરિણામ</span>
+        <span class="info-icon" onclick="showChartInfo('overall')">i</span>
+      </div>
+      <canvas id="pieChart" style="max-height:220px"></canvas>
+    </div>
+    <div class="card">
+      <div class="chart-title">
+        <span>વિષય વાર વિતરણ</span>
+        <span class="info-icon" onclick="showChartInfo('subjects')">i</span>
+      </div>
+      <canvas id="subjectPieChart" style="max-height:220px"></canvas>
+    </div>
   </div>
 
   <div class="stats-grid">
@@ -391,8 +469,8 @@ function displayOverallPerformance() {
       <div class="stat-label">Overall ચોકસાઈ</div>
       <div class="stat-value" style="color:#3b82f6">${overallData.overallPercentage}%</div>
     </div>
-    <div class="stat-card clickable">
-      <div class="stat-label">એકાગ્રતા રેટિંગ</div>
+    <div class="stat-card clickable" onclick="showConcentrationInfo()">
+      <div class="stat-label">એકાગ્રતા રેટિંગ ℹ️</div>
       <div class="stat-value" style="color:#f59e0b">${overallData.concentrationRating}/10</div>
     </div>
     <div class="stat-card">
@@ -420,14 +498,16 @@ function displayOverallPerformance() {
 
   <div class="card">
     <div class="section-title">📊 વિષય વાર Overall Analysis</div>
-    ${subjectHTML}
+    <div class="subjects-grid">
+      ${subjectHTML}
+    </div>
   </div>
 
   ${recCards}
   `;
 
-  // Draw pie chart
   setTimeout(() => {
+    // Overall Pie Chart
     const ctx = document.getElementById('pieChart');
     if (ctx) {
       new Chart(ctx.getContext('2d'), {
@@ -445,14 +525,39 @@ function displayOverallPerformance() {
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { padding: 15, font: { size: 13 } }
+              labels: { padding: 10, font: { size: 12 } }
             }
           }
         }
       });
     }
 
-    // Draw trend chart (last 5 tests)
+    // Subject Distribution Pie Chart
+    const subjCtx = document.getElementById('subjectPieChart');
+    if (subjCtx) {
+      new Chart(subjCtx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: subjectLabels,
+          datasets: [{
+            data: subjectData,
+            backgroundColor: subjectColors
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { padding: 10, font: { size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Colorful Trend Chart
     const trendCtx = document.getElementById('trendChart');
     if (trendCtx) {
       const last5 = allResults.slice(0, 5).reverse();
@@ -466,12 +571,16 @@ function displayOverallPerformance() {
           datasets: [{
             label: 'સ્કોર %',
             data: scores,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.3,
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+            tension: 0.4,
             fill: true,
-            pointRadius: 5,
-            pointHoverRadius: 7
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#8b5cf6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            borderWidth: 3
           }]
         },
         options: {
@@ -487,10 +596,18 @@ function displayOverallPerformance() {
             y: {
               beginAtZero: true,
               max: 100,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
               ticks: {
                 callback: function(value) {
                   return value + '%';
                 }
+              }
+            },
+            x: {
+              grid: {
+                display: false
               }
             }
           }
@@ -518,7 +635,7 @@ function showChapterDetails(subjId, subjName) {
   chaptersHTML += '</div>';
   
   document.getElementById('modalIcon').innerText = '📚';
-  document.getElementById('modalTitle').innerText = subjName + ' - Chapter-wise Performance';
+  document.getElementById('modalTitle').innerText = subjName + ' - Chapter-wise';
   document.getElementById('modalBody').innerHTML = chaptersHTML;
   document.getElementById('modal').classList.add('show');
 }
