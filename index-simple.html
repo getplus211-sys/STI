@@ -30,26 +30,48 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 async function loadHomePage() {
   try {
+    console.log('Loading home page blocks...');
+    
     const { data, error } = await sb
       .from('home_page_blocks')
       .select('*')
       .eq('is_active', true)
       .order('display_order', { ascending: true });
     
-    if (error) throw error;
+    console.log('Response:', { data, error });
     
-    let html = '';
-    if (data) {
-      data.forEach(block => {
-        html += block.block_html;
-      });
+    if (error) {
+      console.error('Supabase error:', error);
+      throw new Error(error.message || 'Database error');
     }
     
+    if (!data || data.length === 0) {
+      document.getElementById('app').innerHTML = `
+        <div class="loader">
+          <h2>⚠️ કોઈ blocks મળ્યા નથી</h2>
+          <p>Table માં data add કરો</p>
+        </div>
+      `;
+      return;
+    }
+    
+    let html = '';
+    data.forEach(block => {
+      html += block.block_html;
+    });
+    
     document.getElementById('app').innerHTML = html;
+    console.log('Page loaded successfully!');
     
   } catch (err) {
-    console.error('Error:', err);
-    document.getElementById('app').innerHTML = '<div class="loader"><h2>❌ Error</h2><p>ડેટા લોડ કરવામાં સમસ્યા</p></div>';
+    console.error('Error details:', err);
+    document.getElementById('app').innerHTML = `
+      <div class="loader">
+        <h2>❌ Error</h2>
+        <p style="color:#ef4444;font-size:14px;margin-top:10px">${err.message}</p>
+        <p style="font-size:12px;margin-top:10px">Console check કરો વધુ details માટે</p>
+      </div>
+    `;
   }
 }
 
