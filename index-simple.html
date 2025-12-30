@@ -7,9 +7,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui;background:#f1f5f9}
-.container{max-width:1200px;margin:auto;padding:20px}
-.loader{text-align:center;padding:60px;color:#64748b}
+body{font-family:system-ui;background:#f1f5f9;padding:0}
+.container{max-width:100%;margin:auto;padding:12px}
+.loader{text-align:center;padding:40px 20px;color:#64748b}
+
+/* Mobile First - Default Styles */
+/* All blocks will be mobile-friendly by default */
 </style>
 </head>
 <body>
@@ -27,7 +30,6 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 async function loadHomePage() {
   try {
-    // માત્ર એક જ query - display_order થી sorted
     const { data, error } = await sb
       .from('home_page_blocks')
       .select('*')
@@ -36,7 +38,6 @@ async function loadHomePage() {
     
     if (error) throw error;
     
-    // બધા blocks નો HTML એક પછી એક display કરો
     let html = '';
     if (data) {
       data.forEach(block => {
