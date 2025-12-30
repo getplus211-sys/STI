@@ -22,13 +22,14 @@ body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
 h2,h3,h4{margin:6px 0 12px 0}
 button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cursor:pointer;margin-bottom:10px}
 .blue{background:#3b82f6;color:#fff}
-.badge{background:#10b981;color:#fff;padding:6px 14px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:0;float:right}
+.badge{background:#e0e7ff;color:#4338ca;padding:6px 14px;border-radius:20px;font-size:14px;display:inline-block;margin-bottom:0;float:right;font-weight:600}
 .student-header{display:flex;align-items:center;gap:15px;margin-bottom:20px;position:relative;z-index:1}
 .avatar{width:90px;height:90px;background:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;color:#fff;box-shadow:0 8px 20px rgba(59,130,246,0.4);border:4px solid #fff}
 .student-meta{display:flex;gap:12px;font-size:14px;flex-wrap:wrap;margin-top:8px}
 .student-name{color:#1e293b;font-size:26px;font-weight:700;margin:0 0 8px 0;text-shadow:0 2px 4px rgba(0,0,0,0.1)}
 .meta-badge{background:#fff;padding:6px 12px;border-radius:20px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:5px}
-.level-badge{font-weight:700;padding:8px 16px;border-radius:25px;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.level-badge{font-weight:700;padding:8px 16px;border-radius:25px;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.15);cursor:pointer;transition:all 0.2s}
+.level-badge:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.2)}
 .level-initial{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
 .level-starter{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff}
 .level-good{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
@@ -40,6 +41,11 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .level-excellentplus{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
 .level-perfect{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;animation:glow 2s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:0 4px 12px rgba(139,92,246,0.4)}50%{box-shadow:0 4px 20px rgba(139,92,246,0.8)}}
+.level-info-modal{max-width:500px}
+.level-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:15px}
+.level-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:#f8fafc}
+.level-name{font-weight:600;font-size:14px}
+.level-range{font-size:13px;color:#64748b}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}
 .stat-card{background:#f8fafc;border-radius:12px;padding:15px;text-align:center;position:relative}
 .stat-card.clickable{cursor:pointer;transition:all 0.2s}
@@ -507,7 +513,7 @@ function displayPerformance() {
       <div style="flex:1">
         <h2 class="student-name">${userName}</h2>
         <div class="student-meta">
-          <span class="meta-badge level-badge level-${levelClass}">📊 ${level}</span>
+          <span class="meta-badge level-badge level-${levelClass}" onclick="showLevelInfo()">📊 ${level}</span>
           <span class="meta-badge" style="color:#f59e0b">🏆 Rank: #${userRank}</span>
           <span class="meta-badge" style="color:#6366f1">📅 ${date}</span>
         </div>
@@ -655,6 +661,43 @@ function showConcentrationInfo() {
     'આ રેટિંગ તમારી સ્પીડ અને ચોકસાઈ બંને પર આધારિત છે.\n\n' +
     'જો તમે બધા પ્રશ્નો સાચા કરો પણ વધુ સમય લો તો, એકાગ્રતા તમારી ઓછી જ ગણાશે. ઝડપ અને ચોકસાઈ ઉપર એકાગ્રતાનું માપન થાય છે.'
   );
+}
+
+function showLevelInfo() {
+  const levelData = [
+    { name: 'Initial', range: '1-10%', class: 'level-initial' },
+    { name: 'Starter', range: '11-20%', class: 'level-starter' },
+    { name: 'Good', range: '21-30%', class: 'level-good' },
+    { name: 'Better', range: '31-40%', class: 'level-better' },
+    { name: 'Nice', range: '41-50%', class: 'level-nice' },
+    { name: 'Very Good', range: '51-60%', class: 'level-verygood' },
+    { name: 'Very Nice', range: '61-70%', class: 'level-verynice' },
+    { name: 'Excellent', range: '71-80%', class: 'level-excellent' },
+    { name: 'Excellent+', range: '81-90%', class: 'level-excellentplus' },
+    { name: 'Perfect', range: '91-100%', class: 'level-perfect' }
+  ];
+  
+  let levelHTML = '<div class="level-grid">';
+  levelData.forEach(level => {
+    levelHTML += `
+      <div class="level-item">
+        <span class="level-badge ${level.class}" style="margin:0;float:none">${level.name}</span>
+        <span class="level-range">${level.range}</span>
+      </div>
+    `;
+  });
+  levelHTML += '</div>';
+  
+  document.getElementById('modalIcon').innerText = '📊';
+  document.getElementById('modalTitle').innerText = 'Performance Levels';
+  document.getElementById('modalText').innerHTML = 'તમારા પ્રદર્શનના આધારે આ levels નક્કી થાય છે:' + levelHTML;
+  document.getElementById('modal').querySelector('.modal-content').classList.add('level-info-modal');
+  document.getElementById('modal').classList.add('show');
+}
+
+function hideModal() {
+  document.getElementById('modal').classList.remove('show');
+  document.getElementById('modal').querySelector('.modal-content').classList.remove('level-info-modal');
 }
 </script>
 </body>
