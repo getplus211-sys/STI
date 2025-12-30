@@ -41,11 +41,12 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .level-excellentplus{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
 .level-perfect{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;animation:glow 2s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:0 4px 12px rgba(139,92,246,0.4)}50%{box-shadow:0 4px 20px rgba(139,92,246,0.8)}}
-.level-info-modal{max-width:500px}
-.level-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:15px}
-.level-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:#f8fafc}
-.level-name{font-weight:600;font-size:14px}
-.level-range{font-size:13px;color:#64748b}
+.level-info-modal{max-width:380px;max-height:80vh;overflow-y:auto}
+.level-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+.level-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;background:#f8fafc}
+.level-name{font-weight:600;font-size:13px}
+.level-range{font-size:12px;color:#64748b}
+.level-item .level-badge{padding:5px 10px;font-size:12px;margin:0;float:none;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:20px 0}
 .stat-card{background:#f8fafc;border-radius:12px;padding:15px;text-align:center;position:relative}
 .stat-card.clickable{cursor:pointer;transition:all 0.2s}
@@ -77,11 +78,11 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .loader{text-align:center;padding:40px}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal.show{display:flex}
-.modal-content{background:#fff;border-radius:20px;max-width:420px;width:90%;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalPop 0.3s ease;text-align:center}
+.modal-content{background:#fff;border-radius:20px;max-width:420px;width:90%;max-height:85vh;overflow-y:auto;padding:25px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalPop 0.3s ease;text-align:center}
 @keyframes modalPop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
-.modal-icon{font-size:50px;margin-bottom:15px}
-.modal-title{font-size:20px;font-weight:700;margin-bottom:10px;color:#1e293b}
-.modal-text{font-size:14px;color:#64748b;line-height:1.6;margin-bottom:20px;white-space:pre-line}
+.modal-icon{font-size:40px;margin-bottom:10px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:8px;color:#1e293b}
+.modal-text{font-size:13px;color:#64748b;line-height:1.5;margin-bottom:15px;white-space:pre-line}
 .modal-btn{background:#3b82f6;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
 .back-btn{margin-top:20px}
 @media (max-width:600px){
@@ -108,7 +109,7 @@ body{padding-top:70px}
   </div>
 </div>
 
-<div id="modal" class="modal">
+<div id="modal" class="modal" onclick="if(event.target.id === 'modal') hideModal()">
   <div class="modal-content">
     <div class="modal-icon" id="modalIcon">ℹ️</div>
     <div class="modal-title" id="modalTitle">Title</div>
@@ -681,7 +682,7 @@ function showLevelInfo() {
   levelData.forEach(level => {
     levelHTML += `
       <div class="level-item">
-        <span class="level-badge ${level.class}" style="margin:0;float:none">${level.name}</span>
+        <span class="level-badge ${level.class}">${level.name}</span>
         <span class="level-range">${level.range}</span>
       </div>
     `;
@@ -690,7 +691,7 @@ function showLevelInfo() {
   
   document.getElementById('modalIcon').innerText = '📊';
   document.getElementById('modalTitle').innerText = 'Performance Levels';
-  document.getElementById('modalText').innerHTML = 'તમારા પ્રદર્શનના આધારે આ levels નક્કી થાય છે:' + levelHTML;
+  document.getElementById('modalText').innerHTML = 'તમારા પ્રદર્શનના આધારે levels:' + levelHTML;
   document.getElementById('modal').querySelector('.modal-content').classList.add('level-info-modal');
   document.getElementById('modal').classList.add('show');
 }
