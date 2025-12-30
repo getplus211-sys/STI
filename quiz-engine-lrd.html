@@ -49,6 +49,8 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .modal-buttons button{flex:1;border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;border:none}
 .modal-btn-confirm{background:#22c55e;color:#fff}
 .modal-btn-cancel{background:#e2e8f0;color:#334155}
+.rank{display:flex;gap:10px;align-items:center}
+.rank.me{border:2px solid #22c55e}
 .rank-item{display:flex;align-items:center;gap:12px;padding:12px;background:#f8fafc;border-radius:10px;margin-bottom:8px}
 .rank-num{width:35px;height:35px;background:#3b82f6;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px}
 .rank-num.top1{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
@@ -541,7 +543,7 @@ async function loadLeaderboard() {
   app.innerHTML = '<div class="card loader"><div style="font-size:40px;animation:spin 2s linear infinite">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Leaderboard લોડ થઈ રહ્યો છે</p></div>';
   
   try {
-    // First get ALL results for this test to find user's rank
+    // Get ALL results for this test
     const { data: allResults, error: allError } = await sb
       .from("lrd_test_results")
       .select("user_id, score, total_time_seconds, correct_answers, total_questions, percentage")
@@ -551,19 +553,22 @@ async function loadLeaderboard() {
 
     if (allError) {
       console.error('Leaderboard error:', allError);
-      app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>Failed to load leaderboard</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+      showModal('❌', 'લોડ નિષ્ફળ', 'Failed to load leaderboard: ' + allError.message, 
+        '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
       return;
     }
 
     if (!allResults || allResults.length === 0) {
-      app.innerHTML = '<div class="card"><h3>⚠️ No Results</h3><p>કોઈ results નથી</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+      showModal('⚠️', 'કોઈ Results નથી', 'આ ટેસ્ટ માટે હજુ કોઈ results નથી', 
+        '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
       return;
     }
 
     // Find current user's position in all results
     const myIndex = allResults.findIndex(r => r.user_id === user.id);
     if (myIndex === -1) {
-      app.innerHTML = '<div class="card"><h3>⚠️ Error</h3><p>તમારું result નથી મળ્યું</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+      showModal('⚠️', 'રિઝલ્ટ નથી મળ્યું', 'Your result not found in leaderboard', 
+        '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
       return;
     }
 
@@ -573,17 +578,17 @@ async function loadLeaderboard() {
     // Get top 50 results
     const top50 = allResults.slice(0, 50);
 
-    // Get user IDs for profile fetching
-    const userIds = [...new Set(top50.map(r => r.user_id))];
-    
+    // Fetch profiles separately (like quiz-engine 6)
+    const allUserIds = allResults.map(r => r.user_id);
     const { data: profiles } = await sb
       .from("profiles")
-      .select("id, full_name, avatar_url")
-      .in("id", userIds);
+      .select("id, full_name")
+      .in("id", allUserIds);
 
-    const profileMap = {};
+    // Create name map
+    const nameMap = {};
     if (profiles) {
-      profiles.forEach(p => profileMap[p.id] = p);
+      profiles.forEach(p => nameMap[p.id] = p.full_name);
     }
 
     const myMinutes = Math.floor(myData.total_time_seconds / 60);
@@ -592,47 +597,41 @@ async function loadLeaderboard() {
     let html = `
     <div class="card">
       <span class="badge kapila">KAPiLa</span>
-      <h2>🏆 Leaderboard</h2>
-      <p style="color:#6b7280;margin:10px 0">${currentTest ? currentTest.test_name : 'Test Results'}</p>
-    </div>
+      <button class="gray" onclick="loadExistingResult()">⬅ Back to Result</button>
+      <br><br>
 
-    <div class="card">
-      <h4 style="margin-bottom:10px">તમારી રેંક</h4>
-      <div class="rank-item" style="border:2px solid #22c55e;background:#f0fdf4">
-        <div class="rank-num ${myRank === 1 ? 'top1' : myRank === 2 ? 'top2' : myRank === 3 ? 'top3' : ''}">${myRank}</div>
-        <div class="rank-info">
-          <div class="rank-name">${profileMap[user.id]?.full_name || 'You'} (તમે)</div>
-          <div class="rank-score">${myData.correct_answers}/${myData.total_questions} correct • ${myData.percentage}% • ${myMinutes}m ${mySeconds}s</div>
-        </div>
-        <div class="rank-points">${myData.score}</div>
+      <div class="card rank" style="border:2px solid #22c55e;background:#f0fdf4;padding:15px">
+        <b>Your Rank: #${myRank}</b><br>
+        Name: ${nameMap[user.id] || "You"}<br>
+        Score: ${myData.score}/${myData.total_questions}<br>
+        Accuracy: ${myData.percentage}%<br>
+        Time: ${myMinutes}m ${mySeconds}s
       </div>
-    </div>
 
-    <div class="card">
-      <h4 style="margin-bottom:10px">Top ${top50.length} Students</h4>`;
+      <h2>🏆 Leaderboard (Top 50)</h2>
+    </div>`;
 
     top50.forEach((r, idx) => {
       const minutes = Math.floor(r.total_time_seconds / 60);
       const seconds = r.total_time_seconds % 60;
-      const rankClass = idx === 0 ? 'top1' : idx === 1 ? 'top2' : idx === 2 ? 'top3' : '';
       const isCurrentUser = r.user_id === user.id;
       
       html += `
-      <div class="rank-item" ${isCurrentUser ? 'style="border:2px solid #22c55e;background:#f0fdf4"' : ''}>
-        <div class="rank-num ${rankClass}">${idx + 1}</div>
-        <div class="rank-info">
-          <div class="rank-name">${profileMap[r.user_id]?.full_name || 'User'} ${isCurrentUser ? '(તમે)' : ''}</div>
-          <div class="rank-score">${r.correct_answers}/${r.total_questions} correct • ${r.percentage}% • ${minutes}m ${seconds}s</div>
-        </div>
-        <div class="rank-points">${r.score}</div>
+      <div class="card rank" ${isCurrentUser ? 'style="border:2px solid #22c55e;background:#f0fdf4"' : ''}>
+        <b>Rank #${idx + 1}</b><br>
+        Name: ${nameMap[r.user_id] || "User"} ${isCurrentUser ? '(તમે)' : ''}<br>
+        Score: ${r.score}/${r.total_questions}<br>
+        Accuracy: ${r.percentage}%<br>
+        Time: ${minutes}m ${seconds}s
       </div>`;
     });
 
-    html += '</div><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button>';
+    html += '<button class="gray" onclick="loadExistingResult()">⬅ Back to Result</button>';
     app.innerHTML = html;
   } catch (err) {
     console.error('Leaderboard error:', err);
-    app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>' + err.message + '</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+    showModal('❌', 'લોડ નિષ્ફળ', 'Failed to load leaderboard. Please try again.', 
+      '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
   }
 }
 
