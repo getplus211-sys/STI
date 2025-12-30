@@ -77,6 +77,7 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .checkbox-container{display:flex;align-items:center;gap:10px;padding:15px;background:#f1f5f9;border-radius:10px;margin:15px 0}
 .checkbox-container input[type="checkbox"]{width:20px;height:20px;cursor:pointer}
 .checkbox-container label{cursor:pointer;font-size:14px;color:#334155}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -426,6 +427,14 @@ async function submitTest() {
   submitted = true;
   clearInterval(timer);
 
+  // Show loading indicator
+  app.innerHTML = `
+  <div class="card loader" style="text-align:center">
+    <div style="font-size:60px;animation:spin 2s linear infinite">⏳</div>
+    <h3>સબમિટ થઈ રહ્યું છે...</h3>
+    <p>કૃપા કરીને રાહ જુઓ, તમારા જવાબો સેવ થઈ રહ્યા છે</p>
+  </div>`;
+
   let correct = 0, wrong = 0, skip = 0, e = 0;
 
   questions.forEach(q => {
@@ -529,68 +538,102 @@ function loadResult(score, c, w, s, e, time) {
 }
 
 async function loadLeaderboard() {
-  app.innerHTML = '<div class="card loader"><div style="font-size:40px">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Leaderboard લોડ થઈ રહ્યો છે</p></div>';
+  app.innerHTML = '<div class="card loader"><div style="font-size:40px;animation:spin 2s linear infinite">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Leaderboard લોડ થઈ રહ્યો છે</p></div>';
   
-  const { data: results } = await sb
-    .from("lrd_test_results")
-    .select("*, profiles(full_name, avatar_url)")
-    .eq("test_id", TEST_ID)
-    .order("score", { ascending: false })
-    .order("total_time_seconds", { ascending: true })
-    .limit(50);
+  try {
+    // First get ALL results for this test to find user's rank
+    const { data: allResults, error: allError } = await sb
+      .from("lrd_test_results")
+      .select("user_id, score, total_time_seconds, correct_answers, total_questions, percentage")
+      .eq("test_id", TEST_ID)
+      .order("score", { ascending: false })
+      .order("total_time_seconds", { ascending: true });
 
-  if (!results || results.length === 0) {
-    app.innerHTML = '<div class="card"><h3>⚠️ No Results</h3><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
-    return;
-  }
+    if (allError) {
+      console.error('Leaderboard error:', allError);
+      app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>Failed to load leaderboard</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+      return;
+    }
 
-  const myIndex = results.findIndex(r => r.user_id === user.id);
-  const myRank = myIndex + 1;
-  const myData = results[myIndex];
+    if (!allResults || allResults.length === 0) {
+      app.innerHTML = '<div class="card"><h3>⚠️ No Results</h3><p>કોઈ results નથી</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+      return;
+    }
 
-  const myMinutes = Math.floor(myData.total_time_seconds / 60);
-  const mySeconds = myData.total_time_seconds % 60;
+    // Find current user's position in all results
+    const myIndex = allResults.findIndex(r => r.user_id === user.id);
+    if (myIndex === -1) {
+      app.innerHTML = '<div class="card"><h3>⚠️ Error</h3><p>તમારું result નથી મળ્યું</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+      return;
+    }
 
-  let html = `
-  <div class="card">
-    <span class="badge kapila">KAPiLa</span>
-    <h2>🏆 Leaderboard</h2>
-    <p style="color:#6b7280;margin:10px 0">${currentTest.test_name}</p>
-  </div>
+    const myRank = myIndex + 1;
+    const myData = allResults[myIndex];
 
-  <div class="card">
-    <h4 style="margin-bottom:10px">તમારી રેંક</h4>
-    <div class="rank-item" style="border:2px solid #22c55e">
-      <div class="rank-num ${myRank === 1 ? 'top1' : myRank === 2 ? 'top2' : myRank === 3 ? 'top3' : ''}">${myRank}</div>
-      <div class="rank-info">
-        <div class="rank-name">${myData.profiles?.full_name || 'You'} (તમે)</div>
-        <div class="rank-score">${myData.correct_answers}/${myData.total_questions} correct • ${myData.percentage}% • ${myMinutes}m ${mySeconds}s</div>
-      </div>
-      <div class="rank-points">${myData.score}</div>
-    </div>
-  </div>
+    // Get top 50 results
+    const top50 = allResults.slice(0, 50);
 
-  <div class="card">
-    <h4 style="margin-bottom:10px">Top 50 Students</h4>`;
-
-  results.forEach((r, idx) => {
-    const minutes = Math.floor(r.total_time_seconds / 60);
-    const seconds = r.total_time_seconds % 60;
-    const rankClass = idx === 0 ? 'top1' : idx === 1 ? 'top2' : idx === 2 ? 'top3' : '';
+    // Get user IDs for profile fetching
+    const userIds = [...new Set(top50.map(r => r.user_id))];
     
-    html += `
-    <div class="rank-item" ${r.user_id === user.id ? 'style="border:2px solid #22c55e"' : ''}>
-      <div class="rank-num ${rankClass}">${idx + 1}</div>
-      <div class="rank-info">
-        <div class="rank-name">${r.profiles?.full_name || 'User'} ${r.user_id === user.id ? '(તમે)' : ''}</div>
-        <div class="rank-score">${r.correct_answers}/${r.total_questions} correct • ${r.percentage}% • ${minutes}m ${seconds}s</div>
-      </div>
-      <div class="rank-points">${r.score}</div>
-    </div>`;
-  });
+    const { data: profiles } = await sb
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", userIds);
 
-  html += '</div><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button>';
-  app.innerHTML = html;
+    const profileMap = {};
+    if (profiles) {
+      profiles.forEach(p => profileMap[p.id] = p);
+    }
+
+    const myMinutes = Math.floor(myData.total_time_seconds / 60);
+    const mySeconds = myData.total_time_seconds % 60;
+
+    let html = `
+    <div class="card">
+      <span class="badge kapila">KAPiLa</span>
+      <h2>🏆 Leaderboard</h2>
+      <p style="color:#6b7280;margin:10px 0">${currentTest ? currentTest.test_name : 'Test Results'}</p>
+    </div>
+
+    <div class="card">
+      <h4 style="margin-bottom:10px">તમારી રેંક</h4>
+      <div class="rank-item" style="border:2px solid #22c55e;background:#f0fdf4">
+        <div class="rank-num ${myRank === 1 ? 'top1' : myRank === 2 ? 'top2' : myRank === 3 ? 'top3' : ''}">${myRank}</div>
+        <div class="rank-info">
+          <div class="rank-name">${profileMap[user.id]?.full_name || 'You'} (તમે)</div>
+          <div class="rank-score">${myData.correct_answers}/${myData.total_questions} correct • ${myData.percentage}% • ${myMinutes}m ${mySeconds}s</div>
+        </div>
+        <div class="rank-points">${myData.score}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="margin-bottom:10px">Top ${top50.length} Students</h4>`;
+
+    top50.forEach((r, idx) => {
+      const minutes = Math.floor(r.total_time_seconds / 60);
+      const seconds = r.total_time_seconds % 60;
+      const rankClass = idx === 0 ? 'top1' : idx === 1 ? 'top2' : idx === 2 ? 'top3' : '';
+      const isCurrentUser = r.user_id === user.id;
+      
+      html += `
+      <div class="rank-item" ${isCurrentUser ? 'style="border:2px solid #22c55e;background:#f0fdf4"' : ''}>
+        <div class="rank-num ${rankClass}">${idx + 1}</div>
+        <div class="rank-info">
+          <div class="rank-name">${profileMap[r.user_id]?.full_name || 'User'} ${isCurrentUser ? '(તમે)' : ''}</div>
+          <div class="rank-score">${r.correct_answers}/${r.total_questions} correct • ${r.percentage}% • ${minutes}m ${seconds}s</div>
+        </div>
+        <div class="rank-points">${r.score}</div>
+      </div>`;
+    });
+
+    html += '</div><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button>';
+    app.innerHTML = html;
+  } catch (err) {
+    console.error('Leaderboard error:', err);
+    app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>' + err.message + '</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+  }
 }
 
 function viewPerformance() {
