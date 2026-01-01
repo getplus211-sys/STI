@@ -56,9 +56,9 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
   </div>
   <div class="header-right">
     <span id="userNameDisplay" class="user-name" style="display:none"></span>
-    <a href="index-kapila-complete.html" class="back-btn">
-      <span>←</span>
-      <span>પાછા</span>
+    <a href="index-kapila.html" class="back-btn">
+      <span>← Home</span>
+      <span></span>
     </a>
   </div>
 </header>
@@ -133,7 +133,7 @@ async function init() {
     // Check auth
     const { data: { user } } = await sb.auth.getUser();
     if (!user) {
-      window.location.href = 'index-kapila-complete.html';
+      window.location.href = 'index-kapila.html';
       return;
     }
     currentUser = user;
@@ -244,7 +244,7 @@ function navigate(page) {
   document.querySelectorAll('.footer-btn').forEach(btn => btn.classList.remove('active'));
   event.target.closest('.footer-btn').classList.add('active');
   
-  if (page === 'home') window.location.href = 'index-kapila-complete.html';
+  if (page === 'home') window.location.href = 'index-kapila.html';
   else if (page === 'performance') window.location.href = 'overall-performance.html';
   else if (page === 'account') window.location.href = 'account.html';
   else if (page === 'contact') window.location.href = 'contact.html';
