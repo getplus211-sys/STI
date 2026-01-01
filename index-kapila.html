@@ -402,7 +402,7 @@ function toggleMenu() {
 
 function menuNavigate(page) {
   toggleMenu();
-  if (page === 'home') window.location.href = 'index-kapila-complete.html';
+  if (page === 'home') window.location.href = 'index-kapila.html';
   else if (page === 'register') openAuthModal();
   else if (page === 'about') showAboutPopup();
   else if (page === 'privacy') window.location.href = 'privacy-policy.html';
@@ -414,7 +414,7 @@ function navigateFooter(page) {
   document.querySelectorAll('.footer-btn').forEach(btn => btn.classList.remove('active'));
   event.target.closest('.footer-btn').classList.add('active');
   
-  if (page === 'home') window.location.href = 'index-kapila-complete.html';
+  if (page === 'home') window.location.href = 'index-kapila.html';
   else if (page === 'performance') checkAuthAndNavigate('overall-performance.html');
   else if (page === 'account') showAccountPopup();
   else if (page === 'contact') showContactPopup();
