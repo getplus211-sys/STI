@@ -7,8 +7,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:70px}
-.header{position:fixed;top:0;left:0;right:0;z-index:1000;background:#fff;padding:12px 16px;box-shadow:0 2px 10px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center}
+body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:70px}
+
+/* Header */
+.header{position:fixed;top:0;left:0;right:0;z-index:1000;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+.header-top{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb}
 .brand{flex:1}
 .brand-name{font-size:18px;font-weight:bold;color:#ea580c;line-height:1.2}
 .brand-subtitle{font-size:10px;color:#ea580c}
@@ -16,12 +19,46 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .register-btn{background:#2563eb;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:bold;border:none;cursor:pointer}
 .menu-btn{width:40px;height:40px;background:#f3f4f6;border-radius:8px;border:none;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
 .user-name{font-size:12px;font-weight:bold;color:#1f2937}
+
+/* Chapters Horizontal Scroll */
+.chapters-header{overflow-x:auto;overflow-y:hidden;white-space:nowrap;padding:12px 16px;background:#fff;-webkit-overflow-scrolling:touch}
+.chapters-header::-webkit-scrollbar{height:4px}
+.chapters-header::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}
+.chapter-tab{display:inline-block;padding:8px 16px;margin-right:8px;background:#f3f4f6;border-radius:20px;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;transition:all 0.2s;border:2px solid transparent}
+.chapter-tab:hover{background:#e5e7eb}
+.chapter-tab.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.chapter-tab.loading{background:#f3f4f6;color:#9ca3af;cursor:wait}
+
+/* Footer */
 .footer{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:#fff;padding:12px 16px;box-shadow:0 -2px 10px rgba(0,0,0,0.1);display:flex;justify-content:space-around;align-items:center}
 .footer-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:24px;color:#6b7280;cursor:pointer;position:relative}
 .footer-btn.active{color:#2563eb}
 .footer-label{font-size:9px;font-weight:600}
 .notification-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;padding:2px 5px;border-radius:10px;font-weight:bold}
+
+/* Container */
 .container{padding:0 16px;max-width:600px;margin:0 auto}
+
+/* Quiz List */
+.quiz-list{padding:16px}
+.quiz-item{background:#fff;padding:16px;margin-bottom:12px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.08);cursor:pointer;transition:all 0.2s}
+.quiz-item:hover{box-shadow:0 4px 12px rgba(0,0,0,0.15);transform:translateY(-2px)}
+.quiz-item:active{transform:translateY(0)}
+.quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.quiz-name{font-size:16px;font-weight:600;color:#1f2937}
+.quiz-badge{background:#22c55e;color:#fff;font-size:11px;padding:4px 10px;border-radius:12px;font-weight:600}
+.quiz-badge.medium{background:#f59e0b}
+.quiz-badge.hard{background:#ef4444}
+.quiz-info{display:flex;gap:16px;margin-top:8px}
+.quiz-info-item{display:flex;align-items:center;gap:6px;font-size:13px;color:#6b7280}
+
+/* Loading State */
+.loading{text-align:center;padding:60px 20px;color:#6b7280}
+.spinner{font-size:48px;margin:0 auto 16px;animation:spin 2s linear infinite;display:inline-block}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.loading h3{margin-top:16px;font-size:16px;font-weight:500}
+
+/* Side Menu */
 .side-menu{position:fixed;top:0;right:-280px;width:280px;height:100%;background:#fff;z-index:2000;transition:right 0.3s;box-shadow:-2px 0 10px rgba(0,0,0,0.1);overflow-y:auto}
 .side-menu.open{right:0}
 .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1999;display:none}
@@ -34,6 +71,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .menu-item{padding:16px 20px;border-bottom:1px solid #f3f4f6;cursor:pointer;display:flex;align-items:center;gap:12px}
 .menu-item:hover{background:#f9fafb}
 .menu-icon{font-size:24px;width:40px;text-align:center}
+
+/* Modal */
 .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:3000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
 .modal.show{display:flex}
 .modal-content{background:#fff;border-radius:16px;max-width:400px;width:100%;padding:24px;max-height:90vh;overflow-y:auto;margin:auto}
@@ -61,44 +100,34 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .info-row{background:#f9fafb;padding:12px;border-radius:8px;margin:8px 0;display:flex;align-items:center;gap:12px}
 .info-label{font-size:11px;color:#6b7280;margin-bottom:2px}
 .info-value{font-size:14px;font-weight:600;color:#1f2937}
-.price-strike{text-decoration:line-through;color:#9ca3af;font-size:16px}
-.price-offer{color:#22c55e;font-size:24px;font-weight:bold}
-
-/* Spinner Animation - Timer Emoji */
-.spinner{font-size:48px;margin:0 auto 16px;animation:spin 2s linear infinite;display:inline-block}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-
-/* Chapters List */
-.chapters-list{padding:16px}
-.chapter-item{background:#fff;padding:16px;margin-bottom:12px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.08);cursor:pointer;transition:all 0.2s}
-.chapter-item:hover{box-shadow:0 4px 12px rgba(0,0,0,0.15);transform:translateY(-2px)}
-.chapter-item:active{transform:translateY(0)}
-.chapter-number{font-size:14px;color:#6b7280;font-weight:600;margin-bottom:6px}
-.chapter-name{font-size:16px;color:#1f2937;font-weight:500;line-height:1.4}
-.chapter-code{font-size:11px;color:#9ca3af;margin-top:6px;font-family:monospace}
-.loading{text-align:center;padding:60px 20px;color:#6b7280}
-.loading h3{margin-top:16px;font-size:16px;font-weight:500}
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="brand">
-    <div class="brand-name">ગુજરાતી સાહિત્ય</div>
-    <div class="brand-subtitle">KAPiLa Institute</div>
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-name">ગુજરાતી સાહિત્ય</div>
+      <div class="brand-subtitle">KAPiLa Institute</div>
+    </div>
+    <div class="header-right">
+      <button id="registerBtn" class="register-btn" onclick="openAuthModal()">Register</button>
+      <span id="userNameDisplay" class="user-name" style="display:none"></span>
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </div>
   </div>
-  <div class="header-right">
-    <button id="registerBtn" class="register-btn" onclick="openAuthModal()">Register</button>
-    <span id="userNameDisplay" class="user-name" style="display:none"></span>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  <div class="chapters-header" id="chaptersHeader">
+    <div class="loading" style="padding:12px 0">
+      <span class="spinner" style="font-size:20px;margin:0">⏱️</span>
+    </div>
   </div>
 </header>
 
 <div class="container">
-  <div class="chapters-list" id="chaptersList">
+  <div class="quiz-list" id="quizList">
     <div class="loading">
       <div class="spinner">⏱️</div>
-      <h3>લોડિંગ થઈ રહ્યું છે...</h3>
+      <h3>પ્રકરણ પસંદ કરો</h3>
     </div>
   </div>
 </div>
@@ -370,6 +399,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
+let allChapters = [];
+let currentChapterCode = null;
 
 async function init() {
   const { data: { user } } = await sb.auth.getUser();
@@ -389,7 +420,6 @@ async function init() {
 
 async function loadChapters() {
   try {
-    // First, try to fetch without ordering to see if data exists
     const { data, error } = await sb
       .from('kls_chapters')
       .select('*')
@@ -397,46 +427,121 @@ async function loadChapters() {
     
     if (error) throw error;
     
-    const chaptersList = document.getElementById('chaptersList');
-    
     if (!data || data.length === 0) {
-      chaptersList.innerHTML = `
-        <div class="loading">
-          <h3 style="color:#6b7280">કોઈ પ્રકરણો મળ્યા નથી</h3>
-        </div>
-      `;
+      document.getElementById('chaptersHeader').innerHTML = '<div style="padding:12px;color:#6b7280;font-size:13px">કોઈ પ્રકરણો નથી</div>';
       return;
     }
     
-    // Sort manually by number field
-    const sortedData = data.sort((a, b) => {
+    // Sort by number
+    allChapters = data.sort((a, b) => {
       const numA = parseInt(a.number) || 0;
       const numB = parseInt(b.number) || 0;
       return numA - numB;
     });
     
-    chaptersList.innerHTML = sortedData.map(chapter => `
-      <div class="chapter-item" onclick="openChapter('${chapter.id}', '${chapter.name}')">
-        <div class="chapter-number">પ્રકરણ ${chapter.number}</div>
-        <div class="chapter-name">${chapter.name}</div>
-        <div class="chapter-code">${chapter.chapter_code}</div>
-      </div>
-    `).join('');
+    // Create chapter tabs
+    const chaptersHTML = allChapters.map((chapter, index) => {
+      const chapterNum = chapter.chapter_code.split('_').pop(); // Extract "01" from "GUJ_SAH_01"
+      return `<span class="chapter-tab ${index === 0 ? 'active' : ''}" onclick="selectChapter('${chapter.chapter_code}')" data-code="${chapter.chapter_code}">પ્રકરણ ${chapterNum}</span>`;
+    }).join('');
+    
+    document.getElementById('chaptersHeader').innerHTML = chaptersHTML;
+    
+    // Load first chapter's quizzes automatically
+    if (allChapters.length > 0) {
+      selectChapter(allChapters[0].chapter_code);
+    }
     
   } catch (err) {
-    document.getElementById('chaptersList').innerHTML = `
+    document.getElementById('chaptersHeader').innerHTML = '<div style="padding:12px;color:#ef4444;font-size:13px">Error loading chapters</div>';
+  }
+}
+
+async function selectChapter(chapterCode) {
+  currentChapterCode = chapterCode;
+  
+  // Update active tab
+  document.querySelectorAll('.chapter-tab').forEach(tab => {
+    tab.classList.remove('active');
+    if (tab.getAttribute('data-code') === chapterCode) {
+      tab.classList.add('active');
+      tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  });
+  
+  // Show loading
+  document.getElementById('quizList').innerHTML = `
+    <div class="loading">
+      <div class="spinner">⏱️</div>
+      <h3>લોડિંગ થઈ રહ્યું છે...</h3>
+    </div>
+  `;
+  
+  // Load quizzes for this chapter
+  await loadQuizzes(chapterCode);
+}
+
+async function loadQuizzes(chapterCode) {
+  try {
+    const { data, error } = await sb
+      .from('kls_quizzes')
+      .select('*')
+      .eq('chapter_code', chapterCode)
+      .eq('is_active', true);
+    
+    if (error) throw error;
+    
+    const quizList = document.getElementById('quizList');
+    
+    if (!data || data.length === 0) {
+      quizList.innerHTML = `
+        <div class="loading">
+          <h3 style="color:#6b7280">આ પ્રકરણમાં કોઈ quiz નથી</h3>
+        </div>
+      `;
+      return;
+    }
+    
+    quizList.innerHTML = data.map(quiz => {
+      const difficultyClass = quiz.difficulty_level === 'easy' ? '' : 
+                              quiz.difficulty_level === 'medium' ? 'medium' : 'hard';
+      const difficultyText = quiz.difficulty_level === 'easy' ? 'સરળ' :
+                            quiz.difficulty_level === 'medium' ? 'મધ્યમ' : 'મુશ્કેલ';
+      
+      return `
+        <div class="quiz-item" onclick="startQuiz('${quiz.id}')">
+          <div class="quiz-header">
+            <div class="quiz-name">${quiz.quiz_name}</div>
+            <div class="quiz-badge ${difficultyClass}">${difficultyText}</div>
+          </div>
+          <div class="quiz-info">
+            <div class="quiz-info-item">
+              <span>📝</span>
+              <span>${quiz.total_questions} પ્રશ્નો</span>
+            </div>
+            <div class="quiz-info-item">
+              <span>⏱️</span>
+              <span>${quiz.time_limit} મિનિટ</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+  } catch (err) {
+    document.getElementById('quizList').innerHTML = `
       <div class="loading">
-        <h3 style="color:#ef4444">કોઈ સમસ્યા આવી છે</h3>
+        <h3 style="color:#ef4444">Quiz લોડ કરવામાં સમસ્યા</h3>
         <p style="font-size:14px;margin-top:8px;color:#6b7280">કૃપા કરીને ફરી પ્રયાસ કરો</p>
       </div>
     `;
   }
 }
 
-function openChapter(chapterId, chapterName) {
-  // Future: Chapter detail page
-  alert('પ્રકરણ: ' + chapterName);
-  // window.location.href = 'chapter-detail.html?id=' + chapterId;
+function startQuiz(quizId) {
+  // Future: Navigate to quiz page
+  alert('Quiz ID: ' + quizId + '\n\nQuiz start functionality આવશે');
+  // window.location.href = 'quiz.html?id=' + quizId;
 }
 
 function checkAuthAndNavigate(url) {
