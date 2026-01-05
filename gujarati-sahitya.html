@@ -64,8 +64,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .price-strike{text-decoration:line-through;color:#9ca3af;font-size:16px}
 .price-offer{color:#22c55e;font-size:24px;font-weight:bold}
 
-/* Spinner Animation */
-.spinner{width:40px;height:40px;margin:0 auto 16px;border:4px solid #f3f4f6;border-top:4px solid #2563eb;border-radius:50%;animation:spin 1s linear infinite}
+/* Spinner Animation - Timer Emoji */
+.spinner{font-size:48px;margin:0 auto 16px;animation:spin 2s linear infinite;display:inline-block}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 
 /* Chapters List */
@@ -97,8 +97,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 <div class="container">
   <div class="chapters-list" id="chaptersList">
     <div class="loading">
-      <div class="spinner"></div>
-      <h3>લોડ થઈ રહ્યું છે...</h3>
+      <div class="spinner">⏱️</div>
+      <h3>લોડિંગ થઈ રહ્યું છે...</h3>
     </div>
   </div>
 </div>
@@ -364,9 +364,9 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 </div>
 
 <script>
-// તમારા Supabase credentials અહીં નાખો
-const SUPABASE_URL = 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = 'your-anon-key';
+// Supabase Credentials
+const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
