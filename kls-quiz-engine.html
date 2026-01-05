@@ -341,7 +341,7 @@ function showQuestion() {
     <div onclick="selectOpt(${q.id}, 2)" class="option ${userAns === 2 ? 'active' : ''}">${q.option_b}</div>
     <div onclick="selectOpt(${q.id}, 3)" class="option ${userAns === 3 ? 'active' : ''}">${q.option_c}</div>
     <div onclick="selectOpt(${q.id}, 4)" class="option ${userAns === 4 ? 'active' : ''}">${q.option_d}</div>
-    <div onclick="selectOpt(${q.id}, 5)" class="option ${userAns === 5 ? 'active' : ''}" style="border:2px dashed #f59e0b">${q.option_e}</div>
+    <div onclick="selectOpt(${q.id}, 5)" class="option ${userAns === 5 ? 'active' : ''}" style="border:2px dashed #d1d5db;color:#6b7280">${q.option_e}</div>
     
     <div class="nav-buttons">
       ${current > 0 ? '<button class="gray" onclick="prevQ()">⬅️ પાછળ</button>' : '<button class="gray" disabled>⬅️ પાછળ</button>'}
@@ -419,6 +419,9 @@ async function submitQuiz() {
     }
   });
 
+  const attempted = correct + wrong; // Direct calculation
+  console.log('Results:', {total: questions.length, correct, wrong, skip, eUsed, attempted});
+
   const score = correct;
   const percentage = ((correct / questions.length) * 100).toFixed(2);
   const timeTaken = Math.floor((Date.now() - startTime) / 1000);
@@ -430,7 +433,7 @@ async function submitQuiz() {
     subject_id: currentQuiz.subject_id,
     chapter_code: currentQuiz.chapter_code,
     total_questions: questions.length,
-    attempted_questions: questions.length - skip,
+    attempted_questions: attempted,
     correct_answers: correct,
     wrong_answers: wrong,
     skipped_questions: skip,
