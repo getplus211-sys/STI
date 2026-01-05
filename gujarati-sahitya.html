@@ -439,10 +439,10 @@ async function loadChapters() {
       return;
     }
     
-    // Sort by number
+    // Sort by chapter code number
     allChapters = data.sort((a, b) => {
-      const numA = parseInt(a.number) || 0;
-      const numB = parseInt(b.number) || 0;
+      const numA = parseInt(a.chapter_code.split('_').pop()) || 0;
+      const numB = parseInt(b.chapter_code.split('_').pop()) || 0;
       return numA - numB;
     });
     
@@ -520,13 +520,12 @@ async function loadQuizzes(chapterCode) {
     }
     
     quizList.innerHTML = data.map(quiz => {
-      const difficultyClass = quiz.difficulty_level === 'easy' ? '' : 
-                              quiz.difficulty_level === 'medium' ? 'medium' : 'hard';
-      const difficultyText = quiz.difficulty_level === 'easy' ? 'સરળ' :
-                            quiz.difficulty_level === 'medium' ? 'મધ્યમ' : 'મુશ્કેલ';
+      const difficultyClass = quiz.difficulty_level === 'સરળ' ? '' : 
+                              quiz.difficulty_level === 'મધ્યમ' ? 'medium' : 'hard';
+      const difficultyText = quiz.difficulty_level;
       
       return `
-        <div class="quiz-item" onclick="startQuiz('${quiz.id}')">
+        <div class="quiz-item" onclick="startQuiz('${quiz.quiz_id}')">
           <div class="quiz-header">
             <div class="quiz-name">${quiz.quiz_name}</div>
             <div class="quiz-badge ${difficultyClass}">${difficultyText}</div>
