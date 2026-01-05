@@ -7,7 +7,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body{margin:0;font-family:system-ui;background:#f1f5f9}
+body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:70px}
+.header{position:fixed;top:0;left:0;right:0;z-index:1000;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.1);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.brand{flex:1}
+.brand-name{font-size:18px;font-weight:bold;color:#ea580c;line-height:1.2}
+.brand-subtitle{font-size:10px;color:#ea580c}
+.back-btn{background:#f3f4f6;border:none;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px}
+.back-btn:hover{background:#e5e7eb}
 .container{max-width:900px;margin:auto;padding:12px}
 .card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
 h2,h3,h4{margin:6px 0}
@@ -72,6 +78,17 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 </style>
 </head>
 <body>
+<header class="header">
+  <div class="brand">
+    <div class="brand-name">KLS Quiz Engine</div>
+    <div class="brand-subtitle">KAPiLa Institute</div>
+  </div>
+  <button class="back-btn" onclick="window.history.back()">
+    <span>←</span>
+    <span>પાછા જાઓ</span>
+  </button>
+</header>
+
 <div class="container" id="app">
   <div class="card loader">
     <h3>લોડ થઈ રહ્યું છે...</h3>
@@ -104,8 +121,8 @@ const urlParams = new URLSearchParams(window.location.search);
 const QUIZ_ID = urlParams.get('quiz_id'); // Example: GUJ_SAH_01_EASY_001
 
 let app = document.getElementById("app");
-let user, questions = [], current = 0, answers = {}, startTime, timer, submitted = false, testResultId = null, currentQuiz = null;
-let existingResult = null;
+let user, questions = [], current = 0, answers = {}, startTime, timer, submitted = false, quizAttemptId = null, currentQuiz = null;
+let existingAttempt = null;
 let testStarted = false;
 
 if (!QUIZ_ID) {
@@ -157,17 +174,16 @@ async function init() {
     currentQuiz = quiz;
 
     // ✅ STEP 2: Check if user has already attempted this quiz
-    // Using lrd_test_results table with test_id = QUIZ_ID
     const { data: previousAttempt, error: attemptError } = await sb
-      .from("lrd_test_results")
+      .from("kls_quiz_attempts")
       .select("*")
       .eq("user_id", user.id)
-      .eq("test_id", QUIZ_ID)
+      .eq("quiz_id", QUIZ_ID)
       .maybeSingle();
 
     if (previousAttempt) {
-      existingResult = previousAttempt;
-      testResultId = previousAttempt.id;
+      existingAttempt = previousAttempt;
+      quizAttemptId = previousAttempt.id;
       showAlreadyAttempted(quiz, previousAttempt);
       return;
     }
@@ -194,9 +210,9 @@ async function init() {
 // ============================================
 // ALREADY ATTEMPTED
 // ============================================
-function showAlreadyAttempted(quiz, result) {
-  const date = new Date(result.completed_at).toLocaleDateString('gu-IN');
-  const time = new Date(result.completed_at).toLocaleTimeString('gu-IN', {hour: '2-digit', minute: '2-digit'});
+function showAlreadyAttempted(quiz, attempt) {
+  const date = new Date(attempt.completed_at).toLocaleDateString('gu-IN');
+  const time = new Date(attempt.completed_at).toLocaleTimeString('gu-IN', {hour: '2-digit', minute: '2-digit'});
   
   app.innerHTML = `
   <div class="card">
@@ -206,11 +222,12 @@ function showAlreadyAttempted(quiz, result) {
     <div class="alert-box">
       <h3>⚠️ તમે આ ક્વિઝ પહેલાથી જ આપી ચુક્યા છો!</h3>
       <p><b>તારીખ:</b> ${date} ${time}</p>
-      <p><b>તમારો સ્કોર:</b> ${result.score}/${result.total_questions}</p>
-      <p><b>ચોકસાઈ:</b> ${result.percentage}%</p>
+      <p><b>તમારો સ્કોર:</b> ${attempt.score}/${attempt.total_questions}</p>
+      <p><b>ચોકસાઈ:</b> ${attempt.percentage}%</p>
       <p style="margin-top:10px">દરેક ક્વિઝ માત્ર એક જ વાર આપી શકાય છે. તમે તમારા પરિણામો અને solutions જોઈ શકો છો.</p>
     </div>
 
+    <button class="primary" onclick="window.location.href='kls-performance.html?attempt_id=${quizAttemptId}'">📊 Performance Report જુઓ</button>
     <button class="primary" onclick="loadExistingResult()">📊 View Your Result</button>
     <button class="gray" onclick="loadExistingSolutions()">📝 View Solutions</button>
   </div>`;
@@ -408,10 +425,12 @@ async function submitQuiz() {
   const percentage = ((correct / questions.length) * 100).toFixed(2);
   const timeTaken = Math.floor((Date.now() - startTime) / 1000);
 
-  // ✅ Save to lrd_test_results table (using test_id = QUIZ_ID)
-  const { data: result, error } = await sb.from("lrd_test_results").insert({
+  // ✅ Save to kls_quiz_attempts table
+  const { data: attempt, error } = await sb.from("kls_quiz_attempts").insert({
     user_id: user.id,
-    test_id: QUIZ_ID,  // Using QUIZ_ID as test_id
+    quiz_id: QUIZ_ID,
+    subject_id: currentQuiz.subject_id,
+    chapter_code: currentQuiz.chapter_code,
     total_questions: questions.length,
     attempted_questions: questions.length - skip,
     correct_answers: correct,
@@ -431,19 +450,20 @@ async function submitQuiz() {
     return;
   }
 
-  testResultId = result.id;
-  existingResult = result;
+  quizAttemptId = attempt.id;
+  existingAttempt = attempt;
 
-  // ✅ Save to lrd_question_attempts table
+  // ✅ Save to kls_question_attempts table
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
     const userAns = answers[q.id];
     const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : 5;
     
-    await sb.from("lrd_question_attempts").insert({
-      test_result_id: testResultId,
+    await sb.from("kls_question_attempts").insert({
+      quiz_attempt_id: quizAttemptId,
       question_id: q.id,
       user_id: user.id,
+      quiz_id: QUIZ_ID,
       selected_answer: userAns ? (userAns === 1 ? 'A' : userAns === 2 ? 'B' : userAns === 3 ? 'C' : userAns === 4 ? 'D' : 'E') : 'SKIPPED',
       is_correct: userAns === correctOpt,
       time_taken_seconds: Math.floor(timeTaken / questions.length),
@@ -472,7 +492,8 @@ function loadResult(score, c, w, s, e, time) {
       <p><b>ચોકસાઈ:</b> ${((c/questions.length)*100).toFixed(1)}%</p>
     </div>
     <canvas id="chart"></canvas><br><br>
-    <button class="primary" onclick="loadLeaderboard()">🏆 Leaderboard જુઓ</button>
+    <button class="primary" onclick="window.location.href='kls-performance.html?attempt_id=${quizAttemptId}'">📊 Performance Report જુઓ</button>
+    <button class="blue" onclick="loadLeaderboard()">🏆 Leaderboard જુઓ</button>
     <button class="gray" onclick="loadExistingSolutions()">📝 Solutions જુઓ</button>
   </div>`;
 
@@ -497,18 +518,18 @@ function loadResult(score, c, w, s, e, time) {
 // LOAD EXISTING RESULT
 // ============================================
 async function loadExistingResult() {
-  if (!existingResult) {
-    const { data } = await sb.from("lrd_test_results").select("*").eq("id", testResultId).single();
-    existingResult = data;
+  if (!existingAttempt) {
+    const { data } = await sb.from("kls_quiz_attempts").select("*").eq("id", quizAttemptId).single();
+    existingAttempt = data;
   }
   
   loadResult(
-    existingResult.score,
-    existingResult.correct_answers,
-    existingResult.wrong_answers,
-    existingResult.skipped_questions,
-    existingResult.e_option_used,
-    existingResult.total_time_seconds
+    existingAttempt.score,
+    existingAttempt.correct_answers,
+    existingAttempt.wrong_answers,
+    existingAttempt.skipped_questions,
+    existingAttempt.e_option_used,
+    existingAttempt.total_time_seconds
   );
 }
 
@@ -519,9 +540,9 @@ async function loadExistingSolutions() {
   app.innerHTML = '<div class="card loader"><h3>લોડ થઈ રહ્યું છે...</h3></div>';
   
   const { data: attempts } = await sb
-    .from("lrd_question_attempts")
+    .from("kls_question_attempts")
     .select("*")
-    .eq("test_result_id", testResultId)
+    .eq("quiz_attempt_id", quizAttemptId)
     .order("question_order");
 
   let html = `
@@ -567,26 +588,26 @@ async function loadLeaderboard() {
   app.innerHTML = '<div class="card loader"><h3>લોડ થઈ રહ્યું છે...</h3></div>';
   
   try {
-    const { data: allResults } = await sb
-      .from("lrd_test_results")
+    const { data: allAttempts } = await sb
+      .from("kls_quiz_attempts")
       .select("user_id, score, total_time_seconds, correct_answers, total_questions, percentage")
-      .eq("test_id", QUIZ_ID)
+      .eq("quiz_id", QUIZ_ID)
       .order("score", { ascending: false })
       .order("total_time_seconds", { ascending: true });
 
-    if (!allResults || allResults.length === 0) {
+    if (!allAttempts || allAttempts.length === 0) {
       showModal('⚠️', 'કોઈ Results નથી', 'આ quiz માટે હજુ કોઈ results નથી', 
         '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
       return;
     }
 
-    const myIndex = allResults.findIndex(r => r.user_id === user.id);
+    const myIndex = allAttempts.findIndex(r => r.user_id === user.id);
     const myRank = myIndex + 1;
-    const myData = allResults[myIndex];
-    const top50 = allResults.slice(0, 50);
+    const myData = allAttempts[myIndex];
+    const top50 = allAttempts.slice(0, 50);
 
     // Fetch profiles
-    const allUserIds = allResults.map(r => r.user_id);
+    const allUserIds = allAttempts.map(r => r.user_id);
     const { data: profiles } = await sb
       .from("profiles")
       .select("id, full_name")
