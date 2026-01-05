@@ -301,7 +301,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
       <span style="font-size:24px">📧</span>
       <div style="flex:1">
         <div class="info-label">Email</div>
-        <div class="info-value">contact@kapilainstitute.com</div>
+        <div class="info-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2645494852474552664d47564f4a474f4855524f525352430845494b">[email&#160;protected]</a></div>
       </div>
     </div>
     <div class="info-row">
@@ -399,7 +399,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // Supabase Credentials
 const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
@@ -520,13 +520,12 @@ async function loadQuizzes(chapterCode) {
     }
     
     quizList.innerHTML = data.map(quiz => {
-      const difficultyClass = quiz.difficulty_level === 'easy' ? '' : 
-                              quiz.difficulty_level === 'medium' ? 'medium' : 'hard';
-      const difficultyText = quiz.difficulty_level === 'easy' ? 'સરળ' :
-                            quiz.difficulty_level === 'medium' ? 'મધ્યમ' : 'મુશ્કેલ';
+      const difficultyClass = quiz.difficulty_level === 'સરળ' ? '' : 
+                              quiz.difficulty_level === 'મધ્યમ' ? 'medium' : 'hard';
+      const difficultyText = quiz.difficulty_level; // Direct use as it's already in Gujarati
       
       return `
-        <div class="quiz-item" onclick="startQuiz('${quiz.id}')">
+        <div class="quiz-item" onclick="startQuiz('${quiz.quiz_id}')">
           <div class="quiz-header">
             <div class="quiz-name">${quiz.quiz_name}</div>
             <div class="quiz-badge ${difficultyClass}">${difficultyText}</div>
@@ -556,9 +555,8 @@ async function loadQuizzes(chapterCode) {
 }
 
 function startQuiz(quizId) {
-  // Future: Navigate to quiz page
-  alert('Quiz ID: ' + quizId + '\n\nQuiz start functionality આવશે');
-  // window.location.href = 'quiz.html?id=' + quizId;
+  // Redirect to KLS Quiz Engine with quiz_id parameter
+  window.location.href = 'kls-quiz-engine.html?quiz_id=' + quizId;
 }
 
 function checkAuthAndNavigate(url) {
@@ -730,15 +728,4 @@ function closeAccountModal() {
   document.getElementById('accountModal').classList.remove('show');
 }
 
-function showNotificationPopup() {
-  document.getElementById('notificationModal').classList.add('show');
-}
-
-function closeNotificationModal() {
-  document.getElementById('notificationModal').classList.remove('show');
-}
-
-init();
-</script>
-</body>
-</html>
+function showNot
