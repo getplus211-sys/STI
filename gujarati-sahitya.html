@@ -39,6 +39,10 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
 /* Container */
 .container{padding:0 16px;max-width:600px;margin:0 auto}
 
+/* Chapter Title */
+.chapter-title{background:#fff;padding:16px;margin:16px 16px 0 16px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.chapter-title h2{font-size:18px;color:#1f2937;font-weight:600;line-height:1.4}
+
 /* Quiz List */
 .quiz-list{padding:16px}
 .quiz-item{background:#fff;padding:16px;margin-bottom:12px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.08);cursor:pointer;transition:all 0.2s}
@@ -124,6 +128,9 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
 </header>
 
 <div class="container">
+  <div class="chapter-title" id="chapterTitle" style="display:none">
+    <h2></h2>
+  </div>
   <div class="quiz-list" id="quizList">
     <div class="loading">
       <div class="spinner">⏱️</div>
@@ -459,6 +466,16 @@ async function loadChapters() {
 
 async function selectChapter(chapterCode) {
   currentChapterCode = chapterCode;
+  
+  // Find selected chapter
+  const selectedChapter = allChapters.find(ch => ch.chapter_code === chapterCode);
+  
+  // Update chapter title
+  const chapterTitle = document.getElementById('chapterTitle');
+  if (selectedChapter) {
+    chapterTitle.style.display = 'block';
+    chapterTitle.querySelector('h2').innerText = selectedChapter.name;
+  }
   
   // Update active tab
   document.querySelectorAll('.chapter-tab').forEach(tab => {
