@@ -405,9 +405,14 @@ async function submitQuiz() {
   // Calculate results
   let correct = 0, wrong = 0, skip = 0, eUsed = 0;
   
+  console.log('DEBUG: Answers object:', answers);
+  console.log('DEBUG: Questions IDs:', questions.map(q => q.id));
+  
   questions.forEach(q => {
     const userAns = answers[q.id];
     const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : null;
+    
+    console.log(`Q ${q.id}: userAns=${userAns}, correct=${correctOpt}`);
     
     if (!userAns || userAns === 5) {
       skip++;
