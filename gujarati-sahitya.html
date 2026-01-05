@@ -67,11 +67,10 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
   <div class="header-top">
     <div class="brand">
       <div class="brand-name">ગુજરાતી સાહિત્ય</div>
-      <div class="brand-subtitle">KLS Quiz System</div>
+      <div class="brand-subtitle">KAPiLa Learning</div>
     </div>
     <div class="header-right">
       <span id="userNameDisplay" class="user-name" style="display:none"></span>
-      <button class="menu-btn">☰</button>
     </div>
   </div>
   <div class="chapters-header" id="chaptersHeader">
@@ -94,21 +93,21 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
 </div>
 
 <footer class="footer">
-  <button class="footer-btn active">
+  <button class="footer-btn active" onclick="window.location.href='index-kapila.html'">
     <span>🏠</span>
     <span class="footer-label">Home</span>
   </button>
-  <button class="footer-btn">
+  <button class="footer-btn" onclick="window.location.href='overall-performance.html'">
     <span>📊</span>
     <span class="footer-label">Performance</span>
   </button>
-  <button class="footer-btn">
-    <span>👤</span>
-    <span class="footer-label">Account</span>
-  </button>
-  <button class="footer-btn">
+  <button class="footer-btn" onclick="window.open('tel:+916353511804')">
     <span>📞</span>
-    <span class="footer-label">Contact</span>
+    <span class="footer-label">Call</span>
+  </button>
+  <button class="footer-btn" onclick="window.open('https://wa.me/916353511804', '_blank')">
+    <span>💬</span>
+    <span class="footer-label">WhatsApp</span>
   </button>
 </footer>
 
@@ -134,6 +133,7 @@ async function init() {
     const { data: { user } } = await sb.auth.getUser();
     currentUser = user;
     
+    // Fetch and display user profile
     if (currentUser) {
       const { data: profile } = await sb.from('profiles').select('full_name').eq('id', currentUser.id).single();
       if (profile) {
@@ -165,8 +165,8 @@ async function loadChapters() {
       return;
     }
     
-    const chaptersHTML = chapters.map(ch => 
-      `<div class="chapter-tab" data-code="${ch.chapter_code}" onclick="selectChapter('${ch.chapter_code}', '${ch.name}')">${ch.name}</div>`
+    const chaptersHTML = chapters.map((ch, index) => 
+      `<div class="chapter-tab" data-code="${ch.chapter_code}" onclick="selectChapter('${ch.chapter_code}', '${ch.name}')">પ્રકરણ ${index + 1}</div>`
     ).join('');
     
     document.getElementById('chaptersHeader').innerHTML = chaptersHTML;
