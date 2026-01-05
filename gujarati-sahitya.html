@@ -301,7 +301,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
       <span style="font-size:24px">📧</span>
       <div style="flex:1">
         <div class="info-label">Email</div>
-        <div class="info-value">contact@kapilainstitute.com</div>
+        <div class="info-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2a4945445e4b495e6a414b5a43464b4344595e435e5f5e4f04494547">[email&#160;protected]</a></div>
       </div>
     </div>
     <div class="info-row">
@@ -399,7 +399,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // Supabase Credentials
 const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
@@ -556,9 +556,8 @@ async function loadQuizzes(chapterCode) {
 }
 
 function startQuiz(quizId) {
-  // Future: Navigate to quiz page
-  alert('Quiz ID: ' + quizId + '\n\nQuiz start functionality આવશે');
-  // window.location.href = 'quiz.html?id=' + quizId;
+  // Redirect to KLS Quiz Engine
+  window.location.href = 'kls-quiz-engine.html?quiz_id=' + quizId;
 }
 
 function checkAuthAndNavigate(url) {
@@ -730,15 +729,4 @@ function closeAccountModal() {
   document.getElementById('accountModal').classList.remove('show');
 }
 
-function showNotificationPopup() {
-  document.getElementById('notificationModal').classList.add('show');
-}
-
-function closeNotificationModal() {
-  document.getElementById('notificationModal').classList.remove('show');
-}
-
-init();
-</script>
-</body>
-</html>
+function showNot
