@@ -389,11 +389,11 @@ async function init() {
 
 async function loadChapters() {
   try {
+    // First, try to fetch without ordering to see if data exists
     const { data, error } = await sb
       .from('kls_chapters')
       .select('*')
-      .eq('subject_id', '00000000-0000-0000-0000-000000000014')
-      .order('number', { ascending: true });
+      .eq('subject_id', '00000000-0000-0000-0000-000000000014');
     
     if (error) throw error;
     
@@ -408,7 +408,14 @@ async function loadChapters() {
       return;
     }
     
-    chaptersList.innerHTML = data.map(chapter => `
+    // Sort manually by number field
+    const sortedData = data.sort((a, b) => {
+      const numA = parseInt(a.number) || 0;
+      const numB = parseInt(b.number) || 0;
+      return numA - numB;
+    });
+    
+    chaptersList.innerHTML = sortedData.map(chapter => `
       <div class="chapter-item" onclick="openChapter('${chapter.id}', '${chapter.name}')">
         <div class="chapter-number">પ્રકરણ ${chapter.number}</div>
         <div class="chapter-name">${chapter.name}</div>
