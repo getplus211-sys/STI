@@ -112,7 +112,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:130px;padding-bottom:
 <script>
 // Supabase Configuration
 const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYwNzQ1MTEsImV4cCI6MjA1MTY1MDUxMX0.t4MkVufW2r6_gaIZ46tQK-DUd_shvOYqbGz6_xrBSko";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // Subject Configuration
@@ -164,7 +164,7 @@ async function loadChapters() {
     }
     
     const chaptersHTML = chapters.map((ch, index) => 
-      \`<div class="chapter-tab" data-code="\${ch.chapter_code}" onclick="selectChapter('\${ch.chapter_code}', '\${ch.name}')">પ્રકરણ \${index + 1}</div>\`
+      `<div class="chapter-tab" data-code="${ch.chapter_code}" onclick="selectChapter('${ch.chapter_code}', '${ch.name}')">પ્રકરણ ${index + 1}</div>`
     ).join('');
     
     document.getElementById('chaptersHeader').innerHTML = chaptersHTML;
@@ -197,12 +197,12 @@ async function selectChapter(chapterCode, chapterName) {
   });
   
   // Show loading
-  document.getElementById('quizList').innerHTML = \`
+  document.getElementById('quizList').innerHTML = `
     <div class="loading">
       <div class="spinner">⏳</div>
       <h3>લોડિંગ થઈ રહ્યું છે...</h3>
     </div>
-  \`;
+  `;
   
   // Load quizzes for this chapter
   await loadQuizzes(chapterCode);
@@ -222,12 +222,12 @@ async function loadQuizzes(chapterCode) {
     const quizList = document.getElementById('quizList');
     
     if (!data || data.length === 0) {
-      quizList.innerHTML = \`
+      quizList.innerHTML = `
         <div class="loading">
           <h3 style="color:#6b7280">આ પ્રકરણમાં કોઈ quiz નથી</h3>
           <p style="font-size:14px;margin-top:8px">Quiz જલ્દી LIVE થશે</p>
         </div>
-      \`;
+      `;
       return;
     }
     
@@ -235,34 +235,34 @@ async function loadQuizzes(chapterCode) {
       const difficultyClass = quiz.difficulty_level === 'સરળ' ? '' : 
                               quiz.difficulty_level === 'મધ્યમ' ? 'medium' : 'hard';
       
-      return \`
-        <div class="quiz-item" onclick="startQuiz('\${quiz.quiz_id}')">
+      return `
+        <div class="quiz-item" onclick="startQuiz('${quiz.quiz_id}')">
           <div class="quiz-header">
-            <div class="quiz-name">\${quiz.quiz_name}</div>
-            <div class="quiz-badge \${difficultyClass}">\${quiz.difficulty_level}</div>
+            <div class="quiz-name">${quiz.quiz_name}</div>
+            <div class="quiz-badge ${difficultyClass}">${quiz.difficulty_level}</div>
           </div>
           <div class="quiz-info">
             <div class="quiz-info-item">
               <span>📝</span>
-              <span>\${quiz.total_questions} પ્રશ્નો</span>
+              <span>${quiz.total_questions} પ્રશ્નો</span>
             </div>
             <div class="quiz-info-item">
               <span>⏱️</span>
-              <span>\${quiz.time_limit} મિનિટ</span>
+              <span>${quiz.time_limit} મિનિટ</span>
             </div>
           </div>
         </div>
-      \`;
+      `;
     }).join('');
     
   } catch (err) {
     console.error('Quizzes error:', err);
-    document.getElementById('quizList').innerHTML = \`
+    document.getElementById('quizList').innerHTML = `
       <div class="loading">
         <h3 style="color:#ef4444">Quiz લોડ કરવામાં સમસ્યા</h3>
         <p style="font-size:14px;margin-top:8px">કૃપા કરીને ફરી પ્રયાસ કરો</p>
       </div>
-    \`;
+    `;
   }
 }
 
