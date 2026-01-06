@@ -445,7 +445,10 @@ function displayPerformance() {
       <div class="page-title">Performance Dashboard</div>
       <div class="test-title">${quizName}</div>
     </div>
-    <a href="gujarati-sahitya-complete.html" class="home-btn">🏠 Back</a>
+    <div style="display:flex;gap:10px">
+      <button onclick="window.history.back()" class="home-btn" style="border:none;cursor:pointer">← Back</button>
+      <a href="index-kapila.html" class="home-btn">🏠 Home</a>
+    </div>
   </div>
   `;
   
@@ -539,7 +542,10 @@ function displayPerformance() {
   ${recCards}
   ${extraSuggestions}
 
-  <button class="blue back-btn" onclick="window.location.href='gujarati-sahitya-complete.html'">🏠 Back to Home</button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button class="blue" onclick="window.history.back()">← પાછા જાઓ</button>
+    <button class="blue" onclick="window.location.href='index-kapila.html'">🏠 Home</button>
+  </div>
   `;
 
   // Draw pie chart
