@@ -193,7 +193,7 @@ function showAlreadyAttempted(test, result) {
   app.innerHTML = `
   <div class="card">
     <span class="badge completed">✓ પૂર્ણ થયેલ</span>
-    <h2>${test.test_name}</h2>
+    <h2>${test.quiz_name}</h2>
     
     <div class="alert-box">
       <h3>⚠️ તમે આ ટેસ્ટ પહેલાથી જ આપી ચુક્યા છો!</h3>
@@ -287,7 +287,7 @@ async function loadExistingSolutions() {
 
     solutionsHTML += `
     <div class="card" id="sol${idx}" style="border-left: 5px solid ${isCorrect ? '#22c55e' : (userAns === 'SKIPPED' ? '#cbd5e1' : '#ef4444')}">
-      <p><b>Q${idx + 1}:</b> ${q.question_text}</p>
+      <p><b>Q${idx + 1}:</b> ${q.question}</p>
       <p><b>Your Answer:</b> ${userAns === 'SKIPPED' ? 'છોડી દીધો' : (userAns === 'A' ? q.option_a : userAns === 'B' ? q.option_b : userAns === 'C' ? q.option_c : userAns === 'D' ? q.option_d : q.option_e)}</p>
       <p style="color: #22c55e"><b>Correct Answer:</b> ${correctAns === 'A' ? q.option_a : correctAns === 'B' ? q.option_b : correctAns === 'C' ? q.option_c : correctAns === 'D' ? q.option_d : q.option_e}</p>
       ${q.explanation ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Explanation:</b> ${q.explanation}</div>` : ""}
@@ -308,7 +308,7 @@ function showInstructions(test) {
   app.innerHTML = `
   <div class="card">
     <h2>📋 Instructions</h2>
-    <h3>${test.test_name}</h3>
+    <h3>${test.quiz_name}</h3>
     <p style="margin:10px 0"><b>Total Questions:</b> ${questions.length}</p>
     <p style="margin:10px 0"><b>Duration:</b> ${test.duration_minutes} minutes</p>
     
@@ -375,7 +375,7 @@ function renderQuestion() {
       <div id="timer">⏱️ 0:00</div>
       <div>પ્રશ્ન ${current + 1}/${questions.length}</div>
     </div>
-    <p style="font-weight:bold;margin:10px 0">${q.question_text}</p>
+    <p style="font-weight:bold;margin:10px 0">${q.question}</p>
     ${optionsHTML}
     <div class="nav-buttons">
       <button class="gray" onclick="prevQuestion()" ${current === 0 ? 'disabled' : ''}>⬅ પાછળ</button>
@@ -512,7 +512,7 @@ async function submitTest() {
       selected_answer: userAns ? (userAns === 1 ? 'A' : userAns === 2 ? 'B' : userAns === 3 ? 'C' : userAns === 4 ? 'D' : 'E') : 'SKIPPED',
       is_correct: userAns === correctOpt,
       time_taken_seconds: Math.floor(timeTaken / questions.length),
-      question_order: i + 1
+      question_order: (i + 1)
     });
   }
 
