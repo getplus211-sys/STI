@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<title>ગણિત - KAPiLa Learning System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+.container{max-width:1200px;margin:0 auto}
+.header{background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:20px;padding:30px;margin-bottom:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(102,126,234,0.1) 0%,transparent 70%);animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.header-content{position:relative;z-index:1}
+.subject-title{font-size:42px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;text-align:center}
+.subject-subtitle{font-size:18px;color:#64748b;text-align:center;margin-bottom:20px}
+.stats-bar{display:flex;justify-content:center;gap:30px;flex-wrap:wrap}
+.stat-item{text-align:center;padding:15px 25px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:15px;box-shadow:0 4px 15px rgba(59,130,246,0.2)}
+.stat-value{font-size:32px;font-weight:700;color:#0369a1}
+.stat-label{font-size:13px;color:#64748b;margin-top:5px}
+.chapters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.chapter-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.15);transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden}
+.chapter-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f59e0b,#d97706);transform:scaleX(0);transition:transform 0.3s}
+.chapter-card:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(0,0,0,0.2)}
+.chapter-card:hover::before{transform:scaleX(1)}
+.chapter-number{font-size:16px;font-weight:700;color:#f59e0b;margin-bottom:10px}
+.chapter-name{font-size:18px;font-weight:600;color:#1e293b;margin-bottom:15px;line-height:1.4}
+.chapter-stats{display:flex;justify-content:space-between;align-items:center;padding-top:15px;border-top:2px solid #f1f5f9}
+.quiz-count{font-size:14px;color:#64748b}
+.quiz-count strong{color:#0369a1}
+.start-btn{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;padding:8px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s}
+.start-btn:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(245,158,11,0.4)}
+.back-btn{background:rgba(255,255,255,0.2);color:#fff;border:2px solid rgba(255,255,255,0.4);padding:12px 24px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:30px;display:inline-block;text-decoration:none;transition:all 0.3s}
+.back-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px)}
+.loading{text-align:center;padding:40px;color:#fff;font-size:18px}
+@media (max-width:768px){
+  .subject-title{font-size:32px}
+  .chapters-grid{grid-template-columns:1fr}
+  .stats-bar{gap:15px}
+  .stat-item{padding:10px 15px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-content">
+      <h1 class="subject-title">📐 ગણિત</h1>
+      <p class="subject-subtitle">Mathematics - GPSC Prelims Preparation</p>
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="totalChapters">21</div>
+          <div class="stat-label">કુલ પ્રકરણો</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalQuizzes">0</div>
+          <div class="stat-label">કુલ ક્વિઝ</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="completedQuizzes">0</div>
+          <div class="stat-label">પૂર્ણ થયેલ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="chapters-grid" id="chaptersGrid">
+    <div class="loading">Loading chapters...</div>
+  </div>
+  
+  <a href="index-kapila.html" class="back-btn">🏠 હોમ પર પાછા જાઓ</a>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYwNzQ1MTEsImV4cCI6MjA1MTY1MDUxMX0.t4MkVufW2r6_gaIZ46tQK-DUd_shvOYqbGz6_xrBSko';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const SUBJECT_ID = '00000000-0000-0000-0000-000000000001';
+const CHAPTER_CODES = [
+  {code:'MATH_01',name:'સંખ્યા પદ્ધતિ',color:'#ef4444'},
+  {code:'MATH_02',name:'લ.સા.અ. અને ગુ.સા.અ.',color:'#f97316'},
+  {code:'MATH_03',name:'સાદુરૂપ (Simplification)',color:'#f59e0b'},
+  {code:'MATH_04',name:'વર્ગ અને વર્ગમૂળ, ઘન અને ઘનમૂળ',color:'#eab308'},
+  {code:'MATH_05',name:'સરેરાશ (Average)',color:'#84cc16'},
+  {code:'MATH_06',name:'ટકાવારી (Percentage)',color:'#22c55e'},
+  {code:'MATH_07',name:'નફો અને નુકસાન',color:'#10b981'},
+  {code:'MATH_08',name:'સાદુ વ્યાજ',color:'#14b8a6'},
+  {code:'MATH_09',name:'ચક્રવૃદ્ધિ વ્યાજ',color:'#06b6d4'},
+  {code:'MATH_10',name:'ગુણોત્તર અને પ્રમાણ',color:'#0ea5e9'},
+  {code:'MATH_11',name:'ભાગીદારી (Partnership)',color:'#3b82f6'},
+  {code:'MATH_12',name:'ઉંમર સંબંધિત દાખલા',color:'#6366f1'},
+  {code:'MATH_13',name:'મિશ્રણ (Alligation)',color:'#8b5cf6'},
+  {code:'MATH_14',name:'સમય અને કાર્ય',color:'#a855f7'},
+  {code:'MATH_15',name:'નળ અને ટાંકી',color:'#d946ef'},
+  {code:'MATH_16',name:'સમય, અંતર અને ઝડપ',color:'#ec4899'},
+  {code:'MATH_17',name:'ટ્રેન સંબંધિત દાખલા',color:'#f43f5e'},
+  {code:'MATH_18',name:'હોડી અને પ્રવાહ',color:'#ef4444'},
+  {code:'MATH_19',name:'ક્ષેત્રફળ (2D)',color:'#f97316'},
+  {code:'MATH_20',name:'ઘનફળ (3D)',color:'#f59e0b'},
+  {code:'MATH_21',name:'ક્રમચય-સંચય અને સંભાવના',color:'#eab308'}
+];
+
+async function loadChapters() {
+  try {
+    const {data:user} = await sb.auth.getUser();
+    if(!user.user){window.location.href='login.html';return;}
+    
+    const {data:quizzes} = await sb.from('kls_quizzes').select('*').eq('subject_id',SUBJECT_ID);
+    const {data:attempts} = await sb.from('kls_quiz_attempts').select('quiz_id').eq('user_id',user.user.id);
+    
+    const completedQuizIds = new Set((attempts||[]).map(a=>a.quiz_id));
+    const quizzesByChapter = {};
+    (quizzes||[]).forEach(q=>{
+      if(!quizzesByChapter[q.chapter_code])quizzesByChapter[q.chapter_code]=[];
+      quizzesByChapter[q.chapter_code].push(q);
+    });
+    
+    document.getElementById('totalQuizzes').textContent = (quizzes||[]).length;
+    document.getElementById('completedQuizzes').textContent = completedQuizIds.size;
+    
+    const grid = document.getElementById('chaptersGrid');
+    grid.innerHTML = CHAPTER_CODES.map((ch,i)=>{
+      const chapterQuizzes = quizzesByChapter[ch.code]||[];
+      const completed = chapterQuizzes.filter(q=>completedQuizIds.has(q.quiz_id)).length;
+      return `
+        <div class="chapter-card" style="border-top:4px solid ${ch.color}">
+          <div class="chapter-number">પ્રકરણ ${i+1}</div>
+          <div class="chapter-name">${ch.name}</div>
+          <div class="chapter-stats">
+            <div class="quiz-count">ક્વિઝ: <strong>${completed}/${chapterQuizzes.length}</strong></div>
+            <button class="start-btn" onclick="window.location.href='kls-quiz-list.html?subject_id=${SUBJECT_ID}&chapter_code=${ch.code}'" style="background:linear-gradient(135deg,${ch.color},${ch.color}dd)">શરૂ કરો</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(err) {
+    console.error(err);
+    document.getElementById('chaptersGrid').innerHTML='<div class="loading">Error loading data</div>';
+  }
+}
+
+loadChapters();
+</script>
+</body>
+</html>
