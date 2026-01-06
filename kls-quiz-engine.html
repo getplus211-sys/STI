@@ -260,19 +260,49 @@ async function loadExistingResult() {
 async function loadExistingSolutions() {
   app.innerHTML = '<div class="card loader"><div style="font-size:40px">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Solutions લોડ થઈ રહ્યું છે</p></div>';
 
-  const { data: attempts } = await sb
+  console.log('Loading solutions for attempt:', quizAttemptId);
+  
+  // First check if attempts exist
+  const { data: attempts, error: attemptsError } = await sb
     .from("kls_question_attempts")
-    .select("*, kls_questions(*)")
+    .select("*")
     .eq("quiz_attempt_id", quizAttemptId);
 
+  console.log('Question attempts:', attempts, 'Error:', attemptsError);
+
   if (!attempts || attempts.length === 0) {
-    app.innerHTML = '<div class="card"><h3>⚠️ No Data</h3><p>Solutions not found</p><button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>';
+    app.innerHTML = `<div class="card"><h3>⚠️ No Data</h3>
+      <p>Solutions not found. Attempt ID: ${quizAttemptId}</p>
+      <p style="font-size:12px">Check console for debug info</p>
+      <button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>`;
     return;
   }
+  
+  // Now load questions separately
+  const questionIds = attempts.map(a => a.question_id);
+  const { data: questions, error: questionsError } = await sb
+    .from("kls_questions")
+    .select("*")
+    .in("id", questionIds);
+  
+  console.log('Questions:', questions, 'Error:', questionsError);
+  
+  if (!questions || questions.length === 0) {
+    app.innerHTML = `<div class="card"><h3>⚠️ Questions Not Found</h3>
+      <p>Question details not available</p>
+      <button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>`;
+    return;
+  }
+  
+  // Merge data manually
+  const mergedData = attempts.map(att => {
+    const q = questions.find(qu => qu.id === att.question_id);
+    return { ...att, kls_questions: q };
+  });
 
   // Question Navigator Grid
   let gridHTML = '<div class="card"><h4>Question Navigator</h4><div class="qgrid">';
-  attempts.forEach((a, idx) => {
+  mergedData.forEach((a, idx) => {
     let btnClass = 'qbtn';
     if (a.selected_answer === 'SKIPPED') btnClass += ' skipped';
     else if (a.is_correct) btnClass += ' correct';
@@ -287,7 +317,7 @@ async function loadExistingSolutions() {
   <button class="gray" style="margin-bottom:15px" onclick="loadExistingResult()">← પાછા જાઓ</button>
   ${gridHTML}`;
 
-  attempts.forEach((a, idx) => {
+  mergedData.forEach((a, idx) => {
     const q = a.kls_questions;
     const userAns = a.selected_answer;
     const correctAns = q.correct_answer;
@@ -528,9 +558,11 @@ async function submitTest() {
       quiz_attempt_id: quizAttemptId,
       question_id: q.id,
       user_id: user.id,
+      quiz_id: QUIZ_ID,
       selected_answer: selectedAnswer,
       is_correct: isCorrect,
-      time_taken_seconds: Math.floor(timeTaken / questions.length)
+      time_taken_seconds: Math.floor(timeTaken / questions.length),
+      question_order: i + 1
     });
   }
 
