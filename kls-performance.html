@@ -204,15 +204,13 @@ async function init() {
     
     previousAttempts = prevAttempts || [];
 
-    // Load question attempts with question details (including difficulty)
+    // Load question attempts with question details (difficulty level only)
     const { data: attempts, error: attemptsError } = await sb
       .from("kls_question_attempts")
       .select(`
         *,
         kls_questions (
-          difficulty_level,
-          subject_name,
-          chapter_name
+          difficulty_level
         )
       `)
       .eq("quiz_attempt_id", ATTEMPT_ID);
@@ -224,9 +222,7 @@ async function init() {
     // Flatten the structure
     questionAttempts = (attempts || []).map(att => ({
       ...att,
-      difficulty_level: att.kls_questions?.difficulty_level || 'સરળ',
-      subject_name: att.kls_questions?.subject_name || att.subject_name,
-      chapter_name: att.kls_questions?.chapter_name || att.chapter_name
+      difficulty_level: att.kls_questions?.difficulty_level || 'સરળ'
     }));
 
     if (questionAttempts.length === 0) {
