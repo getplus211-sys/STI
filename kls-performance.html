@@ -316,25 +316,25 @@ function displayPerformance() {
     if (att.is_correct) chapterMap[chapterName].correct++;
   });
 
-  // Calculate weighted accuracy
-  let weightedScore = 0;
-  let maxWeightedScore = 0;
+  // Calculate weighted marks
+  let weightedMarks = 0;
+  let maxWeightedMarks = 0;
   
   questionAttempts.forEach(att => {
     const diff = att.difficulty_level;
     if (diff === 'સરળ') {
-      maxWeightedScore += 0.33;
-      if (att.is_correct) weightedScore += 0.33;
+      maxWeightedMarks += 0.33;
+      if (att.is_correct) weightedMarks += 0.33;
     } else if (diff === 'મધ્યમ') {
-      maxWeightedScore += 0.50;
-      if (att.is_correct) weightedScore += 0.50;
+      maxWeightedMarks += 0.50;
+      if (att.is_correct) weightedMarks += 0.50;
     } else if (diff === 'મુશ્કેલ') {
-      maxWeightedScore += 1.00;
-      if (att.is_correct) weightedScore += 1.00;
+      maxWeightedMarks += 1.00;
+      if (att.is_correct) weightedMarks += 1.00;
     }
   });
   
-  const weightedAccuracy = maxWeightedScore > 0 ? ((weightedScore / maxWeightedScore) * 100).toFixed(2) : '0.00';
+  const weightedAccuracy = maxWeightedMarks > 0 ? ((weightedMarks / maxWeightedMarks) * 100).toFixed(2) : '0.00';
 
   // Generate chapter analysis table
   let chapterHTML = '';
@@ -356,9 +356,9 @@ function displayPerformance() {
   });
   
   chapterHTML = `
-    <div class="subject-card">
+    <div class="subject-card" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #fbbf24">
       <div class="subject-title">
-        <span>Chapter Analysis</span>
+        <span style="color:#78350f;font-weight:700">📊 Chapter Analysis</span>
         <span class="badge ${chapterPerColor}">Overall: ${chapterPer}%</span>
       </div>
       <table class="analysis-table">
@@ -428,40 +428,40 @@ function displayPerformance() {
       <div class="page-title">Performance Dashboard</div>
       <div class="test-title">${quizName}</div>
     </div>
-    <a href="gujarati-sahitya.html" class="home-btn">🏠 Back</a>
+    <a href="gujarati-sahitya-complete.html" class="home-btn">🏠 Back</a>
   </div>
   `;
   
   document.body.insertAdjacentHTML('afterbegin', headerHTML);
 
   app.innerHTML = `
-  <div class="card student-card">
+  <div class="card student-card" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:2px solid #e9d5ff">
     <div class="student-header">
       <div class="avatar">${firstLetter}</div>
       <div style="flex:1">
         <h1 class="student-name">${userName}</h1>
         <div class="student-meta">
-          <div class="meta-badge">📅 ${date}</div>
-          <div class="meta-badge">🏆 Rank #${userRank}</div>
+          <div class="meta-badge" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">📅 ${date}</div>
+          <div class="meta-badge" style="background:linear-gradient(135deg,#fef08a,#fde047)">🏆 Rank #${userRank}</div>
         </div>
       </div>
     </div>
-    <div class="level-badge ${levelClass}" onclick="showLevelInfo()">${level} ℹ️</div>
+    <div class="level-badge ${levelClass}" onclick="showLevelInfo()" style="box-shadow:0 4px 15px rgba(0,0,0,0.2)">${level} ℹ️</div>
   </div>
 
-  <div class="card">
-    <h3>📊 Quiz પરિણામ</h3>
+  <div class="card" style="background:linear-gradient(135deg,#fefce8,#fef9c3);border:2px solid #fde047">
+    <h3 style="color:#854d0e">📊 Quiz પરિણામ</h3>
     <canvas id="pieChart" style="max-height:250px"></canvas>
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd)">
+    <div class="stat-card" style="background:linear-gradient(135deg,#e0e7ff,#c7d2fe)">
       <div class="stat-label">કુલ પ્રશ્નો</div>
-      <div class="stat-value" style="color:#0369a1">${quizAttempt.total_questions}</div>
+      <div class="stat-value" style="color:#4338ca">${quizAttempt.total_questions}</div>
     </div>
-    <div class="stat-card" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">
+    <div class="stat-card" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0)">
       <div class="stat-label">સાચા જવાબ</div>
-      <div class="stat-value" style="color:#15803d">${quizAttempt.correct_answers}</div>
+      <div class="stat-value" style="color:#047857">${quizAttempt.correct_answers}</div>
     </div>
     <div class="stat-card" style="background:linear-gradient(135deg,#fee2e2,#fecaca)">
       <div class="stat-label">ખોટા જવાબ</div>
@@ -522,7 +522,7 @@ function displayPerformance() {
   ${recCards}
   ${extraSuggestions}
 
-  <button class="blue back-btn" onclick="window.location.href='gujarati-sahitya.html'">🏠 Back to Home</button>
+  <button class="blue back-btn" onclick="window.location.href='gujarati-sahitya-complete.html'">🏠 Back to Home</button>
   `;
 
   // Draw pie chart
