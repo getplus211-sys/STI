@@ -121,7 +121,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const QUIZ_ID = urlParams.get('quiz_id');
 
 let app = document.getElementById("app");
-let user, questions = [], current = 0, answers = {}, startTime, timer, submitted = false, testResultId = null, currentTest = null;
+let user, questions = [], current = 0, answers = {}, startTime, timer, submitted = false, quizAttemptId = null, currentTest = null;
 let existingResult = null;
 let testStarted = false;
 
@@ -149,7 +149,7 @@ async function init() {
     }
     user = u;
 
-    const { data: test } = await sb.from("kls_quizzes").select("*").eq("id", QUIZ_ID).single();
+    const { data: test } = await sb.from("kls_quizzes").select("*").eq("quiz_id", QUIZ_ID).single();
     if (!test) {
       app.innerHTML = '<div class="card"><h3>❌ Test Not Found</h3></div>';
       return;
@@ -167,12 +167,12 @@ async function init() {
     // If user has already taken this test, show their previous result
     if (previousAttempt) {
       existingResult = previousAttempt;
-      testResultId = previousAttempt.id;
+      quizAttemptId = previousAttempt.id;
       showAlreadyAttempted(test, previousAttempt);
       return;
     }
 
-    const { data: qs } = await sb.from("kls_questions").select("*").eq("quiz_id", QUIZ_ID).order("question_order");
+    const { data: qs } = await sb.from("kls_questions").select("*").eq("quiz_id", QUIZ_ID);
     questions = qs || [];
 
     if (questions.length === 0) {
@@ -254,7 +254,7 @@ async function loadExistingSolutions() {
   const { data: attempts } = await sb
     .from("kls_question_attempts")
     .select("*, kls_questions(*)")
-    .eq("test_result_id", testResultId)
+    .eq("quiz_attempt_id", quizAttemptId)
     .order("question_order");
 
   if (!attempts || attempts.length === 0) {
@@ -475,6 +475,8 @@ async function submitTest() {
   const { data: result, error } = await sb.from("kls_quiz_attempts").insert({
     user_id: user.id,
     quiz_id: QUIZ_ID,
+    subject_id: currentTest.subject_id,
+    chapter_code: currentTest.chapter_code,
     total_questions: questions.length,
     attempted_questions: questions.length - skip,
     correct_answers: correct,
@@ -494,7 +496,7 @@ async function submitTest() {
     return;
   }
 
-  testResultId = result.id;
+  quizAttemptId = result.id;
   existingResult = result;
 
   // Save question attempts
@@ -504,7 +506,7 @@ async function submitTest() {
     const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : 5;
     
     await sb.from("kls_question_attempts").insert({
-      test_result_id: testResultId,
+      quiz_attempt_id: quizAttemptId,
       question_id: q.id,
       user_id: user.id,
       selected_answer: userAns ? (userAns === 1 ? 'A' : userAns === 2 ? 'B' : userAns === 3 ? 'C' : userAns === 4 ? 'D' : 'E') : 'SKIPPED',
@@ -651,7 +653,7 @@ async function loadLeaderboard() {
 }
 
 function viewPerformance() {
-  window.location.href = `performance.html?result_id=${testResultId}`;
+  window.location.href = `performance.html?attempt_id=${quizAttemptId}`;
 }
 
 function showModal(icon, title, text, buttons) {
