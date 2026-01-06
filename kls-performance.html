@@ -242,28 +242,21 @@ function getPerformanceLevel(percentage) {
 }
 
 function calculateConcentrationRating(avgTimePerQ, accuracy) {
-  if (accuracy <= 0) return "1.0";
+  if (accuracy <= 0) return "1.00";
   
-  let rating = 10;
+  let rating = 10.0;
   
-  if (avgTimePerQ > 10) rating -= 0.5;
-  if (avgTimePerQ > 15) rating -= 1;
-  if (avgTimePerQ > 20) rating -= 1;
-  if (avgTimePerQ > 25) rating -= 1.5;
-  if (avgTimePerQ > 30) rating -= 2;
-  if (avgTimePerQ > 35) rating -= 3;
+  // Time-based deductions (finer granularity)
+  if (avgTimePerQ > 10) rating -= 0.05 * (avgTimePerQ - 10);
+  if (avgTimePerQ > 20) rating -= 0.10 * (avgTimePerQ - 20);
+  if (avgTimePerQ > 30) rating -= 0.15 * (avgTimePerQ - 30);
   
-  if (accuracy < 90) rating -= 0.5;
-  if (accuracy < 80) rating -= 1;
-  if (accuracy < 70) rating -= 1.5;
-  if (accuracy < 60) rating -= 2;
-  if (accuracy < 50) rating -= 2;
-  if (accuracy < 40) rating -= 2.5;
-  if (accuracy < 30) rating -= 2.5;
-  if (accuracy < 20) rating -= 3;
-  if (accuracy < 10) rating -= 3;
+  // Accuracy-based deductions (finer granularity)
+  if (accuracy < 100) rating -= 0.01 * (100 - accuracy);
+  if (accuracy < 80) rating -= 0.02 * (80 - accuracy);
+  if (accuracy < 50) rating -= 0.03 * (50 - accuracy);
   
-  return Math.max(1, Math.min(10, rating)).toFixed(1);
+  return Math.max(1, Math.min(10, rating)).toFixed(2);
 }
 
 function getPercentageColor(per) {
@@ -322,6 +315,26 @@ function displayPerformance() {
     chapterMap[chapterName].total++;
     if (att.is_correct) chapterMap[chapterName].correct++;
   });
+
+  // Calculate weighted accuracy
+  let weightedScore = 0;
+  let maxWeightedScore = 0;
+  
+  questionAttempts.forEach(att => {
+    const diff = att.difficulty_level;
+    if (diff === 'સરળ') {
+      maxWeightedScore += 0.33;
+      if (att.is_correct) weightedScore += 0.33;
+    } else if (diff === 'મધ્યમ') {
+      maxWeightedScore += 0.50;
+      if (att.is_correct) weightedScore += 0.50;
+    } else if (diff === 'મુશ્કેલ') {
+      maxWeightedScore += 1.00;
+      if (att.is_correct) weightedScore += 1.00;
+    }
+  });
+  
+  const weightedAccuracy = maxWeightedScore > 0 ? ((weightedScore / maxWeightedScore) * 100).toFixed(2) : '0.00';
 
   // Generate chapter analysis table
   let chapterHTML = '';
@@ -442,49 +455,57 @@ function displayPerformance() {
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd)">
       <div class="stat-label">કુલ પ્રશ્નો</div>
-      <div class="stat-value">${quizAttempt.total_questions}</div>
+      <div class="stat-value" style="color:#0369a1">${quizAttempt.total_questions}</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">
       <div class="stat-label">સાચા જવાબ</div>
-      <div class="stat-value" style="color:#22c55e">${quizAttempt.correct_answers}</div>
+      <div class="stat-value" style="color:#15803d">${quizAttempt.correct_answers}</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#fee2e2,#fecaca)">
       <div class="stat-label">ખોટા જવાબ</div>
-      <div class="stat-value" style="color:#ef4444">${quizAttempt.wrong_answers}</div>
+      <div class="stat-value" style="color:#dc2626">${quizAttempt.wrong_answers}</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">ચોકસાઈ</div>
-      <div class="stat-value" style="color:#22c55e">${quizAttempt.percentage}%</div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">
+      <div class="stat-label">ટકાવારી</div>
+      <div class="stat-value" style="color:#a16207">${quizAttempt.percentage}%</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#e0e7ff,#c7d2fe)">
+      <div class="stat-label">ચોકસાઈ (Weighted)</div>
+      <div class="stat-value" style="color:#4338ca">${weightedAccuracy}%</div>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#f3e8ff,#e9d5ff)">
       <div class="stat-label">સમય/પ્રશ્ન</div>
-      <div class="stat-value">${timePerQ}s</div>
+      <div class="stat-value" style="color:#7c3aed">${timePerQ}s</div>
     </div>
-    <div class="stat-card clickable" onclick="showConcentrationInfo()">
+    <div class="stat-card clickable" style="background:linear-gradient(135deg,#ffedd5,#fed7aa)" onclick="showConcentrationInfo()">
       <div class="stat-label">એકાગ્રતા રેટિંગ ℹ️</div>
-      <div class="stat-value" style="color:#f59e0b">${concentrationRating}/10</div>
+      <div class="stat-value" style="color:#c2410c">${concentrationRating}/10</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0)">
       <div class="stat-label">સરળ (સાચા/કુલ)</div>
-      <div class="stat-value">${diffStats.easy.correct}/${diffStats.easy.total}</div>
+      <div class="stat-value" style="color:#047857">${diffStats.easy.correct}/${diffStats.easy.total}</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#fef08a,#fde047)">
+      <div class="stat-label">મધ્યમ (સાચા/કુલ)</div>
+      <div class="stat-value" style="color:#a16207">${diffStats.medium.correct}/${diffStats.medium.total}</div>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#fecaca,#fca5a5)">
       <div class="stat-label">મુશ્કેલ (સાચા/કુલ)</div>
-      <div class="stat-value">${diffStats.hard.correct}/${diffStats.hard.total}</div>
+      <div class="stat-value" style="color:#b91c1c">${diffStats.hard.correct}/${diffStats.hard.total}</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#ddd6fe,#c4b5fd)">
       <div class="stat-label">ટાર્ગેટ સ્કોર</div>
-      <div class="stat-value">60</div>
+      <div class="stat-value" style="color:#6d28d9">60</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="background:linear-gradient(135deg,#fed7aa,#fdba74)">
       <div class="stat-label">સુધારો જરૂર</div>
-      <div class="stat-value" style="color:#f59e0b">${improvementNeeded}%</div>
+      <div class="stat-value" style="color:#c2410c">${improvementNeeded}%</div>
     </div>
-    <div class="stat-card" style="grid-column:span 2">
-      <div class="stat-label">બાકી પ્રશ્નો</div>
-      <div class="stat-value">${String(quizAttempt.skipped_questions).padStart(2, '0')}</div>
+    <div class="stat-card" style="grid-column:span 2;background:linear-gradient(135deg,#e5e7eb,#d1d5db)">
+      <div class="stat-label">બાકી પ્રશ્નો (Skip + E)</div>
+      <div class="stat-value" style="color:#374151">${String(quizAttempt.skipped_questions + quizAttempt.e_option_used).padStart(2, '0')}</div>
     </div>
   </div>
 
@@ -600,18 +621,12 @@ function showLevelInfo() {
     { name: 'Perfect', range: '91-100%', class: 'level-perfect' }
   ];
   
-  let levelHTML = '<div style="display:grid;gap:8px;margin-top:10px">';
+  let levelText = '\n\n';
   levelData.forEach(level => {
-    levelHTML += `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;background:#f8fafc">
-        <span class="level-badge ${level.class}" style="padding:5px 10px;font-size:12px;margin:0">${level.name}</span>
-        <span style="font-size:12px;color:#64748b">${level.range}</span>
-      </div>
-    `;
+    levelText += `${level.name}: ${level.range}\n`;
   });
-  levelHTML += '</div>';
   
-  showModal('📊', 'Performance Levels', 'તમારા પ્રદર્શનના આધારે levels:' + levelHTML);
+  showModal('📊', 'Performance Levels', 'તમારા પ્રદર્શનના આધારે levels:' + levelText);
 }
 </script>
 </body>
