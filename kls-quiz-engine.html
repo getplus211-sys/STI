@@ -468,16 +468,16 @@ async function submitTest() {
 
   questions.forEach(q => {
     const a = answers[q.id];
-    if (!a) {
+    const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : null;
+    
+    if (!a || a === 5) {
+      // No answer or E option (Not Attempted)
       skip++;
-    } else if (a === 5) {
-      e++;
-      if (q.correct_answer === 'E') correct++;
-      else wrong++;
+      if (a === 5) e++; // Track E option usage
+    } else if (a === correctOpt) {
+      correct++;
     } else {
-      const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : 4;
-      if (a === correctOpt) correct++;
-      else wrong++;
+      wrong++;
     }
   });
 
@@ -518,14 +518,19 @@ async function submitTest() {
     const userAns = answers[q.id];
     const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : 5;
     
+    // Proper skip detection
+    const isSkipped = !userAns || userAns === 5;
+    const selectedAnswer = isSkipped ? 'SKIPPED' : 
+                          (userAns === 1 ? 'A' : userAns === 2 ? 'B' : userAns === 3 ? 'C' : userAns === 4 ? 'D' : 'E');
+    const isCorrect = isSkipped ? false : userAns === correctOpt;
+    
     await sb.from("kls_question_attempts").insert({
       quiz_attempt_id: quizAttemptId,
       question_id: q.id,
       user_id: user.id,
-      selected_answer: userAns ? (userAns === 1 ? 'A' : userAns === 2 ? 'B' : userAns === 3 ? 'C' : userAns === 4 ? 'D' : 'E') : 'SKIPPED',
-      is_correct: userAns === correctOpt,
-      time_taken_seconds: Math.floor(timeTaken / questions.length),
-      question_order: (i + 1)
+      selected_answer: selectedAnswer,
+      is_correct: isCorrect,
+      time_taken_seconds: Math.floor(timeTaken / questions.length)
     });
   }
 
