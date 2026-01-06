@@ -208,7 +208,7 @@ async function init() {
     userName = profile?.full_name || "Student";
 
     const { data: results } = await sb
-      .from("lrd_test_results")
+      .from("kls_quiz_attempts")
       .select("*")
       .eq("user_id", user.id)
       .order("completed_at", { ascending: false });
@@ -222,16 +222,16 @@ async function init() {
 
     const resultIds = results.map(r => r.id);
     const { data: attempts } = await sb
-      .from("lrd_question_attempts")
+      .from("kls_question_attempts")
       .select(`
         *,
-        lrd_questions (
+        kls_questions (
           *,
-          lrd_subjects (id, name, subject_code),
-          lrd_chapters (id, name, chapter_id)
+          kls_subjects (id, name, subject_code),
+          kls_chapters (id, name, chapter_code)
         )
       `)
-      .in("test_result_id", resultIds);
+      .in("quiz_attempt_id", resultIds);
     
     allAttempts = attempts || [];
 
@@ -325,12 +325,12 @@ function calculateOverallData() {
   const subjectMap = {};
   
   allAttempts.forEach(att => {
-    if (!att.lrd_questions || !att.lrd_questions.lrd_subjects || !att.lrd_questions.lrd_chapters) return;
+    if (!att.kls_questions || !att.kls_questions.kls_subjects || !att.kls_questions.kls_chapters) return;
     
-    const subjId = att.lrd_questions.lrd_subjects.id;
-    const subjName = att.lrd_questions.lrd_subjects.name;
-    const chapterId = att.lrd_questions.lrd_chapters.id;
-    const chapterName = att.lrd_questions.lrd_chapters.name;
+    const subjId = att.kls_questions.kls_subjects.id;
+    const subjName = att.kls_questions.kls_subjects.name;
+    const chapterId = att.kls_questions.kls_chapters.id;
+    const chapterName = att.kls_questions.kls_chapters.name;
     
     if (!subjectMap[subjId]) {
       subjectMap[subjId] = {
