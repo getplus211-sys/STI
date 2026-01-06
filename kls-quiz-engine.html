@@ -500,16 +500,21 @@ async function submitTest() {
     const a = answers[q.id];
     const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : null;
     
-    if (!a || a === 5) {
-      // No answer or E option (Not Attempted)
+    if (a === 5) {
+      // E option selected (Not Attempted)
+      e++;
+    } else if (!a) {
+      // No answer given (Skipped)
       skip++;
-      if (a === 5) e++; // Track E option usage
     } else if (a === correctOpt) {
+      // Correct answer
       correct++;
     } else {
+      // Wrong answer (A/B/C/D selected but wrong)
       wrong++;
     }
   });
+  console.log('Total check:', correct + wrong + skip, '(should be', questions.length + ')');
 
   const score = correct;
   const timeTaken = Math.floor((Date.now() - startTime) / 1000);
@@ -521,7 +526,7 @@ async function submitTest() {
     subject_id: currentTest.subject_id,
     chapter_code: currentTest.chapter_code,
     total_questions: questions.length,
-    attempted_questions: questions.length - skip,
+    attempted_questions: correct + wrong, // Only actual attempts (not skip or E)
     correct_answers: correct,
     wrong_answers: wrong,
     skipped_questions: skip,
@@ -546,13 +551,21 @@ async function submitTest() {
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
     const userAns = answers[q.id];
-    const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : 5;
+    const correctOpt = q.correct_answer === 'A' ? 1 : q.correct_answer === 'B' ? 2 : q.correct_answer === 'C' ? 3 : q.correct_answer === 'D' ? 4 : null;
     
-    // Proper skip detection
-    const isSkipped = !userAns || userAns === 5;
-    const selectedAnswer = isSkipped ? 'SKIPPED' : 
-                          (userAns === 1 ? 'A' : userAns === 2 ? 'B' : userAns === 3 ? 'C' : userAns === 4 ? 'D' : 'E');
-    const isCorrect = isSkipped ? false : userAns === correctOpt;
+    // Determine selected answer and correctness
+    let selectedAnswer, isCorrect;
+    
+    if (userAns === 5) {
+      selectedAnswer = 'E'; // E option
+      isCorrect = false;
+    } else if (!userAns) {
+      selectedAnswer = 'SKIPPED'; // No answer
+      isCorrect = false;
+    } else {
+      selectedAnswer = userAns === 1 ? 'A' : userAns === 2 ? 'B' : userAns === 3 ? 'C' : 'D';
+      isCorrect = userAns === correctOpt;
+    }
     
     await sb.from("kls_question_attempts").insert({
       quiz_attempt_id: quizAttemptId,
