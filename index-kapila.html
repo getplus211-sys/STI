@@ -7,26 +7,26 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:70px}
-.header{position:fixed;top:0;left:0;right:0;z-index:1000;background:#fff;padding:12px 16px;box-shadow:0 2px 10px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center}
+body{font-family:sans-serif;background:#f3f4f6;padding-top:60px;padding-bottom:60px}
+.header{position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#a855f7,#9333ea);padding:8px 12px;box-shadow:0 2px 8px rgba(168,85,247,0.2);display:flex;justify-content:space-between;align-items:center}
 .brand{flex:1}
-.brand-name{font-size:18px;font-weight:bold;color:#ea580c;line-height:1.2}
-.brand-subtitle{font-size:10px;color:#ea580c}
-.header-right{display:flex;align-items:center;gap:8px}
-.register-btn{background:#2563eb;color:#fff;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:bold;border:none;cursor:pointer}
-.menu-btn{width:40px;height:40px;background:#f3f4f6;border-radius:8px;border:none;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
-.user-name{font-size:12px;font-weight:bold;color:#1f2937}
-.footer{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:#fff;padding:12px 16px;box-shadow:0 -2px 10px rgba(0,0,0,0.1);display:flex;justify-content:space-around;align-items:center}
-.footer-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:24px;color:#6b7280;cursor:pointer;position:relative}
-.footer-btn.active{color:#2563eb}
-.footer-label{font-size:9px;font-weight:600}
+.brand-name{font-size:16px;font-weight:bold;color:#fff;line-height:1.2}
+.brand-subtitle{font-size:9px;color:rgba(255,255,255,0.95)}
+.header-right{display:flex;align-items:center;gap:6px}
+.register-btn{background:#fff;color:#a855f7;padding:6px 12px;border-radius:16px;font-size:10px;font-weight:bold;border:none;cursor:pointer}
+.menu-btn{width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:6px;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;cursor:pointer}
+.user-name{font-size:11px;font-weight:bold;color:#fff}
+.footer{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#a855f7,#9333ea);padding:8px 12px;box-shadow:0 -2px 8px rgba(168,85,247,0.2);display:flex;justify-content:space-around;align-items:center}
+.footer-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:20px;color:#fff;cursor:pointer;position:relative}
+.footer-btn.active{color:#fff}
+.footer-label{font-size:8px;font-weight:600;color:#fff}
 .notification-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;padding:2px 5px;border-radius:10px;font-weight:bold}
 .container{padding:0 16px;max-width:600px;margin:0 auto}
 .side-menu{position:fixed;top:0;right:-280px;width:280px;height:100%;background:#fff;z-index:2000;transition:right 0.3s;box-shadow:-2px 0 10px rgba(0,0,0,0.1);overflow-y:auto}
 .side-menu.open{right:0}
 .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1999;display:none}
 .menu-overlay.show{display:block}
-.menu-header{padding:20px;background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;position:relative}
+.menu-header{padding:20px;background:linear-gradient(135deg,#a855f7,#9333ea);color:#fff;position:relative}
 .menu-header h3{font-size:18px;margin-bottom:4px}
 .menu-header p{font-size:12px;opacity:0.9}
 .menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:24px;width:32px;height:32px;border-radius:8px;cursor:pointer}
@@ -45,13 +45,20 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
 .form-group{margin-bottom:16px}
 .form-label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151}
 .form-input{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
-.btn-primary{width:100%;background:#2563eb;color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:bold;border:none;cursor:pointer}
-.btn-primary:hover{background:#1d4ed8}
+.password-wrapper{position:relative}
+.password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#6b7280}
+.password-toggle:hover{color:#374151}
+.password-hint{font-size:11px;color:#6b7280;margin-top:4px}
+.error-text{color:#ef4444;font-size:12px;margin-top:4px;display:none}
+.error-text.show{display:block}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.btn-primary{width:100%;background:#a855f7;color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:bold;border:none;cursor:pointer}
+.btn-primary:hover{background:#9333ea}
 .btn-secondary{width:100%;background:#f3f4f6;color:#1f2937;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:8px}
 .btn-link{background:none;border:none;color:#2563eb;font-size:12px;cursor:pointer;text-decoration:underline;margin-top:8px;width:100%;text-align:center}
 .tabs{display:flex;border-bottom:2px solid #e5e7eb;margin-bottom:20px}
 .tab{flex:1;padding:12px;text-align:center;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
-.tab.active{color:#2563eb;border-bottom-color:#2563eb}
+.tab.active{color:#a855f7;border-bottom-color:#a855f7}
 .tab-content{display:none}
 .tab-content.active{display:block}
 .success-popup{background:#fff;border-radius:16px;padding:30px;text-align:center;max-width:350px}
@@ -95,7 +102,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
     <span class="footer-label">Performance</span>
   </button>
   <button class="footer-btn" onclick="navigateFooter('account')">
-    <span>👤</span>
+    <span>🤵‍♂</span>
     <span class="footer-label">Account</span>
   </button>
   <button class="footer-btn" onclick="navigateFooter('contact')">
@@ -166,11 +173,15 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" class="form-input" id="loginEmail" required>
+          <input type="email" class="form-input" id="loginEmail" placeholder="example@email.com" required>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" class="form-input" id="loginPassword" required>
+          <div class="password-wrapper">
+            <input type="password" class="form-input" id="loginPassword" placeholder="abc123" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">👁️</button>
+          </div>
+          <div class="password-hint">Example: abc123</div>
         </div>
         <button type="submit" class="btn-primary">Login</button>
         <button type="button" class="btn-link" onclick="showForgotPassword()">Forgot Password?</button>
@@ -181,7 +192,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
       <form onsubmit="handleRegister(event)">
         <div class="form-group">
           <label class="form-label">Full Name</label>
-          <input type="text" class="form-input" id="registerName" required>
+          <input type="text" class="form-input" id="registerName" placeholder="તમારું નામ" required>
         </div>
         <div class="form-group">
           <label class="form-label">Mobile Number</label>
@@ -189,11 +200,64 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
         </div>
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" class="form-input" id="registerEmail" required>
+          <input type="email" class="form-input" id="registerEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">District (જિલ્લો)</label>
+          <select class="form-input" id="registerDistrict" required>
+            <option value="">Select District</option>
+            <option value="Ahmedabad">Ahmedabad (અમદાવાદ)</option>
+            <option value="Amreli">Amreli (અમરેલી)</option>
+            <option value="Anand">Anand (આણંદ)</option>
+            <option value="Aravalli">Aravalli (અરવલ્લી)</option>
+            <option value="Banaskantha">Banaskantha (બનાસકાંઠા)</option>
+            <option value="Bharuch">Bharuch (ભરૂચ)</option>
+            <option value="Bhavnagar">Bhavnagar (ભાવનગર)</option>
+            <option value="Botad">Botad (બોટાદ)</option>
+            <option value="Chhota Udaipur">Chhota Udaipur (છોટા ઉદેપુર)</option>
+            <option value="Dahod">Dahod (દાહોદ)</option>
+            <option value="Dang">Dang (ડાંગ)</option>
+            <option value="Devbhoomi Dwarka">Devbhoomi Dwarka (દેવભૂમિ દ્વારકા)</option>
+            <option value="Gandhinagar">Gandhinagar (ગાંધીનગર)</option>
+            <option value="Gir Somnath">Gir Somnath (ગીર સોમનાથ)</option>
+            <option value="Jamnagar">Jamnagar (જામનગર)</option>
+            <option value="Junagadh">Junagadh (જૂનાગઢ)</option>
+            <option value="Kheda">Kheda (ખેડા)</option>
+            <option value="Kutch">Kutch (કચ્છ)</option>
+            <option value="Mahisagar">Mahisagar (મહીસાગર)</option>
+            <option value="Mehsana">Mehsana (મહેસાણા)</option>
+            <option value="Morbi">Morbi (મોરબી)</option>
+            <option value="Narmada">Narmada (નર્મદા)</option>
+            <option value="Navsari">Navsari (નવસારી)</option>
+            <option value="Panchmahal">Panchmahal (પંચમહાલ)</option>
+            <option value="Patan">Patan (પાટણ)</option>
+            <option value="Porbandar">Porbandar (પોરબંદર)</option>
+            <option value="Rajkot">Rajkot (રાજકોટ)</option>
+            <option value="Sabarkantha">Sabarkantha (સાબરકાંઠા)</option>
+            <option value="Surat">Surat (સુરત)</option>
+            <option value="Surendranagar">Surendranagar (સુરેન્દ્રનગર)</option>
+            <option value="Tapi">Tapi (તાપી)</option>
+            <option value="Vadodara">Vadodara (વડોદરા)</option>
+            <option value="Valsad">Valsad (વલસાડ)</option>
+            <option value="Vav-Tharad">Vav-Tharad (વાવ-થરાદ)</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" class="form-input" id="registerPassword" minlength="6" required>
+          <div class="password-wrapper">
+            <input type="password" class="form-input" id="registerPassword" minlength="6" placeholder="abc123" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')">👁️</button>
+          </div>
+          <div class="password-hint">Minimum 6 characters (Example: abc123)</div>
+          <div class="error-text" id="passwordError"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <div class="password-wrapper">
+            <input type="password" class="form-input" id="registerPasswordConfirm" minlength="6" placeholder="abc123" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('registerPasswordConfirm')">👁️</button>
+          </div>
+          <div class="error-text" id="confirmPasswordError"></div>
         </div>
         <button type="submit" class="btn-primary">Register</button>
         <button type="button" class="btn-secondary" onclick="closeAuthModal()">Cancel</button>
@@ -217,7 +281,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:7
     <form onsubmit="handleForgotPassword(event)">
       <div class="form-group">
         <label class="form-label">Email Address</label>
-        <input type="email" class="form-input" id="forgotEmail" required>
+        <input type="email" class="form-input" id="forgotEmail" placeholder="example@email.com" required>
       </div>
       <button type="submit" class="btn-primary">Send Reset Link</button>
       <button type="button" class="btn-secondary" onclick="closeForgotPassword()">Cancel</button>
@@ -452,12 +516,55 @@ async function handleLogin(e) {
   }
 }
 
+function togglePassword(fieldId) {
+  const field = document.getElementById(fieldId);
+  const btn = field.nextElementSibling;
+  if (field.type === 'password') {
+    field.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    field.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+function validatePassword(password) {
+  if (password.length < 6) {
+    return 'Password must be at least 6 characters (Example: abc123)';
+  }
+  return null;
+}
+
 async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById('registerName').value;
   const mobile = document.getElementById('registerMobile').value;
   const email = document.getElementById('registerEmail').value;
+  const district = document.getElementById('registerDistrict').value;
   const password = document.getElementById('registerPassword').value;
+  const confirmPassword = document.getElementById('registerPasswordConfirm').value;
+  
+  // Reset errors
+  document.getElementById('passwordError').classList.remove('show');
+  document.getElementById('confirmPasswordError').classList.remove('show');
+  document.getElementById('passwordError').textContent = '';
+  document.getElementById('confirmPasswordError').textContent = '';
+  
+  // Validate password length
+  const passwordError = validatePassword(password);
+  if (passwordError) {
+    document.getElementById('passwordError').textContent = passwordError;
+    document.getElementById('passwordError').classList.add('show');
+    return;
+  }
+  
+  // Check password match
+  if (password !== confirmPassword) {
+    document.getElementById('confirmPasswordError').textContent = 'Passwords do not match. Please re-enter.';
+    document.getElementById('confirmPasswordError').classList.add('show');
+    document.getElementById('registerPasswordConfirm').value = '';
+    return;
+  }
   
   const { data: authData, error: authError } = await sb.auth.signUp({ email, password });
   
@@ -470,6 +577,7 @@ async function handleRegister(e) {
     await sb.from('profiles').update({ 
       full_name: name,
       mobile: mobile,
+      district: district,
       updated_at: new Date().toISOString()
     }).eq('id', authData.user.id);
   }
