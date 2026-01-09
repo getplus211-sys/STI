@@ -239,17 +239,44 @@ async function confirmRetake() {
   app.innerHTML = '<div class="loader">♻️ રીસેટ થઈ રહ્યું છે...</div>';
   
   try {
-    // Delete old attempt data
-    await sb.from('kls_quiz_attempts').delete().eq('id', quizAttemptId);
-    await sb.from('kls_question_attempts').delete().eq('quiz_attempt_id', quizAttemptId);
+    console.log('Deleting quiz attempt:', quizAttemptId);
     
-    // Reset and reload quiz
-    existingResult = null;
-    quizAttemptId = null;
-    window.location.reload();
+    // Delete question attempts first
+    const { error: qaError } = await sb
+      .from('kls_question_attempts')
+      .delete()
+      .eq('quiz_attempt_id', quizAttemptId);
+    
+    if (qaError) {
+      console.error('Question attempts delete error:', qaError);
+      throw qaError;
+    }
+    
+    console.log('Question attempts deleted');
+    
+    // Delete quiz attempt
+    const { error: quizError } = await sb
+      .from('kls_quiz_attempts')
+      .delete()
+      .eq('id', quizAttemptId);
+    
+    if (quizError) {
+      console.error('Quiz attempt delete error:', quizError);
+      throw quizError;
+    }
+    
+    console.log('Quiz attempt deleted, reloading...');
+    
+    // Force reload with cache clear
+    window.location.href = window.location.href.split('?')[0] + '?quiz_id=' + quizId + '&t=' + Date.now();
+    
   } catch (err) {
     console.error('Retake error:', err);
-    app.innerHTML = `<div class="card"><h3>❌ Error</h3><p>${err.message}</p></div>`;
+    app.innerHTML = `<div class="card">
+      <h3>❌ Error</h3>
+      <p>${err.message}</p>
+      <button class="primary" onclick="window.location.reload()">Retry</button>
+    </div>`;
   }
 }
 
