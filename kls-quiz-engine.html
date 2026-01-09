@@ -268,7 +268,7 @@ async function confirmRetake() {
     console.log('Quiz attempt deleted, reloading...');
     
     // Force reload with cache clear
-    window.location.href = window.location.href.split('?')[0] + '?quiz_id=' + quizId + '&t=' + Date.now();
+    window.location.href = window.location.href.split('?')[0] + '?quiz_id=' + QUIZ_ID + '&t=' + Date.now();
     
   } catch (err) {
     console.error('Retake error:', err);
