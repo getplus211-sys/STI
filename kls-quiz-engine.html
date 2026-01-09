@@ -21,6 +21,7 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .primary{background:#22c55e;color:#fff}
 .gray{background:#e5e7eb;color:#333}
 .blue{background:#3b82f6;color:#fff}
+.success{background:#8b5cf6;color:#fff}
 .danger{background:#dc2626;color:#fff}
 .warning{background:#f59e0b;color:#fff}
 .option{border:1px solid #ddd;border-radius:12px;padding:12px;margin:8px 0;cursor:pointer;transition:all 0.2s}
@@ -216,8 +217,29 @@ function showAlreadyAttempted(test, result) {
     <button class="blue" onclick="loadExistingResult()">📊 તમારા પરિણામો જુઓ</button>
     <button class="gray" onclick="loadExistingSolutions()">📝 Solutions જુઓ</button>
     <br>
+    <button class="success" onclick="retakeQuiz()">🔄 શું તમે ફરી ટેસ્ટ આપવા માંગો છો?</button>
     <button class="warning" onclick="window.history.back()">← પાછા જાઓ</button>
   </div>`;
+}
+
+async function retakeQuiz() {
+  if (!confirm('શું તમે ખરેખર આ ટેસ્ટ ફરીથી આપવા માંગો છો? તમારો જૂનો સ્કોર અપડેટ થઈ જશે.')) {
+    return;
+  }
+  
+  try {
+    // Delete old attempt data
+    await sb.from('kls_quiz_attempts').delete().eq('id', quizAttemptId);
+    await sb.from('kls_question_attempts').delete().eq('quiz_attempt_id', quizAttemptId);
+    
+    // Reset and reload quiz
+    existingResult = null;
+    quizAttemptId = null;
+    window.location.reload();
+  } catch (err) {
+    console.error('Retake error:', err);
+    alert('Error: ' + err.message);
+  }
 }
 
 async function loadExistingResult() {
