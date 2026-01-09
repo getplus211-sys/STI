@@ -118,7 +118,7 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
     <div class="modal-title" id="modalTitle">Title</div>
     <div class="modal-text" id="modalText">Message</div>
     <div class="modal-buttons" id="modalButtons"></div>
-    <div class="modal-brand"><span>KAPiLa Institute</span><br>Created by devendra_dd</div>
+    <div class="modal-brand"><span>KAPiLa Learning</span><br>Created by devendra_dd</div>
   </div>
 </div>
 
@@ -223,9 +223,20 @@ function showAlreadyAttempted(test, result) {
 }
 
 async function retakeQuiz() {
-  if (!confirm('શું તમે ખરેખર આ ટેસ્ટ ફરીથી આપવા માંગો છો? તમારો જૂનો સ્કોર અપડેટ થઈ જશે.')) {
-    return;
-  }
+  showModal(
+    '🔄',
+    'ફરી ટેસ્ટ આપો',
+    'શું તમે ખરેખર આ ટેસ્ટ ફરીથી આપવા માંગો છો?<br><br><strong>નોંધ:</strong> તમારો જૂનો સ્કોર અને પ્રયાસ delete થઈ જશે.',
+    `
+      <button class="success" onclick="confirmRetake()">હા, ફરી ટેસ્ટ આપું</button>
+      <button class="gray" onclick="hideModal()">ના, રદ કરો</button>
+    `
+  );
+}
+
+async function confirmRetake() {
+  hideModal();
+  app.innerHTML = '<div class="loader">♻️ રીસેટ થઈ રહ્યું છે...</div>';
   
   try {
     // Delete old attempt data
@@ -238,7 +249,7 @@ async function retakeQuiz() {
     window.location.reload();
   } catch (err) {
     console.error('Retake error:', err);
-    alert('Error: ' + err.message);
+    app.innerHTML = `<div class="card"><h3>❌ Error</h3><p>${err.message}</p></div>`;
   }
 }
 
