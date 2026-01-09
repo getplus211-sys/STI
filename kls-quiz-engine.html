@@ -228,7 +228,7 @@ async function retakeQuiz() {
     'ફરી ટેસ્ટ આપો',
     'શું તમે ખરેખર આ ટેસ્ટ ફરીથી આપવા માંગો છો?<br><br><strong>નોંધ:</strong> તમારો જૂનો સ્કોર અને પ્રયાસ delete થઈ જશે.',
     `
-      <button class="success" onclick="confirmRetake()">હા, ફરી ટેસ્ટ આપું</button>
+      <button class="primary" onclick="confirmRetake()">હા, ફરી ટેસ્ટ આપું</button>
       <button class="gray" onclick="hideModal()">ના, રદ કરો</button>
     `
   );
@@ -759,7 +759,7 @@ function viewPerformance() {
 function showModal(icon, title, text, buttons) {
   document.getElementById('modalIcon').innerText = icon;
   document.getElementById('modalTitle').innerText = title;
-  document.getElementById('modalText').innerText = text;
+  document.getElementById('modalText').innerHTML = text;
   document.getElementById('modalButtons').innerHTML = buttons;
   document.getElementById('modal').classList.add('show');
 }
