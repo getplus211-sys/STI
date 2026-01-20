@@ -7,18 +7,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:80px}
+body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:80px}
 
-/* Header સ્ટાઇલ - તમારા ફોટો મુજબ */
+/* Header સ્ટાઇલ - ફોટો મુજબ */
 .header{
   position:fixed;
   top:0;
   left:0;
   right:0;
   z-index:1000;
-  background:linear-gradient(135deg,#7c3aed,#6d28d9);
-  padding:12px 16px;
-  box-shadow:0 2px 10px rgba(124,58,237,0.3);
+  background:linear-gradient(135deg,#a855f7,#9333ea);
+  padding:24px 16px 12px 16px;
+  box-shadow:0 2px 10px rgba(168,85,247,0.3);
 }
 .header-content{
   display:flex;
@@ -29,14 +29,14 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
 }
 .brand{flex:1}
 .brand-name{
-  font-size:24px;
+  font-size:20px;
   font-weight:900;
   color:#fff;
   line-height:1.2;
-  letter-spacing:0.5px;
+  letter-spacing:0.3px;
 }
 .brand-subtitle{
-  font-size:11px;
+  font-size:10px;
   color:rgba(255,255,255,0.9);
   margin-top:2px;
 }
@@ -46,12 +46,13 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
   gap:12px;
 }
 .user-name{
-  font-size:14px;
+  font-size:13px;
   font-weight:bold;
   color:#fff;
-  background:rgba(255,255,255,0.15);
-  padding:6px 14px;
-  border-radius:20px;
+  max-width:120px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 .menu-btn{
   width:40px;
@@ -75,7 +76,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
   transition:all 0.3s;
 }
 
-/* Footer સ્ટાઇલ - તમારા ફોટો મુજબ */
+/* Footer સ્ટાઇલ - ફોટો મુજબ */
 .footer{
   position:fixed;
   bottom:0;
@@ -106,6 +107,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
   flex:1;
   position:relative;
   transition:all 0.2s;
+  text-decoration:none;
 }
 .footer-btn:active{
   transform:scale(0.95);
@@ -126,8 +128,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
   transition:all 0.2s;
 }
 .footer-btn.active svg{
-  stroke:#7c3aed;
-  fill:#7c3aed;
+  stroke:#a855f7;
+  fill:#a855f7;
 }
 .footer-label{
   font-size:10px;
@@ -136,7 +138,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
   transition:all 0.2s;
 }
 .footer-btn.active .footer-label{
-  color:#7c3aed;
+  color:#a855f7;
 }
 .notification-badge{
   position:absolute;
@@ -157,7 +159,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
 .side-menu.open{right:0}
 .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1999;display:none}
 .menu-overlay.show{display:block}
-.menu-header{padding:20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;position:relative}
+.menu-header{padding:20px;background:linear-gradient(135deg,#a855f7,#9333ea);color:#fff;position:relative}
 .menu-header h3{font-size:18px;margin-bottom:4px}
 .menu-header p{font-size:12px;opacity:0.9}
 .menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:24px;width:32px;height:32px;border-radius:8px;cursor:pointer}
@@ -173,32 +175,6 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:
 .modal-title-wrap{flex:1}
 .modal-brand{font-size:18px;font-weight:bold;color:#ea580c}
 .modal-subtitle{font-size:11px;color:#6b7280}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151}
-.form-input{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px}
-.password-wrapper{position:relative}
-.password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#6b7280}
-.password-toggle:hover{color:#374151}
-.password-hint{font-size:11px;color:#6b7280;margin-top:4px}
-.error-text{color:#ef4444;font-size:12px;margin-top:4px;display:none}
-.error-text.show{display:block}
-select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
-.btn-primary{width:100%;background:#7c3aed;color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:bold;border:none;cursor:pointer}
-.btn-primary:hover{background:#6d28d9}
-.btn-secondary{width:100%;background:#f3f4f6;color:#1f2937;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:8px}
-.btn-link{background:none;border:none;color:#2563eb;font-size:12px;cursor:pointer;text-decoration:underline;margin-top:8px;width:100%;text-align:center}
-.tabs{display:flex;border-bottom:2px solid #e5e7eb;margin-bottom:20px}
-.tab{flex:1;padding:12px;text-align:center;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
-.tab.active{color:#7c3aed;border-bottom-color:#7c3aed}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.success-popup{background:#fff;border-radius:16px;padding:30px;text-align:center;max-width:350px}
-.success-icon{font-size:60px;margin-bottom:16px}
-.success-title{font-size:20px;font-weight:bold;margin-bottom:8px}
-.success-text{font-size:14px;color:#6b7280;margin-bottom:20px}
-.info-row{background:#f9fafb;padding:12px;border-radius:8px;margin:8px 0;display:flex;align-items:center;gap:12px}
-.info-label{font-size:11px;color:#6b7280;margin-bottom:2px}
-.info-value{font-size:14px;font-weight:600;color:#1f2937}
 </style>
 </head>
 <body>
@@ -240,12 +216,12 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       </div>
       <span class="footer-label">Performance</span>
     </button>
-    <button class="footer-btn" onclick="navigateFooter('account')">
+    <a href="account.html" class="footer-btn">
       <div class="footer-icon">
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
       </div>
       <span class="footer-label">Account</span>
-    </button>
+    </a>
     <button class="footer-btn" onclick="navigateFooter('contact')">
       <div class="footer-icon">
         <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
@@ -315,7 +291,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <a href="tel:+916353511804" style="display:block;width:100%;background:#2563eb;color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:bold;text-decoration:none;font-size:14px">
       Call
     </a>
-    <button class="btn-secondary" onclick="closeContactModal()" style="margin-top:12px">બંધ કરો</button>
+    <button style="width:100%;background:#f3f4f6;color:#1f2937;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:12px" onclick="closeContactModal()">બંધ કરો</button>
   </div>
 </div>
 
@@ -337,45 +313,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <p style="margin-bottom:12px">With thousands of successful students, KAPiLa Learning has become a trusted name in competitive exam preparation across Gujarat.</p>
       <p>Join us today and take the first step towards your successful career in government service!</p>
     </div>
-    <button class="btn-primary" onclick="closeAboutModal()" style="margin-top:20px">બંધ કરો</button>
-  </div>
-</div>
-
-<!-- Account Modal -->
-<div class="modal" id="accountModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-logo">👤</div>
-      <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Learning</div>
-        <div class="modal-subtitle">Account Information</div>
-      </div>
-    </div>
-    <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px;text-align:center">તમારી Account Details</h3>
-    <div id="accountInfo">
-      <div class="info-row">
-        <span style="font-size:24px">👤</span>
-        <div style="flex:1">
-          <div class="info-label">Full Name</div>
-          <div class="info-value" id="accountName">--</div>
-        </div>
-      </div>
-      <div class="info-row">
-        <span style="font-size:24px">📧</span>
-        <div style="flex:1">
-          <div class="info-label">Email</div>
-          <div class="info-value" id="accountEmail">--</div>
-        </div>
-      </div>
-      <div class="info-row">
-        <span style="font-size:24px">📱</span>
-        <div style="flex:1">
-          <div class="info-label">Mobile Number</div>
-          <div class="info-value" id="accountMobile">--</div>
-        </div>
-      </div>
-    </div>
-    <button class="btn-primary" onclick="closeAccountModal()" style="margin-top:20px">બંધ કરો</button>
+    <button style="width:100%;background:#a855f7;color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:bold;border:none;cursor:pointer;margin-top:20px" onclick="closeAboutModal()">બંધ કરો</button>
   </div>
 </div>
 
@@ -397,7 +335,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <p style="font-size:12px;margin-top:8px">તમારા નવા notifications અહીં દેખાશે</p>
       </div>
     </div>
-    <button class="btn-secondary" onclick="closeNotificationModal()" style="margin-top:12px">બંધ કરો</button>
+    <button style="width:100%;background:#f3f4f6;color:#1f2937;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:12px" onclick="closeNotificationModal()">બંધ કરો</button>
   </div>
 </div>
 
@@ -459,7 +397,6 @@ function navigateFooter(page) {
   
   if (page === 'home') window.location.href = 'index-kapila.html';
   else if (page === 'performance') window.location.href = 'overall-performance.html';
-  else if (page === 'account') showAccountPopup();
   else if (page === 'contact') showContactPopup();
   else if (page === 'notification') showNotificationPopup();
 }
@@ -483,20 +420,6 @@ function showAboutPopup() {
 
 function closeAboutModal() {
   document.getElementById('aboutModal').classList.remove('show');
-}
-
-async function showAccountPopup() {
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  
-  document.getElementById('accountName').innerText = profile?.full_name || '--';
-  document.getElementById('accountEmail').innerText = currentUser.email || '--';
-  document.getElementById('accountMobile').innerText = profile?.mobile || '--';
-  
-  document.getElementById('accountModal').classList.add('show');
-}
-
-function closeAccountModal() {
-  document.getElementById('accountModal').classList.remove('show');
 }
 
 function showNotificationPopup() {
