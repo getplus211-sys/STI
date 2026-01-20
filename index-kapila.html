@@ -415,6 +415,15 @@ async function handleLogout() {
   window.location.href = 'login.html';
 }
 
+function checkAuthAndNavigate(page) {
+  if (currentUser) {
+    window.location.href = page;
+  } else {
+    alert('કૃપા કરીને પહેલા login કરો');
+    window.location.href = 'login.html';
+  }
+}
+
 function showContactPopup() {
   document.getElementById('contactModal').classList.add('show');
 }
