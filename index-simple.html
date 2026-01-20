@@ -3,30 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAPiLa Institute - Digital Learning Platform</title>
+<title>KAPiLa Learning - Digital Learning Platform</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:sans-serif;background:#f3f4f6;padding-top:60px;padding-bottom:60px}
-.header{position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#a855f7,#9333ea);padding:8px 12px;box-shadow:0 2px 8px rgba(168,85,247,0.2);display:flex;justify-content:space-between;align-items:center}
+body{font-family:sans-serif;background:#f3f4f6;padding-top:120px;padding-bottom:80px}
+
+/* Header સ્ટાઇલ - તમારા ફોટો મુજબ */
+.header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  background:linear-gradient(135deg,#7c3aed,#6d28d9);
+  padding:12px 16px;
+  box-shadow:0 2px 10px rgba(124,58,237,0.3);
+}
+.header-content{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  max-width:600px;
+  margin:0 auto;
+}
 .brand{flex:1}
-.brand-name{font-size:16px;font-weight:bold;color:#fff;line-height:1.2}
-.brand-subtitle{font-size:9px;color:rgba(255,255,255,0.95)}
-.header-right{display:flex;align-items:center;gap:6px}
-.register-btn{background:#fff;color:#a855f7;padding:6px 12px;border-radius:16px;font-size:10px;font-weight:bold;border:none;cursor:pointer}
-.menu-btn{width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:6px;border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;cursor:pointer}
-.user-name{font-size:11px;font-weight:bold;color:#fff}
-.footer{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#a855f7,#9333ea);padding:8px 12px;box-shadow:0 -2px 8px rgba(168,85,247,0.2);display:flex;justify-content:space-around;align-items:center}
-.footer-btn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:20px;color:#fff;cursor:pointer;position:relative}
-.footer-btn.active{color:#fff}
-.footer-label{font-size:8px;font-weight:600;color:#fff}
-.notification-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;padding:2px 5px;border-radius:10px;font-weight:bold}
+.brand-name{
+  font-size:24px;
+  font-weight:900;
+  color:#fff;
+  line-height:1.2;
+  letter-spacing:0.5px;
+}
+.brand-subtitle{
+  font-size:11px;
+  color:rgba(255,255,255,0.9);
+  margin-top:2px;
+}
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.user-name{
+  font-size:14px;
+  font-weight:bold;
+  color:#fff;
+  background:rgba(255,255,255,0.15);
+  padding:6px 14px;
+  border-radius:20px;
+}
+.menu-btn{
+  width:40px;
+  height:40px;
+  background:rgba(255,255,255,0.2);
+  border-radius:8px;
+  border:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  cursor:pointer;
+  padding:8px;
+}
+.menu-btn span{
+  width:100%;
+  height:3px;
+  background:#fff;
+  border-radius:2px;
+  transition:all 0.3s;
+}
+
+/* Footer સ્ટાઇલ - તમારા ફોટો મુજબ */
+.footer{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  background:#fff;
+  padding:8px 0;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.1);
+  border-top:1px solid #e5e7eb;
+}
+.footer-nav{
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  max-width:600px;
+  margin:0 auto;
+}
+.footer-btn{
+  background:none;
+  border:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+  padding:8px 12px;
+  flex:1;
+  position:relative;
+  transition:all 0.2s;
+}
+.footer-btn:active{
+  transform:scale(0.95);
+}
+.footer-icon{
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.footer-btn svg{
+  width:24px;
+  height:24px;
+  stroke:#9ca3af;
+  stroke-width:2;
+  fill:none;
+  transition:all 0.2s;
+}
+.footer-btn.active svg{
+  stroke:#7c3aed;
+  fill:#7c3aed;
+}
+.footer-label{
+  font-size:10px;
+  font-weight:600;
+  color:#9ca3af;
+  transition:all 0.2s;
+}
+.footer-btn.active .footer-label{
+  color:#7c3aed;
+}
+.notification-badge{
+  position:absolute;
+  top:4px;
+  right:8px;
+  background:#ef4444;
+  color:#fff;
+  font-size:9px;
+  padding:2px 5px;
+  border-radius:10px;
+  font-weight:bold;
+  min-width:18px;
+  text-align:center;
+}
+
 .container{padding:0 16px;max-width:600px;margin:0 auto}
 .side-menu{position:fixed;top:0;right:-280px;width:280px;height:100%;background:#fff;z-index:2000;transition:right 0.3s;box-shadow:-2px 0 10px rgba(0,0,0,0.1);overflow-y:auto}
 .side-menu.open{right:0}
 .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1999;display:none}
 .menu-overlay.show{display:block}
-.menu-header{padding:20px;background:linear-gradient(135deg,#a855f7,#9333ea);color:#fff;position:relative}
+.menu-header{padding:20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;position:relative}
 .menu-header h3{font-size:18px;margin-bottom:4px}
 .menu-header p{font-size:12px;opacity:0.9}
 .menu-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:24px;width:32px;height:32px;border-radius:8px;cursor:pointer}
@@ -52,13 +183,13 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:60px;padding-bottom:6
 .error-text{color:#ef4444;font-size:12px;margin-top:4px;display:none}
 .error-text.show{display:block}
 select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
-.btn-primary{width:100%;background:#a855f7;color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:bold;border:none;cursor:pointer}
-.btn-primary:hover{background:#9333ea}
+.btn-primary{width:100%;background:#7c3aed;color:#fff;padding:12px;border-radius:8px;font-size:14px;font-weight:bold;border:none;cursor:pointer}
+.btn-primary:hover{background:#6d28d9}
 .btn-secondary{width:100%;background:#f3f4f6;color:#1f2937;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:8px}
 .btn-link{background:none;border:none;color:#2563eb;font-size:12px;cursor:pointer;text-decoration:underline;margin-top:8px;width:100%;text-align:center}
 .tabs{display:flex;border-bottom:2px solid #e5e7eb;margin-bottom:20px}
 .tab{flex:1;padding:12px;text-align:center;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
-.tab.active{color:#a855f7;border-bottom-color:#a855f7}
+.tab.active{color:#7c3aed;border-bottom-color:#7c3aed}
 .tab-content{display:none}
 .tab-content.active{display:block}
 .success-popup{background:#fff;border-radius:16px;padding:30px;text-align:center;max-width:350px}
@@ -68,21 +199,24 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .info-row{background:#f9fafb;padding:12px;border-radius:8px;margin:8px 0;display:flex;align-items:center;gap:12px}
 .info-label{font-size:11px;color:#6b7280;margin-bottom:2px}
 .info-value{font-size:14px;font-weight:600;color:#1f2937}
-.price-strike{text-decoration:line-through;color:#9ca3af;font-size:16px}
-.price-offer{color:#22c55e;font-size:24px;font-weight:bold}
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="brand">
-    <div class="brand-name">KAPiLa Institute</div>
-    <div class="brand-subtitle">Digital Learning Platform</div>
-  </div>
-  <div class="header-right">
-    <button id="registerBtn" class="register-btn" onclick="openAuthModal()">Register</button>
-    <span id="userNameDisplay" class="user-name" style="display:none"></span>
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  <div class="header-content">
+    <div class="brand">
+      <div class="brand-name">KAPiLa Learning</div>
+      <div class="brand-subtitle">Digital Learning Platform</div>
+    </div>
+    <div class="header-right">
+      <span id="userNameDisplay" class="user-name" style="display:none"></span>
+      <button class="menu-btn" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -93,41 +227,49 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 </div>
 
 <footer class="footer">
-  <button class="footer-btn active" onclick="navigateFooter('home')">
-    <span>🏠</span>
-    <span class="footer-label">Home</span>
-  </button>
-  <button class="footer-btn" onclick="navigateFooter('performance')">
-    <span>📊</span>
-    <span class="footer-label">Performance</span>
-  </button>
-  <button class="footer-btn" onclick="navigateFooter('account')">
-    <span>🤵‍♂</span>
-    <span class="footer-label">Account</span>
-  </button>
-  <button class="footer-btn" onclick="navigateFooter('contact')">
-    <span>📞</span>
-    <span class="footer-label">Contact</span>
-  </button>
-  <button class="footer-btn" onclick="navigateFooter('notification')">
-    <span>🔔</span>
-    <span class="footer-label">Notifications</span>
-    <span id="notificationBadge" class="notification-badge" style="display:none">0</span>
-  </button>
+  <div class="footer-nav">
+    <button class="footer-btn active" onclick="navigateFooter('home')">
+      <div class="footer-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      </div>
+      <span class="footer-label">Home</span>
+    </button>
+    <button class="footer-btn" onclick="navigateFooter('performance')">
+      <div class="footer-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+      </div>
+      <span class="footer-label">Performance</span>
+    </button>
+    <button class="footer-btn" onclick="navigateFooter('account')">
+      <div class="footer-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </div>
+      <span class="footer-label">Account</span>
+    </button>
+    <button class="footer-btn" onclick="navigateFooter('contact')">
+      <div class="footer-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+      </div>
+      <span class="footer-label">Contact</span>
+    </button>
+    <button class="footer-btn" onclick="navigateFooter('notification')">
+      <div class="footer-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      </div>
+      <span class="footer-label">Notifications</span>
+      <span id="notificationBadge" class="notification-badge" style="display:none">0</span>
+    </button>
+  </div>
 </footer>
 
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
   <div class="menu-header">
     <button class="menu-close" onclick="toggleMenu()">×</button>
-    <h3>KAPiLa Institute</h3>
+    <h3>KAPiLa Learning</h3>
     <p>Digital Learning Platform</p>
   </div>
   <div class="menu-items">
-    <div class="menu-item" id="registerMenuItem" onclick="menuNavigate('register')">
-      <span class="menu-icon">✍️</span>
-      <span>Register</span>
-    </div>
     <div class="menu-item" onclick="menuNavigate('home')">
       <span class="menu-icon">🏠</span>
       <span>Home</span>
@@ -155,164 +297,13 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   </div>
 </div>
 
-<!-- Auth Modal -->
-<div class="modal" id="authModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-logo">🎓</div>
-      <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Institute</div>
-        <div class="modal-subtitle">Digital Learning Platform</div>
-      </div>
-    </div>
-    <div class="tabs">
-      <div class="tab active" onclick="switchAuthTab('login')">Login</div>
-      <div class="tab" onclick="switchAuthTab('register')">Register</div>
-    </div>
-    <div id="loginTab" class="tab-content active">
-      <form onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" class="form-input" id="loginEmail" placeholder="example@email.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="password-wrapper">
-            <input type="password" class="form-input" id="loginPassword" placeholder="abc123" required>
-            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">👁️</button>
-          </div>
-          <div class="password-hint">Example: abc123</div>
-        </div>
-        <button type="submit" class="btn-primary">Login</button>
-        <button type="button" class="btn-link" onclick="showForgotPassword()">Forgot Password?</button>
-        <button type="button" class="btn-secondary" onclick="closeAuthModal()">Cancel</button>
-      </form>
-    </div>
-    <div id="registerTab" class="tab-content">
-      <form onsubmit="handleRegister(event)">
-        <div class="form-group">
-          <label class="form-label">Full Name</label>
-          <input type="text" class="form-input" id="registerName" placeholder="તમારું નામ" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Mobile Number</label>
-          <input type="tel" class="form-input" id="registerMobile" pattern="[0-9]{10}" placeholder="10 digit mobile number" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" class="form-input" id="registerEmail" placeholder="example@email.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">District (જિલ્લો)</label>
-          <select class="form-input" id="registerDistrict" required>
-            <option value="">Select District</option>
-            <option value="Ahmedabad">Ahmedabad (અમદાવાદ)</option>
-            <option value="Amreli">Amreli (અમરેલી)</option>
-            <option value="Anand">Anand (આણંદ)</option>
-            <option value="Aravalli">Aravalli (અરવલ્લી)</option>
-            <option value="Banaskantha">Banaskantha (બનાસકાંઠા)</option>
-            <option value="Bharuch">Bharuch (ભરૂચ)</option>
-            <option value="Bhavnagar">Bhavnagar (ભાવનગર)</option>
-            <option value="Botad">Botad (બોટાદ)</option>
-            <option value="Chhota Udaipur">Chhota Udaipur (છોટા ઉદેપુર)</option>
-            <option value="Dahod">Dahod (દાહોદ)</option>
-            <option value="Dang">Dang (ડાંગ)</option>
-            <option value="Devbhoomi Dwarka">Devbhoomi Dwarka (દેવભૂમિ દ્વારકા)</option>
-            <option value="Gandhinagar">Gandhinagar (ગાંધીનગર)</option>
-            <option value="Gir Somnath">Gir Somnath (ગીર સોમનાથ)</option>
-            <option value="Jamnagar">Jamnagar (જામનગર)</option>
-            <option value="Junagadh">Junagadh (જૂનાગઢ)</option>
-            <option value="Kheda">Kheda (ખેડા)</option>
-            <option value="Kutch">Kutch (કચ્છ)</option>
-            <option value="Mahisagar">Mahisagar (મહીસાગર)</option>
-            <option value="Mehsana">Mehsana (મહેસાણા)</option>
-            <option value="Morbi">Morbi (મોરબી)</option>
-            <option value="Narmada">Narmada (નર્મદા)</option>
-            <option value="Navsari">Navsari (નવસારી)</option>
-            <option value="Panchmahal">Panchmahal (પંચમહાલ)</option>
-            <option value="Patan">Patan (પાટણ)</option>
-            <option value="Porbandar">Porbandar (પોરબંદર)</option>
-            <option value="Rajkot">Rajkot (રાજકોટ)</option>
-            <option value="Sabarkantha">Sabarkantha (સાબરકાંઠા)</option>
-            <option value="Surat">Surat (સુરત)</option>
-            <option value="Surendranagar">Surendranagar (સુરેન્દ્રનગર)</option>
-            <option value="Tapi">Tapi (તાપી)</option>
-            <option value="Vadodara">Vadodara (વડોદરા)</option>
-            <option value="Valsad">Valsad (વલસાડ)</option>
-            <option value="Vav-Tharad">Vav-Tharad (વાવ-થરાદ)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="password-wrapper">
-            <input type="password" class="form-input" id="registerPassword" minlength="6" placeholder="abc123" required>
-            <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')">👁️</button>
-          </div>
-          <div class="password-hint">Minimum 6 characters (Example: abc123)</div>
-          <div class="error-text" id="passwordError"></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Confirm Password</label>
-          <div class="password-wrapper">
-            <input type="password" class="form-input" id="registerPasswordConfirm" minlength="6" placeholder="abc123" required>
-            <button type="button" class="password-toggle" onclick="togglePassword('registerPasswordConfirm')">👁️</button>
-          </div>
-          <div class="error-text" id="confirmPasswordError"></div>
-        </div>
-        <button type="submit" class="btn-primary">Register</button>
-        <button type="button" class="btn-secondary" onclick="closeAuthModal()">Cancel</button>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Forgot Password Modal -->
-<div class="modal" id="forgotPasswordModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-logo">🔑</div>
-      <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Institute</div>
-        <div class="modal-subtitle">Reset Password</div>
-      </div>
-    </div>
-    <h3 style="font-size:16px;font-weight:bold;margin-bottom:12px;text-align:center">Forgot Password?</h3>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;text-align:center">તમારા email address દાખલ કરો અને અમે તમને password reset link મોકલીશું.</p>
-    <form onsubmit="handleForgotPassword(event)">
-      <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input type="email" class="form-input" id="forgotEmail" placeholder="example@email.com" required>
-      </div>
-      <button type="submit" class="btn-primary">Send Reset Link</button>
-      <button type="button" class="btn-secondary" onclick="closeForgotPassword()">Cancel</button>
-    </form>
-  </div>
-</div>
-
-<!-- Success Modal -->
-<div class="modal" id="successModal">
-  <div class="success-popup">
-    <div class="modal-header">
-      <div class="modal-logo">🎓</div>
-      <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Institute</div>
-        <div class="modal-subtitle">Digital Learning Platform</div>
-      </div>
-    </div>
-    <div class="success-icon" id="successIcon">✅</div>
-    <div class="success-title" id="successTitle">Success!</div>
-    <div class="success-text" id="successText">Message</div>
-    <button class="btn-primary" onclick="closeSuccessModal()">બંધ કરો</button>
-  </div>
-</div>
-
 <!-- Contact Modal -->
 <div class="modal" id="contactModal">
   <div class="modal-content">
     <div class="modal-header">
       <div class="modal-logo">🎓</div>
       <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Institute</div>
+        <div class="modal-brand">KAPiLa Learning</div>
         <div class="modal-subtitle">Digital Learning Platform</div>
       </div>
     </div>
@@ -334,16 +325,16 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="modal-header">
       <div class="modal-logo">🎓</div>
       <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Institute</div>
+        <div class="modal-brand">KAPiLa Learning</div>
         <div class="modal-subtitle">Digital Learning Platform</div>
       </div>
     </div>
-    <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px;text-align:center">ℹ️ About KAPiLa Institute</h3>
+    <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px;text-align:center">ℹ️ About KAPiLa Learning</h3>
     <div style="color:#374151;font-size:14px;line-height:1.8;text-align:justify">
-      <p style="margin-bottom:12px">KAPiLa Institute is a leading educational platform dedicated to helping students prepare for competitive government examinations including GPSC, CCE, PSI, Police, Talati, and other state-level exams.</p>
+      <p style="margin-bottom:12px">KAPiLa Learning is a leading educational platform dedicated to helping students prepare for competitive government examinations including GPSC, CCE, PSI, Police, Talati, and other state-level exams.</p>
       <p style="margin-bottom:12px">We provide comprehensive study materials, mock tests, and performance analytics to ensure students achieve their dreams of securing government jobs.</p>
       <p style="margin-bottom:12px">Our expert faculty and innovative digital learning approach make exam preparation accessible, effective, and affordable for every student.</p>
-      <p style="margin-bottom:12px">With thousands of successful students, KAPiLa Institute has become a trusted name in competitive exam preparation across Gujarat.</p>
+      <p style="margin-bottom:12px">With thousands of successful students, KAPiLa Learning has become a trusted name in competitive exam preparation across Gujarat.</p>
       <p>Join us today and take the first step towards your successful career in government service!</p>
     </div>
     <button class="btn-primary" onclick="closeAboutModal()" style="margin-top:20px">બંધ કરો</button>
@@ -356,7 +347,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="modal-header">
       <div class="modal-logo">👤</div>
       <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Institute</div>
+        <div class="modal-brand">KAPiLa Learning</div>
         <div class="modal-subtitle">Account Information</div>
       </div>
     </div>
@@ -394,7 +385,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="modal-header">
       <div class="modal-logo">🔔</div>
       <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Institute</div>
+        <div class="modal-brand">KAPiLa Learning</div>
         <div class="modal-subtitle">Notifications</div>
       </div>
     </div>
@@ -418,6 +409,10 @@ let currentUser = null;
 
 async function init() {
   await checkAuth();
+  if (!currentUser) {
+    window.location.href = 'login.html';
+    return;
+  }
   await loadHomePage();
 }
 
@@ -425,18 +420,11 @@ async function checkAuth() {
   const { data: { user } } = await sb.auth.getUser();
   if (user) {
     currentUser = user;
-    document.getElementById('registerBtn').style.display = 'none';
     document.getElementById('userNameDisplay').style.display = 'block';
     document.getElementById('logoutMenuItem').style.display = 'flex';
-    document.getElementById('registerMenuItem').style.display = 'none';
     
     const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
     document.getElementById('userNameDisplay').innerText = profile?.full_name || user.email.split('@')[0];
-  } else {
-    document.getElementById('registerBtn').style.display = 'block';
-    document.getElementById('userNameDisplay').style.display = 'none';
-    document.getElementById('logoutMenuItem').style.display = 'none';
-    document.getElementById('registerMenuItem').style.display = 'flex';
   }
 }
 
@@ -451,14 +439,6 @@ async function loadHomePage() {
   }
 }
 
-function checkAuthAndNavigate(url) {
-  if (!currentUser) {
-    openAuthModal();
-    return;
-  }
-  window.location.href = url;
-}
-
 function toggleMenu() {
   document.getElementById('sideMenu').classList.toggle('open');
   document.getElementById('menuOverlay').classList.toggle('show');
@@ -467,7 +447,6 @@ function toggleMenu() {
 function menuNavigate(page) {
   toggleMenu();
   if (page === 'home') window.location.href = 'index-kapila.html';
-  else if (page === 'register') openAuthModal();
   else if (page === 'about') showAboutPopup();
   else if (page === 'privacy') window.location.href = 'privacy-policy.html';
   else if (page === 'terms') window.location.href = 'terms-and-conditions.html';
@@ -479,154 +458,15 @@ function navigateFooter(page) {
   event.target.closest('.footer-btn').classList.add('active');
   
   if (page === 'home') window.location.href = 'index-kapila.html';
-  else if (page === 'performance') checkAuthAndNavigate('overall-performance.html');
+  else if (page === 'performance') window.location.href = 'overall-performance.html';
   else if (page === 'account') showAccountPopup();
   else if (page === 'contact') showContactPopup();
   else if (page === 'notification') showNotificationPopup();
 }
 
-function openAuthModal() {
-  document.getElementById('authModal').classList.add('show');
-}
-
-function closeAuthModal() {
-  document.getElementById('authModal').classList.remove('show');
-}
-
-function switchAuthTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById(tab + 'Tab').classList.add('active');
-}
-
-async function handleLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-  
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  
-  if (error) {
-    alert('Login Error: ' + error.message);
-  } else {
-    closeAuthModal();
-    showSuccessPopup('🎉', 'Login Successful!', 'Welcome to KAPiLa Institute');
-    setTimeout(() => window.location.reload(), 2000);
-  }
-}
-
-function togglePassword(fieldId) {
-  const field = document.getElementById(fieldId);
-  const btn = field.nextElementSibling;
-  if (field.type === 'password') {
-    field.type = 'text';
-    btn.textContent = '🙈';
-  } else {
-    field.type = 'password';
-    btn.textContent = '👁️';
-  }
-}
-
-function validatePassword(password) {
-  if (password.length < 6) {
-    return 'Password must be at least 6 characters (Example: abc123)';
-  }
-  return null;
-}
-
-async function handleRegister(e) {
-  e.preventDefault();
-  const name = document.getElementById('registerName').value;
-  const mobile = document.getElementById('registerMobile').value;
-  const email = document.getElementById('registerEmail').value;
-  const district = document.getElementById('registerDistrict').value;
-  const password = document.getElementById('registerPassword').value;
-  const confirmPassword = document.getElementById('registerPasswordConfirm').value;
-  
-  // Reset errors
-  document.getElementById('passwordError').classList.remove('show');
-  document.getElementById('confirmPasswordError').classList.remove('show');
-  document.getElementById('passwordError').textContent = '';
-  document.getElementById('confirmPasswordError').textContent = '';
-  
-  // Validate password length
-  const passwordError = validatePassword(password);
-  if (passwordError) {
-    document.getElementById('passwordError').textContent = passwordError;
-    document.getElementById('passwordError').classList.add('show');
-    return;
-  }
-  
-  // Check password match
-  if (password !== confirmPassword) {
-    document.getElementById('confirmPasswordError').textContent = 'Passwords do not match. Please re-enter.';
-    document.getElementById('confirmPasswordError').classList.add('show');
-    document.getElementById('registerPasswordConfirm').value = '';
-    return;
-  }
-  
-  const { data: authData, error: authError } = await sb.auth.signUp({ email, password });
-  
-  if (authError) {
-    alert('Registration Error: ' + authError.message);
-    return;
-  }
-  
-  if (authData.user) {
-    await sb.from('profiles').update({ 
-      full_name: name,
-      mobile: mobile,
-      district: district,
-      updated_at: new Date().toISOString()
-    }).eq('id', authData.user.id);
-  }
-  
-  closeAuthModal();
-  showSuccessPopup('✅', 'Registration Successful!', 'Welcome to KAPiLa Institute! Please check your email.');
-  setTimeout(() => window.location.reload(), 2000);
-}
-
-function showForgotPassword() {
-  closeAuthModal();
-  document.getElementById('forgotPasswordModal').classList.add('show');
-}
-
-function closeForgotPassword() {
-  document.getElementById('forgotPasswordModal').classList.remove('show');
-}
-
-async function handleForgotPassword(e) {
-  e.preventDefault();
-  const email = document.getElementById('forgotEmail').value;
-  
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/reset-password.html'
-  });
-  
-  if (error) {
-    alert('Error: ' + error.message);
-  } else {
-    closeForgotPassword();
-    showSuccessPopup('📧', 'Email Sent!', 'તમારા email check કરો. તમને password reset link મળ્યો છે. ત્યાંથી નવો password બનાવો અને ફરીથી login કરો.');
-  }
-}
-
 async function handleLogout() {
   await sb.auth.signOut();
-  showSuccessPopup('👋', 'Logout Successful!', 'આપનો આભાર! ફરી મળીશું.');
-  setTimeout(() => window.location.reload(), 2000);
-}
-
-function showSuccessPopup(icon, title, text) {
-  document.getElementById('successIcon').innerText = icon;
-  document.getElementById('successTitle').innerText = title;
-  document.getElementById('successText').innerText = text;
-  document.getElementById('successModal').classList.add('show');
-}
-
-function closeSuccessModal() {
-  document.getElementById('successModal').classList.remove('show');
+  window.location.href = 'login.html';
 }
 
 function showContactPopup() {
@@ -646,11 +486,6 @@ function closeAboutModal() {
 }
 
 async function showAccountPopup() {
-  if (!currentUser) {
-    openAuthModal();
-    return;
-  }
-  
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
   
   document.getElementById('accountName').innerText = profile?.full_name || '--';
