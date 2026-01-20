@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:80px}
+body{font-family:sans-serif;background:#f3f4f6;padding-top:105px;padding-bottom:70px}
 
 /* Header સ્ટાઇલ - ફોટો મુજબ */
 .header{
@@ -17,8 +17,11 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:8
   right:0;
   z-index:1000;
   background:linear-gradient(135deg,#8b5cf6,#7c3aed);
-  padding:20px 16px 12px 16px;
+  padding:0 12px 12px 12px;
   box-shadow:0 2px 10px rgba(139,92,246,0.3);
+  min-height:95px;
+  display:flex;
+  align-items:flex-end;
 }
 .header-content{
   display:flex;
@@ -26,6 +29,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:8
   align-items:center;
   max-width:600px;
   margin:0 auto;
+  width:100%;
+  padding-bottom:2px;
 }
 .brand{flex:1}
 .brand-name{
@@ -43,7 +48,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:8
 .header-right{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:8px;
 }
 .user-name{
   font-size:13px;
@@ -83,7 +88,7 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:8
   right:0;
   z-index:1000;
   background:#fff;
-  padding:8px 0;
+  padding:6px 0;
   box-shadow:0 -2px 10px rgba(0,0,0,0.1);
   border-top:1px solid #e5e7eb;
 }
@@ -100,9 +105,9 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:8
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:4px;
+  gap:3px;
   cursor:pointer;
-  padding:8px 12px;
+  padding:6px 10px;
   flex:1;
   position:relative;
   transition:all 0.2s;
@@ -157,6 +162,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:70px;padding-bottom:8
 }
 
 .container{padding:0 16px;max-width:600px;margin:0 auto}
+.container a, .container button{cursor:pointer;pointer-events:auto}
+.container *{pointer-events:auto}
 .side-menu{position:fixed;top:0;right:-280px;width:280px;height:100%;background:#fff;z-index:2000;transition:right 0.3s;box-shadow:-2px 0 10px rgba(0,0,0,0.1);overflow-y:auto}
 .side-menu.open{right:0}
 .menu-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1999;display:none}
@@ -406,6 +413,15 @@ function navigateFooter(page) {
 async function handleLogout() {
   await sb.auth.signOut();
   window.location.href = 'login.html';
+}
+
+function checkAuthAndNavigate(page) {
+  if (currentUser) {
+    window.location.href = page;
+  } else {
+    alert('કૃપા કરીને પહેલા login કરો');
+    window.location.href = 'login.html';
+  }
 }
 
 function showContactPopup() {
