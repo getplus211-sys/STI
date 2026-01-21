@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Profile - KAPiLa Learning</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:20px}
+
+.header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  padding:0 12px 12px 12px;
+  box-shadow:0 2px 10px rgba(139,92,246,0.3);
+  min-height:95px;
+  display:flex;
+  align-items:flex-end;
+}
+.header-content{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  max-width:600px;
+  margin:0 auto;
+  width:100%;
+}
+.back-btn{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:28px;
+  cursor:pointer;
+  padding:4px;
+}
+.header-title{
+  font-size:24px;
+  font-weight:bold;
+  color:#fff;
+  flex:1;
+  text-align:center;
+}
+
+.container{
+  max-width:600px;
+  margin:0 auto;
+  padding:0 16px;
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom:16px;
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:20px;
+}
+
+.form-group{
+  margin-bottom:20px;
+}
+.form-label{
+  display:block;
+  font-size:14px;
+  font-weight:600;
+  color:#6b7280;
+  margin-bottom:8px;
+}
+.lock-icon{
+  font-size:14px;
+  margin-left:4px;
+}
+.form-input, .form-select{
+  width:100%;
+  padding:14px 16px;
+  font-size:15px;
+  border:2px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+  color:#1f2937;
+  transition:all 0.2s;
+}
+.form-input:focus, .form-select:focus{
+  outline:none;
+  border-color:#8b5cf6;
+}
+.form-input:disabled, .form-select:disabled{
+  background:#f3f4f6;
+  color:#9ca3af;
+  cursor:not-allowed;
+}
+.form-input::placeholder{
+  color:#9ca3af;
+}
+
+.date-display{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:14px 16px;
+  border:2px solid #e5e7eb;
+  border-radius:12px;
+  background:#f3f4f6;
+  color:#1f2937;
+}
+.date-icon{
+  font-size:20px;
+}
+.date-text{
+  flex:1;
+  font-size:15px;
+}
+
+.btn{
+  width:100%;
+  padding:16px;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  transition:transform 0.2s;
+}
+.btn:active{transform:scale(0.98)}
+.btn-primary{
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color:#fff;
+}
+
+.success-message, .error-message{
+  padding:12px 16px;
+  border-radius:8px;
+  font-size:14px;
+  margin-bottom:16px;
+  display:none;
+}
+.success-message{
+  background:#d1fae5;
+  color:#065f46;
+}
+.error-message{
+  background:#fee2e2;
+  color:#dc2626;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-content">
+    <button class="back-btn" onclick="window.location.href='account.html'">←</button>
+    <h1 class="header-title">Edit Profile</h1>
+    <div style="width:36px"></div>
+  </div>
+</header>
+
+<div class="container">
+  <div id="successMessage" class="success-message"></div>
+  <div id="errorMessage" class="error-message"></div>
+
+  <div class="card">
+    <h2 class="section-title">Personal Information</h2>
+    
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input type="text" class="form-input" id="fullName" placeholder="Enter your full name">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Mobile Number <span class="lock-icon">🔒</span></label>
+      <input type="tel" class="form-input" id="mobile" disabled>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email Address <span class="lock-icon">🔒</span></label>
+      <input type="email" class="form-input" id="email" disabled>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">District</label>
+      <select class="form-select" id="district">
+        <option value="">Select District</option>
+        <option value="Ahmedabad - અમદાવાદ">Ahmedabad - અમદાવાદ</option>
+        <option value="Surat - સુરત">Surat - સુરત</option>
+        <option value="Vadodara - વડોદરા">Vadodara - વડોદરા</option>
+        <option value="Rajkot - રાજકોટ">Rajkot - રાજકોટ</option>
+        <option value="Bhavnagar - ભાવનગર">Bhavnagar - ભાવનગર</option>
+        <option value="Jamnagar - જામનગર">Jamnagar - જામનગર</option>
+        <option value="Junagadh - જૂનાગઢ">Junagadh - જૂનાગઢ</option>
+        <option value="Gandhinagar - ગાંધીનગર">Gandhinagar - ગાંધીનગર</option>
+        <option value="Anand - આણંદ">Anand - આણંદ</option>
+        <option value="Mehsana - મહેસાણા">Mehsana - મહેસાણા</option>
+        <option value="Patan - પાટણ">Patan - પાટણ</option>
+        <option value="Banaskantha - બનાસકાંઠા">Banaskantha - બનાસકાંઠા</option>
+        <option value="Sabarkantha - સાબરકાંઠા">Sabarkantha - સાબરકાંઠા</option>
+        <option value="Kheda - ખેડા">Kheda - ખેડા</option>
+        <option value="Panchmahals - પંચમહાલ">Panchmahals - પંચમહાલ</option>
+        <option value="Dahod - દાહોદ">Dahod - દાહોદ</option>
+        <option value="Navsari - નવસારી">Navsari - નવસારી</option>
+        <option value="Valsad - વલસાડ">Valsad - વલસાડ</option>
+        <option value="Tapi - તાપી">Tapi - તાપી</option>
+        <option value="Narmada - નર્મદા">Narmada - નર્મદા</option>
+        <option value="Bharuch - ભરૂચ">Bharuch - ભરૂચ</option>
+        <option value="Surendranagar - સુરેન્દ્રનગર">Surendranagar - સુરેન્દ્રનગર</option>
+        <option value="Morbi - મોરબી">Morbi - મોરબી</option>
+        <option value="Kutch - કચ્છ">Kutch - કચ્છ</option>
+        <option value="Devbhumi Dwarka - દેવભૂમિ દ્વારકા">Devbhumi Dwarka - દેવભૂમિ દ્વારકા</option>
+        <option value="Porbandar - પોરબંદર">Porbandar - પોરબંદર</option>
+        <option value="Gir Somnath - ગીર સોમનાથ">Gir Somnath - ગીર સોમનાથ</option>
+        <option value="Amreli - અમરેલી">Amreli - અમરેલી</option>
+        <option value="Botad - બોટાદ">Botad - બોટાદ</option>
+        <option value="Arvalli - અરવલ્લી">Arvalli - અરવલ્લી</option>
+        <option value="Mahisagar - મહીસાગર">Mahisagar - મહીસાગર</option>
+        <option value="Chhota Udaipur - છોટા ઉદેપુર">Chhota Udaipur - છોટા ઉદેપુર</option>
+        <option value="Banaskantha - બનાસકાંઠા">Banaskantha - બનાસકાંઠા</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Date of Birth</label>
+      <div class="date-display">
+        <span class="date-icon">📅</span>
+        <span class="date-text" id="dobDisplay">Loading...</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveChanges()">SAVE CHANGES</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+async function loadProfile() {
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    
+    if (error) throw error;
+    
+    if (profile) {
+      document.getElementById('fullName').value = profile.full_name || '';
+      document.getElementById('mobile').value = profile.mobile || '';
+      document.getElementById('email').value = profile.email || user.email;
+      document.getElementById('district').value = profile.district || '';
+      
+      if (profile.date_of_birth) {
+        const date = new Date(profile.date_of_birth);
+        const formatted = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
+        document.getElementById('dobDisplay').textContent = formatted;
+      }
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    showError('Error loading profile');
+  }
+}
+
+async function saveChanges() {
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+
+    const fullName = document.getElementById('fullName').value;
+    const district = document.getElementById('district').value;
+
+    if (!fullName || !district) {
+      showError('કૃપા કરીને બધી માહિતી ભરો');
+      return;
+    }
+
+    const { error } = await sb.from('profiles').update({
+      full_name: fullName,
+      district: district,
+      updated_at: new Date().toISOString()
+    }).eq('id', user.id);
+
+    if (error) throw error;
+
+    showSuccess('Profile updated successfully!');
+    setTimeout(() => {
+      window.location.href = 'account.html';
+    }, 1500);
+    
+  } catch (err) {
+    console.error('Error:', err);
+    showError('Failed to update profile');
+  }
+}
+
+function showSuccess(message) {
+  const div = document.getElementById('successMessage');
+  div.textContent = message;
+  div.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showError(message) {
+  const div = document.getElementById('errorMessage');
+  div.textContent = message;
+  div.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => {
+    div.style.display = 'none';
+  }, 5000);
+}
+
+loadProfile();
+</script>
+</body>
+</html>
