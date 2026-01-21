@@ -153,14 +153,74 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:2
   background:#fee2e2;
   color:#dc2626;
 }
+
+/* Success Popup */
+.popup-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.6);
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.popup-overlay.show{
+  display:flex;
+}
+.popup-box{
+  background:#fff;
+  border-radius:20px;
+  padding:32px 24px;
+  max-width:400px;
+  width:100%;
+  text-align:center;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  animation:popIn 0.3s ease-out;
+}
+@keyframes popIn{
+  from{transform:scale(0.8);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.popup-icon{
+  font-size:64px;
+  margin-bottom:16px;
+}
+.popup-title{
+  font-size:24px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:12px;
+}
+.popup-message{
+  font-size:15px;
+  color:#6b7280;
+  line-height:1.6;
+  margin-bottom:24px;
+}
+.popup-btn{
+  width:100%;
+  padding:16px;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
 </style>
 </head>
 <body>
 
 <header class="header">
   <div class="header-content">
-    <button class="back-btn" onclick="window.location.href='account.html'">←</button>
-    <h1 class="header-title">Edit Profile</h1>
+    <button class="back-btn" onclick="goBack()" id="backBtn">←</button>
+    <h1 class="header-title" id="pageTitle">Edit Profile</h1>
     <div style="width:36px"></div>
   </div>
 </header>
@@ -173,8 +233,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:2
     <h2 class="section-title">Personal Information</h2>
     
     <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input type="text" class="form-input" id="fullName" placeholder="Enter your full name">
+      <label class="form-label">Full Name <span style="color:#ef4444">*</span></label>
+      <input type="text" class="form-input" id="fullName" placeholder="Enter your full name" required>
     </div>
 
     <div class="form-group">
@@ -188,8 +248,8 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:2
     </div>
 
     <div class="form-group">
-      <label class="form-label">District</label>
-      <select class="form-select" id="district">
+      <label class="form-label">District <span style="color:#ef4444">*</span></label>
+      <select class="form-select" id="district" required>
         <option value="">Select District</option>
         <option value="Ahmedabad - અમદાવાદ">Ahmedabad - અમદાવાદ</option>
         <option value="Amreli - અમરેલી">Amreli - અમરેલી</option>
@@ -229,14 +289,21 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:2
     </div>
 
     <div class="form-group">
-      <label class="form-label">Date of Birth</label>
-      <div class="date-display">
-        <span class="date-icon">📅</span>
-        <span class="date-text" id="dobDisplay">Loading...</span>
-      </div>
+      <label class="form-label">Date of Birth <span style="color:#ef4444">*</span></label>
+      <input type="date" class="form-input" id="dateOfBirth" required>
     </div>
 
     <button class="btn btn-primary" onclick="saveChanges()">SAVE CHANGES</button>
+  </div>
+</div>
+
+<!-- Success Popup -->
+<div class="popup-overlay" id="successPopup">
+  <div class="popup-box">
+    <div class="popup-icon">🎉</div>
+    <h3 class="popup-title">અભિનંદન!</h3>
+    <p class="popup-message">તમે 50 Credits પ્રાપ્ત થયા છે!<br><br>ગુજરાત સરકારની પરીક્ષાઓમાં તૈયારી કરવા માટે અમારા platform સાથે જોડાયેલા રહો.</p>
+    <button class="popup-btn" onclick="closeSuccessPopup()">શરૂ કરો</button>
   </div>
 </div>
 
@@ -245,12 +312,23 @@ const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+let isNewUser = false;
+
 async function loadProfile() {
   try {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) {
       window.location.href = 'login.html';
       return;
+    }
+
+    // Check if new user
+    const urlParams = new URLSearchParams(window.location.search);
+    isNewUser = urlParams.get('new') === 'true';
+
+    if (isNewUser) {
+      document.getElementById('pageTitle').textContent = 'Complete Your Profile';
+      document.getElementById('backBtn').style.display = 'none';
     }
 
     const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
@@ -264,15 +342,7 @@ async function loadProfile() {
       document.getElementById('district').value = profile.district || '';
       
       if (profile.date_of_birth) {
-        const date = new Date(profile.date_of_birth + 'T00:00:00');
-        const day = date.getDate();
-        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        const month = months[date.getMonth()];
-        const year = date.getFullYear();
-        const formatted = `${day} ${month} ${year}`;
-        document.getElementById('dobDisplay').textContent = formatted;
-      } else {
-        document.getElementById('dobDisplay').textContent = 'Not set';
+        document.getElementById('dateOfBirth').value = profile.date_of_birth;
       }
     }
   } catch (err) {
@@ -281,36 +351,64 @@ async function loadProfile() {
   }
 }
 
+function goBack() {
+  if (isNewUser) {
+    return; // Can't go back if new user
+  }
+  window.location.href = 'account.html';
+}
+
 async function saveChanges() {
   try {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
 
-    const fullName = document.getElementById('fullName').value;
+    const fullName = document.getElementById('fullName').value.trim();
     const district = document.getElementById('district').value;
+    const dob = document.getElementById('dateOfBirth').value;
 
-    if (!fullName || !district) {
-      showError('કૃપા કરીને બધી માહિતી ભરો');
+    // Validation
+    if (!fullName || !district || !dob) {
+      showError('કૃપા કરીને બધી જરૂરી માહિતી ભરો (marked with *)');
       return;
     }
 
-    const { error } = await sb.from('profiles').update({
+    // Update profile
+    const updateData = {
       full_name: fullName,
       district: district,
+      date_of_birth: dob,
       updated_at: new Date().toISOString()
-    }).eq('id', user.id);
+    };
+
+    // If new user, give 50 credits
+    if (isNewUser) {
+      updateData.credits = 50;
+    }
+
+    const { error } = await sb.from('profiles').update(updateData).eq('id', user.id);
 
     if (error) throw error;
 
-    showSuccess('Profile updated successfully!');
-    setTimeout(() => {
-      window.location.href = 'account.html';
-    }, 1500);
+    if (isNewUser) {
+      // Show success popup
+      document.getElementById('successPopup').classList.add('show');
+    } else {
+      showSuccess('Profile updated successfully!');
+      setTimeout(() => {
+        window.location.href = 'account.html';
+      }, 1500);
+    }
     
   } catch (err) {
     console.error('Error:', err);
     showError('Failed to update profile');
   }
+}
+
+function closeSuccessPopup() {
+  document.getElementById('successPopup').classList.remove('show');
+  window.location.href = 'index-kapila.html';
 }
 
 function showSuccess(message) {
