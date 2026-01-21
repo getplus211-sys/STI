@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account - KAPiLa Learning</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:20px}
+
+.header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  padding:0 12px 12px 12px;
+  box-shadow:0 2px 10px rgba(139,92,246,0.3);
+  min-height:95px;
+  display:flex;
+  align-items:flex-end;
+}
+.header-content{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  max-width:600px;
+  margin:0 auto;
+  width:100%;
+}
+.back-btn{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:28px;
+  cursor:pointer;
+  padding:4px;
+  display:flex;
+  align-items:center;
+}
+.header-title{
+  font-size:24px;
+  font-weight:bold;
+  color:#fff;
+  flex:1;
+  text-align:center;
+}
+
+.container{
+  max-width:600px;
+  margin:0 auto;
+  padding:0 16px;
+}
+
+.profile-card{
+  background:#fff;
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.profile-avatar{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#c4b5fd,#a78bfa);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:36px;
+  flex-shrink:0;
+}
+.profile-info h2{
+  font-size:20px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:4px;
+}
+.profile-info p{
+  font-size:16px;
+  color:#6b7280;
+}
+
+.credits-card{
+  background:#fff;
+  border-radius:16px;
+  padding:20px 24px;
+  margin-bottom:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.credits-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.credits-icon{
+  width:48px;
+  height:48px;
+  font-size:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.credits-info p{
+  font-size:13px;
+  color:#6b7280;
+  margin-bottom:4px;
+}
+.credits-amount{
+  font-size:32px;
+  font-weight:bold;
+  color:#f59e0b;
+}
+.info-btn{
+  background:#e5e7eb;
+  border:none;
+  width:40px;
+  height:40px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  color:#6b7280;
+  cursor:pointer;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+.stat-card{
+  background:#fff;
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.stat-number{
+  font-size:40px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:8px;
+}
+.stat-label{
+  font-size:14px;
+  color:#6b7280;
+}
+
+.level-card{
+  background:#fff;
+  border-radius:16px;
+  padding:28px 24px;
+  margin-bottom:16px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.level-title{
+  font-size:28px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:4px;
+}
+.level-subtitle{
+  font-size:14px;
+  color:#6b7280;
+}
+
+.section-title{
+  font-size:16px;
+  font-weight:bold;
+  color:#6b7280;
+  margin:24px 0 12px 0;
+  padding:0 4px;
+}
+
+.menu-card{
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.menu-item{
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  cursor:pointer;
+  border-bottom:1px solid #f3f4f6;
+  text-decoration:none;
+  color:inherit;
+}
+.menu-item:last-child{border-bottom:none}
+.menu-item:active{background:#f9fafb}
+.menu-icon{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  flex-shrink:0;
+}
+.icon-blue{background:#dbeafe}
+.icon-yellow{background:#fef3c7}
+.icon-gray{background:#f3f4f6}
+.menu-text{flex:1}
+.menu-text h4{
+  font-size:16px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:2px;
+}
+.menu-text p{
+  font-size:13px;
+  color:#9ca3af;
+}
+.menu-arrow{
+  font-size:20px;
+  color:#d1d5db;
+}
+
+.action-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:24px;
+}
+.btn{
+  width:100%;
+  padding:16px;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:transform 0.2s;
+}
+.btn:active{transform:scale(0.98)}
+.btn-primary{
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color:#fff;
+}
+.btn-danger{
+  background:#ef4444;
+  color:#fff;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-content">
+    <button class="back-btn" onclick="window.location.href='index-kapila.html'">←</button>
+    <h1 class="header-title">Account</h1>
+    <div style="width:36px"></div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Profile Card -->
+  <div class="profile-card">
+    <div class="profile-avatar" id="avatarIcon">જ</div>
+    <div class="profile-info">
+      <h2 id="userName">લોડ થઈ રહ્યું છે...</h2>
+      <p id="userMobile">-</p>
+    </div>
+  </div>
+
+  <!-- Credits Card -->
+  <div class="credits-card">
+    <div class="credits-left">
+      <div class="credits-icon">🪙</div>
+      <div class="credits-info">
+        <p>Available Credits</p>
+        <div class="credits-amount" id="creditsAmount">0</div>
+      </div>
+    </div>
+    <button class="info-btn" onclick="showCreditsInfo()">ℹ️</button>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="testsCount">0</div>
+      <div class="stat-label">Tests</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="rankNumber">0</div>
+      <div class="stat-label">Rank</div>
+    </div>
+  </div>
+
+  <!-- Level Card -->
+  <div class="level-card">
+    <div class="level-title" id="levelName">Bronze</div>
+    <div class="level-subtitle">Current Level</div>
+  </div>
+
+  <!-- General Section -->
+  <div class="section-title">General</div>
+  <div class="menu-card">
+    <a href="edit-profile.html" class="menu-item">
+      <div class="menu-icon icon-blue">👤</div>
+      <div class="menu-text">
+        <h4>Edit Profile</h4>
+        <p>Update your information</p>
+      </div>
+      <span class="menu-arrow">→</span>
+    </a>
+    <a href="reset-password.html" class="menu-item">
+      <div class="menu-icon icon-yellow">🔑</div>
+      <div class="menu-text">
+        <h4>Reset Password</h4>
+        <p>Change your password</p>
+      </div>
+      <span class="menu-arrow">→</span>
+    </a>
+    <a href="#" class="menu-item" onclick="showFAQ(); return false;">
+      <div class="menu-icon icon-gray">💬</div>
+      <div class="menu-text">
+        <h4>FAQ</h4>
+        <p>Frequently asked questions</p>
+      </div>
+      <span class="menu-arrow">→</span>
+    </a>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button class="btn btn-primary" onclick="window.location.href='index-kapila.html'">
+      🏠 GO TO HOME
+    </button>
+    <button class="btn btn-danger" onclick="handleLogout()">
+      🚪 LOGOUT
+    </button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+async function loadProfile() {
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    
+    if (error) throw error;
+    
+    if (profile) {
+      document.getElementById('userName').innerText = profile.full_name || 'User';
+      document.getElementById('userMobile').innerText = profile.mobile || user.email;
+      document.getElementById('creditsAmount').innerText = profile.credits || 0;
+      document.getElementById('testsCount').innerText = profile.total_tests_taken || 0;
+      document.getElementById('rankNumber').innerText = profile.current_rank || 0;
+      document.getElementById('levelName').innerText = profile.current_level || 'Bronze';
+      
+      // Set avatar initial
+      const name = profile.full_name || 'User';
+      const initial = name.charAt(0);
+      document.getElementById('avatarIcon').innerText = initial;
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    alert('Error loading profile');
+  }
+}
+
+async function handleLogout() {
+  if (confirm('શું તમે ખરેખર logout કરવા માંગો છો?')) {
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+  }
+}
+
+function showCreditsInfo() {
+  alert('Credits are used to take tests and access premium content. You can earn credits by completing tests and daily activities.');
+}
+
+function showFAQ() {
+  alert('FAQ page coming soon!');
+}
+
+loadProfile();
+</script>
+</body>
+</html>
