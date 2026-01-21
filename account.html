@@ -261,6 +261,69 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:2
   background:#ef4444;
   color:#fff;
 }
+
+/* Logout Dialog */
+.dialog-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.dialog-overlay.show{
+  display:flex;
+}
+.dialog-box{
+  background:#fff;
+  border-radius:16px;
+  padding:24px;
+  max-width:400px;
+  width:100%;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2);
+}
+.dialog-title{
+  font-size:20px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:12px;
+}
+.dialog-message{
+  font-size:15px;
+  color:#6b7280;
+  margin-bottom:20px;
+  line-height:1.5;
+}
+.dialog-buttons{
+  display:flex;
+  gap:12px;
+}
+.dialog-btn{
+  flex:1;
+  padding:12px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:600;
+  border:none;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.dialog-btn:active{
+  transform:scale(0.98);
+}
+.dialog-btn-cancel{
+  background:#f3f4f6;
+  color:#6b7280;
+}
+.dialog-btn-confirm{
+  background:#8b5cf6;
+  color:#fff;
+}
 </style>
 </head>
 <body>
