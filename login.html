@@ -1,330 +1,233 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAPiLA Institute - Digital Learning Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background-color: #f3f4f6; font-family: sans-serif; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .tab-button { padding: 12px 24px; border-bottom: 3px solid transparent; font-weight: 600; transition: all 0.3s; }
-        .tab-button.active { color: #2563eb; border-bottom-color: #2563eb; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - KAPiLa Learning</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:sans-serif;
+  background:#f3f4f6;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
+}
+
+.logo-section{
+  text-align:center;
+  margin:40px 0;
+}
+.logo-icon{
+  font-size:80px;
+  margin-bottom:16px;
+}
+.logo-title{
+  font-size:32px;
+  font-weight:bold;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:8px;
+}
+.logo-subtitle{
+  font-size:16px;
+  color:#6b7280;
+}
+
+.login-card{
+  background:#fff;
+  border-radius:16px;
+  padding:32px 24px;
+  width:100%;
+  max-width:500px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.form-title{
+  font-size:28px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:24px;
+}
+
+.form-group{
+  margin-bottom:20px;
+}
+.form-label{
+  display:block;
+  font-size:15px;
+  font-weight:600;
+  color:#374151;
+  margin-bottom:8px;
+}
+.form-input{
+  width:100%;
+  padding:14px 16px;
+  font-size:15px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#f9fafb;
+  color:#1f2937;
+  transition:all 0.2s;
+}
+.form-input:focus{
+  outline:none;
+  border-color:#8b5cf6;
+  background:#fff;
+}
+.form-input::placeholder{
+  color:#9ca3af;
+}
+
+.password-wrapper{
+  position:relative;
+}
+.toggle-password{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  font-size:24px;
+  cursor:pointer;
+  padding:4px;
+}
+
+.btn{
+  width:100%;
+  padding:16px;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  transition:transform 0.2s;
+  margin-top:8px;
+}
+.btn:active{transform:scale(0.98)}
+.btn-primary{
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color:#fff;
+}
+
+.register-link{
+  text-align:center;
+  margin-top:20px;
+  font-size:15px;
+  color:#6b7280;
+}
+.register-link a{
+  color:#8b5cf6;
+  font-weight:bold;
+  text-decoration:none;
+}
+.register-link a:hover{
+  text-decoration:underline;
+}
+
+.error-message{
+  background:#fee2e2;
+  color:#dc2626;
+  padding:12px 16px;
+  border-radius:8px;
+  font-size:14px;
+  margin-bottom:16px;
+  display:none;
+}
+</style>
 </head>
-<body class="p-4 pb-24">
+<body>
 
-    <header class="flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-        <div>
-            <h1 class="text-xl font-bold text-gray-800">KAPiLA Institute</h1>
-            <p class="text-[9px] text-gray-500">Digital Learning Platform</p>
-        </div>
-        <div id="authArea" class="flex items-center gap-2">
-            <button id="btnReg" onclick="openAuthModal('register')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
-            <button id="btnLogin" onclick="openAuthModal('login')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase shadow-md">Login</button>
-            <div id="userProfile" class="hidden flex items-center gap-2">
-                <span id="userName" class="text-xs font-bold text-gray-700"></span>
-                <button onclick="handleLogout()" class="bg-red-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Logout</button>
-            </div>
-        </div>
-    </header>
+<div class="logo-section">
+  <div class="logo-icon">🎓</div>
+  <div class="logo-title">KAPiLa Learning</div>
+  <div class="logo-subtitle">Digital Learning Platform</div>
+</div>
 
-    <!-- Main Card -->
-    <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 shadow-lg mb-6 text-white">
-        <h2 class="text-xl font-bold mb-3">📚 તમામ MCQ Material</h2>
-        <div class="bg-white/20 rounded-xl p-3 backdrop-blur-sm">
-            <p class="text-sm font-semibold mb-2">EXAMS:</p>
-            <div class="flex flex-wrap gap-2">
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">GPSC</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">CCE</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">PSI</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">POLICE</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">TALATI</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">MPHW</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">FHW</span>
-                <span class="bg-white/30 px-3 py-1 rounded-full text-xs font-bold">FOREST GUARD</span>
-            </div>
-        </div>
+<div class="login-card">
+  <h2 class="form-title">Login</h2>
+  
+  <div id="errorMessage" class="error-message"></div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="email" placeholder="your@email.com" required>
     </div>
 
-    <!-- Daily Learning Section -->
-    <div class="mb-4">
-        <h3 class="text-lg font-bold text-gray-800 mb-3">📅 Daily Learning</h3>
-        <div class="grid grid-cols-2 gap-3">
-            <!-- Daily Quiz Card -->
-            <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
-                <div class="text-3xl mb-2">🧠</div>
-                <h4 class="text-sm font-bold text-gray-800 mb-2">Daily QUIZ</h4>
-                <p class="text-[10px] text-gray-500 mb-3">બધા subjects ની mix quiz, 25 પ્રશ્નો</p>
-                <button onclick="checkAuthAndProceed('daily-quiz.html')" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold">શરૂ કરો</button>
-            </div>
-
-            <!-- Daily Maths & Reasoning Card -->
-            <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
-                <div class="text-3xl mb-2">🔢</div>
-                <h4 class="text-sm font-bold text-gray-800 mb-2">MATHS & REASONING</h4>
-                <p class="text-[10px] text-gray-500 mb-3">રોજ અલગ chapter, CCE & PSI માટે ઉપયોગી</p>
-                <button onclick="checkAuthAndProceed('daily-maths-res.html')" class="w-full bg-green-600 text-white py-2 rounded-lg text-xs font-bold">શરૂ કરો</button>
-            </div>
-        </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="password-wrapper">
+        <input type="password" class="form-input" id="password" placeholder="Enter your password" required>
+        <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+      </div>
     </div>
 
-    <!-- Existing Cards -->
-    <div class="space-y-4">
-        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
-            <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
-            <p class="text-gray-500 text-sm my-3">50 માર્કની ટેસ્ટ | અત્યારે જ આપો</p>
-            <button onclick="checkAuthAndProceed('demo-test-page.html?test=demo_test_sti')" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
-        </div>
+    <button type="submit" class="btn btn-primary">LOGIN</button>
+  </form>
 
-        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
-            <h2 class="text-lg font-bold">Test Series: GPSC-STI</h2>
-            <div class="flex justify-between items-center my-4">
-                <span class="text-green-600 font-bold text-xl">₹49/-</span>
-                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded-full font-bold">5 MOCK TESTS</span>
-            </div>
-            <button onclick="checkAuthAndProceed('mock-test-page.html')" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Give Right Now</button>
-        </div>
-    </div>
+  <div class="register-link">
+    Don't have an account? <a href="register.html">Register</a>
+  </div>
+</div>
 
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center">
-        <div class="text-[10px] text-gray-400">© 2025 KAPiLA Institute</div>
-        <div class="flex gap-2">
-            <a href="https://wa.me/916353511804?text=Hello%20KAPiLA%20Institute"
-               target="_blank"
-               class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">
-               WhatsApp
-            </a>
-            <a href="tel:+916353511804"
-               class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">
-               Call
-            </a>
-        </div>
-    </footer>
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    <!-- Unified Auth Modal -->
-    <div id="authModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 text-2xl z-10">&times;</button>
-            
-            <!-- Tabs -->
-            <div class="flex border-b">
-                <button id="loginTab" class="tab-button flex-1 active" onclick="switchTab('login')">લોગિન</button>
-                <button id="registerTab" class="tab-button flex-1" onclick="switchTab('register')">રજિસ્ટ્રેશન</button>
-            </div>
+// Check if already logged in
+async function checkAuth() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) {
+    window.location.href = 'index-kapila.html';
+  }
+}
 
-            <!-- Login Form -->
-            <div id="loginContent" class="tab-content active p-6">
-                <h3 class="text-xl font-bold mb-5">લોગિન કરો</h3>
-                <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <div id="loginMessage" class="text-sm text-red-600 mb-3 hidden"></div>
-                <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    એકાઉન્ટ નથી? <button onclick="switchTab('register')" class="text-blue-600 font-bold">રજિસ્ટર કરો</button>
-                </p>
-            </div>
+function togglePassword() {
+  const input = document.getElementById('password');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
 
-            <!-- Register Form -->
-            <div id="registerContent" class="tab-content p-6">
-                <h3 class="text-xl font-bold mb-5">નવું રજિસ્ટ્રેશન</h3>
-                <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <div id="registerMessage" class="text-sm text-red-600 mb-3 hidden"></div>
-                <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">સેવ કરો</button>
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    પહેલેથી એકાઉન્ટ છે? <button onclick="switchTab('login')" class="text-blue-600 font-bold">લોગિન કરો</button>
-                </p>
-            </div>
-        </div>
-    </div>
+function showError(message) {
+  const errorDiv = document.getElementById('errorMessage');
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+  setTimeout(() => {
+    errorDiv.style.display = 'none';
+  }, 5000);
+}
 
-    <script>
-        const supabaseUrl = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
 
-        let pendingRedirect = null;
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
 
-        window.onload = async () => {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if (user) showUser(user);
-        };
+    if (error) throw error;
 
-        async function showUser(user) {
-            const { data } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
-            if (data) {
-                document.getElementById('userName').innerText = data.full_name;
-                document.getElementById('btnReg').classList.add('hidden');
-                document.getElementById('btnLogin').classList.add('hidden');
-                document.getElementById('userProfile').classList.remove('hidden');
-            }
-        }
+    // Login successful
+    window.location.href = 'index-kapila.html';
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    showError(error.message || 'Login failed. Please check your credentials.');
+  }
+});
 
-        function openAuthModal(tab = 'login') {
-            document.getElementById('authModal').classList.add('active');
-            switchTab(tab);
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.remove('active');
-            pendingRedirect = null;
-            clearMessages();
-        }
-
-        function switchTab(tab) {
-            // Clear messages
-            clearMessages();
-
-            // Update tab buttons
-            document.getElementById('loginTab').classList.toggle('active', tab === 'login');
-            document.getElementById('registerTab').classList.toggle('active', tab === 'register');
-
-            // Update tab content
-            document.getElementById('loginContent').classList.toggle('active', tab === 'login');
-            document.getElementById('registerContent').classList.toggle('active', tab === 'register');
-        }
-
-        function clearMessages() {
-            document.getElementById('loginMessage').classList.add('hidden');
-            document.getElementById('registerMessage').classList.add('hidden');
-            document.getElementById('loginMessage').innerText = '';
-            document.getElementById('registerMessage').innerText = '';
-        }
-
-        function showMessage(type, message) {
-            const messageDiv = document.getElementById(type + 'Message');
-            messageDiv.innerText = message;
-            messageDiv.classList.remove('hidden');
-        }
-
-        async function checkAuthAndProceed(url) {
-            const { data: { user } } = await _supabase.auth.getUser();
-            
-            if (user) {
-                // User is logged in, proceed to the test
-                location.href = url;
-            } else {
-                // User is not logged in, show auth modal
-                pendingRedirect = url;
-                openAuthModal('login');
-            }
-        }
-
-        async function handleRegister() {
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPass').value;
-            const fullName = document.getElementById('regName').value.trim();
-            const mobile = document.getElementById('regMobile').value.trim();
-            const btn = document.getElementById('regBtn');
-
-            clearMessages();
-
-            if(!email || !password || !fullName || !mobile) { 
-                showMessage('register', "બધી વિગતો ભરો");
-                return; 
-            }
-
-            btn.disabled = true; 
-            btn.innerText = "સેવ થાય છે...";
-
-            // Check if user already exists
-            const { data: existingUser } = await _supabase
-                .from('profiles')
-                .select('email')
-                .eq('email', email)
-                .single();
-
-            if (existingUser) {
-                showMessage('register', "તમે પહેલેથી જ રજિસ્ટર છો, કૃપયા લોગિન કરો");
-                btn.disabled = false; 
-                btn.innerText = "સેવ કરો";
-                setTimeout(() => switchTab('login'), 2000);
-                return;
-            }
-
-            const { data, error: authError } = await _supabase.auth.signUp({ email, password });
-
-            if (authError) {
-                showMessage('register', "ભૂલ: " + authError.message);
-                btn.disabled = false; 
-                btn.innerText = "સેવ કરો";
-                return;
-            }
-
-            if (data.user) {
-                const { error: profileError } = await _supabase
-                    .from('profiles')
-                    .upsert({ id: data.user.id, email: email, full_name: fullName, mobile: mobile });
-                
-                if (profileError) {
-                    showMessage('register', "ટેબલ ભૂલ: " + profileError.message);
-                    btn.disabled = false; 
-                    btn.innerText = "સેવ કરો";
-                } else { 
-                    showMessage('register', "સફળ! લોગિન થઈ રહ્યું છે...");
-                    setTimeout(() => {
-                        if (pendingRedirect) {
-                            location.href = pendingRedirect;
-                        } else {
-                            location.reload();
-                        }
-                    }, 1000);
-                }
-            }
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPass').value;
-            const btn = document.getElementById('loginBtn');
-
-            clearMessages();
-
-            if(!email || !password) { 
-                showMessage('login', "ઈમેલ અને પાસવર્ડ ભરો");
-                return; 
-            }
-
-            btn.disabled = true;
-            btn.innerText = "લોગિન થાય છે...";
-
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                // Check if user doesn't exist
-                if (error.message.includes('Invalid login credentials') || error.message.includes('not found')) {
-                    showMessage('login', "એકાઉન્ટ નથી મળ્યું, કૃપયા પહેલા રજિસ્ટર કરો");
-                    btn.disabled = false;
-                    btn.innerText = "લોગિન કરો";
-                    setTimeout(() => switchTab('register'), 2000);
-                } else {
-                    showMessage('login', "લોગિન ભૂલ: " + error.message);
-                    btn.disabled = false;
-                    btn.innerText = "લોગિન કરો";
-                }
-            } else {
-                showMessage('login', "સફળ! રીડાયરેક્ટ થઈ રહ્યું છે...");
-                setTimeout(() => {
-                    if (pendingRedirect) {
-                        location.href = pendingRedirect;
-                    } else {
-                        location.reload();
-                    }
-                }, 1000);
-            }
-         }
-
-        async function handleLogout() {
-            await _supabase.auth.signOut();
-            location.reload();
-        }
-    </script>
+checkAuth();
+</script>
 </body>
 </html>
