@@ -360,6 +360,7 @@ async function init() {
     window.location.href = 'login.html';
     return;
   }
+  await checkProfileCompletion();
   await loadHomePage();
 }
 
@@ -372,6 +373,21 @@ async function checkAuth() {
     
     const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
     document.getElementById('userNameDisplay').innerText = profile?.full_name || user.email.split('@')[0];
+  }
+}
+
+async function checkProfileCompletion() {
+  try {
+    const { data: profile } = await sb.from('profiles').select('full_name, district, date_of_birth').eq('id', currentUser.id).single();
+    
+    // Check if profile is complete
+    if (!profile || !profile.full_name || !profile.district || !profile.date_of_birth) {
+      // Profile incomplete - redirect to edit profile
+      window.location.href = 'edit-profile.html?new=true';
+      return;
+    }
+  } catch (err) {
+    console.error('Profile check error:', err);
   }
 }
 
