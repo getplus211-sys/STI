@@ -268,8 +268,8 @@ function showInfo(message) {
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const mobile = document.getElementById('mobileInput').value;
-  const email = document.getElementById('emailInput').value;
+  const mobile = document.getElementById('mobileInput').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passwordInput').value;
 
   // Validation
@@ -278,7 +278,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     return;
   }
 
-  if (mobile.length !== 10) {
+  if (mobile.length !== 10 || !/^\d{10}$/.test(mobile)) {
     showError('માન્ય 10 અંકનો મોબાઇલ નંબર દાખલ કરો');
     return;
   }
@@ -292,9 +292,9 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     // Check if user already exists
     const { data: existingProfile } = await sb
       .from('profiles')
-      .select('email')
-      .eq('email', email)
-      .single();
+      .select('email, mobile')
+      .or(`email.eq.${email},mobile.eq.${mobile}`)
+      .maybeSingle();
 
     if (existingProfile) {
       showInfo('તમારું account પહેલાથી જ ઉપલબ્ધ છે. કૃપા કરીને login કરો.');
@@ -307,14 +307,24 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     // Create auth user
     const { data: authData, error: authError } = await sb.auth.signUp({
       email: email,
-      password: password
+      password: password,
+      options: {
+        data: {
+          mobile: mobile
+        }
+      }
     });
 
     if (authError) throw authError;
     if (!authData.user) throw new Error('User creation failed');
 
-    // Create minimal profile
-    const { error: profileError } = await sb.from('profiles').insert({
+    console.log('User created:', authData.user.id);
+
+    // Wait a moment for auth to settle
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Create profile with mobile number
+    const profileData = {
       id: authData.user.id,
       email: email,
       mobile: mobile,
@@ -327,14 +337,38 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
       credits: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
-    });
+    };
 
-    if (profileError && profileError.code !== '23505') {
-      console.error('Profile error:', profileError);
-      throw profileError;
+    console.log('Inserting profile:', profileData);
+
+    const { data: insertResult, error: profileError } = await sb
+      .from('profiles')
+      .insert(profileData)
+      .select();
+
+    if (profileError) {
+      console.error('Profile insert error:', profileError);
+      if (profileError.code !== '23505') {
+        throw new Error('Failed to create profile: ' + profileError.message);
+      }
     }
 
-    // Redirect to edit profile
+    console.log('Profile created:', insertResult);
+
+    // Verify profile was created
+    const { data: verifyProfile } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    console.log('Verified profile:', verifyProfile);
+
+    if (!verifyProfile) {
+      throw new Error('Profile verification failed');
+    }
+
+    // Success - redirect to edit profile
     window.location.href = 'edit-profile.html?new=true';
     
   } catch (error) {
@@ -344,8 +378,31 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 });
 
 async function signInWithGoogle() {
-  // Google Sign-in feature coming soon
-  alert('Google Sign-in feature આવનારા સમયમાં ઉપલબ્ધ થશે. કૃપા કરીને હાલ email થી register કરો.');
+  try {
+    const { data, error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/edit-profile.html?new=true`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent'
+        }
+      }
+    });
+    
+    if (error) {
+      console.error('Google OAuth error:', error);
+      // If OAuth not configured, show friendly message
+      if (error.message.includes('Provider') || error.message.includes('not enabled')) {
+        alert('Google Sign-in હાલ ઉપલબ્ધ નથી. કૃપા કરીને email થી register કરો.');
+      } else {
+        throw error;
+      }
+    }
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    showError('Google sign-in failed. Please try email registration.');
+  }
 }
 
 // Check if already logged in
