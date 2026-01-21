@@ -416,6 +416,31 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:95px;padding-bottom:2
   </div>
 </div>
 
+<!-- Logout Dialog -->
+<div class="dialog-overlay" id="logoutDialog">
+  <div class="dialog-box">
+    <h3 class="dialog-title">Logout</h3>
+    <p class="dialog-message">શું તમે ખરેખર logout કરવા માંગો છો?</p>
+    <div class="dialog-buttons">
+      <button class="dialog-btn dialog-btn-cancel" onclick="closeLogoutDialog()">રદ કરો</button>
+      <button class="dialog-btn dialog-btn-confirm" onclick="confirmLogout()">હા, LOGOUT કરો</button>
+    </div>
+  </div>
+</div>
+
+<!-- Credits Info Dialog -->
+<div class="dialog-overlay" id="creditsDialog">
+  <div class="dialog-box">
+    <h3 class="dialog-title">🪙 ક્રેડિટ્સ વિશે</h3>
+    <div class="dialog-message" style="text-align:left">
+      <p style="margin-bottom:12px"><strong>ઉપયોગ:</strong> આ ક્રેડિટ્સ નો ઉપયોગ તમે આવનારી પરિક્ષાઓના પ્રિમિયમ મોક ટેસ્ટ માટે કરી શકશો.</p>
+      
+      <p style="margin-bottom:12px"><strong>કેવી રીતે નવા મળશે?:</strong> તમે જ્યારે વિષય પ્રમાણે અથવા પુછાયેલા પ્રશ્નો નો ટેસ્ટ આપો છો ત્યારે આ ક્રેડિટ તમને ફ્રી માં પ્રાપ્ત થાય છે. એક ટેસ્ટ માં તમને 1 થી લઈને 5 સુધી ક્રેડિટ પ્રાપ્ત થાય છે.</p>
+    </div>
+    <button class="dialog-btn dialog-btn-confirm" onclick="closeCreditsDialog()" style="width:100%">સમજ્યું</button>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
@@ -453,14 +478,24 @@ async function loadProfile() {
 }
 
 async function handleLogout() {
-  if (confirm('શું તમે ખરેખર logout કરવા માંગો છો?')) {
-    await sb.auth.signOut();
-    window.location.href = 'login.html';
-  }
+  document.getElementById('logoutDialog').classList.add('show');
+}
+
+function closeLogoutDialog() {
+  document.getElementById('logoutDialog').classList.remove('show');
+}
+
+async function confirmLogout() {
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
 }
 
 function showCreditsInfo() {
-  alert('Credits are used to take tests and access premium content. You can earn credits by completing tests and daily activities.');
+  document.getElementById('creditsDialog').classList.add('show');
+}
+
+function closeCreditsDialog() {
+  document.getElementById('creditsDialog').classList.remove('show');
 }
 
 loadProfile();
