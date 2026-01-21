@@ -11,6 +11,381 @@ body{
   font-family:sans-serif;
   background:#f3f4f6;
   min-height:100vh;
+  padding:20px 20px 120px 20px;
+}
+
+.header{
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  padding:32px 16px;
+  text-align:center;
+  color:#fff;
+  border-radius:16px;
+  margin-bottom:24px;
+}
+.header-title{
+  font-size:28px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+.header-subtitle{
+  font-size:14px;
+  opacity:0.9;
+}
+
+.container{
+  max-width:500px;
+  margin:0 auto;
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:28px 24px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom:16px;
+}
+
+.form-title{
+  font-size:22px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:24px;
+  text-align:center;
+}
+
+.form-group{
+  margin-bottom:20px;
+}
+.form-label{
+  display:block;
+  font-size:14px;
+  font-weight:600;
+  color:#374151;
+  margin-bottom:8px;
+}
+.required{
+  color:#ef4444;
+}
+.form-input{
+  width:100%;
+  padding:14px 16px;
+  font-size:15px;
+  border:2px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+  color:#1f2937;
+  transition:all 0.2s;
+}
+.form-input:focus{
+  outline:none;
+  border-color:#8b5cf6;
+}
+.form-input::placeholder{
+  color:#9ca3af;
+}
+.form-hint{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:4px;
+}
+
+.password-wrapper{
+  position:relative;
+}
+.toggle-password{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  font-size:24px;
+  cursor:pointer;
+}
+
+.btn{
+  width:100%;
+  padding:16px;
+  font-size:16px;
+  font-weight:bold;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  transition:transform 0.2s;
+  margin-top:8px;
+}
+.btn:active{transform:scale(0.98)}
+.btn-primary{
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color:#fff;
+}
+
+.divider{
+  display:flex;
+  align-items:center;
+  margin:24px 0;
+  color:#9ca3af;
+  font-size:14px;
+}
+.divider::before, .divider::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:#e5e7eb;
+}
+.divider::before{margin-right:12px}
+.divider::after{margin-left:12px}
+
+.btn-google{
+  background:#fff;
+  color:#1f2937;
+  border:2px solid #e5e7eb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+.google-icon{
+  width:20px;
+  height:20px;
+}
+
+.login-link{
+  text-align:center;
+  margin-top:20px;
+  font-size:14px;
+  color:#6b7280;
+}
+.login-link a{
+  color:#8b5cf6;
+  font-weight:bold;
+  text-decoration:none;
+}
+
+.error-message, .info-message{
+  padding:12px 16px;
+  border-radius:8px;
+  font-size:14px;
+  margin-bottom:16px;
+  display:none;
+}
+.error-message{
+  background:#fee2e2;
+  color:#dc2626;
+}
+.info-message{
+  background:#dbeafe;
+  color:#1e40af;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">KAPiLa Learning</div>
+  <div class="header-subtitle">Create your account</div>
+</div>
+
+<div class="container">
+  <div id="errorMessage" class="error-message"></div>
+  <div id="infoMessage" class="info-message"></div>
+
+  <div class="card">
+    <h2 class="form-title">રજિસ્ટર કરો</h2>
+    
+    <form id="registerForm">
+      <div class="form-group">
+        <label class="form-label">Mobile Number <span class="required">*</span></label>
+        <input type="tel" class="form-input" id="mobile" placeholder="10 digit mobile number" maxlength="10" pattern="[0-9]{10}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email <span class="required">*</span></label>
+        <input type="email" class="form-input" id="email" placeholder="your@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password <span class="required">*</span></label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" id="password" placeholder="Enter password" minlength="6" required>
+          <button type="button" class="toggle-password" onclick="togglePassword('password')">👁️</button>
+        </div>
+        <div class="form-hint">ઓછામાં ઓછું 6 અક્ષરો, Example: Abc123</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm Password <span class="required">*</span></label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" id="confirmPassword" placeholder="Re-enter password" minlength="6" required>
+          <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">👁️</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">CREATE ACCOUNT</button>
+    </form>
+
+    <div class="divider">OR</div>
+
+    <button class="btn btn-google" onclick="signInWithGoogle()">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continue with Google
+    </button>
+  </div>
+
+  <div class="login-link">
+    શું તમે પહેલેથી રજિસ્ટ્રેશન કરેલ છો? <a href="login.html">Login</a>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+function togglePassword(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function showError(message) {
+  const errorDiv = document.getElementById('errorMessage');
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => {
+    errorDiv.style.display = 'none';
+  }, 5000);
+}
+
+function showInfo(message) {
+  const infoDiv = document.getElementById('infoMessage');
+  infoDiv.textContent = message;
+  infoDiv.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const mobile = document.getElementById('mobile').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  // Validation
+  if (!mobile || !email || !password || !confirmPassword) {
+    showError('કૃપા કરીને બધી માહિતી ભરો');
+    return;
+  }
+
+  if (mobile.length !== 10) {
+    showError('માન્ય 10 અંકનો મોબાઇલ નંબર દાખલ કરો');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showError('Passwords do not match');
+    return;
+  }
+
+  if (password.length < 6) {
+    showError('Password must be at least 6 characters');
+    return;
+  }
+
+  try {
+    // Check if user already exists
+    const { data: existingProfile } = await sb
+      .from('profiles')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    if (existingProfile) {
+      showInfo('તમારું account પહેલાથી જ ઉપલબ્ધ છે. કૃપા કરીને login કરો.');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+      return;
+    }
+
+    // Create auth user
+    const { data: authData, error: authError } = await sb.auth.signUp({
+      email: email,
+      password: password
+    });
+
+    if (authError) throw authError;
+    if (!authData.user) throw new Error('User creation failed');
+
+    // Create minimal profile
+    const { error: profileError } = await sb.from('profiles').insert({
+      id: authData.user.id,
+      email: email,
+      mobile: mobile,
+      full_name: null,
+      district: null,
+      date_of_birth: null,
+      current_level: 'Bronze',
+      current_rank: 0,
+      total_tests_taken: 0,
+      credits: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+
+    if (profileError && profileError.code !== '23505') {
+      console.error('Profile error:', profileError);
+      throw profileError;
+    }
+
+    // Redirect to edit profile
+    window.location.href = 'edit-profile.html?new=true';
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    showError(error.message || 'Registration failed. Please try again.');
+  }
+});
+
+async function signInWithGoogle() {
+  try {
+    const { data, error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/edit-profile.html?new=true'
+      }
+    });
+    
+    if (error) throw error;
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    showError('Google sign-in failed. Please try again.');
+  }
+}
+
+// Check if already logged in
+async function checkAuth() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) {
+    window.location.href = 'index-kapila.html';
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:sans-serif;
+  background:#f3f4f6;
+  min-height:100vh;
   padding-bottom:120px;
 }
 
