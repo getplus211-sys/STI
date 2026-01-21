@@ -211,7 +211,17 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       password: password
     });
 
-    if (error) throw error;
+    if (error) {
+      // Check if user doesn't exist
+      if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
+        showError('તમે નવા user છો. કૃપા કરીને પહેલા register કરો.');
+        setTimeout(() => {
+          window.location.href = 'register.html';
+        }, 2000);
+        return;
+      }
+      throw error;
+    }
 
     // Login successful
     window.location.href = 'index-kapila.html';
