@@ -141,8 +141,26 @@ async function selectChapter(chapterCode, chapterName) {
 }
 async function loadQuizzes(chapterCode) {
   try {
-    const { data, error } = await sb.from('kls_quizzes').select('*, likes_count').eq('chapter_code', chapterCode).eq('is_active', true).order('difficulty_level');
+    // Load quizzes
+    const { data, error } = await sb.from('kls_quizzes').select('*').eq('chapter_code', chapterCode).eq('is_active', true).order('difficulty_level');
     if (error) throw error;
+    
+    // Get likes count for each quiz
+    const quizIds = data.map(q => q.quiz_id);
+    const { data: likesData } = await sb.from('quiz_likes').select('quiz_id');
+    
+    // Count likes per quiz
+    const likesCounts = {};
+    if (likesData) {
+      likesData.forEach(like => {
+        likesCounts[like.quiz_id] = (likesCounts[like.quiz_id] || 0) + 1;
+      });
+    }
+    
+    // Add likes_count to each quiz
+    data.forEach(quiz => {
+      quiz.likes_count = likesCounts[quiz.quiz_id] || 0;
+    });
     
     // Load user's likes if logged in
     let userLikes = [];
