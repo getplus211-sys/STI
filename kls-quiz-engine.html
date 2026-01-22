@@ -137,7 +137,6 @@ let testStarted = false;
 
 if (!QUIZ_ID) {
   app.innerHTML = '<div class="card"><h3>⚠️ Invalid URL</h3><p>Test ID not found</p></div>';
-  hideLoading();
 } else {
   init();
 }
@@ -167,22 +166,6 @@ async function init() {
     }
     currentTest = test;
 
-    // Check if user has already attempted this test (ONE TEST PER STUDENT)
-    const { data: previousAttempt, error: attemptError } = await sb
-      .from("kls_quiz_attempts")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("quiz_id", QUIZ_ID)
-      .maybeSingle();
-
-    // If user has already taken this test, show their previous result
-    if (previousAttempt) {
-      existingResult = previousAttempt;
-      quizAttemptId = previousAttempt.id;
-      showAlreadyAttempted(test, previousAttempt);
-      return;
-    }
-
     const { data: qs } = await sb.from("kls_questions").select("*").eq("quiz_id", QUIZ_ID);
     questions = qs || [];
 
@@ -195,212 +178,6 @@ async function init() {
   } catch (err) {
     app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>' + err.message + '</p></div>';
   }
-}
-
-function showAlreadyAttempted(test, result) {
-  const date = new Date(result.completed_at).toLocaleDateString('gu-IN');
-  const time = new Date(result.completed_at).toLocaleTimeString('gu-IN', {hour: '2-digit', minute: '2-digit'});
-  
-  app.innerHTML = `
-  <div class="card">
-    <span class="badge completed">✓ પૂર્ણ થયેલ</span>
-    <h2>${test.quiz_name}</h2>
-    
-    <div class="alert-box">
-      <h3>⚠️ તમે આ ટેસ્ટ પહેલાથી જ આપી ચુક્યા છો!</h3>
-      <p><b>તારીખ:</b> ${date} ${time}</p>
-      <p><b>તમારો સ્કોર:</b> ${result.score}/${result.total_questions}</p>
-      <p><b>ચોકસાઈ:</b> ${result.percentage}%</p>
-      <p style="margin-top:10px">દરેક ટેસ્ટ માત્ર એક જ વાર આપી શકાય છે. તમે તમારા પરિણામો અને solutions જોઈ શકો છો.</p>
-    </div>
-
-    <button class="primary" onclick="window.location.href='kls-performance.html?attempt_id=${quizAttemptId}'">📊 Performance Report જુઓ</button>
-    <button class="blue" onclick="loadExistingResult()">📊 તમારા પરિણામો જુઓ</button>
-    <button class="gray" onclick="loadExistingSolutions()">📝 Solutions જુઓ</button>
-    <br>
-    <button class="success" onclick="retakeQuiz()">🔄 શું તમે ફરી ટેસ્ટ આપવા માંગો છો?</button>
-    <button class="warning" onclick="window.history.back()">← પાછા જાઓ</button>
-  </div>`;
-}
-
-async function retakeQuiz() {
-  showModal(
-    '🔄',
-    'ફરી ટેસ્ટ આપો',
-    'શું તમે ખરેખર આ ટેસ્ટ ફરીથી આપવા માંગો છો?<br><br><strong>નોંધ:</strong> તમારો જૂનો સ્કોર અને પ્રયાસ delete થઈ જશે.',
-    `
-      <button class="primary" onclick="confirmRetake()">હા, ફરી ટેસ્ટ આપું</button>
-      <button class="gray" onclick="hideModal()">ના, રદ કરો</button>
-    `
-  );
-}
-
-async function confirmRetake() {
-  hideModal();
-  app.innerHTML = '<div class="loader">♻️ રીસેટ થઈ રહ્યું છે...</div>';
-  
-  try {
-    console.log('Deleting quiz attempt:', quizAttemptId);
-    
-    // Delete question attempts first
-    const { error: qaError } = await sb
-      .from('kls_question_attempts')
-      .delete()
-      .eq('quiz_attempt_id', quizAttemptId);
-    
-    if (qaError) {
-      console.error('Question attempts delete error:', qaError);
-      throw qaError;
-    }
-    
-    console.log('Question attempts deleted');
-    
-    // Delete quiz attempt
-    const { error: quizError } = await sb
-      .from('kls_quiz_attempts')
-      .delete()
-      .eq('id', quizAttemptId);
-    
-    if (quizError) {
-      console.error('Quiz attempt delete error:', quizError);
-      throw quizError;
-    }
-    
-    console.log('Quiz attempt deleted, reloading...');
-    
-    // Force reload with cache clear
-    window.location.href = window.location.href.split('?')[0] + '?quiz_id=' + QUIZ_ID + '&t=' + Date.now();
-    
-  } catch (err) {
-    console.error('Retake error:', err);
-    app.innerHTML = `<div class="card">
-      <h3>❌ Error</h3>
-      <p>${err.message}</p>
-      <button class="primary" onclick="window.location.reload()">Retry</button>
-    </div>`;
-  }
-}
-
-async function loadExistingResult() {
-  const r = existingResult;
-  const m = Math.floor(r.total_time_seconds / 60);
-  const sec = r.total_time_seconds % 60;
-
-  app.innerHTML = `
-  <div class="card">
-    <span class="badge completed">✓ પૂર્ણ થયેલ</span>
-    <h2>Your Score: ${r.score}</h2>
-    <div style="margin:15px 0;line-height:1.8">
-      <p><b>Correct:</b> ${r.correct_answers} | <b>Wrong:</b> ${r.wrong_answers}</p>
-      <p><b>Skipped:</b> ${r.skipped_questions} | <b>E Options:</b> ${r.e_option_used}</p>
-      <p><b>Time Taken:</b> ${m}m ${sec}s</p>
-    </div>
-    <canvas id="chart"></canvas><br><br>
-    <button class="primary" onclick="loadLeaderboard()">🏆 View Leaderboard</button>
-    <button class="gray" onclick="loadExistingSolutions()">📝 View Solutions</button>
-    <button class="blue" onclick="viewPerformance()">📊 Current Test Performance</button>
-  </div>`;
-
-  const chart = document.getElementById("chart");
-  new Chart(chart, {
-    type: "pie",
-    data: {
-      labels: ["Correct", "Wrong", "Skipped", "E"],
-      datasets: [{
-        data: [r.correct_answers, r.wrong_answers, r.skipped_questions, r.e_option_used],
-        backgroundColor: ['#22c55e', '#ef4444', '#cbd5e1', '#eab308']
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'bottom' } }
-    }
-  });
-}
-
-async function loadExistingSolutions() {
-  app.innerHTML = '<div class="card loader"><div style="font-size:40px">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Solutions લોડ થઈ રહ્યું છે</p></div>';
-
-  console.log('Loading solutions for attempt:', quizAttemptId);
-  
-  // First check if attempts exist
-  const { data: attempts, error: attemptsError } = await sb
-    .from("kls_question_attempts")
-    .select("*")
-    .eq("quiz_attempt_id", quizAttemptId);
-
-  console.log('Question attempts:', attempts, 'Error:', attemptsError);
-
-  if (!attempts || attempts.length === 0) {
-    app.innerHTML = `<div class="card"><h3>⚠️ No Data</h3>
-      <p>Solutions not found. Attempt ID: ${quizAttemptId}</p>
-      <p style="font-size:12px">Check console for debug info</p>
-      <button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>`;
-    return;
-  }
-  
-  // Now load questions separately
-  const questionIds = attempts.map(a => a.question_id);
-  const { data: questions, error: questionsError } = await sb
-    .from("kls_questions")
-    .select("*")
-    .in("id", questionIds);
-  
-  console.log('Questions:', questions, 'Error:', questionsError);
-  
-  if (!questions || questions.length === 0) {
-    app.innerHTML = `<div class="card"><h3>⚠️ Questions Not Found</h3>
-      <p>Question details not available</p>
-      <button class="gray" onclick="loadExistingResult()">← પાછા જાઓ</button></div>`;
-    return;
-  }
-  
-  // Merge data manually
-  const mergedData = attempts.map(att => {
-    const q = questions.find(qu => qu.id === att.question_id);
-    return { ...att, kls_questions: q };
-  });
-
-  // Question Navigator Grid
-  let gridHTML = '<div class="card"><h4>Question Navigator</h4><div class="qgrid">';
-  mergedData.forEach((a, idx) => {
-    let btnClass = 'qbtn';
-    if (a.selected_answer === 'SKIPPED') btnClass += ' skipped';
-    else if (a.is_correct) btnClass += ' correct';
-    else btnClass += ' wrong';
-    gridHTML += `<button class="${btnClass}" onclick="scrollToSolution(${idx})">${idx + 1}</button>`;
-  });
-  gridHTML += '</div></div>';
-
-  let solutionsHTML = `
-  <span class="badge kapila">KAPiLa</span>
-  <h3>Answer Key & Solutions</h3>
-  <button class="gray" style="margin-bottom:15px" onclick="loadExistingResult()">← પાછા જાઓ</button>
-  ${gridHTML}`;
-
-  mergedData.forEach((a, idx) => {
-    const q = a.kls_questions;
-    const userAns = a.selected_answer;
-    const correctAns = q.correct_answer;
-    const isCorrect = a.is_correct;
-
-    solutionsHTML += `
-    <div class="card" id="sol${idx}" style="border-left: 5px solid ${isCorrect ? '#22c55e' : (userAns === 'SKIPPED' ? '#cbd5e1' : '#ef4444')}">
-      <p><b>Q${idx + 1}:</b> ${q.question}</p>
-      <p><b>Your Answer:</b> ${userAns === 'SKIPPED' ? 'છોડી દીધો' : (userAns === 'A' ? q.option_a : userAns === 'B' ? q.option_b : userAns === 'C' ? q.option_c : userAns === 'D' ? q.option_d : q.option_e)}</p>
-      <p style="color: #22c55e"><b>Correct Answer:</b> ${correctAns === 'A' ? q.option_a : correctAns === 'B' ? q.option_b : correctAns === 'C' ? q.option_c : correctAns === 'D' ? q.option_d : q.option_e}</p>
-      ${q.explanation ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Explanation:</b> ${q.explanation}</div>` : ""}
-    </div>`;
-  });
-
-  solutionsHTML += '<button class="primary" onclick="loadExistingResult()">← પાછા જાઓ</button>';
-  app.innerHTML = solutionsHTML;
-  window.scrollTo(0, 0);
-}
-
-function scrollToSolution(idx) {
-  const el = document.getElementById('sol' + idx);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function showInstructions(test) {
@@ -418,7 +195,7 @@ function showInstructions(test) {
         <li>તમે કોઈપણ સમયે પ્રશ્નો વચ્ચે આગળ-પાછળ જઈ શકો છો</li>
         <li>E વિકલ્પ નો ઉપયોગ કરી શકો છો જો જરૂર હોય</li>
         <li>સબમિટ કર્યા પછી જવાબ બદલી શકાશે નહીં</li>
-        <li>આ ટેસ્ટ માત્ર એક જ વાર આપી શકાય છે</li>
+        <li>તમે આ ટેસ્ટ ઘણી વાર આપી શકો છો</li>
       </ul>
     </div>
 
@@ -547,28 +324,29 @@ async function submitTest() {
   submitted = true;
   clearInterval(timer);
 
-  // Show loading with progress - recreate if needed
-  let overlay = document.getElementById('loadingOverlay');
-  if (!overlay) {
-    // Recreate overlay if it was removed
-    overlay = document.createElement('div');
-    overlay.id = 'loadingOverlay';
-    overlay.className = 'loading-overlay';
-    overlay.innerHTML = `
-      <div class="loading-content">
-        <div class="loading-logo">🎓</div>
-        <div class="loading-title">KAPiLa Learning</div>
-        <div class="loading-message" id="loadingMessage">Initializing...</div>
-        <div class="progress-container">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
-        <div class="progress-text" id="progressText">0%</div>
+  // Show simple loading
+  app.innerHTML = `
+  <div class="loading-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#f1f5f9;z-index:10000;display:flex;align-items:center;justify-content:center">
+    <div class="loading-content" style="text-align:center;max-width:320px;width:90%">
+      <div class="loading-logo" style="width:80px;height:80px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 24px auto;animation:loadingPulse 2s ease-in-out infinite">🎓</div>
+      <div style="font-size:20px;font-weight:bold;color:#1f2937;margin-bottom:8px">સબમિટ થઈ રહ્યું છે...</div>
+      <div style="font-size:14px;color:#6b7280;margin-bottom:20px">કૃપા કરીને રાહ જુઓ</div>
+      <div style="width:100%;height:6px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:12px">
+        <div id="submitProgress" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#7c3aed);border-radius:10px;width:0%;transition:width 0.5s ease"></div>
       </div>
-    `;
-    document.body.appendChild(overlay);
-  }
-  overlay.classList.remove('hidden');
-  updateProgress(20, 'તમારા જવાબો સેવ કરી રહ્યા છીએ...');
+      <div id="submitMessage" style="font-size:13px;font-weight:600;color:#8b5cf6">તમારા જવાબો સેવ કરી રહ્યા છીએ...</div>
+    </div>
+  </div>`;
+
+  // Progress helper
+  const setProgress = (percent, msg) => {
+    const bar = document.getElementById('submitProgress');
+    const txt = document.getElementById('submitMessage');
+    if (bar) bar.style.width = percent + '%';
+    if (txt) txt.innerText = msg;
+  };
+
+  setProgress(20, 'તમારા જવાબો સેવ કરી રહ્યા છીએ...');
 
   let correct = 0, wrong = 0, skip = 0, e = 0;
 
@@ -592,7 +370,7 @@ async function submitTest() {
   });
   console.log('Total check:', correct + wrong + skip, '(should be', questions.length + ')');
 
-  updateProgress(50, 'Results તૈયાર કરી રહ્યા છીએ...');
+  setProgress(50, 'Results તૈયાર કરી રહ્યા છીએ...');
   const score = correct;
   const timeTaken = Math.floor((Date.now() - startTime) / 1000);
   const percentage = ((correct / questions.length) * 100).toFixed(2);
@@ -624,7 +402,7 @@ async function submitTest() {
   quizAttemptId = result.id;
   existingResult = result;
 
-  updateProgress(70, 'Questions save કરી રહ્યા છીએ...');
+  setProgress(70, 'Questions save કરી રહ્યા છીએ...');
 
   // Save question attempts
   for (let i = 0; i < questions.length; i++) {
@@ -658,10 +436,9 @@ async function submitTest() {
     });
   }
 
-  updateProgress(95, 'તૈયાર છે...');
+  setProgress(95, 'તૈયાર છે...');
   
   // Directly show result page
-  hideLoading();
   loadResult(score, correct, wrong, skip, e, timeTaken);
 }
 
@@ -685,7 +462,8 @@ function loadResult(score, c, w, s, e, time) {
     <canvas id="chart"></canvas><br><br>
     <button class="primary" onclick="window.location.href='kls-performance.html?attempt_id=${quizAttemptId}'">📊 Performance Report જુઓ</button>
     <button class="blue" onclick="loadLeaderboard()">🏆 View Leaderboard</button>
-    <button class="gray" onclick="loadExistingSolutions()">📝 View Answers / Solutions</button>
+    <button class="gray" onclick="loadSolutions()">📝 View Answers / Solutions</button>
+    <button class="success" onclick="window.location.href='kls-quiz-engine.html?quiz_id=${QUIZ_ID}'">🔄 ફરી ટેસ્ટ આપો</button>
   </div>`;
 
   const chart = document.getElementById("chart");
@@ -705,6 +483,91 @@ function loadResult(score, c, w, s, e, time) {
   });
 }
 
+async function loadSolutions() {
+  app.innerHTML = '<div class="card loader"><div style="font-size:40px">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Solutions લોડ થઈ રહ્યું છે</p></div>';
+
+  console.log('Loading solutions for attempt:', quizAttemptId);
+  
+  // First check if attempts exist
+  const { data: attempts, error: attemptsError } = await sb
+    .from("kls_question_attempts")
+    .select("*")
+    .eq("quiz_attempt_id", quizAttemptId);
+
+  console.log('Question attempts:', attempts, 'Error:', attemptsError);
+
+  if (!attempts || attempts.length === 0) {
+    app.innerHTML = `<div class="card"><h3>⚠️ No Data</h3>
+      <p>Solutions not found. Attempt ID: ${quizAttemptId}</p>
+      <p style="font-size:12px">Check console for debug info</p>
+      <button class="gray" onclick="loadResult(${existingResult.score}, ${existingResult.correct_answers}, ${existingResult.wrong_answers}, ${existingResult.skipped_questions}, ${existingResult.e_option_used}, ${existingResult.total_time_seconds})">← પાછા જાઓ</button></div>`;
+    return;
+  }
+  
+  // Now load questions separately
+  const questionIds = attempts.map(a => a.question_id);
+  const { data: questions, error: questionsError } = await sb
+    .from("kls_questions")
+    .select("*")
+    .in("id", questionIds);
+  
+  console.log('Questions:', questions, 'Error:', questionsError);
+  
+  if (!questions || questions.length === 0) {
+    app.innerHTML = `<div class="card"><h3>⚠️ Questions Not Found</h3>
+      <p>Question details not available</p>
+      <button class="gray" onclick="loadResult(${existingResult.score}, ${existingResult.correct_answers}, ${existingResult.wrong_answers}, ${existingResult.skipped_questions}, ${existingResult.e_option_used}, ${existingResult.total_time_seconds})">← પાછા જાઓ</button></div>`;
+    return;
+  }
+  
+  // Merge data manually
+  const mergedData = attempts.map(att => {
+    const q = questions.find(qu => qu.id === att.question_id);
+    return { ...att, kls_questions: q };
+  });
+
+  // Question Navigator Grid
+  let gridHTML = '<div class="card"><h4>Question Navigator</h4><div class="qgrid">';
+  mergedData.forEach((a, idx) => {
+    let btnClass = 'qbtn';
+    if (a.selected_answer === 'SKIPPED') btnClass += ' skipped';
+    else if (a.is_correct) btnClass += ' correct';
+    else btnClass += ' wrong';
+    gridHTML += `<button class="${btnClass}" onclick="scrollToSolution(${idx})">${idx + 1}</button>`;
+  });
+  gridHTML += '</div></div>';
+
+  let solutionsHTML = `
+  <span class="badge kapila">KAPiLa</span>
+  <h3>Answer Key & Solutions</h3>
+  <button class="gray" style="margin-bottom:15px" onclick="loadResult(${existingResult.score}, ${existingResult.correct_answers}, ${existingResult.wrong_answers}, ${existingResult.skipped_questions}, ${existingResult.e_option_used}, ${existingResult.total_time_seconds})">← પાછા જાઓ</button>
+  ${gridHTML}`;
+
+  mergedData.forEach((a, idx) => {
+    const q = a.kls_questions;
+    const userAns = a.selected_answer;
+    const correctAns = q.correct_answer;
+    const isCorrect = a.is_correct;
+
+    solutionsHTML += `
+    <div class="card" id="sol${idx}" style="border-left: 5px solid ${isCorrect ? '#22c55e' : (userAns === 'SKIPPED' ? '#cbd5e1' : '#ef4444')}">
+      <p><b>Q${idx + 1}:</b> ${q.question}</p>
+      <p><b>Your Answer:</b> ${userAns === 'SKIPPED' ? 'છોડી દીધો' : (userAns === 'A' ? q.option_a : userAns === 'B' ? q.option_b : userAns === 'C' ? q.option_c : userAns === 'D' ? q.option_d : q.option_e)}</p>
+      <p style="color: #22c55e"><b>Correct Answer:</b> ${correctAns === 'A' ? q.option_a : correctAns === 'B' ? q.option_b : correctAns === 'C' ? q.option_c : correctAns === 'D' ? q.option_d : q.option_e}</p>
+      ${q.solution ? `<div style="background:#f8fafc; padding:10px; margin-top:10px; font-size:14px;"><b>Solution:</b> ${q.solution}</div>` : ""}
+    </div>`;
+  });
+
+  solutionsHTML += `<button class="primary" onclick="loadResult(${existingResult.score}, ${existingResult.correct_answers}, ${existingResult.wrong_answers}, ${existingResult.skipped_questions}, ${existingResult.e_option_used}, ${existingResult.total_time_seconds})">← પાછા જાઓ</button>`;
+  app.innerHTML = solutionsHTML;
+  window.scrollTo(0, 0);
+}
+
+function scrollToSolution(idx) {
+  const el = document.getElementById('sol' + idx);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 async function loadLeaderboard() {
   app.innerHTML = '<div class="card loader"><div style="font-size:40px;animation:spin 2s linear infinite">⏳</div><h3>લોડ થઈ રહ્યું છે...</h3><p>Leaderboard લોડ થઈ રહ્યો છે</p></div>';
   
@@ -720,13 +583,13 @@ async function loadLeaderboard() {
     if (allError) {
       console.error('Leaderboard error:', allError);
       showModal('❌', 'લોડ નિષ્ફળ', 'Failed to load leaderboard: ' + allError.message, 
-        '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
+        '<button class="modal-btn-confirm" onclick="hideModal()">સમજાયું</button>');
       return;
     }
 
     if (!allResults || allResults.length === 0) {
       showModal('⚠️', 'કોઈ Results નથી', 'આ ટેસ્ટ માટે હજુ કોઈ results નથી', 
-        '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
+        '<button class="modal-btn-confirm" onclick="hideModal()">સમજાયું</button>');
       return;
     }
 
@@ -734,7 +597,7 @@ async function loadLeaderboard() {
     const myIndex = allResults.findIndex(r => r.user_id === user.id);
     if (myIndex === -1) {
       showModal('⚠️', 'રિઝલ્ટ નથી મળ્યું', 'Your result not found in leaderboard', 
-        '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
+        '<button class="modal-btn-confirm" onclick="hideModal()">સમજાયું</button>');
       return;
     }
 
@@ -763,7 +626,7 @@ async function loadLeaderboard() {
     let html = `
     <div class="card">
       <span class="badge kapila">KAPiLa</span>
-      <button class="gray" onclick="loadExistingResult()">⬅ Back to Result</button>
+      <button class="gray" onclick="loadResult(${existingResult.score}, ${existingResult.correct_answers}, ${existingResult.wrong_answers}, ${existingResult.skipped_questions}, ${existingResult.e_option_used}, ${existingResult.total_time_seconds})">⬅ Back to Result</button>
       <br><br>
 
       <div class="card rank" style="border:2px solid #22c55e;background:#f0fdf4;padding:15px">
@@ -792,12 +655,12 @@ async function loadLeaderboard() {
       </div>`;
     });
 
-    html += '<button class="gray" onclick="loadExistingResult()">⬅ Back to Result</button>';
+    html += '<button class="gray" onclick="loadResult(' + existingResult.score + ', ' + existingResult.correct_answers + ', ' + existingResult.wrong_answers + ', ' + existingResult.skipped_questions + ', ' + existingResult.e_option_used + ', ' + existingResult.total_time_seconds + ')">⬅ Back to Result</button>';
     app.innerHTML = html;
   } catch (err) {
     console.error('Leaderboard error:', err);
     showModal('❌', 'લોડ નિષ્ફળ', 'Failed to load leaderboard. Please try again.', 
-      '<button class="modal-btn-confirm" onclick="hideModal();loadExistingResult()">← પાછા જાઓ</button>');
+      '<button class="modal-btn-confirm" onclick="hideModal()">સમજાયું</button>');
   }
 }
 
