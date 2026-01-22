@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ - KAPiLa Learning</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:sans-serif;
+  background:#f3f4f6;
+  min-height:100vh;
+  padding-bottom:100px;
+}
+
+.header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:95px;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  display:flex;
+  align-items:flex-end;
+  padding:0 12px 16px 12px;
+  z-index:100;
+  box-shadow:0 2px 10px rgba(139,92,246,0.3);
+}
+.header-content{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.back-btn{
+  width:36px;
+  height:36px;
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:24px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.header-title{
+  flex:1;
+  text-align:center;
+  color:#fff;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.container{
+  max-width:600px;
+  margin:110px auto 0 auto;
+  padding:0 16px;
+}
+
+.faq-section{
+  margin-bottom:32px;
+}
+.section-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+  padding:0 4px;
+}
+.section-icon{
+  font-size:28px;
+}
+.section-title{
+  font-size:20px;
+  font-weight:bold;
+  color:#1f2937;
+}
+
+.faq-item{
+  background:#fff;
+  border-radius:16px;
+  margin-bottom:12px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.faq-question{
+  padding:18px 20px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  transition:background 0.2s;
+}
+.faq-question:active{
+  background:#f9fafb;
+}
+.question-text{
+  flex:1;
+  font-size:16px;
+  font-weight:600;
+  color:#1f2937;
+  line-height:1.4;
+}
+.question-arrow{
+  font-size:20px;
+  color:#6b7280;
+  transition:transform 0.3s;
+  flex-shrink:0;
+}
+.faq-item.active .question-arrow{
+  transform:rotate(180deg);
+}
+.faq-answer{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.3s ease-out, padding 0.3s ease-out;
+  padding:0 20px;
+}
+.faq-item.active .faq-answer{
+  max-height:500px;
+  padding:0 20px 20px 20px;
+}
+.answer-text{
+  font-size:15px;
+  color:#4b5563;
+  line-height:1.7;
+  white-space:pre-line;
+}
+.answer-list{
+  list-style:none;
+  padding-left:0;
+  margin-top:12px;
+}
+.answer-list li{
+  padding:6px 0;
+  color:#4b5563;
+  font-size:15px;
+  line-height:1.6;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-content">
+    <button class="back-btn" onclick="window.location.href='account.html'">←</button>
+    <h1 class="header-title">FAQ</h1>
+    <div style="width:36px"></div>
+  </div>
+</header>
+
+<div class="container">
+  
+  <!-- Credits વિશે -->
+  <div class="faq-section">
+    <div class="section-header">
+      <span class="section-icon">🪙</span>
+      <h2 class="section-title">Credits વિશે</h2>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span class="question-text">Credits શું છે અને તેનો ઉપયોગ કેવી રીતે થાય છે?</span>
+        <span class="question-arrow">▲</span>
+      </div>
+      <div class="faq-answer">
+        <p class="answer-text">Credits એ વર્ચ્યુઅલ કરન્સી છે જેનો ઉપયોગ તમે પ્રિમિયમ મોક ટેસ્ટ આપવા માટે કરી શકો છો. જ્યારે તમે નિયમિત ટેસ્ટ આપો છો ત્યારે તમને આ credits મળે છે.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span class="question-text">હું credits કેવી રીતે મેળવી શકુ?</span>
+        <span class="question-arrow">▲</span>
+      </div>
+      <div class="faq-answer">
+        <p class="answer-text">તમે જ્યારે વિષય પ્રમાણે અથવા પુછાયેલા પ્રશ્નો નો ટેસ્ટ આપો છો ત્યારે આ credits તમને ફ્રી માં પ્રાપ્ત થાય છે. એક ટેસ્ટ માં તમને 1 થી લઈને 5 સુધી credits પ્રાપ્ત થાય છે. તમે જેટલા વધુ ટેસ્ટ આપશો, તેટલા વધુ credits મળશે.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tests વિશે -->
+  <div class="faq-section">
+    <div class="section-header">
+      <span class="section-icon">📝</span>
+      <h2 class="section-title">Tests વિશે</h2>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span class="question-text">કેટલા પ્રકારની ટેસ્ટ ઉપલબ્ધ છે?</span>
+        <span class="question-arrow">▲</span>
+      </div>
+      <div class="faq-answer">
+        <p class="answer-text">અમારી પાસે બે પ્રકારની ટેસ્ટ છે:</p>
+        <ul class="answer-list">
+          <li>1. નિયમિત ટેસ્ટ: વિષય પ્રમાણે અને પ્રશ્ન પ્રમાણે (ફ્રી)</li>
+          <li>2. પ્રિમિયમ મોક ટેસ્ટ: સંપૂર્ણ પરીક્ષા જેવી ટેસ્ટ (credits જરૂરી)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span class="question-text">મારી Rank કેવી રીતે નક્કી થાય છે?</span>
+        <span class="question-arrow">▲</span>
+      </div>
+      <div class="faq-answer">
+        <p class="answer-text">તમારી rank તમારા એકંદર performance અને બધા students સાથે comparison પર આધારિત છે. જેટલા વધુ ટેસ્ટ આપશો અને સારા marks મેળવશો, તેટલી તમારી rank સુધરશે.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account વિશે -->
+  <div class="faq-section">
+    <div class="section-header">
+      <span class="section-icon">👤</span>
+      <h2 class="section-title">Account વિશે</h2>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span class="question-text">હું મારી profile information કેવી રીતે બદલી શકુ?</span>
+        <span class="question-arrow">▲</span>
+      </div>
+      <div class="faq-answer">
+        <p class="answer-text">Account page પર જાઓ અને 'Edit Profile' પર click કરો. ત્યાં તમે તમારું નામ, જિલ્લો અને જન્મ તારીખ બદલી શકો છો. Mobile number અને Email બદલી શકાય નહીં.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span class="question-text">જો હું password ભૂલી ગયો તો શું કરવું?</span>
+        <span class="question-arrow">▲</span>
+      </div>
+      <div class="faq-answer">
+        <p class="answer-text">જ્યારે તમે Appમા લોગિન કરવાનો પ્રયાસ કરો છો ત્યારે લોગિન બટનની નીચે ફૉરગૉટ પાસવર્ડ પર જાઓ ત્યા નવી લિંક ખુલશે તે લિંકમા તમારો ઈમેઇલ નાખી સેન્ડ બટન દબાવો. હવે તમારા ઈમેઇલમા જાઓ ત્યા તમને અમારા તરફથી એક લિંક મોકલવામાં આવી હશે એ લિંક પર જઈ તમે પાસવર્ડ બદલી શકો છો.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Support -->
+  <div class="faq-section">
+    <div class="section-header">
+      <span class="section-icon">🛠️</span>
+      <h2 class="section-title">Technical Support</h2>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFAQ(this)">
+        <span class="question-text">જો મને કોઈ technical સમસ્યા આવે તો શું કરવું?</span>
+        <span class="question-arrow">▲</span>
+      </div>
+      <div class="faq-answer">
+        <p class="answer-text">Home page પર નીચે 'Contact' button પર click કરો અને અમને તમારી સમસ્યા જણાવો. અમારી team 24 કલાકમાં જવાબ આપશે.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+function toggleFAQ(element) {
+  const faqItem = element.parentElement;
+  const wasActive = faqItem.classList.contains('active');
+  
+  // Close all other FAQ items
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // Toggle current item
+  if (!wasActive) {
+    faqItem.classList.add('active');
+  }
+}
+
+// Check authentication
+async function checkAuth() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    window.location.href = 'login.html';
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
