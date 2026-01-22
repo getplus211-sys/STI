@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us - KAPiLa Learning</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:sans-serif;
+  background:#f3f4f6;
+  min-height:100vh;
+  padding-bottom:100px;
+}
+
+.header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:95px;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  display:flex;
+  align-items:flex-end;
+  padding:0 12px 16px 12px;
+  z-index:100;
+  box-shadow:0 2px 10px rgba(139,92,246,0.3);
+}
+.header-content{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.back-btn{
+  width:36px;
+  height:36px;
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:24px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.header-title{
+  flex:1;
+  text-align:center;
+  color:#fff;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.container{
+  max-width:600px;
+  margin:110px auto 0 auto;
+  padding:0 16px;
+}
+
+.intro-card{
+  background:linear-gradient(135deg,#ede9fe,#ddd6fe);
+  border-radius:24px;
+  padding:40px 24px;
+  text-align:center;
+  margin-bottom:32px;
+}
+.intro-icon{
+  width:80px;
+  height:80px;
+  background:#fff;
+  border-radius:50%;
+  margin:0 auto 20px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+}
+.intro-title{
+  font-size:24px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:12px;
+}
+.intro-text{
+  font-size:15px;
+  color:#6b7280;
+  line-height:1.6;
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:16px;
+  padding:0 4px;
+}
+
+.contact-item{
+  background:#fff;
+  border-radius:20px;
+  padding:20px 24px;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  cursor:pointer;
+  transition:all 0.2s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  text-decoration:none;
+}
+.contact-item:active{
+  transform:scale(0.98);
+  background:#f9fafb;
+}
+
+.contact-icon{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  flex-shrink:0;
+}
+.icon-phone{
+  background:#e0e7ff;
+}
+.icon-whatsapp{
+  background:#dcfce7;
+}
+.icon-email{
+  background:#dbeafe;
+}
+
+.contact-info{
+  flex:1;
+}
+.contact-label{
+  font-size:18px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:4px;
+}
+.contact-value{
+  font-size:16px;
+  color:#8b5cf6;
+  font-weight:600;
+  margin-bottom:2px;
+}
+.contact-hint{
+  font-size:13px;
+  color:#9ca3af;
+}
+
+.contact-arrow{
+  font-size:24px;
+  color:#d1d5db;
+  flex-shrink:0;
+}
+
+.office-card{
+  background:linear-gradient(135deg,#fef3c7,#fde68a);
+  border-radius:20px;
+  padding:24px;
+  margin-top:24px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.office-icon{
+  font-size:48px;
+}
+.office-info{
+  flex:1;
+}
+.office-title{
+  font-size:18px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:8px;
+}
+.office-hours{
+  font-size:14px;
+  color:#6b7280;
+  line-height:1.5;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-content">
+    <button class="back-btn" onclick="window.history.back()">←</button>
+    <h1 class="header-title">Contact Us</h1>
+    <div style="width:36px"></div>
+  </div>
+</header>
+
+<div class="container">
+  
+  <div class="intro-card">
+    <div class="intro-icon">💬</div>
+    <h2 class="intro-title">અમારી સાથે સંપર્ક કરો</h2>
+    <p class="intro-text">કોઈપણ પ્રશ્ન અથવા સહાયતા માટે અમને સંપર્ક કરો.<br>અમે 24 કલાકમાં જવાબ આપીશું.</p>
+  </div>
+
+  <h3 class="section-title">સંપર્ક માધ્યમ</h3>
+
+  <a href="tel:+916353511804" class="contact-item">
+    <div class="contact-icon icon-phone">📞</div>
+    <div class="contact-info">
+      <div class="contact-label">Phone Call</div>
+      <div class="contact-value">+91 6353511804</div>
+      <div class="contact-hint">Tap to call</div>
+    </div>
+    <div class="contact-arrow">→</div>
+  </a>
+
+  <a href="https://wa.me/916353511804" target="_blank" class="contact-item">
+    <div class="contact-icon icon-whatsapp">💬</div>
+    <div class="contact-info">
+      <div class="contact-label">WhatsApp</div>
+      <div class="contact-value">+91 6353511804</div>
+      <div class="contact-hint">Tap to chat</div>
+    </div>
+    <div class="contact-arrow">→</div>
+  </a>
+
+  <a href="mailto:devjoshi.jd24@gmail.com" class="contact-item">
+    <div class="contact-icon icon-email">📧</div>
+    <div class="contact-info">
+      <div class="contact-label">Email</div>
+      <div class="contact-value">devjoshi.jd24@gmail.com</div>
+      <div class="contact-hint">Tap to send email</div>
+    </div>
+    <div class="contact-arrow">→</div>
+  </a>
+
+  <div class="office-card">
+    <div class="office-icon">🏢</div>
+    <div class="office-info">
+      <div class="office-title">ઓફિસ સમય</div>
+      <div class="office-hours">સોમવાર થી શનિવાર: 10 AM - 6:00 PM<br>રવિવાર: બંધ</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Check authentication
+async function checkAuth() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) {
+    window.location.href = 'login.html';
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
