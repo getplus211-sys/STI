@@ -7,13 +7,87 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:60px}
+body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:85px}
+
+/* Loading Progress Bar */
+.loading-overlay{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:#f1f5f9;
+  z-index:10000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:opacity 0.3s;
+}
+.loading-overlay.hidden{
+  opacity:0;
+  pointer-events:none;
+}
+.loading-content{
+  text-align:center;
+  max-width:320px;
+  width:90%;
+}
+.loading-logo{
+  width:80px;
+  height:80px;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  margin:0 auto 24px auto;
+  animation:loadingPulse 2s ease-in-out infinite;
+}
+@keyframes loadingPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.05)}
+}
+.loading-title{
+  font-size:20px;
+  font-weight:bold;
+  color:#1f2937;
+  margin-bottom:8px;
+}
+.loading-message{
+  font-size:14px;
+  color:#6b7280;
+  margin-bottom:20px;
+  min-height:20px;
+}
+.progress-container{
+  width:100%;
+  height:6px;
+  background:#e5e7eb;
+  border-radius:10px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.progress-bar{
+  height:100%;
+  background:linear-gradient(90deg,#8b5cf6,#7c3aed);
+  border-radius:10px;
+  transition:width 0.3s ease;
+  width:0%;
+}
+.progress-text{
+  font-size:13px;
+  font-weight:600;
+  color:#8b5cf6;
+}
+
 .container{max-width:900px;margin:auto;padding:12px}
 .card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
-.sticky-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);box-shadow:0 2px 10px rgba(0,0,0,.15);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-.sticky-header-content{max-width:800px;color:#fff}
+.sticky-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#8b5cf6,#7c3aed);box-shadow:0 2px 10px rgba(139,92,246,0.3);min-height:75px;display:flex;align-items:flex-end;padding:0 12px 12px 12px}
+.sticky-header-content{max-width:600px;color:#fff;flex:1;margin:0 auto;width:100%}
 .page-title{margin:0;font-size:16px;font-weight:700;color:#fff}
-.test-title{margin:0;font-size:13px;color:rgba(255,255,255,0.9);font-weight:500}
+.test-title{margin:0;font-size:13px;color:rgba(255,255,255,0.9);font-weight:500;margin-top:4px}
 .home-btn{background:rgba(255,255,255,0.2);color:#fff;border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .home-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px)}
 .student-card{background:#fff;border:1px solid #e5e7eb;position:relative}
@@ -80,7 +154,7 @@ button{border:none;border-radius:14px;padding:14px;font-size:16px;width:100%;cur
 .student-header{flex-direction:column;text-align:center}
 .analysis-table{font-size:12px}
 .analysis-table th,.analysis-table td{padding:8px 5px}
-body{padding-top:70px}
+body{padding-top:85px}
 .page-title{font-size:14px}
 .test-title{font-size:12px}
 .home-btn{padding:6px 12px;font-size:12px}
@@ -92,6 +166,20 @@ body{padding-top:70px}
 </style>
 </head>
 <body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-content">
+    <div class="loading-logo">🎓</div>
+    <div class="loading-title">KAPiLa Learning</div>
+    <div class="loading-message" id="loadingMessage">Initializing...</div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">0%</div>
+  </div>
+</div>
+
 <div class="container" id="app">
   <div class="card loader">
     <h3>લોડ થઈ રહ્યું છે...</h3>
@@ -113,6 +201,38 @@ const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Loading Progress Management
+let currentProgress = 0;
+const loadingMessages = [
+  'તમારી માહિતી લોડ કરી રહ્યા છીએ...',
+  'Performance data તૈયાર કરી રહ્યા છીએ...',
+  'તમારા results analyze કરી રહ્યા છીએ...',
+  'Charts અને graphs બનાવી રહ્યા છીએ...',
+  'લગભગ તૈયાર છે...'
+];
+
+function updateProgress(percent, message) {
+  currentProgress = percent;
+  if (document.getElementById('progressBar')) {
+    document.getElementById('progressBar').style.width = percent + '%';
+    document.getElementById('progressText').innerText = Math.round(percent) + '%';
+  }
+  if (message && document.getElementById('loadingMessage')) {
+    document.getElementById('loadingMessage').innerText = message;
+  }
+}
+
+function hideLoading() {
+  updateProgress(100, 'તૈયાર છે! ✓');
+  setTimeout(() => {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      setTimeout(() => overlay.remove(), 300);
+    }
+  }, 500);
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 const ATTEMPT_ID = urlParams.get('attempt_id');
 
@@ -122,6 +242,7 @@ let userName = '', userRank = 0, quizName = '';
 
 if (!ATTEMPT_ID) {
   app.innerHTML = '<div class="card"><h3>⚠️ Invalid URL</h3><p>Attempt ID not found</p></div>';
+  hideLoading();
 } else {
   init();
 }
@@ -139,12 +260,17 @@ function hideModal() {
 
 async function init() {
   try {
+    updateProgress(10, loadingMessages[0]);
+    
     const { data: { user: u } } = await sb.auth.getUser();
     if (!u) {
       app.innerHTML = '<div class="card"><h3>🔒 Login Required</h3><p>કૃપા કરીને પહેલા લોગિન કરો</p></div>';
+      hideLoading();
       return;
     }
     user = u;
+
+    updateProgress(30, loadingMessages[1]);
 
     // Load user profile for name
     const { data: profile } = await sb
@@ -155,6 +281,8 @@ async function init() {
     
     userName = profile?.full_name || "Student";
 
+    updateProgress(50, loadingMessages[2]);
+
     // Load quiz attempt
     const { data: attempt, error: attemptError } = await sb
       .from("kls_quiz_attempts")
@@ -164,9 +292,12 @@ async function init() {
     
     if (attemptError || !attempt) {
       app.innerHTML = '<div class="card"><h3>❌ Attempt Not Found</h3><p>' + (attemptError?.message || 'No data') + '</p></div>';
+      hideLoading();
       return;
     }
     quizAttempt = attempt;
+    
+    updateProgress(70, loadingMessages[3]);
     
     // Load quiz name separately
     const { data: quiz } = await sb
@@ -227,13 +358,17 @@ async function init() {
 
     if (questionAttempts.length === 0) {
       app.innerHTML = '<div class="card"><h3>⚠️ No Data</h3><p>પ્રશ્નોનો ડેટા મળ્યો નથી</p></div>';
+      hideLoading();
       return;
     }
 
+    updateProgress(90, loadingMessages[4]);
     displayPerformance();
+    hideLoading();
   } catch (err) {
     console.error('Init error:', err);
     app.innerHTML = '<div class="card"><h3>❌ Error</h3><p>' + err.message + '</p></div>';
+    hideLoading();
   }
 }
 
