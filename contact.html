@@ -209,7 +209,7 @@ body{
 
   <h3 class="section-title">સંપર્ક માધ્યમ</h3>
 
-  <a href="tel:+916353511804" class="contact-item">
+  <div class="contact-item" onclick="handlePhoneCall()">
     <div class="contact-icon icon-phone">📞</div>
     <div class="contact-info">
       <div class="contact-label">Phone Call</div>
@@ -217,9 +217,9 @@ body{
       <div class="contact-hint">Tap to call</div>
     </div>
     <div class="contact-arrow">→</div>
-  </a>
+  </div>
 
-  <a href="https://wa.me/916353511804" target="_blank" class="contact-item">
+  <a href="https://wa.me/916353511804?text=Hello%20KAPiLa%20Learning" target="_blank" class="contact-item">
     <div class="contact-icon icon-whatsapp">💬</div>
     <div class="contact-info">
       <div class="contact-label">WhatsApp</div>
@@ -229,7 +229,7 @@ body{
     <div class="contact-arrow">→</div>
   </a>
 
-  <a href="mailto:devjoshi.jd24@gmail.com" class="contact-item">
+  <div class="contact-item" onclick="handleEmail()">
     <div class="contact-icon icon-email">📧</div>
     <div class="contact-info">
       <div class="contact-label">Email</div>
@@ -237,7 +237,7 @@ body{
       <div class="contact-hint">Tap to send email</div>
     </div>
     <div class="contact-arrow">→</div>
-  </a>
+  </div>
 
   <div class="office-card">
     <div class="office-icon">🏢</div>
@@ -253,6 +253,52 @@ body{
 const SUPABASE_URL = "https://bhmycvrbucmbbrpzeane.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+function handlePhoneCall() {
+  const phoneNumber = '+91 6353511804';
+  
+  // Try to open tel: link
+  const telLink = 'tel:+916353511804';
+  const a = document.createElement('a');
+  a.href = telLink;
+  a.click();
+  
+  // Also copy to clipboard as fallback
+  setTimeout(() => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(phoneNumber).then(() => {
+        alert('Phone number copied: ' + phoneNumber);
+      }).catch(() => {
+        alert('Phone: ' + phoneNumber);
+      });
+    } else {
+      alert('Phone: ' + phoneNumber);
+    }
+  }, 100);
+}
+
+function handleEmail() {
+  const email = 'devjoshi.jd24@gmail.com';
+  
+  // Try to open mailto: link
+  const mailLink = 'mailto:' + email;
+  const a = document.createElement('a');
+  a.href = mailLink;
+  a.click();
+  
+  // Also copy to clipboard as fallback
+  setTimeout(() => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(email).then(() => {
+        alert('Email copied: ' + email);
+      }).catch(() => {
+        alert('Email: ' + email);
+      });
+    } else {
+      alert('Email: ' + email);
+    }
+  }, 100);
+}
 
 // Check authentication
 async function checkAuth() {
