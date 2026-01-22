@@ -547,8 +547,27 @@ async function submitTest() {
   submitted = true;
   clearInterval(timer);
 
-  // Show loading with progress
-  document.getElementById('loadingOverlay').classList.remove('hidden');
+  // Show loading with progress - recreate if needed
+  let overlay = document.getElementById('loadingOverlay');
+  if (!overlay) {
+    // Recreate overlay if it was removed
+    overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+      <div class="loading-content">
+        <div class="loading-logo">🎓</div>
+        <div class="loading-title">KAPiLa Learning</div>
+        <div class="loading-message" id="loadingMessage">Initializing...</div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">0%</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+  overlay.classList.remove('hidden');
   updateProgress(20, 'તમારા જવાબો સેવ કરી રહ્યા છીએ...');
 
   let correct = 0, wrong = 0, skip = 0, e = 0;
