@@ -35,13 +35,6 @@ body{font-family:sans-serif;background:linear-gradient(135deg,#fef3c7,#fde68a);m
 .quiz-badge.hard{background:#ef4444}
 .quiz-info{display:flex;gap:16px;margin-top:8px}
 .quiz-info-item{display:flex;align-items:center;gap:6px;font-size:13px;color:#92400e}
-.quiz-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #fde68a}
-.action-btn{background:none;border:none;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;transition:all 0.2s;color:#92400e;font-weight:600}
-.action-btn:hover{background:#fef3c7}
-.action-btn.liked{color:#f59e0b}
-.action-btn.liked:hover{background:#fef3c7}
-.like-icon{font-size:16px;transition:transform 0.2s}
-.action-btn.liked .like-icon{transform:scale(1.2)}
 .loading{text-align:center;padding:60px 20px;color:#92400e}
 .spinner{font-size:48px;margin:0 auto 16px;animation:spin 2s linear infinite;display:inline-block}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
@@ -141,34 +134,8 @@ async function selectChapter(chapterCode, chapterName) {
 }
 async function loadQuizzes(chapterCode) {
   try {
-    // Load quizzes
     const { data, error } = await sb.from('kls_quizzes').select('*').eq('chapter_code', chapterCode).eq('is_active', true).order('difficulty_level');
     if (error) throw error;
-    
-    // Get likes count for each quiz
-    const quizIds = data.map(q => q.quiz_id);
-    const { data: likesData } = await sb.from('quiz_likes').select('quiz_id');
-    
-    // Count likes per quiz
-    const likesCounts = {};
-    if (likesData) {
-      likesData.forEach(like => {
-        likesCounts[like.quiz_id] = (likesCounts[like.quiz_id] || 0) + 1;
-      });
-    }
-    
-    // Add likes_count to each quiz
-    data.forEach(quiz => {
-      quiz.likes_count = likesCounts[quiz.quiz_id] || 0;
-    });
-    
-    // Load user's likes if logged in
-    let userLikes = [];
-    if (currentUser) {
-      const { data: likes } = await sb.from('quiz_likes').select('quiz_id').eq('user_id', currentUser.id);
-      userLikes = likes ? likes.map(l => l.quiz_id) : [];
-    }
-    
     const quizList = document.getElementById('quizList');
     if (!data || data.length === 0) {
       quizList.innerHTML = `<div class="loading"><h3 style="color:#78350f">આ પ્રકરણમાં કોઈ quiz નથી</h3><p style="font-size:14px;margin-top:8px">Quiz જલ્દી LIVE થશે</p></div>`;
@@ -176,31 +143,7 @@ async function loadQuizzes(chapterCode) {
     }
     quizList.innerHTML = data.map(quiz => {
       const difficultyClass = quiz.difficulty_level === 'સરળ' ? '' : quiz.difficulty_level === 'મધ્યમ' ? 'medium' : 'hard';
-      const isLiked = userLikes.includes(quiz.quiz_id);
-      const likesCount = quiz.likes_count || 0;
-      
-      return `<div class="quiz-item">
-        <div onclick="startQuiz('${quiz.quiz_id}')">
-          <div class="quiz-header">
-            <div class="quiz-name">${quiz.quiz_name}</div>
-            <div class="quiz-badge ${difficultyClass}">${quiz.difficulty_level}</div>
-          </div>
-          <div class="quiz-info">
-            <div class="quiz-info-item"><span>📝</span><span>${quiz.total_questions} પ્રશ્નો</span></div>
-            <div class="quiz-info-item"><span>⏱️</span><span>${quiz.time_limit} મિનિટ</span></div>
-          </div>
-        </div>
-        <div class="quiz-actions">
-          <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(event, '${quiz.quiz_id}', this)">
-            <span class="like-icon">${isLiked ? '❤️' : '🤍'}</span>
-            <span class="like-count">${likesCount}</span>
-          </button>
-          <button class="action-btn" onclick="shareQuiz(event, '${quiz.quiz_id}', '${quiz.quiz_name}')">
-            <span>📤</span>
-            <span>Share</span>
-          </button>
-        </div>
-      </div>`;
+      return `<div class="quiz-item" onclick="startQuiz('${quiz.quiz_id}')"><div class="quiz-header"><div class="quiz-name">${quiz.quiz_name}</div><div class="quiz-badge ${difficultyClass}">${quiz.difficulty_level}</div></div><div class="quiz-info"><div class="quiz-info-item"><span>📝</span><span>${quiz.total_questions} પ્રશ્નો</span></div><div class="quiz-info-item"><span>⏱️</span><span>${quiz.time_limit} મિનિટ</span></div></div></div>`;
     }).join('');
   } catch (err) {
     console.error('Quizzes error:', err);
@@ -209,66 +152,6 @@ async function loadQuizzes(chapterCode) {
 }
 function startQuiz(quizId) {
   window.location.href = 'kls-quiz-engine.html?quiz_id=' + quizId;
-}
-
-async function toggleLike(event, quizId, button) {
-  event.stopPropagation();
-  
-  if (!currentUser) {
-    alert('Like કરવા માટે કૃપા કરીને login કરો');
-    return;
-  }
-  
-  try {
-    const isLiked = button.classList.contains('liked');
-    
-    if (isLiked) {
-      // Unlike
-      const { error } = await sb.from('quiz_likes').delete().eq('quiz_id', quizId).eq('user_id', currentUser.id);
-      if (error) throw error;
-      
-      button.classList.remove('liked');
-      button.querySelector('.like-icon').innerText = '🤍';
-      const countSpan = button.querySelector('.like-count');
-      countSpan.innerText = parseInt(countSpan.innerText) - 1;
-    } else {
-      // Like
-      const { error } = await sb.from('quiz_likes').insert({ quiz_id: quizId, user_id: currentUser.id });
-      if (error) throw error;
-      
-      button.classList.add('liked');
-      button.querySelector('.like-icon').innerText = '❤️';
-      const countSpan = button.querySelector('.like-count');
-      countSpan.innerText = parseInt(countSpan.innerText) + 1;
-    }
-  } catch (err) {
-    console.error('Like error:', err);
-    alert('કંઈક ખોટું થયું. ફરી પ્રયાસ કરો.');
-  }
-}
-
-function shareQuiz(event, quizId, quizName) {
-  event.stopPropagation();
-  
-  const shareUrl = `${window.location.origin}/kls-quiz-engine.html?quiz_id=${quizId}`;
-  const shareText = `${quizName} - KAPiLa Learning પર આ quiz try કરો!`;
-  
-  if (navigator.share) {
-    // Mobile share
-    navigator.share({
-      title: quizName,
-      text: shareText,
-      url: shareUrl
-    }).catch(err => console.log('Share cancelled'));
-  } else {
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert('✅ Link copy થઈ ગઈ! હવે તમે આને share કરી શકો છો.');
-    }).catch(() => {
-      // Fallback
-      prompt('આ link copy કરો:', shareUrl);
-    });
-  }
 }
 </script>
 </body>
