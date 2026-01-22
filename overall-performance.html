@@ -12,7 +12,8 @@ body{margin:0;font-family:system-ui;background:#f1f5f9;padding-top:85px}
 .card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
 .sticky-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(135deg,#8b5cf6,#7c3aed);box-shadow:0 2px 10px rgba(139,92,246,0.3);min-height:75px;display:flex;align-items:flex-end;padding:0 12px 12px 12px}
 .sticky-header-content{max-width:600px;color:#fff;flex:1;margin:0 auto;width:100%}
-.page-title{margin:0;font-size:16px;font-weight:700;color:#fff}
+.page-title{margin:0;font-size:18px;font-weight:700;color:#fff}
+.test-title{margin:0;font-size:12px;color:rgba(255,255,255,0.85);font-weight:500;margin-top:2px}
 .home-btn{background:rgba(255,255,255,0.2);color:#fff;border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .home-btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px)}
 .student-card{background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);border:2px solid #bae6fd;position:relative;overflow:hidden}
@@ -529,7 +530,8 @@ function displayOverallPerformance() {
   app.innerHTML = `
   <div class="sticky-header">
     <div class="sticky-header-content">
-      <div class="page-title">Overall Performance</div>
+      <div class="page-title">${userName}</div>
+      <div class="test-title">તમારું Overall Performance</div>
     </div>
     <a href="index-kapila.html" class="home-btn">🏠 Home</a>
   </div>
