@@ -282,28 +282,6 @@ body{font-family:sans-serif;background:#f3f4f6;padding-top:105px;padding-bottom:
   </div>
 </div>
 
-<!-- Contact Modal -->
-<div class="modal" id="contactModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-logo">🎓</div>
-      <div class="modal-title-wrap">
-        <div class="modal-brand">KAPiLa Learning</div>
-        <div class="modal-subtitle">Digital Learning Platform</div>
-      </div>
-    </div>
-    <h3 style="font-size:18px;font-weight:bold;margin-bottom:16px;text-align:center">📞 Contact Us</h3>
-    <p style="text-align:center;color:#6b7280;font-size:13px;margin-bottom:20px">+91 6353511804</p>
-    <a href="https://wa.me/916353511804?text=Hello%20KAPiLa%20Institute" target="_blank" style="display:block;width:100%;background:#22c55e;color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:bold;text-decoration:none;margin-bottom:12px;font-size:14px">
-      WhatsApp
-    </a>
-    <a href="tel:+916353511804" style="display:block;width:100%;background:#2563eb;color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:bold;text-decoration:none;font-size:14px">
-      Call
-    </a>
-    <button style="width:100%;background:#f3f4f6;color:#1f2937;padding:12px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;margin-top:12px" onclick="closeContactModal()">બંધ કરો</button>
-  </div>
-</div>
-
 <!-- About Us Modal -->
 <div class="modal" id="aboutModal">
   <div class="modal-content">
@@ -413,7 +391,7 @@ function menuNavigate(page) {
   else if (page === 'about') showAboutPopup();
   else if (page === 'privacy') window.location.href = 'privacy-policy.html';
   else if (page === 'terms') window.location.href = 'terms-and-conditions.html';
-  else if (page === 'contact') showContactPopup();
+  else if (page === 'contact') window.location.href = 'contact.html';
 }
 
 function navigateFooter(page) {
@@ -422,7 +400,7 @@ function navigateFooter(page) {
   
   if (page === 'home') window.location.href = 'index-kapila.html';
   else if (page === 'performance') window.location.href = 'overall-performance.html';
-  else if (page === 'contact') showContactPopup();
+  else if (page === 'contact') window.location.href = 'contact.html';
   else if (page === 'notification') showNotificationPopup();
 }
 
@@ -438,14 +416,6 @@ function checkAuthAndNavigate(page) {
     alert('કૃપા કરીને પહેલા login કરો');
     window.location.href = 'login.html';
   }
-}
-
-function showContactPopup() {
-  document.getElementById('contactModal').classList.add('show');
-}
-
-function closeContactModal() {
-  document.getElementById('contactModal').classList.remove('show');
 }
 
 function showAboutPopup() {
