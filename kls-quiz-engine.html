@@ -547,13 +547,9 @@ async function submitTest() {
   submitted = true;
   clearInterval(timer);
 
-  // Show loading indicator
-  app.innerHTML = `
-  <div class="card loader" style="text-align:center">
-    <div style="font-size:60px;animation:spin 2s linear infinite">⏳</div>
-    <h3>સબમિટ થઈ રહ્યું છે...</h3>
-    <p>કૃપા કરીને રાહ જુઓ, તમારા જવાબો સેવ થઈ રહ્યા છે</p>
-  </div>`;
+  // Show loading with progress
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  updateProgress(20, 'તમારા જવાબો સેવ કરી રહ્યા છીએ...');
 
   let correct = 0, wrong = 0, skip = 0, e = 0;
 
@@ -577,6 +573,7 @@ async function submitTest() {
   });
   console.log('Total check:', correct + wrong + skip, '(should be', questions.length + ')');
 
+  updateProgress(50, 'Results તૈયાર કરી રહ્યા છીએ...');
   const score = correct;
   const timeTaken = Math.floor((Date.now() - startTime) / 1000);
   const percentage = ((correct / questions.length) * 100).toFixed(2);
@@ -607,6 +604,8 @@ async function submitTest() {
 
   quizAttemptId = result.id;
   existingResult = result;
+
+  updateProgress(70, 'Questions save કરી રહ્યા છીએ...');
 
   // Save question attempts
   for (let i = 0; i < questions.length; i++) {
@@ -640,7 +639,10 @@ async function submitTest() {
     });
   }
 
+  updateProgress(95, 'તૈયાર છે...');
+  
   // Directly show result page
+  hideLoading();
   loadResult(score, correct, wrong, skip, e, timeTaken);
 }
 
