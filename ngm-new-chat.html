@@ -3,31 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>New Chat</title>
+<title>Setup Profile</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}body{font-family:-apple-system,sans-serif;background:#f5f5f5}.c{max-width:480px;margin:0 auto;background:#fff;min-height:100vh}.h{position:sticky;top:0;height:90px;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:flex-end;padding:0 10px 10px;z-index:100}.hc{width:100%;display:flex;align-items:center;gap:10px}.bb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none}.bb svg{width:24px;height:24px;fill:#fff}.h h1{color:#fff;font-size:22px;font-weight:600}.sb{padding:15px 20px;background:#fff;border-bottom:1px solid #e0e0e0}.si{width:100%;padding:10px 15px;border:1px solid #e0e0e0;border-radius:20px;font-size:14px}.sh{padding:10px 20px;font-size:12px;color:#666;font-weight:600;text-transform:uppercase;background:#f9f9f9}.ul{background:#fff}.ui{padding:12px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;cursor:pointer}.ui:active{background:#f5f5f5}.ua{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:600;overflow:hidden}.ua img{width:100%;height:100%;object-fit:cover}.uif{flex:1}.un{font-size:16px;font-weight:600;color:#333}.um{font-size:13px;color:#666;margin-top:2px}.em{text-align:center;padding:40px 20px;color:#999}.ld{text-align:center;padding:40px;color:#999}
+:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}body{font-family:-apple-system,sans-serif;background:#f5f5f5}.c{max-width:480px;margin:0 auto;background:#fff;min-height:100vh}.h{position:sticky;top:0;height:90px;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:flex-end;padding:0 20px 15px;z-index:100}.h h1{color:#fff;font-size:22px;font-weight:600}.ps{padding:30px 20px 100px}.pps{text-align:center;margin-bottom:30px}.ppw{position:relative;width:120px;height:120px;margin:0 auto 15px}.pp{width:120px;height:120px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:48px;color:#666;overflow:hidden;border:4px solid var(--pc)}.pp img{width:100%;height:100%;object-fit:cover}.ci{position:absolute;bottom:0;right:0;width:36px;height:36px;background:var(--pc);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:3px solid #fff}.ci svg{width:18px;height:18px;fill:#fff}.fg{margin-bottom:20px}.fg label{display:block;font-size:14px;color:#666;margin-bottom:8px;font-weight:500}.fg input,.fg textarea{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px}.fg input:focus,.fg textarea:focus{outline:none;border-color:var(--pc)}.fg textarea{resize:vertical;min-height:80px;font-family:inherit}.cc{text-align:right;font-size:12px;color:#999;margin-top:5px}.sb{width:100%;padding:15px;background:linear-gradient(135deg,var(--pc),var(--sc));color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:20px}.sb:active{transform:scale(.98)}.sb:disabled{opacity:.6}.em{background:#ffebee;color:#c62828;padding:12px;border-radius:8px;margin-bottom:20px;font-size:14px;display:none}.ld{display:none;text-align:center;padding:20px}.sp{border:3px solid #f3f3f3;border-top:3px solid var(--pc);border-radius:50%;width:40px;height:40px;animation:sp 1s linear infinite;margin:0 auto}@keyframes sp{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}#fi{display:none}
 </style>
 </head>
 <body>
 <div class="c">
-<div class="h"><div class="hc"><button class="bb" onclick="gb()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button><h1>New Chat</h1></div></div>
-<div class="sb"><input type="text" class="si" id="si" placeholder="Search by name, mobile or username..." oninput="su()"></div>
-<div class="sh">All Users</div>
-<div class="ld" id="ld">Loading users...</div>
-<div class="ul" id="ul"></div>
-<div class="em" id="em" style="display:none">No users found</div>
+<div class="h"><h1>Setup Your Profile</h1></div>
+<div class="ps">
+<div class="em" id="em"></div>
+<div class="pps">
+<div class="ppw">
+<div class="pp" id="pp"><span id="pi">?</span></div>
+<div class="ci" onclick="document.getElementById('fi').click()"><svg viewBox="0 0 24 24"><path d="M12 15.2c1.77 0 3.2-1.43 3.2-3.2S13.77 8.8 12 8.8 8.8 10.23 8.8 12s1.43 3.2 3.2 3.2zm0-5.5c1.27 0 2.3 1.03 2.3 2.3s-1.03 2.3-2.3 2.3-2.3-1.03-2.3-2.3 1.03-2.3 2.3-2.3zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm11 15H4V6h4.05l1.83-2h4.24l1.83 2H20v11z"/></svg></div>
+</div>
+<input type="file" id="fi" accept="image/*">
+</div>
+<form id="pf">
+<div class="fg"><label>Full Name *</label><input type="text" id="fn" placeholder="Enter your full name" required></div>
+<div class="fg"><label>Mobile Number *</label><input type="tel" id="mb" placeholder="10 digit mobile" required pattern="[0-9]{10}"><div class="cc">Contact sync માટે જરૂરી</div></div>
+<div class="fg"><label>Username (Optional)</label><input type="text" id="un" placeholder="@username"></div>
+<div class="fg"><label>Bio</label><textarea id="bi" placeholder="About yourself..." maxlength="150"></textarea><div class="cc"><span id="bc">0</span>/150</div></div>
+<div class="fg"><label>Date of Birth</label><input type="date" id="db"></div>
+<button type="submit" class="sb" id="sb">Save Profile</button>
+</form>
+<div class="ld" id="ld"><div class="sp"></div><p style="margin-top:10px;color:#666">Saving...</p></div>
+</div>
 </div>
 <script>
-const U='https://bhmycvrbucmbbrpzeane.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4',sb=window.supabase.createClient(U,K);let cu=null,au=[];
+const U='https://bhmycvrbucmbbrpzeane.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4',sb=window.supabase.createClient(U,K);let si=null,cu=null;
 (()=>{const t={purple:{primary:'#667eea',secondary:'#764ba2'},blue:{primary:'#4facfe',secondary:'#00f2fe'},pink:{primary:'#f093fb',secondary:'#f5576c'},green:{primary:'#43e97b',secondary:'#38f9d7'},orange:{primary:'#fa709a',secondary:'#fee140'},red:{primary:'#ff6b6b',secondary:'#ee5a6f'},teal:{primary:'#2bcbba',secondary:'#45caff'},indigo:{primary:'#4776e6',secondary:'#8e54e9'}},th=localStorage.getItem('nandigram_theme')||'purple';if(t[th]){document.documentElement.style.setProperty('--pc',t[th].primary);document.documentElement.style.setProperty('--sc',t[th].secondary)}})();
-async function init(){await ca();if(!cu){window.location.href='login.html';return}await lu()}
+async function init(){await ca();if(!cu){window.location.href='login.html';return}await lp()}
 async function ca(){const{data:{user}}=await sb.auth.getUser();if(user)cu=user}
-async function lu(){try{document.getElementById('ld').style.display='block';document.getElementById('em').style.display='none';const{data:users}=await sb.from('ngm_users').select('*').eq('is_active',true).neq('user_id',cu.id);if(!users||users.length===0){document.getElementById('ld').style.display='none';document.getElementById('em').style.display='block';return}au=users;ru(au)}catch(e){console.error(e);document.getElementById('ld').style.display='none';document.getElementById('em').style.display='block'}}
-function ru(users){document.getElementById('ld').style.display='none';const cn=document.getElementById('ul');cn.innerHTML=users.map(u=>{const ini=u.full_name?u.full_name.charAt(0).toUpperCase():'?';const uname=u.username?`${u.username}`:u.mobile;return`<div class="ui" onclick="sc('${u.user_id}')"><div class="ua">${u.profile_picture_url?`<img src="${u.profile_picture_url}">`:`<span>${ini}</span>`}</div><div class="uif"><div class="un">${u.full_name||'Unknown'}</div><div class="um">${uname}</div></div></div>`}).join('')}
-function su(){const q=document.getElementById('si').value.toLowerCase();const f=au.filter(u=>(u.full_name||'').toLowerCase().includes(q)||(u.mobile||'').includes(q)||(u.username||'').toLowerCase().includes(q));ru(f)}
-async function sc(uid){try{const{data:ec}=await sb.from('ngm_chats').select('chat_id').or(`and(user1_id.eq.${cu.id},user2_id.eq.${uid}),and(user1_id.eq.${uid},user2_id.eq.${cu.id})`).eq('chat_type','direct').single();if(ec){window.location.href=`ngm-chat-window.html?chat=${ec.chat_id}`;return}const{data:nc}=await sb.from('ngm_chats').insert({user1_id:cu.id,user2_id:uid,chat_type:'direct',created_at:new Date().toISOString(),last_message_at:new Date().toISOString()}).select().single();if(nc){await sb.from('ngm_chat_participants').insert([{chat_id:nc.chat_id,user_id:cu.id},{chat_id:nc.chat_id,user_id:uid}]);window.location.href=`ngm-chat-window.html?chat=${nc.chat_id}`}}catch(e){console.error(e)}}
-function gb(){window.location.href='ngm-chats.html'}
+async function lp(){try{const{data:p}=await sb.from('ngm_users').select('*').eq('user_id',cu.id).single();if(p){document.getElementById('fn').value=p.full_name||'';document.getElementById('mb').value=p.mobile||'';document.getElementById('un').value=p.username||'';document.getElementById('bi').value=p.bio||'';document.getElementById('db').value=p.date_of_birth||'';if(p.profile_picture_url)dp(p.profile_picture_url);else if(p.full_name)ui(p.full_name);ub()}}catch(e){console.error(e)}}
+document.getElementById('fi').addEventListener('change',e=>{const f=e.target.files[0];if(f){if(f.size>5*1024*1024){se('Image must be <5MB');return}si=f;const r=new FileReader();r.onload=e=>dp(e.target.result);r.readAsDataURL(f)}});
+function dp(u){document.getElementById('pp').innerHTML=`<img src="${u}">`}
+document.getElementById('fn').addEventListener('input',e=>ui(e.target.value));
+function ui(n){if(n&&!document.querySelector('#pp img'))document.getElementById('pi').textContent=n.charAt(0).toUpperCase()}
+document.getElementById('bi').addEventListener('input',ub);
+function ub(){document.getElementById('bc').textContent=document.getElementById('bi').value.length}
+document.getElementById('un').addEventListener('input',e=>{let v=e.target.value;if(v&&!v.startsWith('@'))v='@'+v.replace('@','');e.target.value=v.toLowerCase().replace(/[^a-z0-9_@]/g,'')});
+document.getElementById('pf').addEventListener('submit',async e=>{e.preventDefault();const fn=document.getElementById('fn').value.trim(),mb=document.getElementById('mb').value.trim(),un=document.getElementById('un').value.trim(),bi=document.getElementById('bi').value.trim(),db=document.getElementById('db').value;if(!fn||!mb){se('Fill required fields');return}if(mb.length!==10){se('Mobile must be 10 digits');return}sl(true);try{let pu=null;if(si){const fn=`${cu.id}_${Date.now()}.jpg`,{error:ue}=await sb.storage.from('profile-pictures').upload(fn,si);if(!ue){const{data:ud}=sb.storage.from('profile-pictures').getPublicUrl(fn);pu=ud.publicUrl}}const pd={user_id:cu.id,full_name:fn,mobile:mb,username:un||null,bio:bi||null,date_of_birth:db||null,profile_picture_url:pu,is_active:true,updated_at:new Date().toISOString()},{error:er}=await sb.from('ngm_users').upsert(pd,{onConflict:'user_id'});if(er){if(er.message&&(er.message.includes('username')||er.message.includes('mobile')))se('Username/mobile taken');else se('Update failed')}else window.location.href='ngm-chats.html'}catch(e){console.error(e);se('Error occurred')}finally{sl(false)}});
+function sl(s){document.getElementById('ld').style.display=s?'block':'none';document.getElementById('pf').style.display=s?'none':'block';document.getElementById('sb').disabled=s}
+function se(m){const ed=document.getElementById('em');ed.textContent=m;ed.style.display='block';setTimeout(()=>ed.style.display='none',5000)}
 document.addEventListener('copy',e=>e.preventDefault());document.addEventListener('paste',e=>e.preventDefault());
 init();
 </script>
