@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nandigram - Setup Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -13,54 +18,44 @@
             -webkit-user-select: none;
             user-select: none;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
-            min-height: 100vh;
         }
-
         .container {
             max-width: 480px;
             margin: 0 auto;
             background: white;
             min-height: 100vh;
         }
-
         .header {
             position: sticky;
             top: 0;
             height: 90px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             align-items: flex-end;
             padding: 0 20px 15px;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
         .header h1 {
             color: white;
             font-size: 22px;
             font-weight: 600;
         }
-
         .profile-setup {
             padding: 30px 20px 100px;
         }
-
         .profile-pic-section {
             text-align: center;
             margin-bottom: 30px;
         }
-
         .profile-pic-wrapper {
             position: relative;
             width: 120px;
             height: 120px;
             margin: 0 auto 15px;
         }
-
         .profile-pic {
             width: 120px;
             height: 120px;
@@ -72,22 +67,20 @@
             font-size: 48px;
             color: #666;
             overflow: hidden;
-            border: 4px solid #667eea;
+            border: 4px solid var(--primary-color);
         }
-
         .profile-pic img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
         .camera-icon {
             position: absolute;
             bottom: 0;
             right: 0;
             width: 36px;
             height: 36px;
-            background: #667eea;
+            background: var(--primary-color);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -95,11 +88,14 @@
             cursor: pointer;
             border: 3px solid white;
         }
-
+        .camera-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
         .form-group {
             margin-bottom: 20px;
         }
-
         .form-group label {
             display: block;
             font-size: 14px;
@@ -107,7 +103,6 @@
             margin-bottom: 8px;
             font-weight: 500;
         }
-
         .form-group input,
         .form-group textarea {
             width: 100%;
@@ -116,30 +111,26 @@
             border-radius: 10px;
             font-size: 16px;
         }
-
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-color);
         }
-
         .form-group textarea {
             resize: vertical;
             min-height: 80px;
             font-family: inherit;
         }
-
         .char-count {
             text-align: right;
             font-size: 12px;
             color: #999;
             margin-top: 5px;
         }
-
         .save-btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -148,11 +139,39 @@
             cursor: pointer;
             margin-top: 20px;
         }
-
         .save-btn:active {
             transform: scale(0.98);
         }
-
+        .save-btn:disabled {
+            opacity: 0.6;
+        }
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         #fileInput {
             display: none;
         }
@@ -165,12 +184,16 @@
         </div>
 
         <div class="profile-setup">
+            <div class="error-message" id="errorMessage"></div>
+
             <div class="profile-pic-section">
                 <div class="profile-pic-wrapper">
                     <div class="profile-pic" id="profilePic">
                         <span id="profileInitial">?</span>
                     </div>
-                    <div class="camera-icon" onclick="document.getElementById('fileInput').click()">📷</div>
+                    <div class="camera-icon" onclick="document.getElementById('fileInput').click()">
+                        <svg viewBox="0 0 24 24"><path d="M12 15.2c1.77 0 3.2-1.43 3.2-3.2S13.77 8.8 12 8.8 8.8 10.23 8.8 12s1.43 3.2 3.2 3.2zm0-5.5c1.27 0 2.3 1.03 2.3 2.3s-1.03 2.3-2.3 2.3-2.3-1.03-2.3-2.3 1.03-2.3 2.3-2.3zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm11 15H4V6h4.05l1.83-2h4.24l1.83 2H20v11z"/></svg>
+                    </div>
                 </div>
                 <input type="file" id="fileInput" accept="image/*">
             </div>
@@ -184,6 +207,12 @@
                 <div class="form-group">
                     <label for="username">Username *</label>
                     <input type="text" id="username" placeholder="@username" required>
+                    <div class="char-count">Username must be unique</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobile">Mobile Number</label>
+                    <input type="tel" id="mobile" placeholder="Enter mobile number">
                 </div>
 
                 <div class="form-group">
@@ -197,88 +226,221 @@
                     <input type="date" id="dob">
                 </div>
 
-                <button type="submit" class="save-btn">Save Profile</button>
+                <button type="submit" class="save-btn" id="saveBtn">Save Profile</button>
             </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #666;">Saving your profile...</p>
+            </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let selectedImage = null;
+        let currentUser = null;
+
+        (function() {
+            const themes = {
+                purple: {primary: '#667eea', secondary: '#764ba2'},
+                blue: {primary: '#4facfe', secondary: '#00f2fe'},
+                pink: {primary: '#f093fb', secondary: '#f5576c'},
+                green: {primary: '#43e97b', secondary: '#38f9d7'},
+                orange: {primary: '#fa709a', secondary: '#fee140'},
+                red: {primary: '#ff6b6b', secondary: '#ee5a6f'},
+                teal: {primary: '#2bcbba', secondary: '#45caff'},
+                indigo: {primary: '#4776e6', secondary: '#8e54e9'}
+            };
+            const theme = localStorage.getItem('nandigram_theme') || 'purple';
+            if (themes[theme]) {
+                document.documentElement.style.setProperty('--primary-color', themes[theme].primary);
+                document.documentElement.style.setProperty('--secondary-color', themes[theme].secondary);
+            }
+        })();
+
+        async function init() {
+            await checkAuth();
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadExistingProfile();
+        }
+
+        async function checkAuth() {
+            const { data: { user } } = await sb.auth.getUser();
+            if (user) {
+                currentUser = user;
+            }
+        }
+
+        async function loadExistingProfile() {
+            try {
+                const { data: profile } = await sb
+                    .from('ngm_users')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                if (profile) {
+                    document.getElementById('fullName').value = profile.full_name || '';
+                    document.getElementById('username').value = profile.username || '';
+                    document.getElementById('mobile').value = profile.mobile || '';
+                    document.getElementById('bio').value = profile.bio || '';
+                    document.getElementById('dob').value = profile.date_of_birth || '';
+                    
+                    if (profile.profile_picture_url) {
+                        displayProfilePic(profile.profile_picture_url);
+                    } else if (profile.full_name) {
+                        updateInitial(profile.full_name);
+                    }
+                    updateBioCount();
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('Image size must be less than 5MB');
+                    return;
+                }
+                selectedImage = file;
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('profilePic').innerHTML = `<img src="${e.target.result}" alt="Profile">`;
-                    selectedImage = e.target.result;
+                    displayProfilePic(e.target.result);
                 };
                 reader.readAsDataURL(file);
             }
         });
 
+        function displayProfilePic(url) {
+            document.getElementById('profilePic').innerHTML = `<img src="${url}" alt="Profile">`;
+        }
+
         document.getElementById('fullName').addEventListener('input', function(e) {
-            if (e.target.value && !selectedImage) {
-                const initial = e.target.value.charAt(0).toUpperCase();
-                document.getElementById('profileInitial').textContent = initial;
-            }
+            updateInitial(e.target.value);
         });
 
-        document.getElementById('bio').addEventListener('input', function() {
-            document.getElementById('bioCount').textContent = this.value.length;
-        });
+        function updateInitial(name) {
+            if (name && !document.querySelector('#profilePic img')) {
+                const initial = name.charAt(0).toUpperCase();
+                document.getElementById('profileInitial').textContent = initial;
+            }
+        }
+
+        document.getElementById('bio').addEventListener('input', updateBioCount);
+
+        function updateBioCount() {
+            const bio = document.getElementById('bio').value;
+            document.getElementById('bioCount').textContent = bio.length;
+        }
 
         document.getElementById('username').addEventListener('input', function(e) {
             let value = e.target.value;
             if (!value.startsWith('@')) {
                 value = '@' + value.replace('@', '');
             }
-            e.target.value = value.toLowerCase();
+            value = value.toLowerCase().replace(/[^a-z0-9_@]/g, '');
+            e.target.value = value;
         });
 
         document.getElementById('profileForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const userId = localStorage.getItem('nandigram_user_id');
-            if (!userId) {
-                window.location.href = 'login.html';
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+            const bio = document.getElementById('bio').value.trim();
+            const dob = document.getElementById('dob').value;
+
+            if (!fullName || !username) {
+                showError('Please fill in all required fields');
                 return;
             }
 
-            const profileData = {
-                full_name: document.getElementById('fullName').value,
-                username: document.getElementById('username').value,
-                bio: document.getElementById('bio').value,
-                date_of_birth: document.getElementById('dob').value,
-                profile_picture_url: selectedImage,
-                updated_at: new Date().toISOString()
-            };
+            if (username.length < 4) {
+                showError('Username must be at least 4 characters');
+                return;
+            }
+
+            showLoading(true);
 
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/ngm_users?user_id=eq.${userId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(profileData)
-                });
+                let profilePicUrl = null;
+                if (selectedImage) {
+                    const fileName = `${currentUser.id}_${Date.now()}.jpg`;
+                    const { data: uploadData, error: uploadError } = await sb.storage
+                        .from('profile-pictures')
+                        .upload(fileName, selectedImage);
+                    
+                    if (!uploadError) {
+                        const { data: urlData } = sb.storage
+                            .from('profile-pictures')
+                            .getPublicUrl(fileName);
+                        profilePicUrl = urlData.publicUrl;
+                    }
+                }
 
-                if (response.ok) {
-                    alert('Profile saved successfully!');
+                const profileData = {
+                    user_id: currentUser.id,
+                    full_name: fullName,
+                    username: username,
+                    mobile: mobile || null,
+                    bio: bio || null,
+                    date_of_birth: dob || null,
+                    profile_picture_url: profilePicUrl,
+                    is_active: true,
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await sb
+                    .from('ngm_users')
+                    .upsert(profileData, { onConflict: 'user_id' });
+
+                if (error) {
+                    if (error.message && error.message.includes('username')) {
+                        showError('Username already taken. Please choose another.');
+                    } else {
+                        showError('Failed to update profile. Please try again.');
+                    }
+                } else {
                     window.location.href = 'ngm-chats.html';
                 }
             } catch (error) {
-                alert('Error saving profile');
+                console.error('Error:', error);
+                showError('An error occurred. Please try again.');
+            } finally {
+                showLoading(false);
             }
         });
 
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('profileForm').style.display = show ? 'none' : 'block';
+            document.getElementById('saveBtn').disabled = show;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
         document.addEventListener('copy', e => e.preventDefault());
         document.addEventListener('paste', e => e.preventDefault());
+
+        init();
     </script>
 </body>
 </html>
