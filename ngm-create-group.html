@@ -1,298 +1,37 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nandigram - Create Group</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-        }
-
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-        }
-
-        .header {
-            position: sticky;
-            top: 0;
-            height: 90px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: flex-end;
-            padding: 0 10px 10px;
-            z-index: 100;
-        }
-
-        .header-content {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .back-btn {
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 22px;
-            font-weight: 600;
-        }
-
-        .form-container {
-            padding: 30px 20px;
-        }
-
-        .group-pic-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .group-pic {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .group-pic img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-            font-family: inherit;
-        }
-
-        .settings-section {
-            margin-top: 30px;
-        }
-
-        .settings-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .setting-label {
-            font-size: 14px;
-            color: #333;
-        }
-
-        .toggle {
-            position: relative;
-            width: 50px;
-            height: 28px;
-            background: #ccc;
-            border-radius: 14px;
-            cursor: pointer;
-        }
-
-        .toggle.active {
-            background: #667eea;
-        }
-
-        .toggle-thumb {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: 0.3s;
-        }
-
-        .toggle.active .toggle-thumb {
-            left: 24px;
-        }
-
-        .create-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 30px;
-        }
-
-        #fileInput {
-            display: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Create Group</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}body{font-family:-apple-system,sans-serif;background:#f5f5f5}.c{max-width:480px;margin:0 auto;background:#fff;min-height:100vh}.h{position:sticky;top:0;height:90px;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:flex-end;padding:0 10px 10px;z-index:100}.hc{width:100%;display:flex;align-items:center;gap:10px}.bb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none}.bb svg{width:24px;height:24px;fill:#fff}.h h1{color:#fff;font-size:22px;font-weight:600}.gf{padding:20px}.gi{width:80px;height:80px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:32px;color:#666;margin:0 auto 20px;cursor:pointer}.gi svg{width:32px;height:32px;fill:#666}.fg{margin-bottom:20px}.fg label{display:block;font-size:14px;color:#666;margin-bottom:8px;font-weight:500}.fg input{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px}.fg input:focus{outline:none;border-color:var(--pc)}.cb{width:100%;padding:15px;background:linear-gradient(135deg,var(--pc),var(--sc));color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:20px}.cb:active{transform:scale(.98)}.em{background:#ffebee;color:#c62828;padding:12px;border-radius:8px;margin-bottom:20px;font-size:14px;display:none}#fi{display:none}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <div class="back-btn" onclick="goBack()">←</div>
-                <h1>Create Group</h1>
-            </div>
-        </div>
-
-        <div class="form-container">
-            <div class="group-pic-section">
-                <div class="group-pic" onclick="document.getElementById('fileInput').click()">
-                    👥
-                </div>
-                <input type="file" id="fileInput" accept="image/*">
-                <p style="font-size: 12px; color: #999;">Click to add group picture</p>
-            </div>
-
-            <form id="createGroupForm">
-                <div class="form-group">
-                    <label>Group Name *</label>
-                    <input type="text" id="groupName" placeholder="Enter group name" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="groupDesc" placeholder="What's this group about?"></textarea>
-                </div>
-
-                <div class="settings-section">
-                    <div class="settings-title">Group Settings</div>
-                    
-                    <div class="setting-item">
-                        <span class="setting-label">Public Group</span>
-                        <div class="toggle" id="publicToggle" onclick="toggleSwitch(this)">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <span class="setting-label">Only Admins Can Send</span>
-                        <div class="toggle" id="adminOnlyToggle" onclick="toggleSwitch(this)">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <span class="setting-label">Join Approval Required</span>
-                        <div class="toggle" id="approvalToggle" onclick="toggleSwitch(this)">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <span class="setting-label">Show Members List</span>
-                        <div class="toggle active" id="membersToggle" onclick="toggleSwitch(this)">
-                            <div class="toggle-thumb"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="create-btn">Create Group</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.querySelector('.group-pic').innerHTML = `<img src="${e.target.result}">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function toggleSwitch(element) {
-            element.classList.toggle('active');
-        }
-
-        document.getElementById('createGroupForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const groupData = {
-                name: document.getElementById('groupName').value,
-                description: document.getElementById('groupDesc').value,
-                isPublic: document.getElementById('publicToggle').classList.contains('active'),
-                adminOnly: document.getElementById('adminOnlyToggle').classList.contains('active'),
-                approvalRequired: document.getElementById('approvalToggle').classList.contains('active'),
-                showMembers: document.getElementById('membersToggle').classList.contains('active')
-            };
-
-            console.log('Creating group:', groupData);
-            alert('Group created successfully!');
-            window.location.href = 'ngm-group-chat.html';
-        });
-
-        function goBack() {
-            window.history.back();
-        }
-
-        document.addEventListener('copy', e => e.preventDefault());
-        document.addEventListener('paste', e => e.preventDefault());
-    </script>
+<div class="c">
+<div class="h"><div class="hc"><button class="bb" onclick="gb()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button><h1>Create Group</h1></div></div>
+<div class="gf">
+<div class="em" id="em"></div>
+<div class="gi" onclick="document.getElementById('fi').click()"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg></div>
+<input type="file" id="fi" accept="image/*">
+<form id="gf">
+<div class="fg"><label>Group Name *</label><input type="text" id="gn" placeholder="Enter group name" required></div>
+<div class="fg"><label>Group Description</label><input type="text" id="gd" placeholder="What's this group about?"></div>
+<button type="submit" class="cb">Create Group</button>
+</form>
+</div>
+</div>
+<script>
+const U='https://bhmycvrbucmbbrpzeane.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4',sb=window.supabase.createClient(U,K);let cu=null,si=null;
+(()=>{const t={purple:{primary:'#667eea',secondary:'#764ba2'},blue:{primary:'#4facfe',secondary:'#00f2fe'},pink:{primary:'#f093fb',secondary:'#f5576c'},green:{primary:'#43e97b',secondary:'#38f9d7'},orange:{primary:'#fa709a',secondary:'#fee140'},red:{primary:'#ff6b6b',secondary:'#ee5a6f'},teal:{primary:'#2bcbba',secondary:'#45caff'},indigo:{primary:'#4776e6',secondary:'#8e54e9'}},th=localStorage.getItem('nandigram_theme')||'purple';if(t[th]){document.documentElement.style.setProperty('--pc',t[th].primary);document.documentElement.style.setProperty('--sc',t[th].secondary)}})();
+async function init(){const{data:{user}}=await sb.auth.getUser();if(user)cu=user;else window.location.href='login.html'}
+document.getElementById('gf').addEventListener('submit',async e=>{e.preventDefault();const gn=document.getElementById('gn').value.trim(),gd=document.getElementById('gd').value.trim();if(!gn){se('Enter group name');return}try{const{data:ng}=await sb.from('ngm_chats').insert({chat_type:'group',group_name:gn,group_description:gd,created_at:new Date().toISOString(),last_message_at:new Date().toISOString()}).select().single();if(ng){await sb.from('ngm_chat_participants').insert({chat_id:ng.chat_id,user_id:cu.id,role:'owner'});window.location.href=`ngm-chat-window.html?chat=${ng.chat_id}`}}catch(e){console.error(e);se('Failed to create group')}});
+function se(m){const ed=document.getElementById('em');ed.textContent=m;ed.style.display='block';setTimeout(()=>ed.style.display='none',5000)}
+function gb(){window.location.href='ngm-group-chat.html'}
+document.addEventListener('copy',e=>e.preventDefault());document.addEventListener('paste',e=>e.preventDefault());
+init();
+</script>
 </body>
 </html>
