@@ -1,255 +1,35 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nandigram - Channels</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            padding-bottom: 70px;
-        }
-
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-        }
-
-        .header {
-            position: sticky;
-            top: 0;
-            height: 90px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: flex-end;
-            padding: 0 20px 15px;
-            z-index: 100;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .channel-item {
-            display: flex;
-            padding: 12px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-        }
-
-        .channel-item:active {
-            background: #f5f5f5;
-        }
-
-        .channel-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
-
-        .channel-info {
-            flex: 1;
-            margin-left: 12px;
-        }
-
-        .channel-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .channel-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .channel-time {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .channel-preview {
-            font-size: 14px;
-            color: #666;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .subscriber-count {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .owner-badge {
-            background: #ffd700;
-            color: #333;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-size: 10px;
-            font-weight: 600;
-            margin-left: 5px;
-        }
-
-        .fab {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            z-index: 99;
-        }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-width: 480px;
-            margin: 0 auto;
-            height: 70px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .footer-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            padding: 10px 5px;
-        }
-
-        .footer-item.active {
-            color: #667eea;
-        }
-
-        .footer-icon {
-            font-size: 24px;
-        }
-
-        .footer-label {
-            font-size: 11px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Channels</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}body{font-family:-apple-system,sans-serif;background:#f5f5f5;padding-bottom:70px}.c{max-width:480px;margin:0 auto;background:#fff;min-height:100vh}.h{position:sticky;top:0;height:90px;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:flex-end;padding:0 20px 15px;z-index:100}.h h1{color:#fff;font-size:24px;font-weight:600}.cl{background:#fff}.ci{display:flex;padding:12px 20px;border-bottom:1px solid #f0f0f0;cursor:pointer}.ci:active{background:#f5f5f5}.ca{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:600;overflow:hidden}.ca img{width:100%;height:100%;object-fit:cover}.cif{flex:1;margin-left:12px}.cn{font-size:16px;font-weight:600;color:#333}.cs{font-size:13px;color:#666;margin-top:3px}.em{text-align:center;padding:60px 20px}.em svg{width:80px;height:80px;fill:#ccc;margin-bottom:20px}.et{font-size:18px;color:#666;margin-bottom:10px}.est{font-size:14px;color:#999}.ld{text-align:center;padding:40px;color:#999}.ft{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;height:70px;background:#fff;border-top:1px solid #e0e0e0;display:flex;justify-content:space-around;align-items:center;z-index:100}.fi{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:10px 5px;color:#999;background:none;border:none}.fi.active{color:var(--pc)}.fi svg{width:24px;height:24px;fill:currentColor}.fl{font-size:11px}.fab{position:fixed;bottom:90px;right:20px;width:56px;height:56px;background:linear-gradient(135deg,var(--pc),var(--sc));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(102,126,234,.4);z-index:99;border:none}.fab svg{width:24px;height:24px;fill:#fff}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Channels</h1>
-        </div>
-
-        <div class="channel-list" id="channelList"></div>
-    </div>
-
-    <div class="fab" onclick="createChannel()">➕</div>
-
-    <div class="footer">
-        <div class="footer-item" onclick="navigate('ngm-chats.html')">
-            <div class="footer-icon">💬</div>
-            <div class="footer-label">Chats</div>
-        </div>
-        <div class="footer-item active">
-            <div class="footer-icon">📢</div>
-            <div class="footer-label">Channels</div>
-        </div>
-        <div class="footer-item" onclick="navigate('ngm-group-chat.html')">
-            <div class="footer-icon">👥</div>
-            <div class="footer-label">Groups</div>
-        </div>
-        <div class="footer-item" onclick="navigate('ngm-profile.html')">
-            <div class="footer-icon">👤</div>
-            <div class="footer-label">Profile</div>
-        </div>
-        <div class="footer-item" onclick="navigate('ngm-kapila.html')">
-            <div class="footer-icon">🤖</div>
-            <div class="footer-label">KAPiLa</div>
-        </div>
-    </div>
-
-    <script>
-        const demoChannels = [
-            {id: 1, name: 'Tech News', message: 'New AI breakthrough announced', time: '2 hours ago', subscribers: 1250, isOwner: true},
-            {id: 2, name: 'Daily Updates', message: 'Good morning everyone!', time: '5 hours ago', subscribers: 850, isOwner: false},
-            {id: 3, name: 'Sports Channel', message: 'Match highlights now available', time: 'Yesterday', subscribers: 2100, isOwner: false}
-        ];
-
-        window.addEventListener('DOMContentLoaded', function() {
-            loadChannels();
-        });
-
-        function loadChannels() {
-            const container = document.getElementById('channelList');
-            container.innerHTML = demoChannels.map(channel => `
-                <div class="channel-item" onclick="openChannel(${channel.id})">
-                    <div class="channel-avatar">📢</div>
-                    <div class="channel-info">
-                        <div class="channel-header">
-                            <span class="channel-name">
-                                ${channel.name}
-                                ${channel.isOwner ? '<span class="owner-badge">OWNER</span>' : ''}
-                            </span>
-                            <span class="channel-time">${channel.time}</span>
-                        </div>
-                        <div class="channel-preview">
-                            <span>${channel.message}</span>
-                            <span class="subscriber-count">${channel.subscribers} subscribers</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openChannel(channelId) {
-            localStorage.setItem('current_channel_id', channelId);
-            window.location.href = 'ngm-chat-window.html?type=channel&id=' + channelId;
-        }
-
-        function createChannel() {
-            window.location.href = 'ngm-create-channel.html';
-        }
-
-        function navigate(page) {
-            window.location.href = page;
-        }
-
-        document.addEventListener('copy', e => e.preventDefault());
-        document.addEventListener('paste', e => e.preventDefault());
-    </script>
+<div class="c">
+<div class="h"><h1>Channels</h1></div>
+<div class="ld" id="ld">Loading channels...</div>
+<div class="cl" id="cl"></div>
+<div class="em" id="em" style="display:none"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><div class="et">No channels yet</div><div class="est">Create a channel to broadcast</div></div>
+</div>
+<button class="fab" onclick="navigate('ngm-create-channel.html')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></button>
+<div class="ft"><button class="fi" onclick="navigate('ngm-chats.html')"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><div class="fl">Chats</div></button><button class="fi active"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg><div class="fl">Channels</div></button><button class="fi" onclick="navigate('ngm-group-chat.html')"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><div class="fl">Groups</div></button><button class="fi" onclick="navigate('ngm-profile.html')"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><div class="fl">Profile</div></button><button class="fi" onclick="navigate('ngm-kapila.html')"><svg viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3zm-2 10H6V7h12v12zm-9-6c-.83 0-1.5-.67-1.5-1.5S8.17 10 9 10s1.5.67 1.5 1.5S9.83 13 9 13zm7.5-1.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5 1.5.67 1.5 1.5zM8 15h8v2H8v-2z"/></svg><div class="fl">KAPiLa</div></button></div>
+<script>
+const U='https://bhmycvrbucmbbrpzeane.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4',sb=window.supabase.createClient(U,K);let cu=null;
+(()=>{const t={purple:{primary:'#667eea',secondary:'#764ba2'},blue:{primary:'#4facfe',secondary:'#00f2fe'},pink:{primary:'#f093fb',secondary:'#f5576c'},green:{primary:'#43e97b',secondary:'#38f9d7'},orange:{primary:'#fa709a',secondary:'#fee140'},red:{primary:'#ff6b6b',secondary:'#ee5a6f'},teal:{primary:'#2bcbba',secondary:'#45caff'},indigo:{primary:'#4776e6',secondary:'#8e54e9'}},th=localStorage.getItem('nandigram_theme')||'purple';if(t[th]){document.documentElement.style.setProperty('--pc',t[th].primary);document.documentElement.style.setProperty('--sc',t[th].secondary)}})();
+async function init(){await ca();if(!cu){window.location.href='login.html';return}await lch()}
+async function ca(){const{data:{user}}=await sb.auth.getUser();if(user)cu=user}
+async function lch(){try{document.getElementById('ld').style.display='block';document.getElementById('em').style.display='none';const{data:pts}=await sb.from('ngm_chat_participants').select('chat_id').eq('user_id',cu.id).eq('is_active',true);if(!pts||pts.length===0){ses();return}const cids=pts.map(p=>p.chat_id),{data:chs}=await sb.from('ngm_channels').select('*,ngm_chats(chat_id,chat_type)').in('chat_id',cids);if(!chs||chs.length===0){ses();return}const cws=await Promise.all(chs.map(async c=>{const{data:sc}=await sb.from('ngm_chat_participants').select('user_id').eq('chat_id',c.chat_id).eq('is_active',true);return{...c,subsCount:sc?sc.length:0}}));rch(cws)}catch(e){console.error(e);ses()}}
+function rch(cs){document.getElementById('ld').style.display='none';const cn=document.getElementById('cl');cn.innerHTML=cs.map(c=>{const ini=c.channel_name?c.channel_name.charAt(0).toUpperCase():'C';return`<div class="ci" onclick="och('${c.chat_id}')"><div class="ca">${c.channel_picture_url?`<img src="${c.channel_picture_url}">`:`<span>${ini}</span>`}</div><div class="cif"><div class="cn">${c.channel_name||'Unnamed Channel'}</div><div class="cs">${c.subsCount} subscribers</div></div></div>`}).join('')}
+function ses(){document.getElementById('ld').style.display='none';document.getElementById('em').style.display='block'}
+function och(cid){window.location.href=`ngm-chat-window.html?chat=${cid}`}
+function navigate(p){window.location.href=p}
+document.addEventListener('copy',e=>e.preventDefault());document.addEventListener('paste',e=>e.preventDefault());
+init();
+</script>
 </body>
 </html>
