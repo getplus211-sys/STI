@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nandigram - Settings</title>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            height: 90px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 10px 10px;
+            z-index: 100;
+        }
+
+        .header-content {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .back-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .section-title {
+            padding: 15px 20px 10px;
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #f5f5f5;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            background: white;
+            cursor: pointer;
+        }
+
+        .setting-item:active {
+            background: #f9f9f9;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .setting-value {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .setting-arrow {
+            color: #999;
+            font-size: 18px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: #ccc;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: var(--primary-color);
+        }
+
+        .toggle-thumb {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+        }
+
+        .toggle.active .toggle-thumb {
+            left: 24px;
+        }
+
+        .theme-colors {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            background: white;
+        }
+
+        .theme-option {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .theme-option:active {
+            transform: scale(0.95);
+        }
+
+        .theme-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .theme-purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .theme-blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .theme-pink { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .theme-green { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .theme-orange { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .theme-red { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); }
+        .theme-teal { background: linear-gradient(135deg, #2bcbba 0%, #45caff 100%); }
+        .theme-indigo { background: linear-gradient(135deg, #4776e6 0%, #8e54e9 100%); }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 0;
+        }
+
+        .radio-option {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .radio-option:active {
+            background: #f9f9f9;
+        }
+
+        .radio-check {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .radio-option.selected .radio-check {
+            border-color: var(--primary-color);
+        }
+
+        .radio-option.selected .radio-check::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="back-btn" onclick="goBack()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </div>
+                <h1>Settings</h1>
+            </div>
+        </div>
+
+        <!-- Theme Colors -->
+        <div class="section-title">App Theme</div>
+        <div class="theme-colors">
+            <div class="theme-option theme-purple selected" onclick="selectTheme('purple', this)"></div>
+            <div class="theme-option theme-blue" onclick="selectTheme('blue', this)"></div>
+            <div class="theme-option theme-pink" onclick="selectTheme('pink', this)"></div>
+            <div class="theme-option theme-green" onclick="selectTheme('green', this)"></div>
+            <div class="theme-option theme-orange" onclick="selectTheme('orange', this)"></div>
+            <div class="theme-option theme-red" onclick="selectTheme('red', this)"></div>
+            <div class="theme-option theme-teal" onclick="selectTheme('teal', this)"></div>
+            <div class="theme-option theme-indigo" onclick="selectTheme('indigo', this)"></div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="section-title">Notifications</div>
+        
+        <div class="setting-item">
+            <div class="setting-info">
+                <div class="setting-label">Show Notifications</div>
+                <div class="setting-value">Get notified of new messages</div>
+            </div>
+            <div class="toggle active" id="notifToggle" onclick="toggleSwitch(this)">
+                <div class="toggle-thumb"></div>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <div class="setting-label">Sound</div>
+                <div class="setting-value">Notification sound enabled</div>
+            </div>
+            <div class="toggle active" id="soundToggle" onclick="toggleSwitch(this)">
+                <div class="toggle-thumb"></div>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <div class="setting-label">Vibrate</div>
+                <div class="setting-value">Vibrate on notification</div>
+            </div>
+            <div class="toggle active" id="vibrateToggle" onclick="toggleSwitch(this)">
+                <div class="toggle-thumb"></div>
+            </div>
+        </div>
+
+        <div class="setting-item" onclick="showModal('messagePreview')">
+            <div class="setting-info">
+                <div class="setting-label">Message Preview</div>
+                <div class="setting-value" id="previewValue">Show preview</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <!-- Data and Storage -->
+        <div class="section-title">Data and Storage</div>
+
+        <div class="setting-item" onclick="showModal('autoDownloadMobile')">
+            <div class="setting-info">
+                <div class="setting-label">Mobile Data - Media Auto-Download</div>
+                <div class="setting-value" id="mobileValue">Photos, Audio</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item" onclick="showModal('autoDownloadWifi')">
+            <div class="setting-info">
+                <div class="setting-label">Wi-Fi - Media Auto-Download</div>
+                <div class="setting-value" id="wifiValue">All media</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item" onclick="showModal('autoDownloadRoaming')">
+            <div class="setting-info">
+                <div class="setting-label">Roaming - Media Auto-Download</div>
+                <div class="setting-value" id="roamingValue">No media</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <div class="setting-label">Compress Images</div>
+                <div class="setting-value">Save data by compressing images</div>
+            </div>
+            <div class="toggle active" id="compressToggle" onclick="toggleSwitch(this)">
+                <div class="toggle-thumb"></div>
+            </div>
+        </div>
+
+        <div class="setting-item" onclick="navigate('ngm-storage-usage.html')">
+            <div class="setting-info">
+                <div class="setting-label">Storage Usage</div>
+                <div class="setting-value">Manage storage and clear cache</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <!-- Privacy and Security -->
+        <div class="section-title">Privacy and Security</div>
+        
+        <div class="setting-item" onclick="navigate('ngm-privacy-settings.html')">
+            <div class="setting-info">
+                <div class="setting-label">Privacy Settings</div>
+                <div class="setting-value">Last seen, profile photo, and more</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item" onclick="navigate('ngm-contacts.html?tab=blocked')">
+            <div class="setting-info">
+                <div class="setting-label">Blocked Users</div>
+                <div class="setting-value" id="blockedCount">0 users blocked</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <div class="setting-label">Two-Step Verification</div>
+                <div class="setting-value">Add extra security to your account</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <!-- Chat Settings -->
+        <div class="section-title">Chat Settings</div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <div class="setting-label">Enter to Send</div>
+                <div class="setting-value">Send message when pressing Enter</div>
+            </div>
+            <div class="toggle" id="enterSendToggle" onclick="toggleSwitch(this)">
+                <div class="toggle-thumb"></div>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <div class="setting-label">Save to Gallery</div>
+                <div class="setting-value">Save incoming media to phone gallery</div>
+            </div>
+            <div class="toggle" id="saveGalleryToggle" onclick="toggleSwitch(this)">
+                <div class="toggle-thumb"></div>
+            </div>
+        </div>
+
+        <!-- Other -->
+        <div class="section-title">Other</div>
+
+        <div class="setting-item" onclick="showLanguage()">
+            <div class="setting-info">
+                <div class="setting-label">Language</div>
+                <div class="setting-value">English</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item" onclick="navigate('ngm-backup.html')">
+            <div class="setting-info">
+                <div class="setting-label">Backup & Restore</div>
+                <div class="setting-value">Backup your chats and media</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item" onclick="showHelp()">
+            <div class="setting-info">
+                <div class="setting-label">Help & Support</div>
+                <div class="setting-value">FAQ and contact support</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+
+        <div class="setting-item" onclick="showAbout()">
+            <div class="setting-info">
+                <div class="setting-label">About</div>
+                <div class="setting-value">Version 1.0.0</div>
+            </div>
+            <div class="setting-arrow">›</div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="messagePreviewModal">
+        <div class="modal-content">
+            <div class="modal-header">Message Preview</div>
+            <div class="modal-body">
+                <div class="radio-option selected" onclick="selectOption(this, 'preview', 'Show preview')">
+                    <span>Show preview</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'preview', 'Hide preview')">
+                    <span>Hide preview</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'preview', 'Name only')">
+                    <span>Name only</span>
+                    <div class="radio-check"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="autoDownloadMobileModal">
+        <div class="modal-content">
+            <div class="modal-header">Auto-Download on Mobile Data</div>
+            <div class="modal-body">
+                <div class="radio-option" onclick="selectOption(this, 'mobile', 'All media')">
+                    <span>All media</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option selected" onclick="selectOption(this, 'mobile', 'Photos, Audio')">
+                    <span>Photos, Audio</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'mobile', 'Photos only')">
+                    <span>Photos only</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'mobile', 'No media')">
+                    <span>No media</span>
+                    <div class="radio-check"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="autoDownloadWifiModal">
+        <div class="modal-content">
+            <div class="modal-header">Auto-Download on Wi-Fi</div>
+            <div class="modal-body">
+                <div class="radio-option selected" onclick="selectOption(this, 'wifi', 'All media')">
+                    <span>All media</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'wifi', 'Photos, Audio')">
+                    <span>Photos, Audio</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'wifi', 'Photos only')">
+                    <span>Photos only</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'wifi', 'No media')">
+                    <span>No media</span>
+                    <div class="radio-check"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="autoDownloadRoamingModal">
+        <div class="modal-content">
+            <div class="modal-header">Auto-Download while Roaming</div>
+            <div class="modal-body">
+                <div class="radio-option" onclick="selectOption(this, 'roaming', 'All media')">
+                    <span>All media</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'roaming', 'Photos, Audio')">
+                    <span>Photos, Audio</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option" onclick="selectOption(this, 'roaming', 'Photos only')">
+                    <span>Photos only</span>
+                    <div class="radio-check"></div>
+                </div>
+                <div class="radio-option selected" onclick="selectOption(this, 'roaming', 'No media')">
+                    <span>No media</span>
+                    <div class="radio-check"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', loadTheme);
+
+        function loadTheme() {
+            const theme = localStorage.getItem('nandigram_theme') || 'purple';
+            const themes = {
+                purple: {primary: '#667eea', secondary: '#764ba2'},
+                blue: {primary: '#4facfe', secondary: '#00f2fe'},
+                pink: {primary: '#f093fb', secondary: '#f5576c'},
+                green: {primary: '#43e97b', secondary: '#38f9d7'},
+                orange: {primary: '#fa709a', secondary: '#fee140'},
+                red: {primary: '#ff6b6b', secondary: '#ee5a6f'},
+                teal: {primary: '#2bcbba', secondary: '#45caff'},
+                indigo: {primary: '#4776e6', secondary: '#8e54e9'}
+            };
+            
+            if (themes[theme]) {
+                document.documentElement.style.setProperty('--primary-color', themes[theme].primary);
+                document.documentElement.style.setProperty('--secondary-color', themes[theme].secondary);
+            }
+        }
+
+        function selectTheme(theme, element) {
+            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            localStorage.setItem('nandigram_theme', theme);
+            loadTheme();
+        }
+
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        function showModal(type) {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+            const modalId = type + 'Modal';
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function selectOption(element, type, value) {
+            const modal = element.closest('.modal');
+            modal.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            const valueIds = {
+                preview: 'previewValue',
+                mobile: 'mobileValue',
+                wifi: 'wifiValue',
+                roaming: 'roamingValue'
+            };
+            
+            if (valueIds[type]) {
+                document.getElementById(valueIds[type]).textContent = value;
+            }
+            
+            setTimeout(() => modal.classList.remove('show'), 300);
+        }
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+
+        function navigate(page) {
+            window.location.href = page;
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function showLanguage() {
+            alert('Language settings');
+        }
+
+        function showHelp() {
+            alert('Help & Support');
+        }
+
+        function showAbout() {
+            alert('Nandigram Messenger v1.0.0\n\nDeveloped for seamless communication');
+        }
+
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+    </script>
+</body>
+</html>

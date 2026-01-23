@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nandigram - Groups</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding-bottom: 70px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 20px 15px;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .group-list {
+            padding-bottom: 20px;
+        }
+
+        .group-item {
+            display: flex;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .group-item:active {
+            background: #f5f5f5;
+        }
+
+        .group-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .group-info {
+            flex: 1;
+            margin-left: 12px;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .group-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .group-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .group-preview {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .group-message {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .group-badge {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .member-count {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .unread-badge {
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+
+        .admin-badge {
+            background: #ffa500;
+            color: white;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            z-index: 99;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            height: 70px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .footer-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 10px 5px;
+        }
+
+        .footer-item.active {
+            color: #667eea;
+        }
+
+        .footer-icon {
+            font-size: 24px;
+        }
+
+        .footer-label {
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Groups</h1>
+        </div>
+
+        <div class="group-list" id="groupList"></div>
+    </div>
+
+    <div class="fab" onclick="createGroup()">➕</div>
+
+    <div class="footer">
+        <div class="footer-item" onclick="navigate('ngm-chats.html')">
+            <div class="footer-icon">💬</div>
+            <div class="footer-label">Chats</div>
+        </div>
+        <div class="footer-item" onclick="navigate('ngm-channel-view.html')">
+            <div class="footer-icon">📢</div>
+            <div class="footer-label">Channels</div>
+        </div>
+        <div class="footer-item active">
+            <div class="footer-icon">👥</div>
+            <div class="footer-label">Groups</div>
+        </div>
+        <div class="footer-item" onclick="navigate('ngm-profile.html')">
+            <div class="footer-icon">👤</div>
+            <div class="footer-label">Profile</div>
+        </div>
+        <div class="footer-item" onclick="navigate('ngm-kapila.html')">
+            <div class="footer-icon">🤖</div>
+            <div class="footer-label">KAPiLa</div>
+        </div>
+    </div>
+
+    <script>
+        const demoGroups = [
+            {id: 1, name: 'Family Group', message: 'Mom: Dinner at 8?', time: '12:45', members: 5, unread: 3, isAdmin: true},
+            {id: 2, name: 'Work Team', message: 'John: Meeting tomorrow', time: '11:30', members: 12, unread: 0, isAdmin: true},
+            {id: 3, name: 'College Friends', message: 'Alice: Party this weekend!', time: 'Yesterday', members: 25, unread: 15, isAdmin: false},
+            {id: 4, name: 'Sports Club', message: 'Mike: Practice at 6 AM', time: 'Monday', members: 8, unread: 0, isAdmin: false}
+        ];
+
+        window.addEventListener('DOMContentLoaded', function() {
+            loadGroups();
+        });
+
+        function loadGroups() {
+            const container = document.getElementById('groupList');
+            container.innerHTML = demoGroups.map(group => `
+                <div class="group-item" onclick="openGroup(${group.id})">
+                    <div class="group-avatar">👥</div>
+                    <div class="group-info">
+                        <div class="group-header">
+                            <span class="group-name">
+                                ${group.name}
+                                ${group.isAdmin ? ' <span class="admin-badge">ADMIN</span>' : ''}
+                            </span>
+                            <span class="group-time">${group.time}</span>
+                        </div>
+                        <div class="group-preview">
+                            <span class="group-message">${group.message}</span>
+                            <div class="group-badge">
+                                <span class="member-count">${group.members} members</span>
+                                ${group.unread ? `<span class="unread-badge">${group.unread}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openGroup(groupId) {
+            localStorage.setItem('current_group_id', groupId);
+            window.location.href = 'ngm-chat-window.html?type=group&id=' + groupId;
+        }
+
+        function createGroup() {
+            window.location.href = 'ngm-create-group.html';
+        }
+
+        function navigate(page) {
+            window.location.href = page;
+        }
+
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+    </script>
+</body>
+</html>

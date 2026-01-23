@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nandigram - Channels</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding-bottom: 70px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 20px 15px;
+            z-index: 100;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .channel-item {
+            display: flex;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .channel-item:active {
+            background: #f5f5f5;
+        }
+
+        .channel-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .channel-info {
+            flex: 1;
+            margin-left: 12px;
+        }
+
+        .channel-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .channel-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .channel-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .channel-preview {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .subscriber-count {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .owner-badge {
+            background: #ffd700;
+            color: #333;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            z-index: 99;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            height: 70px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .footer-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 10px 5px;
+        }
+
+        .footer-item.active {
+            color: #667eea;
+        }
+
+        .footer-icon {
+            font-size: 24px;
+        }
+
+        .footer-label {
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Channels</h1>
+        </div>
+
+        <div class="channel-list" id="channelList"></div>
+    </div>
+
+    <div class="fab" onclick="createChannel()">➕</div>
+
+    <div class="footer">
+        <div class="footer-item" onclick="navigate('ngm-chats.html')">
+            <div class="footer-icon">💬</div>
+            <div class="footer-label">Chats</div>
+        </div>
+        <div class="footer-item active">
+            <div class="footer-icon">📢</div>
+            <div class="footer-label">Channels</div>
+        </div>
+        <div class="footer-item" onclick="navigate('ngm-group-chat.html')">
+            <div class="footer-icon">👥</div>
+            <div class="footer-label">Groups</div>
+        </div>
+        <div class="footer-item" onclick="navigate('ngm-profile.html')">
+            <div class="footer-icon">👤</div>
+            <div class="footer-label">Profile</div>
+        </div>
+        <div class="footer-item" onclick="navigate('ngm-kapila.html')">
+            <div class="footer-icon">🤖</div>
+            <div class="footer-label">KAPiLa</div>
+        </div>
+    </div>
+
+    <script>
+        const demoChannels = [
+            {id: 1, name: 'Tech News', message: 'New AI breakthrough announced', time: '2 hours ago', subscribers: 1250, isOwner: true},
+            {id: 2, name: 'Daily Updates', message: 'Good morning everyone!', time: '5 hours ago', subscribers: 850, isOwner: false},
+            {id: 3, name: 'Sports Channel', message: 'Match highlights now available', time: 'Yesterday', subscribers: 2100, isOwner: false}
+        ];
+
+        window.addEventListener('DOMContentLoaded', function() {
+            loadChannels();
+        });
+
+        function loadChannels() {
+            const container = document.getElementById('channelList');
+            container.innerHTML = demoChannels.map(channel => `
+                <div class="channel-item" onclick="openChannel(${channel.id})">
+                    <div class="channel-avatar">📢</div>
+                    <div class="channel-info">
+                        <div class="channel-header">
+                            <span class="channel-name">
+                                ${channel.name}
+                                ${channel.isOwner ? '<span class="owner-badge">OWNER</span>' : ''}
+                            </span>
+                            <span class="channel-time">${channel.time}</span>
+                        </div>
+                        <div class="channel-preview">
+                            <span>${channel.message}</span>
+                            <span class="subscriber-count">${channel.subscribers} subscribers</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openChannel(channelId) {
+            localStorage.setItem('current_channel_id', channelId);
+            window.location.href = 'ngm-chat-window.html?type=channel&id=' + channelId;
+        }
+
+        function createChannel() {
+            window.location.href = 'ngm-create-channel.html';
+        }
+
+        function navigate(page) {
+            window.location.href = page;
+        }
+
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+    </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nandigram - New Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 10px 10px;
+            z-index: 100;
+        }
+
+        .header-content {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .search-bar {
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .actions-section {
+            padding: 10px 0;
+            background: white;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .action-item:active {
+            background: #f5f5f5;
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-right: 15px;
+        }
+
+        .action-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .section-title {
+            padding: 15px 20px 10px;
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #f5f5f5;
+        }
+
+        .contact-list {
+            background: white;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .contact-item:active {
+            background: #f5f5f5;
+        }
+
+        .contact-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .contact-status {
+            font-size: 13px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="back-btn" onclick="goBack()">←</div>
+                <h1>New Chat</h1>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" class="search-input" placeholder="Search contacts..." id="searchInput">
+        </div>
+
+        <div class="actions-section">
+            <div class="action-item" onclick="navigate('ngm-create-group.html')">
+                <div class="action-icon">👥</div>
+                <div class="action-label">New Group</div>
+            </div>
+
+            <div class="action-item" onclick="navigate('ngm-create-channel.html')">
+                <div class="action-icon">📢</div>
+                <div class="action-label">New Channel</div>
+            </div>
+
+            <div class="action-item" onclick="navigate('ngm-contacts.html')">
+                <div class="action-icon">👤</div>
+                <div class="action-label">New Contact</div>
+            </div>
+        </div>
+
+        <div class="section-title">Your Contacts</div>
+
+        <div class="contact-list">
+            <div class="contact-item" onclick="startChat('Alice Brown')">
+                <div class="contact-avatar">A</div>
+                <div class="contact-info">
+                    <div class="contact-name">Alice Brown</div>
+                    <div class="contact-status">online</div>
+                </div>
+            </div>
+
+            <div class="contact-item" onclick="startChat('Bob Johnson')">
+                <div class="contact-avatar">B</div>
+                <div class="contact-info">
+                    <div class="contact-name">Bob Johnson</div>
+                    <div class="contact-status">last seen today at 2:30 PM</div>
+                </div>
+            </div>
+
+            <div class="contact-item" onclick="startChat('Mike Wilson')">
+                <div class="contact-avatar">M</div>
+                <div class="contact-info">
+                    <div class="contact-name">Mike Wilson</div>
+                    <div class="contact-status">last seen yesterday</div>
+                </div>
+            </div>
+
+            <div class="contact-item" onclick="startChat('Sarah Davis')">
+                <div class="contact-avatar">S</div>
+                <div class="contact-info">
+                    <div class="contact-name">Sarah Davis</div>
+                    <div class="contact-status">last seen 2 days ago</div>
+                </div>
+            </div>
+
+            <div class="contact-item" onclick="startChat('Tom Anderson')">
+                <div class="contact-avatar">T</div>
+                <div class="contact-info">
+                    <div class="contact-name">Tom Anderson</div>
+                    <div class="contact-status">online</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startChat(contactName) {
+            localStorage.setItem('current_chat_name', contactName);
+            window.location.href = 'ngm-chat-window.html';
+        }
+
+        function navigate(page) {
+            window.location.href = page;
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('.contact-item').forEach(item => {
+                const name = item.querySelector('.contact-name').textContent.toLowerCase();
+                item.style.display = name.includes(query) ? 'flex' : 'none';
+            });
+        });
+
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('paste', e => e.preventDefault());
+    </script>
+</body>
+</html>
