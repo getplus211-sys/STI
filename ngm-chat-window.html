@@ -6,75 +6,27 @@
 <title>Chat</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--primary-color:#667eea;--secondary-color:#764ba2}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#e5ddd5;padding-bottom:70px}
-.container{max-width:480px;margin:0 auto;min-height:100vh}
-.header{position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;height:70px;background:linear-gradient(135deg,var(--primary-color) 0%,var(--secondary-color) 100%);display:flex;align-items:center;padding:0 10px;z-index:100;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-.back-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none}
-.back-btn svg{width:24px;height:24px;fill:white}
-.chat-header-info{flex:1;display:flex;align-items:center;gap:10px;margin-left:5px}
-.chat-avatar{width:40px;height:40px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;color:var(--primary-color);font-weight:600;overflow:hidden}
-.chat-avatar img{width:100%;height:100%;object-fit:cover}
-.chat-header-text{flex:1}
-.chat-title{color:white;font-size:16px;font-weight:600}
-.chat-status{color:rgba(255,255,255,0.8);font-size:12px}
-.messages-container{padding:80px 10px 80px;min-height:100vh}
-.message{margin-bottom:10px;display:flex}
-.message.sent{justify-content:flex-end}
-.message.received{justify-content:flex-start}
-.message-bubble{max-width:75%;padding:8px 12px;border-radius:8px;position:relative}
-.message.sent .message-bubble{background:#dcf8c6;border-bottom-right-radius:2px}
-.message.received .message-bubble{background:white;border-bottom-left-radius:2px}
-.message-text{font-size:14px;color:#333;word-wrap:break-word}
-.message-time{font-size:11px;color:#666;margin-top:4px;text-align:right}
-.input-container{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:white;padding:8px;display:flex;gap:8px;border-top:1px solid #e0e0e0}
-.message-input{flex:1;padding:10px 15px;border:1px solid #e0e0e0;border-radius:20px;font-size:14px}
-.send-btn{width:44px;height:44px;background:var(--primary-color);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.send-btn svg{width:20px;height:20px;fill:white}
-.empty{text-align:center;padding:40px 20px;color:#999}
-.loading{text-align:center;padding:20px;color:#999}
+:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}body{font-family:-apple-system,sans-serif;background:#e5ddd5;padding-bottom:70px}.c{max-width:480px;margin:0 auto;min-height:100vh}.h{position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;height:70px;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:center;padding:0 10px;z-index:100;box-shadow:0 2px 5px rgba(0,0,0,.1)}.bb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none}.bb svg{width:24px;height:24px;fill:#fff}.chi{flex:1;display:flex;align-items:center;gap:10px;margin-left:5px}.ca{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--pc);font-weight:600;overflow:hidden}.ca img{width:100%;height:100%;object-fit:cover}.cht{flex:1}.ct{color:#fff;font-size:16px;font-weight:600}.cs{color:rgba(255,255,255,.8);font-size:12px}.mc{padding:80px 10px 80px;min-height:100vh}.m{margin-bottom:10px;display:flex}.m.sent{justify-content:flex-end}.m.received{justify-content:flex-start}.mb{max-width:75%;padding:8px 12px;border-radius:8px;position:relative}.m.sent .mb{background:#dcf8c6;border-bottom-right-radius:2px}.m.received .mb{background:#fff;border-bottom-left-radius:2px}.mt{font-size:14px;color:#333;word-wrap:break-word}.mti{font-size:11px;color:#666;margin-top:4px;text-align:right}.ic{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;padding:8px;display:flex;gap:8px;border-top:1px solid #e0e0e0}.mi{flex:1;padding:10px 15px;border:1px solid #e0e0e0;border-radius:20px;font-size:14px}.seb{width:44px;height:44px;background:var(--pc);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}.seb svg{width:20px;height:20px;fill:#fff}.em{text-align:center;padding:40px 20px;color:#999}.ld{text-align:center;padding:20px;color:#999}
 </style>
 </head>
 <body>
-<div class="container">
-<div class="header">
-<button class="back-btn" onclick="goBack()">
-<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-</button>
-<div class="chat-header-info">
-<div class="chat-avatar" id="chatAvatar">?</div>
-<div class="chat-header-text">
-<div class="chat-title" id="chatTitle">Loading...</div>
-<div class="chat-status" id="chatStatus"></div>
-</div>
-</div>
-</div>
-<div class="messages-container" id="messagesContainer">
-<div class="loading">Loading messages...</div>
-</div>
-<div class="input-container">
-<input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
-<button class="send-btn" id="sendBtn" onclick="sendMessage()">
-<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-</button>
-</div>
+<div class="c">
+<div class="h"><button class="bb" onclick="gb()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button><div class="chi"><div class="ca" id="ca">?</div><div class="cht"><div class="ct" id="ct">Loading...</div><div class="cs" id="cs"></div></div></div></div>
+<div class="mc" id="mc"><div class="ld">Loading messages...</div></div>
+<div class="ic"><input type="text" class="mi" id="mi" placeholder="Type a message..."><button class="seb" id="seb" onclick="sm()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button></div>
 </div>
 <script>
-const SUPABASE_URL='https://bhmycvrbucmbbrpzeane.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let currentUser=null,chatId=null,otherUser=null;
-(function(){const themes={purple:{primary:'#667eea',secondary:'#764ba2'},blue:{primary:'#4facfe',secondary:'#00f2fe'},pink:{primary:'#f093fb',secondary:'#f5576c'},green:{primary:'#43e97b',secondary:'#38f9d7'},orange:{primary:'#fa709a',secondary:'#fee140'},red:{primary:'#ff6b6b',secondary:'#ee5a6f'},teal:{primary:'#2bcbba',secondary:'#45caff'},indigo:{primary:'#4776e6',secondary:'#8e54e9'}};const theme=localStorage.getItem('nandigram_theme')||'purple';if(themes[theme]){document.documentElement.style.setProperty('--primary-color',themes[theme].primary);document.documentElement.style.setProperty('--secondary-color',themes[theme].secondary)}})();
-async function init(){await checkAuth();if(!currentUser){window.location.href='login.html';return}const params=new URLSearchParams(window.location.search);chatId=params.get('chat');if(!chatId){window.location.href='ngm-chats.html';return}await loadChat();await loadMessages();subscribeToMessages()}
-async function checkAuth(){const{data:{user}}=await sb.auth.getUser();if(user)currentUser=user}
-async function loadChat(){try{const{data:chat}=await sb.from('ngm_chats').select('*').eq('chat_id',chatId).single();if(!chat)return;const otherUserId=chat.user1_id===currentUser.id?chat.user2_id:chat.user1_id;const{data:user}=await sb.from('ngm_users').select('*').eq('user_id',otherUserId).single();otherUser=user;if(user){document.getElementById('chatTitle').textContent=user.full_name||user.mobile||'Unknown';const initial=user.full_name?user.full_name.charAt(0).toUpperCase():'?';document.getElementById('chatAvatar').innerHTML=user.profile_picture_url?`<img src="${user.profile_picture_url}">`:`<span>${initial}</span>`;document.getElementById('chatStatus').textContent='Online'}}catch(e){console.error(e)}}
-async function loadMessages(){try{const{data:messages}=await sb.from('ngm_messages').select('*').eq('chat_id',chatId).order('created_at',{ascending:true});renderMessages(messages||[])}catch(e){console.error(e);document.getElementById('messagesContainer').innerHTML='<div class="empty">Error loading messages</div>'}}
-function renderMessages(messages){const container=document.getElementById('messagesContainer');if(messages.length===0){container.innerHTML='<div class="empty">No messages yet. Start the conversation!</div>';return}container.innerHTML=messages.map(msg=>{const isSent=msg.sender_id===currentUser.id;const time=new Date(msg.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});return`<div class="message ${isSent?'sent':'received'}"><div class="message-bubble"><div class="message-text">${msg.content}</div><div class="message-time">${time}</div></div></div>`}).join('');container.scrollTop=container.scrollHeight}
-async function sendMessage(){const input=document.getElementById('messageInput');const text=input.value.trim();if(!text)return;try{const{error}=await sb.from('ngm_messages').insert({chat_id:chatId,sender_id:currentUser.id,content:text,message_type:'text',created_at:new Date().toISOString()});if(!error){await sb.from('ngm_chats').update({last_message_at:new Date().toISOString()}).eq('chat_id',chatId);input.value='';await loadMessages()}}catch(e){console.error(e)}}
-function subscribeToMessages(){sb.channel('messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'ngm_messages',filter:`chat_id=eq.${chatId}`},()=>loadMessages()).subscribe()}
-function goBack(){window.location.href='ngm-chats.html'}
-document.getElementById('messageInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendMessage()});
+const U='https://bhmycvrbucmbbrpzeane.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4',sb=window.supabase.createClient(U,K);let cu=null,cid=null,ou=null;
+(()=>{const t={purple:{primary:'#667eea',secondary:'#764ba2'},blue:{primary:'#4facfe',secondary:'#00f2fe'},pink:{primary:'#f093fb',secondary:'#f5576c'},green:{primary:'#43e97b',secondary:'#38f9d7'},orange:{primary:'#fa709a',secondary:'#fee140'},red:{primary:'#ff6b6b',secondary:'#ee5a6f'},teal:{primary:'#2bcbba',secondary:'#45caff'},indigo:{primary:'#4776e6',secondary:'#8e54e9'}},th=localStorage.getItem('nandigram_theme')||'purple';if(t[th]){document.documentElement.style.setProperty('--pc',t[th].primary);document.documentElement.style.setProperty('--sc',t[th].secondary)}})();
+async function init(){await ca();if(!cu){window.location.href='login.html';return}const p=new URLSearchParams(window.location.search);cid=p.get('chat');if(!cid){window.location.href='ngm-chats.html';return}await lc();await lm();stm()}
+async function ca(){const{data:{user}}=await sb.auth.getUser();if(user)cu=user}
+async function lc(){try{const{data:c}=await sb.from('ngm_chats').select('*').eq('chat_id',cid).single();if(!c)return;const oid=c.user1_id===cu.id?c.user2_id:c.user1_id,{data:u}=await sb.from('ngm_users').select('*').eq('user_id',oid).single();ou=u;if(u){document.getElementById('ct').textContent=u.full_name||u.mobile||'Unknown';const ini=u.full_name?u.full_name.charAt(0).toUpperCase():'?';document.getElementById('ca').innerHTML=u.profile_picture_url?`<img src="${u.profile_picture_url}">`:`<span>${ini}</span>`;document.getElementById('cs').textContent='Online'}}catch(e){console.error(e)}}
+async function lm(){try{const{data:ms}=await sb.from('ngm_messages').select('*').eq('chat_id',cid).order('created_at',{ascending:true});rm(ms||[])}catch(e){console.error(e);document.getElementById('mc').innerHTML='<div class="em">Error loading messages</div>'}}
+function rm(ms){const cn=document.getElementById('mc');if(ms.length===0){cn.innerHTML='<div class="em">No messages yet. Start the conversation!</div>';return}cn.innerHTML=ms.map(m=>{const is=m.sender_id===cu.id,ti=new Date(m.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});return`<div class="m ${is?'sent':'received'}"><div class="mb"><div class="mt">${m.content}</div><div class="mti">${ti}</div></div></div>`}).join('');cn.scrollTop=cn.scrollHeight}
+async function sm(){const inp=document.getElementById('mi'),tx=inp.value.trim();if(!tx)return;try{const{error:e}=await sb.from('ngm_messages').insert({chat_id:cid,sender_id:cu.id,content:tx,message_type:'text',created_at:new Date().toISOString()});if(!e){await sb.from('ngm_chats').update({last_message_at:new Date().toISOString()}).eq('chat_id',cid);inp.value='';await lm()}}catch(e){console.error(e)}}
+function stm(){sb.channel('msgs').on('postgres_changes',{event:'INSERT',schema:'public',table:'ngm_messages',filter:`chat_id=eq.${cid}`},()=>lm()).subscribe()}
+function gb(){window.location.href='ngm-chats.html'}
+document.getElementById('mi').addEventListener('keypress',e=>{if(e.key==='Enter')sm()});
 document.addEventListener('copy',e=>e.preventDefault());document.addEventListener('paste',e=>e.preventDefault());
 init();
 </script>
