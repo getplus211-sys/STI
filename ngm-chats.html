@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --pc: #0088cc; /* Telegram Blue */
+            --pc: #0088cc; 
             --sc: #24a1de;
             --bg: #ffffff;
             --text: #222222;
@@ -18,10 +18,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, sans-serif;
             background: #f1f1f1;
-            color: var(--text);
-            overflow-x: hidden;
+            padding-bottom: 90px; /* Space for larger footer */
         }
 
         .app-container {
@@ -29,349 +28,232 @@
             margin: 0 auto;
             background: var(--bg);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
-        /* Header */
+        /* CUSTOM HEADER: 100px Height, Content at Bottom */
         .header {
             position: sticky;
             top: 0;
-            background: var(--pc);
+            height: 100px;
+            background: linear-gradient(135deg, var(--pc), var(--sc));
             color: white;
-            padding: 15px 20px;
+            padding: 0 20px 15px 20px;
             z-index: 1000;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            align-items: flex-end; /* Content at bottom */
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .header h1 { font-size: 20px; font-weight: 600; }
-        
-        .header-actions { display: flex; gap: 15px; }
+        .header-content {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 { font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
+        .header-actions { display: flex; gap: 18px; }
         .action-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
 
         /* Search Bar */
-        .search-container {
-            padding: 10px 15px;
-            background: var(--pc);
-            display: none;
-        }
+        .search-container { padding: 10px 15px; background: var(--pc); display: none; }
         .search-container.active { display: block; }
-        .search-input {
-            width: 100%;
-            padding: 8px 15px;
-            border-radius: 20px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-        }
+        .search-input { width: 100%; padding: 8px 15px; border-radius: 20px; border: none; outline: none; }
 
         /* Chat List */
-        .chat-list { flex: 1; }
-        
         .chat-item {
             display: flex;
-            padding: 12px 15px;
+            padding: 15px;
             align-items: center;
-            border-bottom: 0.5px solid #eee;
+            border-bottom: 0.5px solid #f0f0f0;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .chat-item:active { background: #f0f0f0; }
-
         .avatar {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6dd5ed, #2193b0);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            margin-right: 15px;
-            flex-shrink: 0;
+            width: 52px; height: 52px; border-radius: 50%;
+            background: #e0e0e0; display: flex; align-items: center;
+            justify-content: center; font-weight: bold; color: white;
+            margin-right: 15px; flex-shrink: 0; font-size: 20px;
         }
 
         .chat-info { flex: 1; overflow: hidden; }
-        
-        .chat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        
+        .chat-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
         .chat-name { font-size: 16px; font-weight: 600; color: #000; }
-        
         .chat-time { font-size: 12px; color: var(--gray); }
-        
-        .chat-bottom { display: flex; justify-content: space-between; align-items: center; }
-        
-        .chat-msg {
-            font-size: 14px;
-            color: var(--gray);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 10px;
-        }
+        .chat-msg { font-size: 14px; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .unread-badge {
-            background: #31cc54;
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 3px 7px;
-            border-radius: 10px;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        .pinned-icon { color: var(--gray); font-size: 14px; transform: rotate(45deg); }
-
-        /* Bottom Nav */
-        .bottom-nav {
+        /* CUSTOM FOOTER: Increased Height, Content at Top */
+        .footer {
             position: fixed;
             bottom: 0;
             width: 100%;
             max-width: 500px;
-            height: 60px;
+            height: 85px; /* Increased height */
             background: #fff;
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
-            align-items: center;
+            align-items: flex-start; /* Content at top */
+            padding-top: 10px; /* Padding for top alignment */
             z-index: 1000;
         }
 
         .nav-item {
             text-align: center;
             color: var(--gray);
-            font-size: 11px;
             flex: 1;
-            padding: 8px 0;
-        }
-
-        .nav-item.active { color: var(--pc); }
-        .nav-icon { font-size: 22px; margin-bottom: 2px; }
-
-        /* Floating Button */
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background: var(--pc);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            border: none;
             cursor: pointer;
         }
 
-        .status-msg { text-align: center; padding: 40px; color: var(--gray); font-size: 14px; }
+        .nav-item.active { color: var(--pc); }
+        .nav-icon { font-size: 24px; }
+        .nav-label { font-size: 11px; margin-top: 2px; font-weight: 500; }
+
+        .fab {
+            position: fixed;
+            bottom: 105px; /* Adjusted for larger footer */
+            right: 20px;
+            width: 56px; height: 56px;
+            background: var(--pc); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 24px; border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .loading { text-align: center; padding: 50px; color: #888; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="header">
-        <h1>નંદીગ્રામ</h1>
-        <div class="header-actions">
-            <button class="action-btn" onclick="toggleSearch()">🔍</button>
-            <button class="action-btn" onclick="showMenu()">⋮</button>
+        <div class="header-content">
+            <h1>Nandigram</h1>
+            <div class="header-actions">
+                <button class="action-btn" onclick="toggleSearch()">🔍</button>
+                <button class="action-btn" onclick="alert('Menu')">⋮</button>
+            </div>
         </div>
     </div>
 
     <div class="search-container" id="searchBox">
-        <input type="text" class="search-input" placeholder="ચેટ શોધો..." id="searchInput" oninput="filterChats()">
+        <input type="text" class="search-input" id="searchInput" placeholder="શોધો..." oninput="filter()">
     </div>
 
-    <div id="pinnedSection" style="display:none; border-bottom: 8px solid #f1f1f1;">
-        <div id="pinnedList"></div>
-    </div>
-
-    <div class="chat-list" id="chatList">
-        <div class="status-msg">ચેટ લોડ થઈ રહી છે...</div>
+    <div id="chatList">
+        <div class="loading">ચેટ લોડ થઈ રહી છે...</div>
     </div>
 
     <button class="fab" onclick="location.href='ngm-new-chat.html'">✎</button>
 
-    <div class="bottom-nav">
+    <div class="footer">
         <div class="nav-item active" onclick="location.href='ngm-chats.html'">
             <div class="nav-icon">💬</div>
-            <div>ચેટ્સ</div>
+            <div class="nav-label">ચેટ્સ</div>
         </div>
         <div class="nav-item" onclick="location.href='ngm-channel-view.html'">
             <div class="nav-icon">📢</div>
-            <div>ચેનલ</div>
+            <div class="nav-label">ચેનલ</div>
         </div>
         <div class="nav-item" onclick="location.href='ngm-group-chat.html'">
             <div class="nav-icon">👥</div>
-            <div>ગ્રુપ</div>
+            <div class="nav-label">ગ્રુપ</div>
         </div>
         <div class="nav-item" onclick="location.href='ngm-kapila.html'">
             <div class="nav-icon">🤖</div>
-            <div>કપિલા</div>
+            <div class="nav-label">KAPiLa</div>
         </div>
         <div class="nav-item" onclick="location.href='ngm-profile.html'">
             <div class="nav-icon">👤</div>
-            <div>પ્રોફાઇલ</div>
+            <div class="nav-label">પ્રોફાઇલ</div>
         </div>
     </div>
 </div>
 
 <script>
-    // Supabase Configuration
-    const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Your Key
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const U = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+    const K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+    const sb = supabase.createClient(U, K);
 
-    let currentUser = null;
-    let allChatsData = [];
+    let cu = null;
 
     async function init() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-        currentUser = user;
-        loadChats();
-        setupRealtime();
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) { location.href = 'login.html'; return; }
+        cu = user;
+        fetchChats();
+        
+        // Real-time update
+        sb.channel('updates').on('postgres_changes', { event: '*', schema: 'public', table: 'ngm_messages' }, fetchChats).subscribe();
     }
 
-    async function loadChats() {
+    async function fetchChats() {
+        const list = document.getElementById('chatList');
         try {
-            // optimized query to get chats with last message and other user info
-            const { data, error } = await supabase
+            // સાદી ક્વેરી જેથી ડેટા લોડ ન થવાની સમસ્યા દૂર થાય
+            let { data: parts, error } = await sb
                 .from('ngm_chat_participants')
                 .select(`
                     *,
-                    chat:ngm_chats(*),
-                    other_user:ngm_users!ngm_chat_participants_user_id_fkey(*)
+                    chat:ngm_chats(*)
                 `)
-                .eq('user_id', currentUser.id)
-                .eq('is_active', true)
-                .order('last_read_at', { ascending: false });
+                .eq('user_id', cu.id);
 
             if (error) throw error;
 
-            if (!data || data.length === 0) {
-                document.getElementById('chatList').innerHTML = '<div class="status-msg">હજુ સુધી કોઈ ચેટ નથી.</div>';
+            if (!parts || parts.length === 0) {
+                list.innerHTML = '<div class="loading">કોઈ ચેટ મળી નથી.</div>';
                 return;
             }
 
-            allChatsData = data;
-            renderChats();
-        } catch (err) {
-            console.error(err);
-            document.getElementById('chatList').innerHTML = '<div class="status-msg">ચેટ લોડ કરવામાં ભૂલ આવી.</div>';
-        }
-    }
+            let html = '';
+            for (let p of parts) {
+                const c = p.chat;
+                if(!c) continue;
 
-    function renderChats() {
-        const chatListEl = document.getElementById('chatList');
-        const pinnedListEl = document.getElementById('pinnedList');
-        const pinnedSection = document.getElementById('pinnedSection');
+                // બીજા યુઝરનું નામ મેળવવા (Personal Chat માટે)
+                let name = "Chat";
+                if(c.chat_type === 'personal') {
+                    const otherId = (c.user1_id === cu.id) ? c.user2_id : c.user1_id;
+                    const { data: u } = await sb.from('ngm_users').select('full_name').eq('user_id', otherId).single();
+                    name = u?.full_name || "User";
+                } else {
+                    name = "Group/Channel";
+                }
 
-        let chatHtml = '';
-        let pinnedHtml = '';
-        let hasPinned = false;
-
-        allChatsData.forEach(item => {
-            const chat = item.chat;
-            const name = item.other_user?.full_name || "Unknown User";
-            const initial = name.charAt(0).toUpperCase();
-            const time = formatTime(chat.last_message_at);
-            const lastMsg = chat.last_message_text || "કોઈ મેસેજ નથી";
-            
-            const html = `
-                <div class="chat-item" onclick="openChat('${chat.chat_id}')">
-                    <div class="avatar">${initial}</div>
-                    <div class="chat-info">
-                        <div class="chat-top">
-                            <span class="chat-name">${name}</span>
-                            <span class="chat-time">${time}</span>
-                        </div>
-                        <div class="chat-bottom">
-                            <span class="chat-msg">${lastMsg}</span>
-                            ${item.unread_count > 0 ? `<span class="unread-badge">${item.unread_count}</span>` : ''}
-                            ${item.is_pinned ? `<span class="pinned-icon">📌</span>` : ''}
+                html += `
+                    <div class="chat-item" onclick="location.href='ngm-chat-window.html?chat=${c.chat_id}'">
+                        <div class="avatar" style="background:${getRandomColor()}">${name.charAt(0)}</div>
+                        <div class="chat-info">
+                            <div class="chat-top">
+                                <span class="chat-name">${name}</span>
+                                <span class="chat-time">હમણાં</span>
+                            </div>
+                            <div class="chat-bottom">
+                                <span class="chat-msg">${c.last_message_text || 'કોઈ મેસેજ નથી'}</span>
+                                ${p.unread_count > 0 ? `<span style="background:#31cc54; color:white; border-radius:10px; padding:2px 8px; font-size:12px;">${p.unread_count}</span>` : ''}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-
-            if (item.is_pinned) {
-                pinnedHtml += html;
-                hasPinned = true;
-            } else {
-                chatHtml += html;
+                `;
             }
-        });
-
-        pinnedSection.style.display = hasPinned ? 'block' : 'none';
-        pinnedListEl.innerHTML = pinnedHtml;
-        chatListEl.innerHTML = chatHtml;
-    }
-
-    function formatTime(dateStr) {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        const now = new Date();
-        const diff = (now - date) / 1000;
-
-        if (diff < 86400) {
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        } else if (diff < 172800) {
-            return 'ગઈકાલે';
-        } else {
-            return date.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+            list.innerHTML = html;
+        } catch (e) {
+            list.innerHTML = '<div class="loading">Error: ' + e.message + '</div>';
         }
     }
 
     function toggleSearch() {
-        const sb = document.getElementById('searchBox');
-        sb.classList.toggle('active');
-        if (sb.classList.contains('active')) document.getElementById('searchInput').focus();
+        const s = document.getElementById('searchBox');
+        s.classList.toggle('active');
     }
 
-    function filterChats() {
-        const q = document.getElementById('searchInput').value.toLowerCase();
-        const items = document.querySelectorAll('.chat-item');
-        items.forEach(item => {
-            const name = item.querySelector('.chat-name').innerText.toLowerCase();
-            item.style.display = name.includes(q) ? 'flex' : 'none';
-        });
+    function getRandomColor() {
+        const colors = ['#ff6b6b', '#4facfe', '#43e97b', '#fa709a', '#667eea'];
+        return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    function openChat(id) {
-        window.location.href = `ngm-chat-window.html?chat=${id}`;
-    }
-
-    function setupRealtime() {
-        supabase.channel('public:ngm_chats')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'ngm_chats' }, payload => {
-                loadChats();
-            })
-            .subscribe();
-    }
-
-    function showMenu() {
-        alert("સેટિંગ્સ\nનવું ગ્રુપ\nનવી ચેનલ\nડાર્ક મોડ");
-    }
-
-    // Security: Disable copy/paste if required as per original code
-    document.addEventListener('copy', e => e.preventDefault());
-    
     init();
 </script>
-
 </body>
 </html>
