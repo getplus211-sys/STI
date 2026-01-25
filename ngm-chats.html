@@ -378,13 +378,17 @@
                     .limit(1)
                     .single();
 
+                // Get total message count for this chat
+                const { count: totalMsgCount } = await sb
+                    .from('ngm_messages')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('chat_id', c.chat_id);
+
                 const lastMsgText = lastMsg 
                     ? lastMsg.content.substring(0, 40) 
                     : 'કોઈ મેસેજ નથી';
 
-                const lastMsgTime = lastMsg 
-                    ? formatTime(new Date(lastMsg.created_at))
-                    : '';
+                const msgCountDisplay = totalMsgCount > 0 ? `${totalMsgCount} msgs` : '';
 
                 const unreadBadgeHTML = p.unread_count > 0 
                     ? `<div class="unread-badge">${p.unread_count}</div>`
@@ -394,7 +398,7 @@
                     id: c.chat_id,
                     name: name,
                     lastMsg: lastMsgText,
-                    time: lastMsgTime,
+                    msgCount: msgCountDisplay,
                     unread: p.unread_count,
                     avatarBg: avatarBg,
                     avatar: name.charAt(0)
@@ -407,11 +411,14 @@
                         <div class="chat-info">
                             <div class="chat-top">
                                 <span class="chat-name">${name}</span>
-                                <span class="chat-time">${lastMsgTime}</span>
+                                <span class="chat-time">now</span>
                             </div>
                             <div class="chat-bottom">
                                 <span class="chat-msg">${lastMsgText}</span>
                                 ${unreadBadgeHTML}
+                            </div>
+                            <div style="font-size:12px; color:#999; margin-top:4px;">
+                                ${msgCountDisplay} ${p.unread_count > 0 ? `• ${p.unread_count} unread` : ''}
                             </div>
                         </div>
                     </div>
@@ -424,25 +431,10 @@
         }
     }
 
-    function formatTime(date) {
-        const now = new Date();
-        const diff = now - date;
-        const mins = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
-        const days = Math.floor(diff / 86400000);
-
-        if (mins < 1) return 'હમણાં';
-        if (mins < 60) return `${mins}m`;
-        if (hours < 24) return `${hours}h`;
-        if (days < 7) return `${days}d`;
-        
-        return date.toLocaleDateString('gu-IN', { month: 'short', day: 'numeric' });
-    }
-
     function openChat(chatId) {
         // Reset unread count for this chat
         resetUnreadCount(chatId);
-        location.href = `ngm-chat-refined.html?chat=${chatId}`;
+        location.href = `ngm-chat-window.html?chat=${chatId}`;
     }
 
     async function resetUnreadCount(chatId) {
@@ -489,11 +481,14 @@
                     <div class="chat-info">
                         <div class="chat-top">
                             <span class="chat-name">${chat.name}</span>
-                            <span class="chat-time">${chat.time}</span>
+                            <span class="chat-time">now</span>
                         </div>
                         <div class="chat-bottom">
                             <span class="chat-msg">${chat.lastMsg}</span>
                             ${unreadBadgeHTML}
+                        </div>
+                        <div style="font-size:12px; color:#999; margin-top:4px;">
+                            ${chat.msgCount} ${chat.unread > 0 ? `• ${chat.unread} unread` : ''}
                         </div>
                     </div>
                 </div>
