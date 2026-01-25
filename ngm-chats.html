@@ -321,8 +321,7 @@
             let { data: parts, error } = await sb
                 .from('ngm_chat_participants')
                 .select('*,chat:ngm_chats(*)')
-                .eq('user_id', cu.id)
-                .order('created_at', { ascending: false });
+                .eq('user_id', cu.id);
 
             if (error) throw error;
 
