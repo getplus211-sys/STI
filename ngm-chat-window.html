@@ -23,7 +23,7 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .menu-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;flex-shrink:0;border-radius:50%;transition:background 0.2s}
 .menu-btn:active{background:rgba(255,255,255,0.2)}
 .menu-btn svg{width:22px;height:22px;fill:#fff}
-.messages-area{flex:1;overflow-y:auto;padding:110px 8px 150px;background:var(--bg);scroll-behavior:smooth}
+.messages-area{flex:1;overflow-y:auto;padding:110px 8px 80px;background:var(--bg);scroll-behavior:smooth}
 .messages-area::-webkit-scrollbar{width:6px}
 .messages-area::-webkit-scrollbar-track{background:transparent}
 .messages-area::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
@@ -321,11 +321,11 @@ const msgInput=document.getElementById('msgInput');
 const inputContainer=document.querySelector('.input-container');
 let keyboardHeight=0;
 
-msgInput.addEventListener('focus',()=>{setTimeout(()=>{const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();keyboardHeight=Math.max(300,vh-ir.top);messagesArea.scrollTop=messagesArea.scrollHeight;inputContainer.style.bottom=keyboardHeight+'px'},100)});
+msgInput.addEventListener('focus',()=>{setTimeout(()=>{const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();keyboardHeight=Math.max(300,vh-ir.top);messagesArea.scrollTop=messagesArea.scrollHeight;inputContainer.style.bottom=(keyboardHeight+50)+'px'},100)});
 
-msgInput.addEventListener('blur',()=>{inputContainer.style.bottom='0px'});
+msgInput.addEventListener('blur',()=>{inputContainer.style.bottom='50px'});
 
-window.addEventListener('resize',()=>{if(document.activeElement===msgInput){const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();if(ir.top<vh-200){keyboardHeight=vh-ir.top;inputContainer.style.bottom=keyboardHeight+'px';messagesArea.scrollTop=messagesArea.scrollHeight}}});
+window.addEventListener('resize',()=>{if(document.activeElement===msgInput){const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();if(ir.top<vh-200){keyboardHeight=vh-ir.top;inputContainer.style.bottom=(keyboardHeight+50)+'px';messagesArea.scrollTop=messagesArea.scrollHeight}}});
 
 init();
 </script>
