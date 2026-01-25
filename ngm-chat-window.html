@@ -35,9 +35,9 @@ body{font-family:'Roboto',-apple-system,sans-serif;background:var(--bg);margin:0
 .message.in .msg-bubble{background:var(--msg-in);border-bottom-left-radius:2px}
 .msg-text{font-size:15px;color:#000;word-wrap:break-word;white-space:pre-wrap}
 .msg-time{font-size:11px;color:#666;margin-top:3px;text-align:right}
-.typing{padding:8px 15px;font-size:13px;color:#666;font-style:italic;position:fixed;bottom:60px;left:0;right:0;max-width:480px;margin:0 auto;background:var(--bg);z-index:90;display:none}
-.typing.raised{bottom:360px}
-.emoji-keyboard,.file-picker{position:fixed;bottom:60px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;display:none;z-index:150;border-top:1px solid #e0e0e0;box-shadow:0 -2px 5px rgba(0,0,0,0.1)}
+.typing{padding:8px 15px;font-size:13px;color:#666;font-style:italic;position:fixed;bottom:110px;left:0;right:0;max-width:480px;margin:0 auto;background:var(--bg);z-index:90;display:none}
+.typing.raised{bottom:410px}
+.emoji-keyboard,.file-picker{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;display:none;z-index:150;border-top:1px solid #e0e0e0;box-shadow:0 -2px 5px rgba(0,0,0,0.1)}
 .emoji-keyboard.show,.file-picker.show{display:flex}
 .emoji-keyboard{flex-direction:column;height:300px}
 .emoji-tabs{display:flex;border-bottom:1px solid #e0e0e0;background:#f7f7f7;overflow-x:auto}
@@ -50,7 +50,8 @@ body{font-family:'Roboto',-apple-system,sans-serif;background:var(--bg);margin:0
 .file-item{padding:15px;margin:5px 0;background:#f5f5f5;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:15px;font-weight:600;position:relative}
 .file-item input{position:absolute;opacity:0;width:100%;height:100%;left:0;top:0}
 .file-item:active{background:#e0e0e0}
-.input-bar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#f5f5f5;display:flex;align-items:center;gap:6px;padding:5px 8px;border-top:1px solid #d0d0d0;box-shadow:0 -2px 5px rgba(0,0,0,0.05);z-index:200;height:60px}
+.input-bar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--bg);display:flex;align-items:center;gap:6px;padding:5px 8px;border-top:1px solid #d0d0d0;box-shadow:0 -2px 5px rgba(0,0,0,0.05);z-index:200;height:50px;transition:bottom 0.3s ease}
+.input-bar.raised{bottom:300px}
 .emoji-btn,.attach-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;flex-shrink:0}
 .emoji-btn{font-size:22px}
 .attach-btn svg{width:20px;height:20px;fill:#999}
@@ -89,7 +90,7 @@ body{font-family:'Roboto',-apple-system,sans-serif;background:var(--bg);margin:0
 .context-item:last-child{border-bottom:none}
 .context-item:active{background:#f5f5f5}
 .empty{text-align:center;padding:40px 20px;color:#999;font-size:15px}
-.unread-badge{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--tg-blue);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;display:none;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:90;cursor:pointer}
+.unread-badge{position:fixed;bottom:200px;left:50%;transform:translateX(-50%);background:var(--tg-blue);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;display:none;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:90;cursor:pointer}
 .unread-badge.show{display:flex}
 .badge-btn{width:20px;height:20px;border-radius:50%;background:#fff;color:var(--tg-blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
 </style>
@@ -113,6 +114,7 @@ body{font-family:'Roboto',-apple-system,sans-serif;background:var(--bg);margin:0
 <button class="badge-btn">↓</button>
 <span id="unreadCount">0 new</span>
 </div>
+
 <div class="emoji-keyboard" id="emojiKeyboard">
 <div class="emoji-tabs">
 <div class="emoji-tab" onclick="switchTab('smileys')">😀 All</div>
@@ -123,11 +125,13 @@ body{font-family:'Roboto',-apple-system,sans-serif;background:var(--bg);margin:0
 </div>
 <div class="emoji-grid" id="emojiGrid"></div>
 </div>
+
 <div class="file-picker" id="filePicker">
 <div class="file-item">📷 Photo<input type="file" accept="image/*" onchange="uploadFile(this,'photo')"></div>
 <div class="file-item">🎥 Video<input type="file" accept="video/*" onchange="uploadFile(this,'video')"></div>
 <div class="file-item">📄 Document<input type="file" accept=".pdf,.doc,.docx,.txt" onchange="uploadFile(this,'document')"></div>
 </div>
+
 <div class="input-bar" id="inputBar">
 <button class="emoji-btn" onclick="toggleEmoji()">😊</button>
 <div class="input-wrapper">
@@ -137,6 +141,7 @@ body{font-family:'Roboto',-apple-system,sans-serif;background:var(--bg);margin:0
 <button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
 </div>
 </div>
+
 <div class="context-menu" id="contextMenu"></div>
 <div class="menu-modal" id="menuModal">
 <div class="menu-content">
@@ -168,6 +173,7 @@ body{font-family:'Roboto',-apple-system,sans-serif;background:var(--bg);margin:0
 </div>
 </div>
 </div>
+
 <script>
 const sb=window.supabase.createClient('https://bhmycvrbucmbbrpzeane.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4');
 let user,chatId,otherUser,selectedMsg,unreadCount=0,lastScrollH=0,isTyping=false,typingCh,typingTO;
@@ -191,9 +197,9 @@ function copyMsg(){document.getElementById('contextMenu').classList.remove('show
 function showDelModal(){document.getElementById('contextMenu').classList.remove('show');document.getElementById('deleteModal').classList.add('show')}
 function closeDeleteModal(){document.getElementById('deleteModal').classList.remove('show')}
 async function deleteForMe(){closeDeleteModal();const m=document.querySelector(`[data-id="${selectedMsg}"]`);m&&(m.style.display='none')}
-async function deleteForAll(){closeDeleteModal();await sb.from('ngm_messages').update({is_deleted:true,deleted_at:new Date().toISOString()}).eq('message_id',selectedMsg);await loadMsg
-  function toggleEmoji(){const ek=document.getElementById('emojiKeyboard'),fp=document.getElementById('filePicker'),ty=document.getElementById('typingIndicator');fp.classList.remove('show');if(ek.classList.contains('show')){ek.classList.remove('show');ty.classList.remove('raised');document.getElementById('msgInput').focus()}else{ek.classList.add('show');ty.classList.add('raised');document.getElementById('msgInput').blur()}}
-function toggleFiles(){const fp=document.getElementById('filePicker'),ek=document.getElementById('emojiKeyboard');ek.classList.remove('show');if(fp.classList.contains('show')){fp.classList.remove('show')}else{fp.classList.add('show')}}
+async function deleteForAll(){closeDeleteModal();await sb.from('ngm_messages').update({is_deleted:true,deleted_at:new Date().toISOString()}).eq('message_id',selectedMsg);await loadMsgs()}
+function toggleEmoji(){const ek=document.getElementById('emojiKeyboard'),fp=document.getElementById('filePicker'),ib=document.getElementById('inputBar'),ty=document.getElementById('typingIndicator');fp.classList.remove('show');if(ek.classList.contains('show')){ek.classList.remove('show');ib.classList.remove('raised');ty.classList.remove('raised');document.getElementById('msgInput').focus()}else{ek.classList.add('show');ib.classList.add('raised');ty.classList.add('raised');document.getElementById('msgInput').blur()}}
+function toggleFiles(){const fp=document.getElementById('filePicker'),ek=document.getElementById('emojiKeyboard'),ib=document.getElementById('inputBar');ek.classList.remove('show');if(fp.classList.contains('show')){fp.classList.remove('show');ib.classList.remove('raised')}else{fp.classList.add('show');ib.classList.add('raised')}}
 function switchTab(tab){currentTab=tab;document.querySelectorAll('.emoji-tab').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');renderEmojis()}
 function renderEmojis(){const g=document.getElementById('emojiGrid'),es=emojis[currentTab]||[];g.innerHTML=es.map(e=>`<div class="emoji-item" onclick="addEmoji('${e}')">${e}</div>`).join('')}
 function addEmoji(e){const inp=document.getElementById('msgInput');inp.value+=e;if(!emojis.recent.includes(e)){emojis.recent.unshift(e);if(emojis.recent.length>50)emojis.recent.pop();localStorage.setItem('recent_emoji',JSON.stringify(emojis.recent))}}
@@ -215,6 +221,3 @@ init();
 </script>
 </body>
 </html>
-```
-
-આ છે સંપૂર્ણ કોડ. હવે Input bar footer થી અલગ છે અને સ્વતંત્ર રીતે કામ કરશે.
