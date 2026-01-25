@@ -250,7 +250,7 @@ function scrollToBottom(){document.getElementById('messagesArea').scrollTop=9999
 
 function handleTyping(){const inp=document.getElementById('msgInput');if(inp.value.trim()){if(!isTyping){isTyping=true;typingCh&&typingCh.send({type:'broadcast',event:'typing',payload:{uid:user.id,typing:true}})}clearTimeout(typingTO);typingTO=setTimeout(()=>{isTyping=false;typingCh&&typingCh.send({type:'broadcast',event:'typing',payload:{uid:user.id,typing:false}})},1000)}else if(isTyping){isTyping=false;typingCh&&typingCh.send({type:'broadcast',event:'typing',payload:{uid:user.id,typing:false}})}}
 
-async function sendMsg(){const inp=document.getElementById('msgInput'),txt=inp.value.trim();if(!txt)return;try{await sb.from('ngm_messages').insert({chat_id:chatId,sender_id:user.id,content:txt,message_type:'text',created_at:new Date().toISOString(),message_status:'sent'});await sb.from('ngm_chats').update({last_message_at:new Date().toISOString()}).eq('chat_id',chatId);inp.value='';inp.style.height='auto';if(isTyping){isTyping=false;typingCh&&typingCh.send({type:'broadcast',event:'typing',payload:{uid:user.id,typing:false}})}await loadMsgs()}catch(e){console.error(e)}}
+async function sendMsg(){const inp=document.getElementById('msgInput'),txt=inp.value.trim();if(!txt)return;try{await sb.from('ngm_messages').insert({chat_id:chatId,sender_id:user.id,content:txt,message_type:'text',created_at:new Date().toISOString()});await sb.from('ngm_chats').update({last_message_at:new Date().toISOString()}).eq('chat_id',chatId);inp.value='';inp.style.height='auto';if(isTyping){isTyping=false;typingCh&&typingCh.send({type:'broadcast',event:'typing',payload:{uid:user.id,typing:false}})}await loadMsgs()}catch(e){console.error(e)}}
 
 async function markRead(){try{await sb.from('ngm_chat_participants').update({unread_count:0}).eq('chat_id',chatId).eq('user_id',user.id)}catch(e){}}
 
@@ -288,7 +288,7 @@ function renderEmojis(){const g=document.getElementById('emojiGrid'),es=emojis[c
 
 function addEmoji(e){const inp=document.getElementById('msgInput');inp.value+=e;if(!emojis.recent.includes(e)){emojis.recent.unshift(e);if(emojis.recent.length>50)emojis.recent.pop();localStorage.setItem('recent_emoji',JSON.stringify(emojis.recent))}}
 
-async function uploadFile(input,type){const file=input.files[0];if(file){const reader=new FileReader();reader.onload=async function(e){await sb.from('ngm_messages').insert({chat_id:chatId,sender_id:user.id,content:`[${type.toUpperCase()}] ${file.name}`,message_type:type,created_at:new Date().toISOString(),message_status:'sent'});await loadMsgs()};reader.readAsDataURL(file)}toggleFiles()}
+async function uploadFile(input,type){const file=input.files[0];if(file){const reader=new FileReader();reader.onload=async function(e){await sb.from('ngm_messages').insert({chat_id:chatId,sender_id:user.id,content:`[${type.toUpperCase()}] ${file.name}`,message_type:type,created_at:new Date().toISOString()});await loadMsgs()};reader.readAsDataURL(file)}toggleFiles()}
 
 function autoResize(t){t.style.height='auto';t.style.height=Math.min(t.scrollHeight,80)+'px'}
 
