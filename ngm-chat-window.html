@@ -119,7 +119,45 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .context-item:active{background:#f5f5f5}
 .context-icon{font-size:16px}
 .empty{text-align:center;padding:40px 20px;color:#999;font-size:15px}
-@media(max-width:480px){.footer-section{height:100px !important}.input-container{bottom:100px !important;height:60px !important}.messages-area{padding:110px 8px 180px !important}}
+@media(max-width:480px){
+  .container{height:100vh}
+  .header{height:80px;padding:0 10px 8px}
+  .header-content{width:100%}
+  .header h1{font-size:20px}
+  .header-actions{gap:12px}
+  .action-btn{font-size:18px;padding:6px}
+  .messages-area{padding:90px 6px 180px}
+  .message{margin-bottom:6px}
+  .msg-wrapper{max-width:85%}
+  .msg-bubble{padding:6px 10px;font-size:14px}
+  .msg-text{font-size:14px;line-height:1.3}
+  .msg-footer{font-size:11px;margin-top:2px}
+  .date-separator{margin:12px 0;font-size:11px}
+  .footer-section{height:100px !important;z-index:100}
+  .emoji-section{bottom:60px !important;max-height:100px}
+  .emoji-quick{font-size:20px;padding:4px;min-width:28px}
+  .input-container{bottom:100px !important;height:60px;padding:6px;gap:4px;z-index:201}
+  .emoji-btn,.attach-btn{width:32px;height:32px;font-size:18px}
+  .send-btn{width:32px;height:32px}
+  .send-btn svg{width:16px;height:16px}
+  .msg-input{font-size:14px;padding:6px 0}
+  .input-wrapper{min-height:32px;padding:0 10px}
+  .avatar{width:38px;height:38px;font-size:16px}
+  .header-info{font-size:14px}
+  .name{font-size:15px}
+  .status{font-size:12px}
+  .emoji-keyboard{height:250px}
+  .emoji-tabs{padding:6px}
+  .emoji-tab{padding:8px 12px;font-size:12px}
+  .emoji-grid{padding:6px;grid-template-columns:repeat(6,1fr);gap:2px}
+  .emoji-item{font-size:24px;padding:4px}
+  .context-menu{min-width:140px;font-size:12px}
+  .context-item{padding:8px 12px;gap:8px;font-size:12px}
+  .back-btn{width:36px;height:36px}
+  .menu-btn{width:36px;height:36px}
+  .unread-badge{font-size:12px;padding:6px 12px;bottom:65px}
+  .typing{font-size:12px;padding:6px 10px;bottom:75px}
+}
 .unread-badge{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:var(--tg-blue);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;display:none;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:90;cursor:pointer;animation:slideDown 0.2s ease-out}
 .unread-badge.show{display:flex}
 @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
