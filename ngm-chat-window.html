@@ -49,7 +49,7 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .msg-status{color:#0084ff;font-weight:600}
 .message.out .msg-status{color:#25d366}
 .typing{padding:8px 15px;font-size:13px;color:#999;font-style:italic;position:fixed;bottom:85px;left:10px;right:10px;max-width:460px;background:transparent;display:none;z-index:90;animation:fadeIn 0.2s}
-.footer-section{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;z-index:200;display:flex;flex-direction:column;height:auto;min-height:120px;box-shadow:0 -2px 8px rgba(0,0,0,0.05)}
+.footer-section{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;z-index:200;display:flex;flex-direction:column;height:auto;min-height:120px;box-shadow:0 -2px 8px rgba(0,0,0,0.05);transition:bottom 0.2s ease-out}
 .emoji-section{display:none;gap:6px;padding:8px;border-bottom:1px solid #e0e0e0;background:#fff;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth}
 .emoji-section::-webkit-scrollbar{height:4px}
 .emoji-section::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
@@ -315,6 +315,18 @@ function openProfile(){otherUser&&(location.href='ngm-user-info.html?user='+othe
 document.addEventListener('click',e=>{!e.target.closest('.context-menu')&&document.getElementById('contextMenu').classList.remove('show');!e.target.closest('.menu-content')&&!e.target.closest('.menu-btn')&&closeMenu()});
 
 document.getElementById('msgInput').addEventListener('keypress',e=>{e.key==='Enter'&&!e.shiftKey&&(e.preventDefault(),sendMsg())});
+
+// Keyboard handling for mobile
+const msgInput=document.getElementById('msgInput');
+const footerSection=document.querySelector('.footer-section');
+const messagesArea=document.getElementById('messagesArea');
+let keyboardHeight=0;
+
+msgInput.addEventListener('focus',()=>{setTimeout(()=>{const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();keyboardHeight=Math.max(300,vh-ir.top);messagesArea.scrollTop=messagesArea.scrollHeight;footerSection.style.bottom=keyboardHeight+'px'},100)});
+
+msgInput.addEventListener('blur',()=>{footerSection.style.bottom='0px'});
+
+window.addEventListener('resize',()=>{if(document.activeElement===msgInput){const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();if(ir.top<vh-200){keyboardHeight=vh-ir.top;footerSection.style.bottom=keyboardHeight+'px';messagesArea.scrollTop=messagesArea.scrollHeight}}});
 
 init();
 </script>
