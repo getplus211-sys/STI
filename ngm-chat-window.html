@@ -321,11 +321,11 @@ const msgInput=document.getElementById('msgInput');
 const inputContainer=document.querySelector('.input-container');
 let keyboardHeight=0;
 
-msgInput.addEventListener('focus',()=>{setTimeout(()=>{const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();keyboardHeight=Math.max(300,vh-ir.top);messagesArea.scrollTop=messagesArea.scrollHeight;inputContainer.style.bottom=(keyboardHeight+50)+'px'},100)});
+msgInput.addEventListener('focus',()=>{setTimeout(()=>{const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();keyboardHeight=Math.max(300,vh-ir.top);messagesArea.scrollTop=messagesArea.scrollHeight;inputContainer.style.bottom=keyboardHeight+'px';inputContainer.style.paddingBottom='0px'},100)});
 
-msgInput.addEventListener('blur',()=>{inputContainer.style.bottom='50px'});
+msgInput.addEventListener('blur',()=>{inputContainer.style.bottom='0px';inputContainer.style.paddingBottom='50px'});
 
-window.addEventListener('resize',()=>{if(document.activeElement===msgInput){const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();if(ir.top<vh-200){keyboardHeight=vh-ir.top;inputContainer.style.bottom=(keyboardHeight+50)+'px';messagesArea.scrollTop=messagesArea.scrollHeight}}});
+window.addEventListener('resize',()=>{if(document.activeElement===msgInput){const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();if(ir.top<vh-200){keyboardHeight=vh-ir.top;inputContainer.style.bottom=keyboardHeight+'px';inputContainer.style.paddingBottom='0px';messagesArea.scrollTop=messagesArea.scrollHeight}}});
 
 init();
 </script>
