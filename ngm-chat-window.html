@@ -6,34 +6,40 @@
 <title>Chat</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}body{font-family:-apple-system,sans-serif;background:#e5ddd5;padding-bottom:120px}.c{max-width:480px;margin:0 auto;min-height:100vh}
+:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,sans-serif;background:#e5ddd5;overflow-x:hidden}
+.c{max-width:480px;margin:0 auto;height:100vh;display:flex;flex-direction:column}
 
 /* --- HEADER 100px --- */
-.h{position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;height:100px;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:flex-end;padding:0 10px 15px 10px;z-index:100}.bb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none}.bb svg{width:24px;height:24px;fill:#fff}.hi{flex:1;display:flex;align-items:center;gap:12px;margin-left:5px;cursor:pointer}.ha{width:50px;height:50px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--pc);font-weight:600;overflow:hidden;flex-shrink:0}.ha img{width:100%;height:100%;object-fit:cover}.hti{flex:1;overflow:hidden}.hn{color:#fff;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hs{color:rgba(255,255,255,0.95);font-size:13px;margin-top:2px}
+.h{height:100px;background:linear-gradient(135deg,var(--pc),var(--sc));display:flex;align-items:flex-end;padding:0 10px 15px 10px;z-index:100;flex-shrink:0}
+.bb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:none;border:none}.bb svg{width:24px;height:24px;fill:#fff}
+.hi{flex:1;display:flex;align-items:center;gap:12px;margin-left:5px;cursor:pointer}
+.ha{width:50px;height:50px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--pc);font-weight:600;overflow:hidden}
+.ha img{width:100%;height:100%;object-fit:cover}
+.hti{flex:1;overflow:hidden}.hn{color:#fff;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hs{color:rgba(255,255,255,0.9);font-size:13px}
 
-.mc{padding:115px 10px 10px;min-height:100vh}
+/* --- MESSAGES AREA --- */
+.mc{flex:1;overflow-y:auto;padding:15px 10px;display:flex;flex-direction:column}
+.m{margin-bottom:10px;display:flex}.m.sent{justify-content:flex-end}.m.received{justify-content:flex-start}
+.mb{max-width:75%;padding:10px 14px;border-radius:12px;position:relative;word-wrap:break-word}
+.m.sent .mb{background:#dcf8c6;border-bottom-right-radius:2px}.m.received .mb{background:#fff;border-bottom-left-radius:2px}
+.mt{font-size:17px;color:#333;line-height:1.4}.mti{font-size:11px;color:#666;margin-top:4px;text-align:right}
 
-/* --- MESSAGES & TEXT (17px) --- */
-.m{margin-bottom:10px;display:flex}.m.sent{justify-content:flex-end}.m.received{justify-content:flex-start}.mb{max-width:75%;padding:10px 14px;border-radius:12px;position:relative;word-wrap:break-word}.m.sent .mb{background:#dcf8c6;border-bottom-right-radius:2px}.m.received .mb{background:#fff;border-bottom-left-radius:2px}.mt{font-size:17px;color:#333;line-height:1.4}.mti{font-size:11px;color:#666;margin-top:4px;text-align:right}
+/* --- EMOJI & ANIMATION --- */
+.mb.emoji-xl{background:none !important;padding:0 !important}.mb.emoji-xl .mt{font-size:60px !important;line-height:1.2;cursor:pointer;display:inline-block;transition:transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
+.mb.emoji-xl .mt:active{transform:scale(1.4) rotate(10deg)}
 
-/* --- EMOJI 60px & TELEGRAM STYLE ANIMATION --- */
-.mb.emoji-xl .mt{font-size:60px !important; line-height:1.2; cursor:pointer; display:inline-block; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-.emoji-xl { background:none !important; box-shadow:none !important; padding:0 !important; }
+/* --- FOOTER & KEYBOARD --- */
+.ic{background:#f5f5f5;padding:10px 8px;border-top:1px solid #ddd;flex-shrink:0}.it{display:flex;gap:8px;align-items:flex-end}
+.ab{width:40px;height:40px;background:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+.mitw{flex:1;background:#fff;border-radius:20px;display:flex;align-items:center}
+.mi{flex:1;padding:10px 15px;border:none;font-size:16px;resize:none;max-height:100px;overflow-y:auto;background:transparent;outline:none}
+.sb{width:40px;height:40px;background:var(--pc);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.sb svg{width:20px;height:20px;fill:#fff}
 
-/* Bounce Animation on Click/Touch */
-.emoji-bounce { animation: telegramBounce 0.5s ease !important; }
-
-@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-@keyframes telegramBounce {
-    0%, 100% { transform: scale(1); }
-    30% { transform: scale(1.4) rotate(-10deg); }
-    50% { transform: scale(1.2) rotate(10deg); }
-    70% { transform: scale(1.3) rotate(-5deg); }
-}
-
-/* --- INPUT & FOOTER --- */
-.ic{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#f5f5f5;padding:10px 8px 8px;z-index:100;border-top:1px solid #e0e0e0;min-height:95px}.it{display:flex;gap:8px;align-items:flex-end}.ab{width:40px;height:40px;background:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}.mitw{flex:1;position:relative;background:#fff;border-radius:20px;min-height:40px}.mi{flex:1;padding:10px 15px;border:none;font-size:16px;resize:none;max-height:100px;overflow-y:auto;background:transparent;width:100%}.mi:focus{outline:none}.sb{width:40px;height:40px;background:var(--pc);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}.sb svg{width:20px;height:20px;fill:#fff}
-.ek{display:none;position:fixed;bottom:95px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #e0e0e0;padding:8px;height:250px;z-index:99;overflow-y:auto}.ek.show{display:block}.eg{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}.ee{font-size:32px;text-align:center;padding:5px;cursor:pointer}
+.ek{display:none;height:280px;background:#fff;border-top:1px solid #ddd;overflow-y:auto}.ek.show{display:block}
+.eg{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;padding:10px}
+.ee{font-size:32px;text-align:center;padding:5px;cursor:pointer;user-select:none}
 </style>
 </head>
 <body>
@@ -44,72 +50,67 @@
             <div class="ha" id="chatAvatar">?</div>
             <div class="hti"><div class="hn" id="chatTitle">Loading...</div><div class="hs" id="chatStatus"></div></div>
         </div>
-        <button class="hm" style="background:none;border:none"><svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+        <div style="width:40px"></div>
     </div>
     <div class="mc" id="messagesContainer"></div>
-    <div class="ek" id="emojiKeyboard"><div class="eg" id="emojiGrid"></div></div>
     <div class="ic">
         <div class="it">
             <button class="ab">📎</button>
-            <div class="mitw"><textarea class="mi" id="messageInput" placeholder="Type a message..." rows="1" oninput="handleTyping()"></textarea></div>
-            <button class="ab" onclick="toggleEmoji()">😊</button>
+            <div class="mitw"><textarea class="mi" id="messageInput" placeholder="Type a message..." rows="1" onfocus="hideEmoji()"></textarea></div>
+            <button class="ab" onclick="toggleEmoji()" id="emojiBtn">😊</button>
             <button class="sb" onclick="sendMessage()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
         </div>
     </div>
+    <div class="ek" id="emojiKeyboard"><div class="eg" id="emojiGrid"></div></div>
 </div>
 
 <script>
 const SUPABASE_URL='https://bhmycvrbucmbbrpzeane.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let currentUser=null,chatId=null,otherUser=null;
-const allEmojis=['😀','😃','😄','😁','😆','😅','😂','🤣','☺️','😊','😇','🥰','😍','🤩','😘','😗','😚','😋','😛','😜','🤪','🤨','🧐','🤓','😎','🥳','🤡','👻','💀','👽','🤖','👍','👎','❤️','🔥','✨'];
+let currentUser, chatId, otherUser;
+const allEmojis=['😀','😃','😄','😁','😆','😅','😂','🤣','☺️','😊','😇','🥰','😍','🤩','😘','😗','😚','😋','😛','😜','🤪','🤨','🧐','🤓','😎','🥳','🤡','👻','💀','👽','🤖','👍','👎','❤️','🔥','✨','💯','🙏','👏','✔️'];
 
 async function init(){
     const {data:{user}} = await sb.auth.getUser();
-    if(!user) { window.location.href='login.html'; return; }
-    currentUser = user;
+    if(!user) return; currentUser = user;
     const params = new URLSearchParams(window.location.search);
     chatId = params.get('chat');
-    
     await loadChat();
     await loadMessages();
     initEmojis();
-    
     sb.channel('m').on('postgres_changes',{event:'INSERT',schema:'public',table:'ngm_messages',filter:`chat_id=eq.${chatId}`},loadMessages).subscribe();
-    setInterval(()=>checkOnlineStatus(), 3000);
+    setInterval(checkOnlineStatus, 3000);
 }
 
 async function loadChat(){
     const {data:chat} = await sb.from('ngm_chats').select('*').eq('chat_id',chatId).single();
     if(chat){
-        const otherUserId = (chat.user1_id === currentUser.id) ? chat.user2_id : chat.user1_id;
-        const {data:userD} = await sb.from('ngm_users').select('*').eq('user_id',otherUserId).single();
-        if(userD){
-            otherUser = userD;
-            document.getElementById('chatTitle').textContent = userD.full_name || userD.mobile;
-            document.getElementById('chatAvatar').innerHTML = userD.profile_picture_url ? `<img src="${userD.profile_picture_url}">` : `<span>${(userD.full_name||'?').charAt(0)}</span>`;
-            updateUserStatus(userD);
-        }
+        const otherId = (chat.user1_id === currentUser.id) ? chat.user2_id : chat.user1_id;
+        const {data:userD} = await sb.from('ngm_users').select('*').eq('user_id',otherId).single();
+        if(userD){ otherUser = userD; updateUIStatus(userD); }
     }
 }
 
-// અસલી સ્ટેટસ લોજિક
-function updateUserStatus(user){
-    const now = Date.now();
-    const lastSeen = user.last_seen ? new Date(user.last_seen).getTime() : 0;
-    const diff = now - lastSeen;
+function updateUIStatus(user){
+    document.getElementById('chatTitle').textContent = user.full_name || user.mobile;
+    document.getElementById('chatAvatar').innerHTML = user.profile_picture_url ? `<img src="${user.profile_picture_url}">` : `<span>${(user.full_name||'?').charAt(0)}</span>`;
+    const diff = Date.now() - new Date(user.last_seen).getTime();
     const statusEl = document.getElementById('chatStatus');
     if(diff < 15000){ statusEl.textContent = 'online'; statusEl.style.color = '#fff'; }
-    else if(diff < 60000){ statusEl.textContent = 'last seen just now'; }
-    else if(diff < 3600000){ statusEl.textContent = 'last seen '+Math.floor(diff/60000)+' min ago'; }
-    else { statusEl.textContent = 'last seen recently'; }
+    else{ statusEl.textContent = 'last seen ' + formatLastSeen(user.last_seen); statusEl.style.color = 'rgba(255,255,255,0.8)'; }
+}
+
+function formatLastSeen(date){
+    if(!date) return 'recently';
+    const d = new Date(date);
+    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
 
 async function checkOnlineStatus(){
     if(otherUser){
         const {data:user} = await sb.from('ngm_users').select('last_seen').eq('user_id',otherUser.user_id).single();
-        if(user) updateUserStatus(user);
+        if(user) updateUIStatus(user);
     }
 }
 
@@ -117,31 +118,16 @@ function renderMessages(messages){
     const container = document.getElementById('messagesContainer');
     container.innerHTML = messages.map(msg => {
         const isSent = msg.sender_id === currentUser.id;
-        const time = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        const content = msg.content.trim();
         const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\s)+$/u;
-        const isOnlyEmoji = emojiRegex.test(content) && (content.match(/\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu) || []).length === 1;
-        
-        let emojiClass = isOnlyEmoji ? 'emoji-xl' : '';
-        
+        const isOnlyEmoji = emojiRegex.test(msg.content.trim()) && (msg.content.match(/\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu) || []).length === 1;
         return `<div class="m ${isSent?'sent':'received'}">
-            <div class="mb ${emojiClass}">
-                <div class="mt" onclick="animateEmoji(this)">${msg.content}</div>
-                ${emojiClass === '' ? `<div class="mti">${time}</div>` : ''}
+            <div class="mb ${isOnlyEmoji?'emoji-xl':''}">
+                <div class="mt">${msg.content}</div>
+                ${!isOnlyEmoji ? `<div class="mti">${new Date(msg.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>` : ''}
             </div>
         </div>`;
     }).join('');
-    window.scrollTo(0, document.body.scrollHeight);
-}
-
-// Telegram Style Click Animation
-function animateEmoji(el) {
-    if(el.parentElement.classList.contains('emoji-xl')) {
-        el.classList.remove('emoji-bounce');
-        void el.offsetWidth; // Trigger reflow
-        el.classList.add('emoji-bounce');
-        setTimeout(() => el.classList.remove('emoji-bounce'), 500);
-    }
+    container.scrollTop = container.scrollHeight;
 }
 
 async function loadMessages(){
@@ -153,19 +139,22 @@ async function sendMessage(){
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
     if(!text) return;
-    const {error} = await sb.from('ngm_messages').insert({chat_id:chatId, sender_id:currentUser.id, content:text, message_type:'text', created_at:new Date().toISOString()});
-    if(!error){ input.value = ''; input.style.height = '40px'; loadMessages(); }
+    await sb.from('ngm_messages').insert({chat_id:chatId, sender_id:currentUser.id, content:text, message_type:'text'});
+    input.value = ''; loadMessages();
 }
 
 function initEmojis(){
-    const grid = document.getElementById('emojiGrid');
-    grid.innerHTML = allEmojis.map(e => `<div class="ee" onclick="addEmoji('${e}')">${e}</div>`).join('');
+    document.getElementById('emojiGrid').innerHTML = allEmojis.map(e => `<div class="ee" onclick="addEmoji('${e}')">${e}</div>`).join('');
 }
-function addEmoji(emoji){ document.getElementById('messageInput').value += emoji; document.getElementById('messageInput').focus(); }
-function handleTyping(){ const mi = document.getElementById('messageInput'); mi.style.height = '40px'; mi.style.height = Math.min(mi.scrollHeight, 100) + 'px'; }
-function toggleEmoji(){ document.getElementById('emojiKeyboard').classList.toggle('show'); }
+function addEmoji(e){ document.getElementById('messageInput').value += e; }
+function toggleEmoji(){ 
+    const ek = document.getElementById('emojiKeyboard');
+    const input = document.getElementById('messageInput');
+    if(ek.classList.contains('show')){ hideEmoji(); input.focus(); }
+    else{ ek.classList.add('show'); document.getElementById('emojiBtn').textContent = '⌨️'; input.blur(); }
+}
+function hideEmoji(){ document.getElementById('emojiKeyboard').classList.remove('show'); document.getElementById('emojiBtn').textContent = '😊'; }
 function goBack(){ window.location.href='ngm-chats.html'; }
-function openUserInfo(){ if(otherUser) window.location.href='ngm-user-info.html?user='+otherUser.user_id; }
 init();
 </script>
 </body>
