@@ -463,8 +463,6 @@
     }
 
     function openChat(chatId) {
-        // Reset unread count for this chat
-        resetUnreadCount(chatId);
         location.href = `ngm-chat-window.html?chat=${chatId}`;
     }
 
