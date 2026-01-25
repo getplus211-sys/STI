@@ -48,8 +48,8 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .message.out .msg-footer{color:#666}
 .msg-status{color:#0084ff;font-weight:600}
 .message.out .msg-status{color:#25d366}
-.typing{padding:8px 15px;font-size:13px;color:#999;font-style:italic;position:fixed;bottom:65px;left:10px;right:10px;max-width:460px;background:transparent;display:none;z-index:90;animation:fadeIn 0.2s}
-.footer-section{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;z-index:200;box-shadow:0 -2px 8px rgba(0,0,0,0.05)}
+.typing{padding:8px 15px;font-size:13px;color:#999;font-style:italic;position:fixed;bottom:85px;left:10px;right:10px;max-width:460px;background:transparent;display:none;z-index:90;animation:fadeIn 0.2s}
+.footer-section{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;z-index:200;box-shadow:0 -2px 8px rgba(0,0,0,0.05);display:flex;flex-direction:column}
 .emoji-section{display:none;gap:6px;padding:8px;border-bottom:1px solid #e0e0e0;background:#fff;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth}
 .emoji-section::-webkit-scrollbar{height:4px}
 .emoji-section::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
@@ -258,17 +258,17 @@ async function updatePresence(){try{await sb.from('ngm_users').update({last_seen
 
 function showCtx(e,mid,isOut){e.preventDefault();selectedMsg=mid;const ctx=document.getElementById('contextMenu');const items=[{icon:'😍',label:'Like',action:'likeMsg'},{icon:'➡️',label:'Forward',action:'forwardMsg'},{icon:'📋',label:'Copy',action:'copyMsg'},{icon:'✏️',label:'Edit',action:'editMsg'},{icon:'↩️',label:'Reply',action:'replyMsg'},{icon:'📌',label:'Pin',action:'pinMsg'}];if(isOut){items.push({icon:'🗑️',label:'Delete',action:'showDelModal'})}const menuHTML=items.map((item,idx)=>`<div class="context-item" onclick="${item.action}()" style="border-bottom:${idx===items.length-1?'none':'1px solid #f0f0f0'}"><span class="context-icon">${item.icon}</span><span>${item.label}</span></div>`).join('');ctx.innerHTML=menuHTML;const x=Math.min(e.pageX,window.innerWidth-200);const y=Math.min(e.pageY,window.innerHeight-300);ctx.style.left=x+'px';ctx.style.top=y+'px';ctx.classList.add('show')}
 
-function likeMsg(){document.getElementById('contextMenu').classList.remove('show');alert('👍 Liked')}
+function likeMsg(){document.getElementById('contextMenu').classList.remove('show');const m=document.querySelector(`[data-id="${selectedMsg}"]`);m&&(m.innerHTML+='<span style="font-size:20px">👍</span>')}
 
-function forwardMsg(){document.getElementById('contextMenu').classList.remove('show');alert('Message forwarded')}
+function forwardMsg(){document.getElementById('contextMenu').classList.remove('show');const m=document.querySelector(`[data-id="${selectedMsg}"] .msg-text`);if(m){const txt=m.textContent;const chats=prompt('Enter chat ID to forward:');if(chats){sb.from('ngm_messages').insert({chat_id:chats,sender_id:user.id,content:`[Forwarded] ${txt}`,message_type:'text',created_at:new Date().toISOString()}).then(()=>alert('Message forwarded!'))}}}
 
 function copyMsg(){document.getElementById('contextMenu').classList.remove('show');const m=document.querySelector(`[data-id="${selectedMsg}"] .msg-text`);m&&navigator.clipboard.writeText(m.textContent)}
 
-function editMsg(){document.getElementById('contextMenu').classList.remove('show');alert('Edit feature coming soon')}
+function editMsg(){document.getElementById('contextMenu').classList.remove('show');const m=document.querySelector(`[data-id="${selectedMsg}"] .msg-text`);if(m){const newTxt=prompt('Edit message:',m.textContent);if(newTxt){sb.from('ngm_messages').update({content:newTxt,is_edited:true,edited_at:new Date().toISOString()}).eq('message_id',selectedMsg).then(()=>loadMsgs())}}}
 
 function replyMsg(){document.getElementById('contextMenu').classList.remove('show');const m=document.querySelector(`[data-id="${selectedMsg}"] .msg-text`);document.getElementById('msgInput').value='> '+m.textContent+'\n';document.getElementById('msgInput').focus();autoResize(document.getElementById('msgInput'))}
 
-function pinMsg(){document.getElementById('contextMenu').classList.remove('show');alert('Message pinned')}
+function pinMsg(){document.getElementById('contextMenu').classList.remove('show');sb.from('ngm_messages').update({is_pinned:true}).eq('message_id',selectedMsg).then(()=>alert('Message pinned!'))}
 
 function showDelModal(){document.getElementById('contextMenu').classList.remove('show');document.getElementById('deleteModal').classList.add('show')}
 
