@@ -392,17 +392,14 @@
                     ? getSmartTime(lastMsg.created_at)
                     : '';
 
-                const msgCountDisplay = totalMsgCount > 0 ? `${totalMsgCount} msgs` : '';
-
                 const unreadBadgeHTML = p.unread_count > 0 
-                    ? `<div class="unread-badge">${p.unread_count}</div>`
+                    ? `<div style="font-size:12px; color:#25d366; font-weight:600; margin-top:4px;">${p.unread_count} unread</div>`
                     : '';
 
                 const chatObj = {
                     id: c.chat_id,
                     name: name,
                     lastMsg: lastMsgText,
-                    msgCount: msgCountDisplay,
                     time: lastMsgTime,
                     unread: p.unread_count,
                     avatarBg: avatarBg,
@@ -416,14 +413,13 @@
                         <div class="chat-info">
                             <div class="chat-top">
                                 <span class="chat-name">${name}</span>
-                                <span class="chat-time">${lastMsgTime}</span>
+                                <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                                    <span class="chat-time">${lastMsgTime}</span>
+                                    ${unreadBadgeHTML}
+                                </div>
                             </div>
                             <div class="chat-bottom">
                                 <span class="chat-msg">${lastMsgText}</span>
-                                ${unreadBadgeHTML}
-                            </div>
-                            <div style="font-size:12px; color:#999; margin-top:4px;">
-                                ${msgCountDisplay} ${p.unread_count > 0 ? `• ${p.unread_count} unread` : ''}
                             </div>
                         </div>
                     </div>
@@ -503,7 +499,7 @@
         let html = '';
         for (let chat of filtered) {
             const unreadBadgeHTML = chat.unread > 0 
-                ? `<div class="unread-badge">${chat.unread}</div>`
+                ? `<div style="font-size:12px; color:#25d366; font-weight:600; margin-top:4px;">${chat.unread} unread</div>`
                 : '';
 
             html += `
@@ -512,14 +508,13 @@
                     <div class="chat-info">
                         <div class="chat-top">
                             <span class="chat-name">${chat.name}</span>
-                            <span class="chat-time">${chat.time}</span>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                                <span class="chat-time">${chat.time}</span>
+                                ${unreadBadgeHTML}
+                            </div>
                         </div>
                         <div class="chat-bottom">
                             <span class="chat-msg">${chat.lastMsg}</span>
-                            ${unreadBadgeHTML}
-                        </div>
-                        <div style="font-size:12px; color:#999; margin-top:4px;">
-                            ${chat.msgCount} ${chat.unread > 0 ? `• ${chat.unread} unread` : ''}
                         </div>
                     </div>
                 </div>
