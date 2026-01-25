@@ -300,6 +300,32 @@
     let cu = null;
     let allChats = [];
 
+    function getSmartTime(dateString) {
+        const msgDate = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - msgDate;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'now';
+        if (diffMins < 60) return `${diffMins}m`;
+        if (diffHours < 24) return `${diffHours}h`;
+        
+        // Check if yesterday
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const msgDateOnly = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+        const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+        
+        if (msgDateOnly.getTime() === yesterdayOnly.getTime()) {
+            return 'Yesterday';
+        }
+        
+        // Otherwise show date
+        return msgDate.toLocaleDateString('gu-IN', { month: 'short', day: 'numeric' });
+    }
+
     async function init() {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { location.href = 'login.html'; return; }
@@ -378,12 +404,6 @@
                     .limit(1)
                     .single();
 
-                // Get total message count for this chat
-                const { count: totalMsgCount } = await sb
-                    .from('ngm_messages')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('chat_id', c.chat_id);
-
                 const lastMsgText = lastMsg 
                     ? lastMsg.content.substring(0, 40) 
                     : 'કોઈ મેસેજ નથી';
@@ -430,32 +450,6 @@
             list.innerHTML = '<div class="loading">Error: ' + e.message + '</div>';
             console.error(e);
         }
-    }
-
-    function getSmartTime(dateString) {
-        const msgDate = new Date(dateString);
-        const now = new Date();
-        const diffMs = now - msgDate;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-
-        if (diffMins < 1) return 'now';
-        if (diffMins < 60) return `${diffMins}m`;
-        if (diffHours < 24) return `${diffHours}h`;
-        
-        // Check if yesterday
-        const yesterday = new Date(now);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const msgDateOnly = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
-        const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
-        
-        if (msgDateOnly.getTime() === yesterdayOnly.getTime()) {
-            return 'Yesterday';
-        }
-        
-        // Otherwise show date
-        return msgDate.toLocaleDateString('gu-IN', { month: 'short', day: 'numeric' });
     }
 
     function openChat(chatId) {
