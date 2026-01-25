@@ -3,38 +3,156 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Chat</title>
+<title>Nandigram Chat</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--pc:#667eea;--sc:#764ba2}*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+:root{--pc:#667eea;--sc:#764ba2}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 body{font-family:-apple-system,sans-serif;background:#e5ddd5;padding-bottom:120px}
-.c{max-width:480px;margin:0 auto;min-height:100vh}
 
-/* --- સુધારેલું હેડર: 100px Height & Content at Bottom --- */
+/* --- HEADER 100px - Content at Bottom --- */
 .h{
     position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;
-    height:100px; /* હાઈટ વધારી */
+    height:100px;
     background:linear-gradient(135deg,var(--pc),var(--sc));
     display:flex;
-    align-items:flex-end; /* કન્ટેન્ટ નીચે રાખવા */
-    padding:0 10px 15px 10px; /* નીચેથી થોડું પેડિંગ */
+    align-items:flex-end;
+    padding:0 15px 15px;
     z-index:100;
     box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
-.bb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none}.bb svg{width:24px;height:24px;fill:#fff}.hi{flex:1;display:flex;align-items:center;gap:12px;margin-left:5px;cursor:pointer}.ha{width:50px;height:50px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--pc);font-weight:600;overflow:hidden;flex-shrink:0}.ha img{width:100%;height:100%;object-fit:cover}.hti{flex:1;overflow:hidden}.hn{color:#fff;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hs{color:rgba(255,255,255,0.95);font-size:13px;margin-top:2px}.hm{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none}.hm svg{width:22px;height:22px;fill:#fff}
+.hi{flex:1;display:flex;align-items:center;gap:12px;cursor:pointer}
+.ha{width:45px;height:45px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--pc);font-weight:600;flex-shrink:0}
+.hn{color:#fff;font-size:18px;font-weight:600}
+.hs{color:rgba(255,255,255,0.8);font-size:12px}
 
-/* મેસેજ કન્ટેનરનું પેડિંગ હેડર મુજબ વધાર્યું */
-.mc{padding:110px 10px 10px;min-height:100vh}
+/* --- MESSAGES CONTAINER --- */
+.mc{padding:115px 10px 10px; min-height:100vh}
 
-.m{margin-bottom:10px;display:flex}.m.sent{justify-content:flex-end}.m.received{justify-content:flex-start}.mb{max-width:75%;padding:8px 12px;border-radius:8px;position:relative;word-wrap:break-word}
+.m{margin-bottom:10px;display:flex}.m.sent{justify-content:flex-end}.m.received{justify-content:flex-start}
+.mb{max-width:75%;padding:8px 12px;border-radius:12px;position:relative;word-wrap:break-word;background:#fff}
+.m.sent .mb{background:#dcf8c6;border-bottom-right-radius:2px}
 
-/* --- ઈમોજી સાઈઝ 2x કરી --- */
-.mb.emoji-xl{background:none!important;padding:2px;font-size:160px;line-height:1;animation:bounce 0.6s} /* પહેલા 80 હતું હવે 160 */
-.mb.emoji-lg{background:none!important;padding:2px;font-size:120px;line-height:1;animation:bounce 0.5s} /* પહેલા 60 હતું હવે 120 */
-.mb.emoji-md{background:none!important;padding:2px;font-size:90px;line-height:1;animation:bounce 0.4s}  /* પહેલા 45 હતું હવે 90 */
-.mb.emoji-sm{font-size:60px} /* 2x */
+/* --- EMOJI 2X SIZE --- */
+.mb.emoji-xl{background:none!important; font-size:160px; line-height:1; animation:bounce 0.6s}
+.mb.emoji-lg{background:none!important; font-size:120px; line-height:1}
+.mb.emoji-md{background:none!important; font-size:90px; line-height:1}
 
-.m.sent .mb{background:#dcf8c6;border-bottom-right-radius:2px}.m.received .mb{background:#fff;border-bottom-left-radius:2px}.mt{font-size:14px;color:#333}.mti{font-size:11px;color:#666;margin-top:4px;text-align:right}@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}.ty{padding:8px 15px;font-size:13px;color:#666;font-style:italic;margin-bottom:5px}.umc{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:var(--pc);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;display:none;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:98}.ua{width:24px;height:24px;border-radius:50%;background:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--pc)}.uc{font-weight:500}.da{width:24px;height:24px;border-radius:50%;background:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--pc);transform:rotate(180deg)}.ic{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#f5f5f5;padding:10px 8px 8px;z-index:100;border-top:1px solid #e0e0e0;min-height:95px}.it{display:flex;gap:8px;align-items:flex-end}.ab{width:40px;height:40px;background:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;flex-shrink:0}.mitw{flex:1;position:relative;background:#fff;border-radius:20px;min-height:40px;max-height:120px;display:flex;align-items:center}.mi{flex:1;padding:10px 15px;border:none;font-size:14px;resize:none;max-height:100px;overflow-y:auto;background:transparent;font-family:inherit}.mi:focus{outline:none}.sb{width:40px;height:40px;background:var(--pc);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}.sb svg{width:20px;height:20px;fill:#fff}.ek{display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #e0e0e0;padding:8px;height:280px;z-index:99;overflow-x:hidden;overflow-y:auto}.ek.show{display:block}.et{display:flex;gap:6px;margin-bottom:6px;border-bottom:1px solid #f0f0f0;padding-bottom:6px}.ett{padding:5px 12px;background:#f0f0f0;border-radius:12px;font-size:12px;cursor:pointer}.ett.active{background:var(--pc);color:#fff}.eg{display:grid;grid-template-columns:repeat(10,1fr);gap:2px}.ee{font-size:30px;padding:2px;cursor:pointer;text-align:center;border-radius:4px;transition:background 0.15s;user-select:none;line-height:1}.ee:active{background:#e0e0e0}.ctx{position:fixed;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:8px 0;z-index:1000;display:none;min-width:180px}.ctx.show{display:block}.cti{padding:12px 20px;font-size:14px;color:#333;cursor:pointer;border-bottom:1px solid #f0f0f0}.cti:last-child{border-bottom:none}.cti:active{background:#f5f5f5}.mm{position:fixed;top:0;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center}.mm.show{display:flex}.mmc{background:#fff;border-radius:12px;padding:20px;width:90%;max-width:400px}.mmt{font-size:18px;font-weight:600;margin-bottom:15px}.mmi{padding:12px 20px;margin:5px 0;cursor:pointer;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;gap:10px}.mmi:active{background:#e0e0e0}.tc{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}.tcc{width:100%;padding:20px 10px;background:#f5f5f5;border-radius:8px;cursor:pointer;text-align:center;border:2px solid transparent}.tcc.active{border-color:var(--pc);background:#e8eaff}.tct{font-size:11px;margin-top:5px;color:#666}.dm{position:fixed;top:0;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:rgba(0,0,0,0.5);z-index:201;display:none;align-items:center;justify-content:center}.dm.show{display:flex}.dmc{background:#fff;border-radius:12px;padding:20px;width:90%;max-width:350px;text-align:center}.dmt{font-size:18px;font-weight:600;margin-bottom:15px}.dmb{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}.dbtn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;flex:1;min-width:80px}.dbtn.cancel{background:#f0f0f0;color:#333}.dbtn.delete{background:#ff4444;color:#fff}.fp{position:fixed;bottom:95px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #e0e0e0;padding:15px;z-index:99;display:none}.fp.show{display:block}.fpi{padding:15px;margin:5px 0;background:#f5f5f5;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:15px;position:relative}.fpi input{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer}.fpi:active{background:#e0e0e0}.empty{text-align:center;padding:40px 20px;color:#999}.loading{text-align:center;padding:20px;color:#999}
+.mt{font-size:15px;color:#000}.mti{font-size:10px;color:#888;text-align:right;margin-top:4px}
+
+/* --- INPUT AREA --- */
+.ic{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#f0f0f0;padding:10px;z-index:100;display:flex;gap:8px;align-items:center}
+.mitw{flex:1;background:#fff;border-radius:25px;padding:5px 15px}
+.mi{width:100%;border:none;outline:none;font-size:15px;min-height:30px;background:transparent}
+.sb{width:45px;height:45px;background:var(--pc);border:none;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+.loading{text-align:center;padding:50px;color:gray}
 </style>
 </head>
+<body>
+
+<div class="h">
+    <div class="hi" onclick="history.back()">
+        <div class="ha" id="chatAvatar">?</div>
+        <div>
+            <div class="hn" id="chatTitle">Loading...</div>
+            <div class="hs" id="chatStatus">online</div>
+        </div>
+    </div>
+</div>
+
+<div class="mc" id="messagesContainer">
+    <div class="loading">મેસેજ લોડ થઈ રહ્યા છે...</div>
+</div>
+
+<div class="ic">
+    <div class="mitw">
+        <textarea class="mi" id="messageInput" placeholder="મેસેજ લખો..." rows="1"></textarea>
+    </div>
+    <button class="sb" onclick="sendMessage()">➤</button>
+</div>
+
+<script>
+const U='https://bhmycvrbucmbbrpzeane.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+const sb=supabase.createClient(U,K);
+let cu, chatId;
+
+async function init(){
+    const {data:{user}} = await sb.auth.getUser();
+    if(!user) { location.href='login.html'; return; }
+    cu = user;
+
+    const params = new URLSearchParams(window.location.search);
+    chatId = params.get('chat');
+    
+    if(!chatId) { location.href='ngm-chats.html'; return; }
+
+    loadChatHeader();
+    loadMessages();
+    
+    // Realtime subscription
+    sb.channel('msgs').on('postgres_changes',{event:'INSERT',schema:'public',table:'ngm_messages',filter:`chat_id=eq.${chatId}`},loadMessages).subscribe();
+}
+
+async function loadChatHeader(){
+    // Simple fetch to avoid relationship errors
+    const {data:chat} = await sb.from('ngm_chats').select('*').eq('chat_id',chatId).single();
+    if(chat){
+        const otherId = (chat.user1_id === cu.id) ? chat.user2_id : chat.user1_id;
+        const {data:user} = await sb.from('ngm_users').select('full_name').eq('user_id',otherId).single();
+        document.getElementById('chatTitle').textContent = user?.full_name || "User";
+        document.getElementById('chatAvatar').textContent = (user?.full_name || "U").charAt(0);
+    }
+}
+
+async function loadMessages(){
+    const {data:msgs, error} = await sb.from('ngm_messages').select('*').eq('chat_id',chatId).order('created_at',{ascending:true});
+    if(error) { console.error(error); return; }
+    
+    const container = document.getElementById('messagesContainer');
+    container.innerHTML = msgs.map(m => {
+        const isSent = m.sender_id === cu.id;
+        const time = new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        
+        // Emoji Logic
+        const emojiCount = m.content.match(/[\p{Emoji}]/gu)?.length || 0;
+        const textOnly = m.content.replace(/[\p{Emoji}\s]/gu, '').length;
+        let emojiCls = '';
+        if(textOnly === 0){
+            if(emojiCount === 1) emojiCls = ' emoji-xl';
+            else if(emojiCount === 2) emojiCls = ' emoji-lg';
+            else if(emojiCount === 3) emojiCls = ' emoji-md';
+        }
+
+        return `<div class="m ${isSent?'sent':'received'}">
+            <div class="mb ${emojiCls}">
+                <div class="mt">${m.content}</div>
+                ${emojiCls==='' ? `<div class="mti">${time}</div>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+async function sendMessage(){
+    const input = document.getElementById('messageInput');
+    const val = input.value.trim();
+    if(!val) return;
+    
+    const {error} = await sb.from('ngm_messages').insert({
+        chat_id: chatId,
+        sender_id: cu.id,
+        content: val
+    });
+
+    if(!error) {
+        input.value = '';
+        loadMessages();
+    }
+}
+
+init();
+</script>
+</body>
+</html>
