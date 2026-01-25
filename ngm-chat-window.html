@@ -361,11 +361,11 @@ const inputContainer=document.querySelector('.input-container');
 const messagesArea=document.getElementById('messagesArea');
 let keyboardHeight=0;
 
-msgInput.addEventListener('focus',()=>{setTimeout(()=>{const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();keyboardHeight=Math.max(300,vh-ir.top);messagesArea.scrollTop=messagesArea.scrollHeight;inputContainer.style.position='fixed';inputContainer.style.bottom=(keyboardHeight+100)+'px'},100)});
+msgInput.addEventListener('focus',()=>{setTimeout(()=>{const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();keyboardHeight=Math.max(300,vh-ir.top);messagesArea.scrollTop=messagesArea.scrollHeight;inputContainer.style.position='fixed';inputContainer.style.bottom=(keyboardHeight+110)+'px'},100)});
 
-msgInput.addEventListener('blur',()=>{inputContainer.style.position='fixed';inputContainer.style.bottom='100px'});
+msgInput.addEventListener('blur',()=>{inputContainer.style.position='fixed';inputContainer.style.bottom="110px"});
 
-window.addEventListener('resize',()=>{if(document.activeElement===msgInput){const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();if(ir.top<vh-200){keyboardHeight=vh-ir.top;inputContainer.style.position='fixed';inputContainer.style.bottom=(keyboardHeight+100)+'px';messagesArea.scrollTop=messagesArea.scrollHeight}}});
+window.addEventListener('resize',()=>{if(document.activeElement===msgInput){const vh=window.innerHeight;const ir=msgInput.getBoundingClientRect();if(ir.top<vh-200){keyboardHeight=vh-ir.top;inputContainer.style.position='fixed';inputContainer.style.bottom=(keyboardHeight+110)+'px';messagesArea.scrollTop=messagesArea.scrollHeight}}});
 
 init();
 </script>
