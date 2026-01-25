@@ -440,7 +440,21 @@
     }
 
     function openChat(chatId) {
-        location.href = `ngm-chat-window.html?chat=${chatId}`;
+        // Reset unread count for this chat
+        resetUnreadCount(chatId);
+        location.href = `ngm-chat-refined.html?chat=${chatId}`;
+    }
+
+    async function resetUnreadCount(chatId) {
+        try {
+            const { error } = await sb.rpc('reset_unread_count', {
+                p_chat_id: chatId,
+                p_user_id: cu.id
+            });
+            if (error) console.error('Reset unread error:', error);
+        } catch (e) {
+            console.error('Error resetting unread:', e);
+        }
     }
 
     function toggleSearch() {
