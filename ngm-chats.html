@@ -419,6 +419,10 @@
                     ? getSmartTime(lastMsg.created_at)
                     : '';
 
+                const unreadBadgeHTML = p.unread_count > 0 
+                    ? `<div style="width:24px; height:24px; background:#0088cc; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; margin-top:4px;">${p.unread_count}</div>`
+                    : '';
+
                 const chatObj = {
                     id: c.chat_id,
                     name: name,
@@ -436,7 +440,10 @@
                         <div class="chat-info">
                             <div class="chat-top">
                                 <span class="chat-name">${name}</span>
-                                <span class="chat-time">${lastMsgTime}</span>
+                                <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                                    <span class="chat-time">${lastMsgTime}</span>
+                                    ${unreadBadgeHTML}
+                                </div>
                             </div>
                             <div class="chat-bottom">
                                 <span class="chat-msg">${lastMsgText}</span>
@@ -490,13 +497,20 @@
 
         let html = '';
         for (let chat of filtered) {
+            const unreadBadgeHTML = chat.unread > 0 
+                ? `<div style="width:24px; height:24px; background:#0088cc; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; margin-top:4px;">${chat.unread}</div>`
+                : '';
+
             html += `
                 <div class="chat-item" onclick="openChat('${chat.id}')">
                     <div class="avatar" style="background:${chat.avatarBg}">${chat.avatar}</div>
                     <div class="chat-info">
                         <div class="chat-top">
                             <span class="chat-name">${chat.name}</span>
-                            <span class="chat-time">${chat.time}</span>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                                <span class="chat-time">${chat.time}</span>
+                                ${unreadBadgeHTML}
+                            </div>
                         </div>
                         <div class="chat-bottom">
                             <span class="chat-msg">${chat.lastMsg}</span>
