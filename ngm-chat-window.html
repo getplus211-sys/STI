@@ -12,78 +12,82 @@
 <body>
 <div class="c">
 <div class="h">
-<button class="bb" onclick="gb()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-<div class="hi" onclick="oui()">
-<div class="ha" id="ha">?</div>
-<div class="ht"><div class="hn" id="hn">Loading...</div><div class="hs" id="hs"></div></div>
+<button class="bb" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+<div class="hi" onclick="openUserInfo()">
+<div class="ha" id="chatAvatar">?</div>
+<div class="ht"><div class="hn" id="chatTitle">Loading...</div><div class="hs" id="chatStatus"></div></div>
 </div>
-<button class="hm" onclick="sm()"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+<button class="hm" onclick="showMenu()"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
 </div>
-<div class="mc" id="mc"><div class="loading">Loading messages...</div></div>
-<div class="ek" id="ek">
-<div class="eg" id="eg"></div>
+<div class="mc" id="messagesContainer"><div class="loading">Loading messages...</div></div>
+<div class="ek" id="emojiKeyboard">
+<div class="eg" id="emojiGrid"></div>
 </div>
 <div class="ic">
-<div class="umc" id="umc" style="display:none">
-<button class="ua" onclick="su()">↑</button>
-<span class="uc" id="uc">0 new messages</span>
-<button class="da" onclick="sd()">↑</button>
+<div class="umc" id="unreadMsgCounter" style="display:none">
+<button class="ua" onclick="scrollToBottom()">↑</button>
+<span class="uc" id="unreadCount">0 new messages</span>
+<button class="da" onclick="scrollToTop()">↑</button>
 </div>
 <div class="it">
-<button class="ab" onclick="tf()">📎</button>
+<button class="ab" onclick="showFilePicker()">📎</button>
 <div class="mitw">
-<textarea class="mi" id="mi" placeholder="Type a message..." rows="1"></textarea>
+<textarea class="mi" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
 </div>
-<button class="ab" onclick="te()" id="eb">😊</button>
-<button class="sb" id="sbn" onclick="smd()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+<button class="ab" onclick="toggleEmoji()" id="emojiBtn">😊</button>
+<button class="sb" id="sendBtn" onclick="sendMessage()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
 </div>
 </div>
 </div>
-<div class="ctx" id="ctx"></div>
-<div class="mm" id="mm">
+<div class="ctx" id="contextMenu"></div>
+<div class="mm" id="menuModal">
 <div class="mmc">
 <div class="mmt">Chat Options</div>
-<div class="mmi" onclick="tn()">🔔 Mute Notifications</div>
-<div class="mmi" onclick="dc()">🗑️ Delete Chat</div>
-<div class="mmi" onclick="ct()">🎨 Change Theme</div>
-<div class="mmi" onclick="cm()">✖️ Close</div>
+<div class="mmi" onclick="muteNotifications()">🔔 Mute Notifications</div>
+<div class="mmi" onclick="deleteChat()">🗑️ Delete Chat</div>
+<div class="mmi" onclick="changeTheme()">🎨 Change Theme</div>
+<div class="mmi" onclick="closeMenu()">✖️ Close</div>
 </div>
 </div>
 <script>
-const U='https://bhmycvrbucmbbrpzeane.supabase.co',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4',sb=window.supabase.createClient(U,K);
-let cu,cid,ou,ct,rm=null,sm_id=null,um=0,lsh=0;
-const es=['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
-(()=>{const t={purple:{primary:'#667eea',secondary:'#764ba2'},blue:{primary:'#4facfe',secondary:'#00f2fe'},pink:{primary:'#f093fb',secondary:'#f5576c'},green:{primary:'#43e97b',secondary:'#38f9d7'},orange:{primary:'#fa709a',secondary:'#fee140'},red:{primary:'#ff6b6b',secondary:'#ee5a6f'},teal:{primary:'#2bcbba',secondary:'#45caff'},indigo:{primary:'#4776e6',secondary:'#8e54e9'}},th=localStorage.getItem('nandigram_theme')||'purple';if(t[th]){document.documentElement.style.setProperty('--pc',t[th].primary);document.documentElement.style.setProperty('--sc',t[th].secondary)}})();
-async function init(){await ca();if(!cu){window.location.href='login.html';return}const p=new URLSearchParams(window.location.search);cid=p.get('chat');if(!cid){window.location.href='ngm-chats.html';return}await lc();await lm();subs();setInterval(()=>ups(),10000);ie();lsh=document.getElementById('mc').scrollHeight}
-async function ca(){const{data:{user}}=await sb.auth.getUser();if(user){cu=user}else{cu=null;window.location.href='login.html'}}
-async function lc(){try{const{data:c}=await sb.from('ngm_chats').select('*').eq('chat_id',cid).single();if(!c)return;ct=c.chat_type;if(ct==='personal'){const oid=c.user1_id===cu.id?c.user2_id:c.user1_id;const{data:u}=await sb.from('ngm_users').select('*').eq('user_id',oid).single();ou=u;if(u){document.getElementById('hn').textContent=u.full_name||u.mobile||'Unknown';const in1=u.full_name?u.full_name.charAt(0).toUpperCase():'?';document.getElementById('ha').innerHTML=u.profile_picture_url?`<img src="${u.profile_picture_url}">`:`<span>${in1}</span>`;uss(u)}}else if(ct==='group'){const{data:g}=await sb.from('ngm_groups').select('*').eq('chat_id',cid).single();if(g){document.getElementById('hn').textContent=g.group_name;document.getElementById('ha').innerHTML='👥';const{data:mc}=await sb.from('ngm_chat_participants').select('*',{count:'exact'}).eq('chat_id',cid).eq('is_active',true);document.getElementById('hs').textContent=`${mc.length||0} members`}}else if(ct==='channel'){const{data:ch}=await sb.from('ngm_channels').select('*').eq('chat_id',cid).single();if(ch){document.getElementById('hn').textContent=ch.channel_name;document.getElementById('ha').innerHTML='📢';document.getElementById('hs').textContent=`${ch.subscriber_count||0} subscribers`}}}catch(e){console.error(e)}}
-function uss(u){if(u.is_online){document.getElementById('hs').textContent='online'}else if(u.last_seen){const ls=new Date(u.last_seen),n=new Date(),df=n-ls;if(df<60000)document.getElementById('hs').textContent='last seen just now';else if(df<3600000)document.getElementById('hs').textContent=`last seen ${Math.floor(df/60000)}m ago';else if(df<86400000)document.getElementById('hs').textContent=`last seen ${Math.floor(df/3600000)}h ago`;else document.getElementById('hs').textContent=`last seen ${Math.floor(df/86400000)}d ago`}else{document.getElementById('hs').textContent='offline'}}
-async function lm(){try{const{data:ms}=await sb.from('ngm_messages').select('*').eq('chat_id',cid).order('created_at',{ascending:true});rms(ms||[]);await umr()}catch(e){console.error(e);document.getElementById('mc').innerHTML='<div class="empty">Error loading messages</div>'}}
-function rms(ms){const con=document.getElementById('mc');if(ms.length===0){con.innerHTML='<div class="empty">No messages yet. Start the conversation!</div>';return}con.innerHTML=ms.map(m=>{const is=m.sender_id===cu.id,tm=new Date(m.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),del=m.is_deleted?'<i>Message deleted</i>':m.content,ieo=/^[\p{Emoji}\s]+$/u.test(m.content)&&m.content.length<=10,eoc=ieo?' emoji-only':'';return`<div class="m ${is?'sent':'received'}" data-mid="${m.message_id}" oncontextmenu="scm(event,'${m.message_id}',${is})"><div class="mb${eoc}"><div class="mt">${del}</div>${!ieo?`<div class="mti">${tm}${is&&m.is_read?' ✓✓':''}</div>`:''}</div></div>`}).join('');const osh=lsh;con.scrollTop=con.scrollHeight;const nsh=con.scrollHeight;if(nsh>osh&&nsh-osh>100)unm();lsh=nsh}
-function unm(){um++;document.getElementById('uc').textContent=`${um} new message${um>1?'s':''}`;document.getElementById('umc').style.display='flex'}
-function su(){const con=document.getElementById('mc');con.scrollTop=con.scrollHeight;um=0;document.getElementById('umc').style.display='none'}
-function sd(){const con=document.getElementById('mc');con.scrollTop=0}
-async function smd(){const inp=document.getElementById('mi'),txt=inp.value.trim();if(!txt)return;try{const{error}=await sb.from('ngm_messages').insert({chat_id:cid,sender_id:cu.id,content:txt,message_type:'text',created_at:new Date().toISOString()});if(!error){await sb.from('ngm_chats').update({last_message_at:new Date().toISOString()}).eq('chat_id',cid);inp.value='';inp.style.height='auto';await lm()}}catch(e){console.error(e)}}
-async function umr(){try{const{data:ms}=await sb.from('ngm_messages').select('message_id').eq('chat_id',cid).eq('is_read',false).neq('sender_id',cu.id);if(ms&&ms.length>0){const mids=ms.map(m=>m.message_id);await sb.from('ngm_messages').update({is_read:true,read_at:new Date().toISOString()}).in('message_id',mids);await sb.from('ngm_chat_participants').update({unread_count:0}).eq('chat_id',cid).eq('user_id',cu.id)}}catch(e){console.error(e)}}
-async function ups(){try{await sb.from('ngm_users').update({last_seen:new Date().toISOString(),is_online:true}).eq('user_id',cu.id)}catch(e){console.error(e)}}
-function scm(e,mid,is){e.preventDefault();sm_id=mid;const ctx=document.getElementById('ctx');ctx.innerHTML=`<div class="cti" onclick="ctxa('copy')">Copy</div>${is?'<div class="cti" onclick="ctxa(\'delete\')">Delete</div>':''}`;ctx.style.left=e.pageX+'px';ctx.style.top=e.pageY+'px';ctx.classList.add('show')}
-async function ctxa(a){document.getElementById('ctx').classList.remove('show');if(a==='delete'&&sm_id){await sb.from('ngm_messages').update({is_deleted:true,deleted_at:new Date().toISOString()}).eq('message_id',sm_id);await lm()}else if(a==='copy'){const m=document.querySelector(`[data-mid="${sm_id}"] .mt`);if(m)navigator.clipboard.writeText(m.textContent)}}
-function te(){document.getElementById('ek').classList.toggle('show')}
-function ie(){const eg=document.getElementById('eg');eg.innerHTML=es.map(e=>`<div class="ee" onclick="ae('${e}')">${e}</div>`).join('')}
-function ae(e){const inp=document.getElementById('mi');inp.value+=e;inp.focus();document.getElementById('ek').classList.remove('show')}
-function tf(){alert('File: Photo, Video, Document, Location')}
-function sm(){document.getElementById('mm').classList.add('show')}
-function cm(){document.getElementById('mm').classList.remove('show')}
-function tn(){alert('Notifications muted');cm()}
-async function dc(){if(confirm('Delete this chat?')){try{await sb.from('ngm_messages').delete().eq('chat_id',cid);await sb.from('ngm_chat_participants').delete().eq('chat_id',cid);await sb.from('ngm_chats').delete().eq('chat_id',cid);window.location.href='ngm-chats.html'}catch(e){console.error(e)}}}
-function ct(){const ts=['purple','blue','pink','green','orange','red','teal','indigo'];const c=prompt('Theme:\n'+ts.map((t,i)=>`${i+1}. ${t}`).join('\n'));if(c&&ts[parseInt(c)-1]){localStorage.setItem('nandigram_theme',ts[parseInt(c)-1]);location.reload()}}
-function oui(){if(ou)window.location.href=`ngm-user-info.html?user=${ou.user_id}`}
-function subs(){sb.channel('messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'ngm_messages',filter:`chat_id=eq.${cid}`},()=>lm()).subscribe()}
-function gb(){window.location.href='ngm-chats.html'}
-const mii=document.getElementById('mi');mii.addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px'});
-mii.addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();smd()}});
-document.addEventListener('click',()=>document.getElementById('ctx').classList.remove('show'));
-document.addEventListener('copy',e=>e.preventDefault());document.addEventListener('paste',e=>e.preventDefault());
+const SUPABASE_URL='https://bhmycvrbucmbbrpzeane.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null,chatId=null,otherUser=null,chatType=null,selectedMsgId=null,unreadMsgCount=0,lastScrollHeight=0;
+const emojis=['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾'];
+(function(){const themes={purple:{primary:'#667eea',secondary:'#764ba2'},blue:{primary:'#4facfe',secondary:'#00f2fe'},pink:{primary:'#f093fb',secondary:'#f5576c'},green:{primary:'#43e97b',secondary:'#38f9d7'},orange:{primary:'#fa709a',secondary:'#fee140'},red:{primary:'#ff6b6b',secondary:'#ee5a6f'},teal:{primary:'#2bcbba',secondary:'#45caff'},indigo:{primary:'#4776e6',secondary:'#8e54e9'}};const theme=localStorage.getItem('nandigram_theme')||'purple';if(themes[theme]){document.documentElement.style.setProperty('--pc',themes[theme].primary);document.documentElement.style.setProperty('--sc',themes[theme].secondary)}})();
+async function init(){await checkAuth();if(!currentUser){window.location.href='login.html';return}const params=new URLSearchParams(window.location.search);chatId=params.get('chat');if(!chatId){window.location.href='ngm-chats.html';return}await loadChat();await loadMessages();subscribeToMessages();setInterval(()=>updatePresence(),10000);initEmojis();lastScrollHeight=document.getElementById('messagesContainer').scrollHeight}
+async function checkAuth(){const{data:{user}}=await sb.auth.getUser();if(user){currentUser=user}else{currentUser=null;window.location.href='login.html'}}
+async function loadChat(){try{const{data:chat}=await sb.from('ngm_chats').select('*').eq('chat_id',chatId).single();if(!chat)return;chatType=chat.chat_type;if(chatType==='personal'){const otherUserId=chat.user1_id===currentUser.id?chat.user2_id:chat.user1_id;const{data:user}=await sb.from('ngm_users').select('*').eq('user_id',otherUserId).single();otherUser=user;if(user){document.getElementById('chatTitle').textContent=user.full_name||user.mobile||'Unknown';const initial=user.full_name?user.full_name.charAt(0).toUpperCase():'?';document.getElementById('chatAvatar').innerHTML=user.profile_picture_url?`<img src="${user.profile_picture_url}">`:`<span>${initial}</span>`;updateUserStatus(user)}}else if(chatType==='group'){const{data:group}=await sb.from('ngm_groups').select('*').eq('chat_id',chatId).single();if(group){document.getElementById('chatTitle').textContent=group.group_name;document.getElementById('chatAvatar').innerHTML='👥';const{data:members}=await sb.from('ngm_chat_participants').select('*',{count:'exact'}).eq('chat_id',chatId).eq('is_active',true);document.getElementById('chatStatus').textContent=`${members.length||0} members`}}else if(chatType==='channel'){const{data:channel}=await sb.from('ngm_channels').select('*').eq('chat_id',chatId).single();if(channel){document.getElementById('chatTitle').textContent=channel.channel_name;document.getElementById('chatAvatar').innerHTML='📢';document.getElementById('chatStatus').textContent=`${channel.subscriber_count||0} subscribers`}}}catch(e){console.error(e)}}
+function updateUserStatus(user){if(user.is_online){document.getElementById('chatStatus').textContent='online'}else if(user.last_seen){const lastSeen=new Date(user.last_seen);const now=new Date();const diff=now-lastSeen;if(diff<60000){document.getElementById('chatStatus').textContent='last seen just now'}else if(diff<3600000){document.getElementById('chatStatus').textContent='last seen '+Math.floor(diff/60000)+' min ago'}else if(diff<86400000){document.getElementById('chatStatus').textContent='last seen '+Math.floor(diff/3600000)+' hr ago'}else{document.getElementById('chatStatus').textContent='last seen '+Math.floor(diff/86400000)+' days ago'}}else{document.getElementById('chatStatus').textContent='offline'}}
+async function loadMessages(){try{const{data:messages}=await sb.from('ngm_messages').select('*').eq('chat_id',chatId).order('created_at',{ascending:true});renderMessages(messages||[]);await markMessagesAsRead()}catch(e){console.error(e);document.getElementById('messagesContainer').innerHTML='<div class="empty">Error loading messages</div>'}}
+function renderMessages(messages){const container=document.getElementById('messagesContainer');if(messages.length===0){container.innerHTML='<div class="empty">No messages yet. Start the conversation!</div>';return}container.innerHTML=messages.map(msg=>{const isSent=msg.sender_id===currentUser.id;const time=new Date(msg.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});const content=msg.is_deleted?'<i>Message deleted</i>':msg.content;const isEmojiOnly=/^[\p{Emoji}\s]+$/u.test(msg.content)&&msg.content.length<=10;const emojiClass=isEmojiOnly?' emoji-only':'';return`<div class="m ${isSent?'sent':'received'}" data-mid="${msg.message_id}" oncontextmenu="showContextMenu(event,'${msg.message_id}',${isSent})"><div class="mb${emojiClass}"><div class="mt">${content}</div>${!isEmojiOnly?`<div class="mti">${time}${isSent&&msg.is_read?' ✓✓':''}</div>`:''}</div></div>`}).join('');const oldScrollHeight=lastScrollHeight;container.scrollTop=container.scrollHeight;const newScrollHeight=container.scrollHeight;if(newScrollHeight>oldScrollHeight&&newScrollHeight-oldScrollHeight>100){showUnreadCounter()}lastScrollHeight=newScrollHeight}
+function showUnreadCounter(){unreadMsgCount++;document.getElementById('unreadCount').textContent=unreadMsgCount+' new message'+(unreadMsgCount>1?'s':'');document.getElementById('unreadMsgCounter').style.display='flex'}
+function scrollToBottom(){const container=document.getElementById('messagesContainer');container.scrollTop=container.scrollHeight;unreadMsgCount=0;document.getElementById('unreadMsgCounter').style.display='none'}
+function scrollToTop(){const container=document.getElementById('messagesContainer');container.scrollTop=0}
+async function sendMessage(){const input=document.getElementById('messageInput');const text=input.value.trim();if(!text)return;try{const{error}=await sb.from('ngm_messages').insert({chat_id:chatId,sender_id:currentUser.id,content:text,message_type:'text',created_at:new Date().toISOString()});if(!error){await sb.from('ngm_chats').update({last_message_at:new Date().toISOString()}).eq('chat_id',chatId);input.value='';input.style.height='auto';await loadMessages()}}catch(e){console.error(e)}}
+async function markMessagesAsRead(){try{const{data:unreadMessages}=await sb.from('ngm_messages').select('message_id').eq('chat_id',chatId).eq('is_read',false).neq('sender_id',currentUser.id);if(unreadMessages&&unreadMessages.length>0){const messageIds=unreadMessages.map(m=>m.message_id);await sb.from('ngm_messages').update({is_read:true,read_at:new Date().toISOString()}).in('message_id',messageIds);await sb.from('ngm_chat_participants').update({unread_count:0}).eq('chat_id',chatId).eq('user_id',currentUser.id)}}catch(e){console.error(e)}}
+async function updatePresence(){try{await sb.from('ngm_users').update({last_seen:new Date().toISOString(),is_online:true}).eq('user_id',currentUser.id)}catch(e){console.error(e)}}
+function showContextMenu(e,msgId,isSent){e.preventDefault();selectedMsgId=msgId;const ctx=document.getElementById('contextMenu');ctx.innerHTML='<div class="cti" onclick="copyMessage()">Copy</div>'+(isSent?'<div class="cti" onclick="deleteMessage()">Delete</div>':'');ctx.style.left=e.pageX+'px';ctx.style.top=e.pageY+'px';ctx.classList.add('show')}
+async function deleteMessage(){document.getElementById('contextMenu').classList.remove('show');if(selectedMsgId){await sb.from('ngm_messages').update({is_deleted:true,deleted_at:new Date().toISOString()}).eq('message_id',selectedMsgId);await loadMessages()}}
+function copyMessage(){document.getElementById('contextMenu').classList.remove('show');const msgElement=document.querySelector(`[data-mid="${selectedMsgId}"] .mt`);if(msgElement)navigator.clipboard.writeText(msgElement.textContent)}
+function toggleEmoji(){document.getElementById('emojiKeyboard').classList.toggle('show')}
+function initEmojis(){const grid=document.getElementById('emojiGrid');grid.innerHTML=emojis.map(e=>`<div class="ee" onclick="addEmoji('${e}')">${e}</div>`).join('')}
+function addEmoji(emoji){const input=document.getElementById('messageInput');input.value+=emoji;input.focus();document.getElementById('emojiKeyboard').classList.remove('show')}
+function showFilePicker(){alert('File picker: Photo, Video, Document, Location')}
+function showMenu(){document.getElementById('menuModal').classList.add('show')}
+function closeMenu(){document.getElementById('menuModal').classList.remove('show')}
+function muteNotifications(){alert('Notifications muted for this chat');closeMenu()}
+async function deleteChat(){if(confirm('Delete this chat?')){try{await sb.from('ngm_messages').delete().eq('chat_id',chatId);await sb.from('ngm_chat_participants').delete().eq('chat_id',chatId);await sb.from('ngm_chats').delete().eq('chat_id',chatId);window.location.href='ngm-chats.html'}catch(e){console.error(e);alert('Error deleting chat')}}}
+function changeTheme(){const themes=['purple','blue','pink','green','orange','red','teal','indigo'];const choice=prompt('Choose theme:\n'+themes.map((t,i)=>(i+1)+'. '+t).join('\n'));if(choice&&themes[parseInt(choice)-1]){localStorage.setItem('nandigram_theme',themes[parseInt(choice)-1]);location.reload()}}
+function openUserInfo(){if(otherUser)window.location.href='ngm-user-info.html?user='+otherUser.user_id}
+function subscribeToMessages(){sb.channel('messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'ngm_messages',filter:`chat_id=eq.${chatId}`},()=>loadMessages()).subscribe()}
+function goBack(){window.location.href='ngm-chats.html'}
+const messageInput=document.getElementById('messageInput');messageInput.addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px'});
+messageInput.addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
+document.addEventListener('click',()=>document.getElementById('contextMenu').classList.remove('show'));
+document.addEventListener('copy',e=>e.preventDefault());
+document.addEventListener('paste',e=>e.preventDefault());
 init();
 </script>
 </body>
