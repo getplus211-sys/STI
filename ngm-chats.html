@@ -312,6 +312,17 @@
             { event: '*', schema: 'public', table: 'ngm_messages' },
             () => fetchChats()
         ).subscribe();
+
+        // Real-time updates on chat participants (unread count)
+        sb.channel('chat_participants').on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'ngm_chat_participants' },
+            (payload) => {
+                if (payload.new?.user_id === cu.id) {
+                    fetchChats();
+                }
+            }
+        ).subscribe();
     }
 
     async function fetchChats() {
