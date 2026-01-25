@@ -388,6 +388,10 @@
                     ? lastMsg.content.substring(0, 40) 
                     : 'કોઈ મેસેજ નથી';
 
+                const lastMsgTime = lastMsg 
+                    ? getSmartTime(lastMsg.created_at)
+                    : '';
+
                 const msgCountDisplay = totalMsgCount > 0 ? `${totalMsgCount} msgs` : '';
 
                 const unreadBadgeHTML = p.unread_count > 0 
@@ -399,6 +403,7 @@
                     name: name,
                     lastMsg: lastMsgText,
                     msgCount: msgCountDisplay,
+                    time: lastMsgTime,
                     unread: p.unread_count,
                     avatarBg: avatarBg,
                     avatar: name.charAt(0)
@@ -411,7 +416,7 @@
                         <div class="chat-info">
                             <div class="chat-top">
                                 <span class="chat-name">${name}</span>
-                                <span class="chat-time">now</span>
+                                <span class="chat-time">${lastMsgTime}</span>
                             </div>
                             <div class="chat-bottom">
                                 <span class="chat-msg">${lastMsgText}</span>
@@ -429,6 +434,32 @@
             list.innerHTML = '<div class="loading">Error: ' + e.message + '</div>';
             console.error(e);
         }
+    }
+
+    function getSmartTime(dateString) {
+        const msgDate = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - msgDate;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'now';
+        if (diffMins < 60) return `${diffMins}m`;
+        if (diffHours < 24) return `${diffHours}h`;
+        
+        // Check if yesterday
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const msgDateOnly = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+        const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+        
+        if (msgDateOnly.getTime() === yesterdayOnly.getTime()) {
+            return 'Yesterday';
+        }
+        
+        // Otherwise show date
+        return msgDate.toLocaleDateString('gu-IN', { month: 'short', day: 'numeric' });
     }
 
     function openChat(chatId) {
@@ -481,7 +512,7 @@
                     <div class="chat-info">
                         <div class="chat-top">
                             <span class="chat-name">${chat.name}</span>
-                            <span class="chat-time">now</span>
+                            <span class="chat-time">${chat.time}</span>
                         </div>
                         <div class="chat-bottom">
                             <span class="chat-msg">${chat.lastMsg}</span>
