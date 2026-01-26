@@ -3,128 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ngm-chats</title>
+    <title>Chats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* કસ્ટમ હાઈટ સેટિંગ્સ */
-        .ngm-header { height: 90px; }
-        .ngm-footer { height: 40px; }
-        /* સ્ક્રોલ એરિયા ગણતરી: 100vh - header(90px) - footer(40px) */
-        .ngm-content { height: calc(100vh - 130px); }
+        :root { --h: 90px; --f: 40px; }
+        body { background: #fff; margin: 0; font-family: -apple-system, system-ui, sans-serif; }
+        .header { height: var(--h); border-bottom: 0.5px solid #ccc; display: flex; align-items: flex-end; padding: 12px 16px; position: sticky; top: 0; background: #fff; z-index: 10; }
+        .footer { height: var(--f); border-top: 0.5px solid #ccc; position: fixed; bottom: 0; width: 100%; max-width: 448px; background: #f8f8f8; display: flex; align-items: center; justify-content: space-around; font-size: 10px; font-weight: bold; color: #8e8e93; }
+        .chat-list { margin-bottom: var(--f); }
+        .chat-item { display: flex; align-items: center; padding: 10px 16px; gap: 12px; border-bottom: 0.5px solid #f2f2f2; cursor: pointer; }
+        .chat-item:active { background: #f2f2f2; }
+        .avatar { width: 54px; height: 54px; border-radius: 50%; background: #007aff; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px; overflow: hidden; flex-shrink: 0; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
-<body class="bg-gray-100 overflow-hidden">
-
-    <div class="max-w-md mx-auto bg-white h-screen flex flex-col shadow-2xl">
-        
-        <header class="ngm-header bg-white border-b flex items-end pb-2 px-4 sticky top-0 z-20">
+<body class="flex justify-center">
+    <div class="w-full max-w-md bg-white min-h-screen relative">
+        <header class="header">
             <div class="flex justify-between items-center w-full">
-                <button class="text-blue-500 font-medium">Edit</button>
-                <h1 class="font-bold text-lg text-gray-800">Chats</h1>
-                <button class="text-blue-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </button>
+                <span class="text-blue-500">Edit</span>
+                <h1 class="font-bold text-lg">Chats</h1>
+                <span class="text-blue-500">✎</span>
             </div>
         </header>
 
-        <div class="p-3 bg-white">
-            <div class="relative">
-                <input type="text" placeholder="Search" class="w-full bg-gray-100 rounded-lg py-1.5 pl-10 pr-4 outline-none text-sm border-none focus:ring-1 focus:ring-blue-400">
-                <svg class="absolute left-3 top-2 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
-        </div>
+        <div id="loader" class="p-10 text-center text-gray-400">Loading Chats...</div>
+        <div id="chat-list" class="chat-list"></div>
 
-        <main id="chat-container" class="ngm-content overflow-y-auto bg-white">
-            <div id="loading" class="flex flex-col items-center justify-center h-full text-gray-400">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
-                <p>Loading chats...</p>
-            </div>
-            <div id="chat-list" class="hidden">
-                </div>
-        </main>
-
-        <footer class="ngm-footer bg-gray-50 border-t flex items-start pt-1 px-2 sticky bottom-0 z-20">
-            <div class="flex justify-around items-center w-full text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
-                <div class="flex flex-col items-center">
-                    <span>Contacts</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span>Calls</span>
-                </div>
-                <div class="flex flex-col items-center text-blue-500">
-                    <span>Chats</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span>Settings</span>
-                </div>
-            </div>
+        <footer class="footer">
+            <span>CONTACTS</span>
+            <span>CALLS</span>
+            <span class="text-blue-500">CHATS</span>
+            <span>SETTINGS</span>
         </footer>
     </div>
 
     <script>
-        // Supabase કોન્ફિગરેશન
-        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const S_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const _supabase = supabase.createClient(S_URL, S_KEY);
 
-        async function fetchNgmChats() {
-            try {
-                // ngm_chats ટેબલ માંથી ડેટા લેવો
-                const { data, error } = await _supabase
-                    .from('ngm_chats')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+        async function loadChats() {
+            // સીધો 'chat_list_view' માંથી ડેટા લેવો
+            const { data, error } = await _supabase.from('chat_list_view').select('*').order('updated_at', { ascending: false });
 
-                const chatList = document.getElementById('chat-list');
-                const loading = document.getElementById('loading');
+            document.getElementById('loader').style.display = 'none';
+            if (error) { console.error(error); return; }
 
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    chatList.innerHTML = data.map(chat => `
-                        <div class="flex items-center gap-4 p-3 hover:bg-gray-50 border-b border-gray-100 cursor-pointer transition active:bg-gray-200">
-                            <div class="relative">
-                                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-inner">
-                                    ${chat.chat_type === 'group' ? 'G' : 'U'}
-                                </div>
-                                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
-                            </div>
-                            
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-baseline">
-                                    <h3 class="font-bold text-gray-900 truncate text-[15px]">
-                                        ${chat.chat_type === 'group' ? 'Ngm Group Chat' : 'User ID: ' + chat.chat_id.slice(0,5)}
-                                    </h3>
-                                    <span class="text-[11px] text-gray-400 ml-2">18:00</span>
-                                </div>
-                                <div class="flex justify-between items-center mt-0.5">
-                                    <p class="text-[13px] text-gray-500 truncate pr-2">
-                                        Supabase માંથી નવો મેસેજ અહીં દેખાશે...
-                                    </p>
-                                    <span class="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                        1
-                                    </span>
-                                </div>
-                            </div>
+            const container = document.getElementById('chat-list');
+            container.innerHTML = data.map(chat => `
+                <div class="chat-item" onclick="location.href='ngm-chat-window.html?chat_id=${chat.chat_id}'">
+                    <div class="avatar">
+                        ${chat.display_picture ? `<img src="${chat.display_picture}">` : chat.display_name[0]}
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <div class="flex justify-between">
+                            <span class="font-bold truncate">${chat.display_name}</span>
+                            <span class="text-xs text-gray-400">${new Date(chat.updated_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                         </div>
-                    `).join('');
-                } else {
-                    chatList.innerHTML = '<div class="p-10 text-center text-gray-400">કોઈ ચેટ મળી નથી.</div>';
-                }
-
-                loading.classList.add('hidden');
-                chatList.classList.remove('hidden');
-
-            } catch (err) {
-                console.error("Error:", err);
-                document.getElementById('loading').innerHTML = `<p class="text-red-500 p-4 text-center">કનેક્શન ભૂલ: Supabase ટેબલ તપાસો.</p>`;
-            }
+                        <p class="text-sm text-gray-500 truncate">${chat.chat_type}</p>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // પેજ લોડ થાય ત્યારે ડેટા ખેંચવો
-        window.onload = fetchNgmChats;
+        loadChats();
     </script>
 </body>
 </html>
+
