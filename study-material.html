@@ -3,145 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NGM Chat Window</title>
+    <title>NGM Chats - Pure Logic</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        :root { --h: 90px; --f: 60px; }
-        body { font-family: -apple-system, sans-serif; background-color: #E5DDD5; }
-        .ngm-header { height: var(--h); background: #517da2; color: white; position: fixed; top: 0; width: 100%; max-width: 448px; z-index: 100; display: flex; align-items: flex-end; padding: 0 15px 12px; }
-        .ngm-footer { height: var(--f); background: #f0f0f0; position: fixed; bottom: 0; width: 100%; max-width: 448px; z-index: 100; display: flex; align-items: center; padding: 0 10px; border-top: 1px solid #ddd; }
-        .chat-container { margin-top: var(--h); margin-bottom: var(--f); padding: 15px; display: flex; flex-direction: column; gap: 8px; min-height: calc(100vh - var(--h) - var(--f)); }
-        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 15px; position: relative; line-height: 1.4; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .msg-sent { align-self: flex-end; background-color: #effdde; color: #000; border-bottom-right-radius: 2px; }
-        .msg-received { align-self: flex-start; background-color: #fff; color: #000; border-bottom-left-radius: 2px; }
-        .msg-time { font-size: 10px; color: #888; text-align: right; margin-top: 4px; }
+        :root {
+            --ios-header: 90px;
+            --ios-footer: 40px;
+            --tg-blue: #0088cc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica;
+            background-color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Layout Architecture */
+        .app-header {
+            height: var(--ios-header);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            max-width: 448px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            border-bottom: 0.5px solid #d1d1d1;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 16px 12px;
+        }
+
+        .app-footer {
+            height: var(--ios-footer);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 448px;
+            background: #f9f9f9;
+            z-index: 1000;
+            border-top: 0.5px solid #d1d1d1;
+            display: flex;
+            align-items: flex-start;
+            padding-top: 6px;
+        }
+
+        .scroll-container {
+            margin-top: var(--ios-header);
+            margin-bottom: var(--ios-footer);
+            min-height: calc(100vh - var(--ios-header) - var(--ios-footer));
+            overflow-y: auto;
+        }
+
+        /* Chat Row Styles */
+        .chat-row {
+            display: flex;
+            padding: 10px 16px;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 0.5px solid #f2f2f2;
+        }
+
+        .chat-row:active {
+            background-color: #e5e5ea;
+        }
+
+        .avatar-circle {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 20px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #5AC8FA 0%, #007AFF 100%);
+        }
+
+        .search-box {
+            background-color: #7676801F;
+            border-radius: 10px;
+            padding: 8px 12px 8px 35px;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        input:focus { outline: none; }
     </style>
 </head>
-<body class="flex justify-center overflow-x-hidden">
+<body class="flex justify-center bg-gray-50">
 
-<div class="w-full max-w-md bg-transparent min-h-screen relative flex flex-col">
-    <header class="ngm-header shadow-md">
-        <div class="flex items-center w-full gap-3">
-            <button onclick="location.href='ngm-chats.html'" class="text-2xl font-light">←</button>
-            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg" id="chat-icon">?</div>
-            <div class="flex-1 overflow-hidden">
-                <h2 class="font-bold text-base truncate" id="chat-name">Loading...</h2>
-                <p class="text-[11px] opacity-80" id="chat-status">online</p>
+    <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col">
+        
+        <header class="app-header">
+            <div class="flex justify-between items-center w-full">
+                <button class="text-[#007AFF] text-[17px]">Edit</button>
+                <h1 class="font-bold text-[17px]">Chats</h1>
+                <button class="text-[#007AFF]">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
             </div>
-            <div class="text-xl">⋮</div>
-        </div>
-    </header>
+        </header>
 
-    <main class="chat-container no-scrollbar" id="message-list">
-        </main>
-
-    <footer class="ngm-footer">
-        <div class="flex w-full items-center gap-2">
-            <button class="text-gray-500 text-2xl px-1">📎</button>
-            <input type="text" id="msgInput" placeholder="Message" class="flex-1 bg-white rounded-full px-4 py-2 text-sm border-none shadow-sm">
-            <button onclick="sendMessage()" id="sendBtn" class="bg-[#517da2] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
-        </div>
-    </footer>
-</div>
-
-<script>
-    const CONFIG = {
-        URL: 'https://bhmycvrbucmbbrpzeane.supabase.co',
-        KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4'
-    };
-
-    const _supabase = supabase.createClient(CONFIG.URL, CONFIG.KEY);
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentChatId = urlParams.get('chat_id');
-    const myId = 'me'; // આને તમે તમારા રિયલ યુઝર આઈડી થી રિપ્લેસ કરી શકો છો
-
-    // 1. Load Everything
-    async function init() {
-        if (!currentChatId) {
-            alert("Chat ID is missing!");
-            return;
-        }
-        document.getElementById('chat-name').innerText = "ID: " + currentChatId.substring(0, 8);
-        await loadMessages();
-        subscribeToMessages();
-    }
-
-    // 2. Fetch Messages from ngm_messages Table
-    async function loadMessages() {
-        const { data, error } = await _supabase
-            .from('ngm_messages')
-            .select('*')
-            .eq('chat_id', currentChatId)
-            .order('created_at', { ascending: true });
-
-        if (error) console.error("Error loading messages:", error);
-        else renderMessages(data);
-    }
-
-    // 3. Render Logic
-    function renderMessages(messages) {
-        const list = document.getElementById('message-list');
-        list.innerHTML = messages.map(m => {
-            const isMe = m.sender_id === myId;
-            const time = new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            return `
-                <div class="msg ${isMe ? 'msg-sent' : 'msg-received'}">
-                    <div>${m.content}</div>
-                    <div class="msg-time">${time}</div>
+        <div class="scroll-container no-scrollbar">
+            <div class="p-3">
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search" class="search-box">
                 </div>
-            `;
-        }).join('');
-        window.scrollTo(0, document.body.scrollHeight);
-    }
+            </div>
 
-    // 4. Send Message Function
-    async function sendMessage() {
-        const input = document.getElementById('msgInput');
-        const text = input.value.trim();
-        if (!text) return;
+            <div id="loader" class="flex flex-col items-center py-20 text-gray-400">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+                <p class="text-xs">Original ડેટા લોડ થઈ રહ્યો છે...</p>
+            </div>
 
-        input.value = '';
-        const { error } = await _supabase
-            .from('ngm_messages')
-            .insert([{
-                chat_id: currentChatId,
-                sender_id: myId,
-                content: text,
-                message_type: 'text'
-            }]);
+            <div id="chatList"></div>
 
-        if (error) {
-            console.error("Send error:", error);
-            alert("Message not sent!");
+            <div id="emptyState" class="hidden py-20 text-center px-10">
+                <p class="text-gray-400 text-sm">તમારા 'ngm_chats' ટેબલમાં કોઈ ડેટા નથી.</p>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <div class="flex justify-around items-center w-full text-[10px] font-bold text-[#8E8E93]">
+                <div class="flex flex-col items-center"><span>CONTACTS</span></div>
+                <div class="flex flex-col items-center"><span>CALLS</span></div>
+                <div class="flex flex-col items-center text-[#007AFF]"><span>CHATS</span></div>
+                <div class="flex flex-col items-center"><span>SETTINGS</span></div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const API_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        
+        const _supabase = supabase.createClient(API_URL, API_KEY);
+
+        // 1. Initial Load
+        async function fetchChats() {
+            const { data, error } = await _supabase
+                .from('ngm_chats')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            document.getElementById('loader').classList.add('hidden');
+
+            if (error) {
+                console.error("Fetch Error:", error);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                return;
+            }
+
+            renderChats(data);
         }
-    }
 
-    // 5. Real-time Subscription (Live Chat)
-    function subscribeToMessages() {
-        _supabase
-            .channel('public:ngm_messages')
-            .on('postgres_changes', { 
-                event: 'INSERT', 
-                schema: 'public', 
-                table: 'ngm_messages',
-                filter: `chat_id=eq.${currentChatId}`
-            }, (payload) => {
-                loadMessages(); // Refresh when new message arrives
-            })
-            .subscribe();
-    }
+        // 2. Dynamic UI Rendering
+        function renderChats(chats) {
+            const listContainer = document.getElementById('chatList');
+            listContainer.innerHTML = chats.map(chat => {
+                const initial = (chat.chat_type || 'U').charAt(0).toUpperCase();
+                const timeStr = chat.updated_at ? new Date(chat.updated_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                const title = chat.chat_type === 'group' ? 'NGM Project Group' : 'User: ' + chat.chat_id.substring(0, 6);
 
-    // Enter Key Support
-    document.getElementById('msgInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+                return `
+                <div class="chat-row" onclick="location.href='ngm-chat-window.html?chat_id=${chat.chat_id}'">
+                    <div class="avatar-circle">${initial}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h2 class="font-bold text-[16px] text-black truncate">${title}</h2>
+                            <span class="text-[14px] text-gray-400">${timeStr}</span>
+                        </div>
+                        <p class="text-[14px] text-gray-500 truncate mt-0.5">
+                            ${chat.chat_type} ચેટ જોવા માટે ટેપ કરો...
+                        </p>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
 
-    init();
-</script>
+        // 3. Search Functionality
+        document.getElementById('searchInput').addEventListener('input', async (e) => {
+            const term = e.target.value.toLowerCase();
+            const { data } = await _supabase.from('ngm_chats').select('*');
+            const filtered = data.filter(c => c.chat_id.toLowerCase().includes(term));
+            renderChats(filtered);
+        });
+
+        // 4. Real-time Subscription
+        function setupRealtime() {
+            _supabase
+                .channel('chat-updates')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'ngm_chats' }, (payload) => {
+                    fetchChats(); // Refresh on any change
+                })
+                .subscribe();
+        }
+
+        // Start
+        window.onload = () => {
+            fetchChats();
+            setupRealtime();
+        };
+    </script>
 </body>
 </html>
