@@ -434,6 +434,17 @@ function closeNotificationModal() {
   document.getElementById('notificationModal').classList.remove('show');
 }
 
+// Nandigram Chat Function
+function openNandigramChats() {
+  if (typeof window.ChatBridge !== 'undefined') {
+    // Android native app
+    window.ChatBridge.openChats();
+  } else {
+    // Web browser fallback
+    alert('Nandigram Chat feature available only in mobile app!');
+  }
+}
+
 init();
 </script>
 </body>
