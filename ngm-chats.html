@@ -2,536 +2,129 @@
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-    <title>Nandigram - Chats</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ngm-chats</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --pc: #0088cc; 
-            --sc: #24a1de;
-            --bg: #ffffff;
-            --text: #222222;
-            --gray: #8e8e93;
-            --border: #dcdcdc;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: -apple-system, sans-serif;
-            background: #f1f1f1;
-            padding-bottom: 90px; /* Space for larger footer */
-        }
-
-        .app-container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: var(--bg);
-            min-height: 100vh;
-        }
-
-        /* CUSTOM HEADER: 100px Height, Content at Bottom */
-        .header {
-            position: sticky;
-            top: 0;
-            height: 100px;
-            background: linear-gradient(135deg, var(--pc), var(--sc));
-            color: white;
-            padding: 0 20px 15px 20px;
-            z-index: 1000;
-            display: flex;
-            align-items: flex-end; /* Content at bottom */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .header-content {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 { font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
-        .header-actions { display: flex; gap: 18px; }
-        .action-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s; }
-        .action-btn:active { background: rgba(255,255,255,0.2); }
-
-        /* Search Bar */
-        .search-container { padding: 10px 15px; background: var(--pc); display: none; }
-        .search-container.active { display: block; }
-        .search-input { width: 100%; padding: 10px 15px; border-radius: 20px; border: none; outline: none; font-size: 14px; }
-
-        /* Chat List */
-        .chat-item {
-            display: flex;
-            padding: 12px 15px;
-            align-items: center;
-            border-bottom: 0.5px solid #f0f0f0;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-
-        .chat-item:active {
-            background: #f5f5f5;
-        }
-
-        .avatar {
-            width: 52px; 
-            height: 52px; 
-            border-radius: 50%;
-            background: #e0e0e0; 
-            display: flex; 
-            align-items: center;
-            justify-content: center; 
-            font-weight: bold; 
-            color: white;
-            margin-right: 15px; 
-            flex-shrink: 0; 
-            font-size: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
-
-        .chat-info { 
-            flex: 1; 
-            overflow: hidden; 
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .chat-top { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chat-name { 
-            font-size: 15px; 
-            font-weight: 600; 
-            color: #000; 
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-time { 
-            font-size: 12px; 
-            color: var(--gray); 
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .chat-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chat-msg { 
-            font-size: 13px; 
-            color: #666; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis;
-            flex: 1;
-        }
-
-        .unread-badge {
-            background: #25d366; 
-            color: white; 
-            border-radius: 50%; 
-            width: 28px; 
-            height: 28px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 11px; 
-            font-weight: bold;
-            flex-shrink: 0;
-            box-shadow: 0 2px 4px rgba(37,211,102,0.3);
-        }
-
-        /* CUSTOM FOOTER: Increased Height, Content at Top */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 500px;
-            height: 85px; /* Increased height */
-            background: #fff;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-start; /* Content at top */
-            padding-top: 10px; /* Padding for top alignment */
-            z-index: 1000;
-        }
-
-        .nav-item {
-            text-align: center;
-            color: var(--gray);
-            flex: 1;
-            cursor: pointer;
-            padding: 8px 0;
-            transition: color 0.2s;
-        }
-
-        .nav-item:active {
-            opacity: 0.7;
-        }
-
-        .nav-item.active { 
-            color: var(--pc); 
-        }
-
-        .nav-icon { 
-            font-size: 24px; 
-            display: block;
-        }
-
-        .nav-label { 
-            font-size: 11px; 
-            margin-top: 2px; 
-            font-weight: 500; 
-        }
-
-        .fab {
-            position: fixed;
-            bottom: 105px; /* Adjusted for larger footer */
-            right: 20px;
-            width: 56px; 
-            height: 56px;
-            background: var(--pc); 
-            border-radius: 50%;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            color: white; 
-            font-size: 24px; 
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,132,204,0.3);
-            transition: all 0.2s;
-        }
-
-        .fab:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 8px rgba(0,132,204,0.3);
-        }
-
-        .loading { 
-            text-align: center; 
-            padding: 50px; 
-            color: #888; 
-            font-size: 14px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .empty-state-text {
-            font-size: 15px;
-            color: #666;
-        }
+        /* કસ્ટમ હાઈટ સેટિંગ્સ */
+        .ngm-header { height: 90px; }
+        .ngm-footer { height: 40px; }
+        /* સ્ક્રોલ એરિયા ગણતરી: 100vh - header(90px) - footer(40px) */
+        .ngm-content { height: calc(100vh - 130px); }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 overflow-hidden">
 
-<div class="app-container">
-    <div class="header">
-        <div class="header-content">
-            <h1>Nandigram</h1>
-            <div class="header-actions">
-                <button class="action-btn" onclick="toggleSearch()" title="Search">🔍</button>
-                <button class="action-btn" onclick="showMenu()" title="Menu">⋮</button>
+    <div class="max-w-md mx-auto bg-white h-screen flex flex-col shadow-2xl">
+        
+        <header class="ngm-header bg-white border-b flex items-end pb-2 px-4 sticky top-0 z-20">
+            <div class="flex justify-between items-center w-full">
+                <button class="text-blue-500 font-medium">Edit</button>
+                <h1 class="font-bold text-lg text-gray-800">Chats</h1>
+                <button class="text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-3 bg-white">
+            <div class="relative">
+                <input type="text" placeholder="Search" class="w-full bg-gray-100 rounded-lg py-1.5 pl-10 pr-4 outline-none text-sm border-none focus:ring-1 focus:ring-blue-400">
+                <svg class="absolute left-3 top-2 text-gray-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </div>
         </div>
+
+        <main id="chat-container" class="ngm-content overflow-y-auto bg-white">
+            <div id="loading" class="flex flex-col items-center justify-center h-full text-gray-400">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+                <p>Loading chats...</p>
+            </div>
+            <div id="chat-list" class="hidden">
+                </div>
+        </main>
+
+        <footer class="ngm-footer bg-gray-50 border-t flex items-start pt-1 px-2 sticky bottom-0 z-20">
+            <div class="flex justify-around items-center w-full text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                <div class="flex flex-col items-center">
+                    <span>Contacts</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span>Calls</span>
+                </div>
+                <div class="flex flex-col items-center text-blue-500">
+                    <span>Chats</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span>Settings</span>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <div class="search-container" id="searchBox">
-        <input type="text" class="search-input" id="searchInput" placeholder="શોધો..." oninput="filterChats()">
-    </div>
-
-    <div id="chatList">
-        <div class="loading">ચેટ લોડ થઈ રહી છે...</div>
-    </div>
-
-    <button class="fab" onclick="location.href='ngm-new-chat.html'" title="New Chat">✎</button>
-
-    <div class="footer">
-        <div class="nav-item active" onclick="location.href='ngm-chats.html'">
-            <span class="nav-icon">💬</span>
-            <div class="nav-label">ચેટ્સ</div>
-        </div>
-        <div class="nav-item" onclick="location.href='ngm-channel-view.html'">
-            <span class="nav-icon">📢</span>
-            <div class="nav-label">ચેનલ</div>
-        </div>
-        <div class="nav-item" onclick="location.href='ngm-group-chat.html'">
-            <span class="nav-icon">👥</span>
-            <div class="nav-label">ગ્રુપ</div>
-        </div>
-        <div class="nav-item" onclick="location.href='ngm-kapila.html'">
-            <span class="nav-icon">🤖</span>
-            <div class="nav-label">KAPiLa</div>
-        </div>
-        <div class="nav-item" onclick="location.href='ngm-profile.html'">
-            <span class="nav-icon">👤</span>
-            <div class="nav-label">પ્રોફાઇલ</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const U = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-    const K = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-    const sb = supabase.createClient(U, K);
-
-    let cu = null;
-    let allChats = [];
-
-    function getSmartTime(dateString) {
-        const msgDate = new Date(dateString);
-        const now = new Date();
-        const diffMs = now - msgDate;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-
-        if (diffMins < 1) return 'now';
-        if (diffMins < 60) return `${diffMins}m`;
-        if (diffHours < 24) return `${diffHours}h`;
+    <script>
+        // Supabase કોન્ફિગરેશન
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         
-        // Check if yesterday
-        const yesterday = new Date(now);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const msgDateOnly = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
-        const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
-        
-        if (msgDateOnly.getTime() === yesterdayOnly.getTime()) {
-            return 'Yesterday';
-        }
-        
-        // Otherwise show date
-        return msgDate.toLocaleDateString('gu-IN', { month: 'short', day: 'numeric' });
-    }
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function init() {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) { location.href = 'login.html'; return; }
-        cu = user;
-        fetchChats();
-        
-        // Real-time updates on messages
-        sb.channel('messages').on(
-            'postgres_changes',
-            { event: '*', schema: 'public', table: 'ngm_messages' },
-            () => fetchChats()
-        ).subscribe();
+        async function fetchNgmChats() {
+            try {
+                // ngm_chats ટેબલ માંથી ડેટા લેવો
+                const { data, error } = await _supabase
+                    .from('ngm_chats')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-        // Real-time updates on chat participants (unread count)
-        sb.channel('chat_participants').on(
-            'postgres_changes',
-            { event: '*', schema: 'public', table: 'ngm_chat_participants' },
-            (payload) => {
-                if (payload.new?.user_id === cu.id) {
-                    fetchChats();
-                }
-            }
-        ).subscribe();
-    }
+                const chatList = document.getElementById('chat-list');
+                const loading = document.getElementById('loading');
 
-    async function fetchChats() {
-        const list = document.getElementById('chatList');
-        try {
-            // Get all chats for current user, sorted by last message time (newest first)
-            let { data: parts, error } = await sb
-                .from('ngm_chat_participants')
-                .select('*,chat:ngm_chats(*)')
-                .eq('user_id', cu.id);
+                if (error) throw error;
 
-            if (error) throw error;
-
-            if (!parts || parts.length === 0) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">💬</div>
-                        <div class="empty-state-text">કોઈ ચેટ નથી<br>નવી ચેટ શરૂ કરવા માટે ✎ ક્લિક કરો</div>
-                    </div>
-                `;
-                return;
-            }
-
-            // Sort chats by last message time (newest first)
-            parts.sort((a, b) => {
-                const timeA = a.chat?.last_message_at ? new Date(a.chat.last_message_at).getTime() : 0;
-                const timeB = b.chat?.last_message_at ? new Date(b.chat.last_message_at).getTime() : 0;
-                return timeB - timeA;
-            });
-
-            let html = '';
-            allChats = [];
-
-            for (let p of parts) {
-                const c = p.chat;
-                if (!c) continue;
-
-                // Get other user name for personal chats
-                let name = "Chat";
-                let avatarBg = getRandomColor();
-                
-                if (c.chat_type === 'personal') {
-                    const otherId = (c.user1_id === cu.id) ? c.user2_id : c.user1_id;
-                    const { data: u } = await sb
-                        .from('ngm_users')
-                        .select('full_name,profile_picture_url')
-                        .eq('user_id', otherId)
-                        .single();
-                    name = u?.full_name || "User";
-                } else {
-                    name = c.group_name || "Group/Channel";
-                }
-
-                // Get last message
-                const { data: lastMsg } = await sb
-                    .from('ngm_messages')
-                    .select('content,created_at,sender_id')
-                    .eq('chat_id', c.chat_id)
-                    .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
-
-                const lastMsgText = lastMsg 
-                    ? lastMsg.content.substring(0, 40) 
-                    : 'કોઈ મેસેજ નથી';
-
-                const lastMsgTime = lastMsg 
-                    ? getSmartTime(lastMsg.created_at)
-                    : '';
-
-                const unreadBadgeHTML = p.unread_count > 0 
-                    ? `<div style="width:24px; height:24px; background:#0088cc; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; margin-top:4px;">${p.unread_count > 99 ? '99+' : p.unread_count}</div>`
-                    : '';
-
-                const chatObj = {
-                    id: c.chat_id,
-                    name: name,
-                    lastMsg: lastMsgText,
-                    time: lastMsgTime,
-                    unread: p.unread_count,
-                    avatarBg: avatarBg,
-                    avatar: name.charAt(0)
-                };
-                allChats.push(chatObj);
-
-                html += `
-                    <div class="chat-item" onclick="openChat('${c.chat_id}')">
-                        <div class="avatar" style="background:${avatarBg}">${name.charAt(0)}</div>
-                        <div class="chat-info">
-                            <div class="chat-top">
-                                <span class="chat-name">${name}</span>
-                                <div style="display:flex;flex-direction:column;align-items:flex-end;">
-                                    <span class="chat-time">${lastMsgTime}</span>
-                                    ${unreadBadgeHTML}
+                if (data && data.length > 0) {
+                    chatList.innerHTML = data.map(chat => `
+                        <div class="flex items-center gap-4 p-3 hover:bg-gray-50 border-b border-gray-100 cursor-pointer transition active:bg-gray-200">
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-inner">
+                                    ${chat.chat_type === 'group' ? 'G' : 'U'}
+                                </div>
+                                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+                            </div>
+                            
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-baseline">
+                                    <h3 class="font-bold text-gray-900 truncate text-[15px]">
+                                        ${chat.chat_type === 'group' ? 'Ngm Group Chat' : 'User ID: ' + chat.chat_id.slice(0,5)}
+                                    </h3>
+                                    <span class="text-[11px] text-gray-400 ml-2">18:00</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-0.5">
+                                    <p class="text-[13px] text-gray-500 truncate pr-2">
+                                        Supabase માંથી નવો મેસેજ અહીં દેખાશે...
+                                    </p>
+                                    <span class="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                        1
+                                    </span>
                                 </div>
                             </div>
-                            <div class="chat-bottom">
-                                <span class="chat-msg">${lastMsgText}</span>
-                            </div>
                         </div>
-                    </div>
-                `;
+                    `).join('');
+                } else {
+                    chatList.innerHTML = '<div class="p-10 text-center text-gray-400">કોઈ ચેટ મળી નથી.</div>';
+                }
+
+                loading.classList.add('hidden');
+                chatList.classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Error:", err);
+                document.getElementById('loading').innerHTML = `<p class="text-red-500 p-4 text-center">કનેક્શન ભૂલ: Supabase ટેબલ તપાસો.</p>`;
             }
-            list.innerHTML = html;
-        } catch (e) {
-            list.innerHTML = '<div class="loading">Error: ' + e.message + '</div>';
-            console.error(e);
-        }
-    }
-
-    function openChat(chatId) {
-        location.href = `ngm-chat-window.html?chat=${chatId}`;
-    }
-
-    async function resetUnreadCount(chatId) {
-        try {
-            const { error } = await sb.rpc('reset_unread_count', {
-                p_chat_id: chatId,
-                p_user_id: cu.id
-            });
-            if (error) console.error('Reset unread error:', error);
-        } catch (e) {
-            console.error('Error resetting unread:', e);
-        }
-    }
-
-    function toggleSearch() {
-        const s = document.getElementById('searchBox');
-        s.classList.toggle('active');
-        if (s.classList.contains('active')) {
-            document.getElementById('searchInput').focus();
-        }
-    }
-
-    function filterChats() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allChats.filter(chat => 
-            chat.name.toLowerCase().includes(query)
-        );
-
-        const list = document.getElementById('chatList');
-        if (filtered.length === 0) {
-            list.innerHTML = '<div class="loading">કોઈ ચેટ મળી નથી</div>';
-            return;
         }
 
-        let html = '';
-        for (let chat of filtered) {
-            const unreadBadgeHTML = chat.unread > 0 
-                ? `<div style="width:24px; height:24px; background:#0088cc; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; margin-top:4px;">${chat.unread > 99 ? '99+' : chat.unread}</div>`
-                : '';
-
-            html += `
-                <div class="chat-item" onclick="openChat('${chat.id}')">
-                    <div class="avatar" style="background:${chat.avatarBg}">${chat.avatar}</div>
-                    <div class="chat-info">
-                        <div class="chat-top">
-                            <span class="chat-name">${chat.name}</span>
-                            <div style="display:flex;flex-direction:column;align-items:flex-end;">
-                                <span class="chat-time">${chat.time}</span>
-                                ${unreadBadgeHTML}
-                            </div>
-                        </div>
-                        <div class="chat-bottom">
-                            <span class="chat-msg">${chat.lastMsg}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        list.innerHTML = html;
-    }
-
-    function showMenu() {
-        alert('Menu - Coming Soon');
-    }
-
-    function getRandomColor() {
-        const colors = ['#ff6b6b', '#4facfe', '#43e97b', '#fa709a', '#667eea', '#ffa502'];
-        return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    init();
-</script>
+        // પેજ લોડ થાય ત્યારે ડેટા ખેંચવો
+        window.onload = fetchNgmChats;
+    </script>
 </body>
 </html>
