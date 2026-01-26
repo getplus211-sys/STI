@@ -1,86 +1,409 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGM Messenger</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>NGM Telegram Clone</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        :root { --h: 90px; --f: 40px; }
-        .ios-header { height: var(--h); display: flex; align-items: flex-end; padding: 0 16px 12px; border-bottom: 0.5px solid #d1d1d1; position: sticky; top: 0; background: white; z-index: 50; }
-        .ios-footer { height: var(--f); position: fixed; bottom: 0; width: 100%; max-width: 448px; background: #f9f9f9; border-top: 0.5px solid #d1d1d1; display: flex; align-items: center; justify-content: space-around; z-index: 50; }
-        .chat-row { display: flex; padding: 12px 16px; gap: 12px; border-bottom: 0.5px solid #f2f2f2; cursor: pointer; transition: 0.2s; }
-        .chat-row:active { background-color: #e5e5ea; }
-        .avatar { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #5AC8FA, #007AFF); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; flex-shrink: 0; }
+        :root {
+            --bg-color: #1e1e1e;
+            --sidebar-bg: #212121;
+            --chat-bg: #0f0f0f;
+            --primary-color: #8774e1;
+            --incoming-bubble: #212121;
+            --outgoing-bubble: #8774e1;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-color: #2f2f2f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-primary); height: 100vh; display: flex; overflow: hidden; }
+
+        /* Login Modal */
+        #login-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .user-list { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .user-card {
+            background: var(--sidebar-bg); padding: 15px; border-radius: 10px;
+            cursor: pointer; border: 1px solid var(--border-color); width: 150px; text-align: center;
+        }
+        .user-card:hover { border-color: var(--primary-color); }
+        .user-avatar-lg { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
+
+        /* Main App Layout */
+        #app-container { display: flex; width: 100%; height: 100%; visibility: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 350px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
+        .search-bar { padding: 10px; }
+        .search-input { width: 100%; padding: 8px 15px; border-radius: 20px; border: none; background: #181818; color: white; outline: none; }
+        
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item {
+            display: flex; align-items: center; padding: 12px 15px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .chat-item:hover, .chat-item.active { background-color: #2b2b2b; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 15px; background: #555; }
+        .chat-info { flex: 1; overflow: hidden; }
+        .chat-name { font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-preview { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-meta { font-size: 11px; color: var(--text-secondary); text-align: right; min-width: 50px; }
+
+        /* Chat Window */
+        .chat-window { flex: 1; display: flex; flex-direction: column; background-color: var(--chat-bg); background-image: url('https://web.telegram.org/img/bg_0.png'); background-blend-mode: overlay; }
+        
+        .chat-header {
+            padding: 10px 20px; background-color: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+        }
+        .header-info { margin-left: 15px; }
+        .header-status { font-size: 13px; color: var(--text-secondary); }
+
+        .messages-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        
+        .message { max-width: 70%; padding: 8px 12px; border-radius: 12px; position: relative; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
+        .message.received { align-self: flex-start; background-color: var(--incoming-bubble); border-bottom-left-radius: 0; }
+        .message.sent { align-self: flex-end; background-color: var(--outgoing-bubble); border-bottom-right-radius: 0; }
+        
+        .msg-time { font-size: 10px; color: rgba(255,255,255,0.6); float: right; margin-top: 5px; margin-left: 10px; }
+
+        .input-area {
+            padding: 15px; background-color: var(--sidebar-bg); display: flex; align-items: center; gap: 15px;
+        }
+        .message-input {
+            flex: 1; padding: 12px; border-radius: 8px; border: none;
+            background: #181818; color: white; outline: none; resize: none; height: 45px;
+        }
+        .send-btn {
+            width: 45px; height: 45px; border-radius: 50%; background: var(--primary-color);
+            border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .send-btn:hover { opacity: 0.9; }
+
+        /* Empty State */
+        .no-chat-selected {
+            display: flex; justify-content: center; align-items: center; height: 100%;
+            color: var(--text-secondary); background: #121212;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; }
+            .chat-window { display: none; }
+            .chat-window.active { display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+            .back-btn { display: block !important; margin-right: 10px; cursor: pointer; }
+        }
+        .back-btn { display: none; color: white; font-size: 20px; }
     </style>
 </head>
-<body class="bg-gray-100 flex justify-center">
+<body>
 
-    <div class="w-full max-w-md bg-white min-h-screen relative flex flex-col shadow-xl">
-        
-        <header class="ios-header">
-            <div class="flex justify-between items-center w-full">
-                <span class="text-[#007AFF] text-lg">Edit</span>
-                <h1 class="font-bold text-lg text-black">Chats</h1>
-                <span class="text-[#007AFF] text-2xl">✎</span>
+    <div id="login-modal">
+        <h2 style="color:white; margin-bottom: 20px;">Select User to Login</h2>
+        <p style="color:#aaa;">(Fetching users from ngm_users_display...)</p>
+        <div class="user-list" id="user-selection-list">
             </div>
-        </header>
+    </div>
 
-        <main class="flex-1 pb-[50px]">
-            <div id="loader" class="py-20 text-center text-gray-400">ચેટ્સ લોડ થઈ રહી છે...</div>
-            <div id="chat-list"></div>
-            <div id="empty-msg" class="hidden py-20 text-center px-10 text-gray-400">તમારા ડેટાબેઝમાં હજી કોઈ ચેટ નથી.</div>
-        </main>
+    <div id="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-bars" style="color: #aaa; cursor: pointer;"></i>
+                <h3 id="current-user-name">Telegram</h3>
+            </div>
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search">
+            </div>
+            <div class="chat-list" id="chat-list">
+                </div>
+        </div>
 
-        <footer class="ios-footer text-[10px] font-bold text-gray-400">
-            <span>CONTACTS</span>
-            <span>CALLS</span>
-            <span class="text-[#007AFF]">CHATS</span>
-            <span>SETTINGS</span>
-        </footer>
+        <div class="chat-window" id="chat-window">
+            <div class="no-chat-selected" id="no-chat-msg">
+                <div style="text-align: center;">
+                    <div style="background: #212121; padding: 20px; border-radius: 50%; display: inline-block; margin-bottom: 10px;">
+                        <i class="fa-regular fa-paper-plane" style="font-size: 30px;"></i>
+                    </div>
+                    <p>Select a chat to start messaging</p>
+                </div>
+            </div>
+
+            <div id="active-chat-interface" style="display: none; height: 100%; flex-direction: column;">
+                <div class="chat-header">
+                    <i class="fa-solid fa-arrow-left back-btn" onclick="closeChat()"></i>
+                    <img src="" alt="" class="avatar" id="header-avatar" style="width: 40px; height: 40px; margin-right: 10px;">
+                    <div class="header-info">
+                        <h4 id="header-name">User Name</h4>
+                        <span class="header-status" id="header-status">online</span>
+                    </div>
+                </div>
+
+                <div class="messages-container" id="messages-container">
+                    </div>
+
+                <div class="input-area">
+                    <i class="fa-solid fa-paperclip" style="color: #aaa; cursor: pointer; font-size: 20px;"></i>
+                    <input type="text" class="message-input" id="msg-input" placeholder="Write a message..." onkeypress="handleEnter(event)">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const API_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        const _supabase = supabase.createClient(API_URL, API_KEY);
+        // --- CONFIGURATION ---
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function init() {
-            // રીયલ-ટાઇમ ડેટા ફેચિંગ ફંક્શન
-            const { data, error } = await _supabase
-                .from('ngm_chats')
-                .select('*')
-                .order('updated_at', { ascending: false });
+        let currentUser = null;
+        let currentConversationId = null;
+        let realtimeSubscription = null;
 
-            document.getElementById('loader').classList.add('hidden');
-
+        // --- INITIALIZATION: Load Users for "Login" ---
+        async function loadUsersForLogin() {
+            const { data, error } = await supabase.from('ngm_users_display').select('*');
             if (error) {
-                console.error("Database Error:", error.message);
+                console.error('Error fetching users:', error);
+                alert("Error connecting to Supabase. Check console.");
+                return;
+            }
+            
+            const list = document.getElementById('user-selection-list');
+            list.innerHTML = '';
+            
+            if(data.length === 0) {
+                list.innerHTML = '<p style="color:white">No users found in ngm_users_display table.</p>';
                 return;
             }
 
-            if (!data || data.length === 0) {
-                document.getElementById('empty-msg').classList.remove('hidden');
-                return;
-            }
-
-            const list = document.getElementById('chat-list');
-            list.innerHTML = data.map(chat => `
-                <div class="chat-row" onclick="location.href='ngm-chat-window.html?chat_id=${chat.chat_id}'">
-                    <div class="avatar">${chat.chat_type[0].toUpperCase()}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-baseline">
-                            <h3 class="font-bold text-[16px] truncate text-black">ID: ${chat.chat_id.slice(0, 8)}</h3>
-                            <span class="text-xs text-gray-400">${chat.updated_at ? new Date(chat.updated_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</span>
-                        </div>
-                        <p class="text-[14px] text-gray-500 truncate mt-0.5">Type: ${chat.chat_type}</p>
-                    </div>
-                </div>
-            `).join('');
+            data.forEach(user => {
+                const div = document.createElement('div');
+                div.className = 'user-card';
+                div.innerHTML = `
+                    <img src="${user.profile_picture_url || 'https://via.placeholder.com/60'}" class="user-avatar-lg">
+                    <div>${user.display_name || 'Unknown'}</div>
+                `;
+                div.onclick = () => loginAs(user);
+                list.appendChild(div);
+            });
         }
 
-        init();
+        function loginAs(user) {
+            currentUser = user;
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('app-container').style.visibility = 'visible';
+            document.getElementById('current-user-name').innerText = user.display_name;
+            loadConversations();
+            
+            // Subscribe to incoming messages globally (optional, purely for notification in real app)
+        }
+
+        loadUsersForLogin();
+
+        // --- LOAD SIDEBAR (Conversations) ---
+        async function loadConversations() {
+            const chatList = document.getElementById('chat-list');
+            chatList.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">Loading chats...</p>';
+
+            // 1. Get Conversation IDs where current user is a participant
+            const { data: participations, error: partError } = await supabase
+                .from('ngm_conversation_participants')
+                .select('conversation_id')
+                .eq('user_id', currentUser.user_id);
+
+            if (partError || !participations.length) {
+                chatList.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">No chats found.</p>';
+                return;
+            }
+
+            const conversationIds = participations.map(p => p.conversation_id);
+
+            // 2. Fetch Conversation Details
+            // Note: Ideally this is a View or JOIN, but doing client-side for simplicity
+            chatList.innerHTML = ''; // Clear loading
+
+            for (let chatId of conversationIds) {
+                // Get other participant info
+                const { data: members } = await supabase
+                    .from('ngm_conversation_participants')
+                    .select('user_id')
+                    .eq('conversation_id', chatId)
+                    .neq('user_id', currentUser.user_id)
+                    .limit(1);
+
+                let chatName = "Group Chat";
+                let chatImg = "https://via.placeholder.com/50";
+                
+                if (members && members.length > 0) {
+                    const otherUserId = members[0].user_id;
+                    const { data: otherUser } = await supabase
+                        .from('ngm_users_display')
+                        .select('*')
+                        .eq('user_id', otherUserId)
+                        .single();
+                    
+                    if (otherUser) {
+                        chatName = otherUser.display_name;
+                        chatImg = otherUser.profile_picture_url || chatImg;
+                    }
+                }
+
+                // Get last message
+                const { data: lastMsg } = await supabase
+                    .from('ngm_messages')
+                    .select('content, created_at')
+                    .eq('conversation_id', chatId)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                const preview = lastMsg ? lastMsg.content : "No messages yet";
+                const timeStr = lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+
+                // Render Item
+                const item = document.createElement('div');
+                item.className = 'chat-item';
+                item.onclick = () => openChat(chatId, chatName, chatImg);
+                item.innerHTML = `
+                    <img src="${chatImg}" class="avatar">
+                    <div class="chat-info">
+                        <div class="chat-name">${chatName}</div>
+                        <div class="chat-preview">${preview}</div>
+                    </div>
+                    <div class="chat-meta">${timeStr}</div>
+                `;
+                chatList.appendChild(item);
+            }
+        }
+
+        // --- OPEN CHAT WINDOW ---
+        async function openChat(chatId, name, img) {
+            currentConversationId = chatId;
+            
+            // UI Update
+            document.getElementById('no-chat-msg').style.display = 'none';
+            document.getElementById('active-chat-interface').style.display = 'flex';
+            document.getElementById('chat-window').classList.add('active'); // For mobile
+            
+            document.getElementById('header-name').innerText = name;
+            document.getElementById('header-avatar').src = img;
+            
+            // Highlight sidebar item
+            document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+            // (Ideally add ID to chat items to highlight specific one)
+
+            await loadMessages(chatId);
+            subscribeToMessages(chatId);
+        }
+
+        function closeChat() {
+             document.getElementById('chat-window').classList.remove('active');
+        }
+
+        // --- LOAD MESSAGES ---
+        async function loadMessages(chatId) {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '<p style="text-align:center; color:#555; margin-top:20px;">Loading...</p>';
+            
+            const { data, error } = await supabase
+                .from('ngm_messages')
+                .select('*')
+                .eq('conversation_id', chatId)
+                .order('created_at', { ascending: true });
+
+            container.innerHTML = ''; // Clear loader
+
+            if (data) {
+                data.forEach(msg => renderMessage(msg));
+                scrollToBottom();
+            }
+        }
+
+        function renderMessage(msg) {
+            const container = document.getElementById('messages-container');
+            const isMine = msg.sender_id === currentUser.user_id;
+            
+            const div = document.createElement('div');
+            div.className = `message ${isMine ? 'sent' : 'received'}`;
+            
+            const time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            div.innerHTML = `
+                ${msg.content}
+                <span class="msg-time">${time} <i class="fa-solid fa-check" style="font-size:8px;"></i></span>
+            `;
+            container.appendChild(div);
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('messages-container');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // --- SEND MESSAGE ---
+        async function sendMessage() {
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text || !currentConversationId) return;
+
+            // Clear input immediately for UX
+            input.value = '';
+
+            // Insert into Supabase
+            const { error } = await supabase
+                .from('ngm_messages')
+                .insert({
+                    conversation_id: currentConversationId,
+                    sender_id: currentUser.user_id,
+                    content: text
+                });
+
+            if (error) {
+                console.error("Send error:", error);
+                alert("Failed to send message");
+            }
+            // Realtime subscription will handle appending the message to the UI
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        // --- REALTIME SUBSCRIPTION ---
+        function subscribeToMessages(chatId) {
+            if (realtimeSubscription) {
+                supabase.removeChannel(realtimeSubscription);
+            }
+
+            realtimeSubscription = supabase
+                .channel(`chat:${chatId}`)
+                .on('postgres_changes', { 
+                    event: 'INSERT', 
+                    schema: 'public', 
+                    table: 'ngm_messages',
+                    filter: `conversation_id=eq.${chatId}`
+                }, (payload) => {
+                    renderMessage(payload.new);
+                    scrollToBottom();
+                })
+                .subscribe();
+        }
+
     </script>
 </body>
 </html>
