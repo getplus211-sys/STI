@@ -50,7 +50,7 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .message.out .msg-status{color:#25d366}
 .typing{padding:8px 15px;font-size:13px;color:#999;font-style:italic;position:fixed;bottom:85px;left:10px;right:10px;max-width:460px;background:transparent;display:none;z-index:90;animation:fadeIn 0.2s}
 .footer-wrapper{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:200;transition:bottom 0.3s ease-out;width:100%}
-.emoji-section{display:none;gap:6px;padding:8px;border-bottom:1px solid #e0e0e0;background:#fff;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;flex-shrink:0}
+.emoji-section{display:none;gap:6px;padding:8px;border-bottom:1px solid #e0e0e0;background:#fff;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;flex-shrink:0;width:100%}
 .emoji-section::-webkit-scrollbar{height:4px}
 .emoji-section::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 .emoji-quick{font-size:24px;padding:6px;cursor:pointer;border-radius:8px;transition:all 0.15s;min-width:32px;display:flex;align-items:center;justify-content:center}
@@ -68,7 +68,7 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .send-btn svg{width:20px;height:20px;fill:#fff;position:relative;z-index:1}
 .send-btn::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.1);opacity:0;transition:opacity 0.2s}
 .send-btn:active::before{opacity:1}
-.emoji-keyboard,.file-picker{position:fixed;bottom:70px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;display:none;z-index:150;border-top:1px solid #e0e0e0;box-shadow:0 -2px 8px rgba(0,0,0,0.1);animation:slideUp 0.2s ease-out}
+.emoji-keyboard,.file-picker{position:fixed;bottom:70px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;display:none;z-index:150;border-top:1px solid #e0e0e0;box-shadow:0 -2px 8px rgba(0,0,0,0.1);animation:slideUp 0.2s ease-out;transition:bottom 0.3s ease-out}
 .emoji-keyboard.show,.file-picker.show{display:flex}
 @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
 .emoji-keyboard{flex-direction:column;height:300px}
@@ -318,7 +318,7 @@ async function deleteForAll(){closeDeleteModal();await sb.from('ngm_messages').u
 
 function toggleEmoji(){const ek=document.getElementById('emojiKeyboard'),fp=document.getElementById('filePicker');if(ek.classList.contains('show')){ek.classList.remove('show');document.getElementById('msgInput').focus()}else{fp.classList.remove('show');ek.classList.add('show');document.getElementById('msgInput').blur()}}
 
-function toggleFiles(){const fp=document.getElementById('filePicker'),ek=document.getElementById('emojiKeyboard');if(fp.classList.contains('show')){fp.classList.remove('show')}else{ek.classList.remove('show');fp.classList.add('show')}}
+function toggleFiles(){const fp=document.getElementById('filePicker'),ek=document.getElementById('emojiKeyboard');if(fp.classList.contains('show')){fp.classList.remove('show');document.getElementById('msgInput').focus()}else{ek.classList.remove('show');fp.classList.add('show');document.getElementById('msgInput').blur()}}
 
 function switchTab(tab){currentTab=tab;document.querySelectorAll('.emoji-tab').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');renderEmojis()}
 
@@ -357,15 +357,93 @@ document.getElementById('msgInput').addEventListener('keypress',e=>{e.key==='Ent
 // Keyboard handling for mobile
 const msgInput=document.getElementById('msgInput');
 const footerWrapper=document.getElementById('footerWrapper');
+const inputSection=document.querySelector('.input-section');
 const messagesArea=document.getElementById('messagesArea');
+const emojiSection=document.getElementById('emojiSection');
+const emojiKeyboard=document.getElementById('emojiKeyboard');
+const filePicker=document.getElementById('filePicker');
 
-msgInput.addEventListener('focus',()=>{setTimeout(()=>{messagesArea.scrollTop=messagesArea.scrollHeight},300)});
-
-msgInput.addEventListener('blur',()=>{setTimeout(()=>{footerWrapper.style.bottom='0px'},200)});
-
-// Detect virtual keyboard and adjust footer position
+let keyboardHeight=0;
 let isKeyboardOpen=false;
-window.visualViewport?.addEventListener('resize',()=>{const viewport=window.visualViewport;const windowHeight=window.innerHeight;const viewportHeight=viewport.height;const keyboardHeight=windowHeight-viewportHeight;if(viewportHeight<windowHeight-100&&!isKeyboardOpen){isKeyboardOpen=true;footerWrapper.style.bottom='0px';messagesArea.scrollTop=messagesArea.scrollHeight}else if(viewportHeight>=windowHeight-100&&isKeyboardOpen){isKeyboardOpen=false;footerWrapper.style.bottom='0px'}});
+let initialWindowHeight=window.innerHeight;
+
+// Close emoji/file pickers when input is focused
+msgInput.addEventListener('focus',()=>{
+  emojiKeyboard.classList.remove('show');
+  filePicker.classList.remove('show');
+  setTimeout(()=>{messagesArea.scrollTop=messagesArea.scrollHeight},100);
+});
+
+msgInput.addEventListener('blur',()=>{
+  setTimeout(()=>{
+    if(!emojiKeyboard.classList.contains('show')&&!filePicker.classList.contains('show')){
+      footerWrapper.style.bottom='0px';
+    }
+  },200);
+});
+
+// Detect virtual keyboard
+window.visualViewport?.addEventListener('resize',()=>{
+  const viewport=window.visualViewport;
+  const currentHeight=viewport.height;
+  const heightDiff=initialWindowHeight-currentHeight;
+  
+  if(heightDiff>150){
+    // Keyboard is open
+    if(!isKeyboardOpen){
+      isKeyboardOpen=true;
+      keyboardHeight=heightDiff;
+      // Move footer above keyboard
+      footerWrapper.style.bottom=keyboardHeight+'px';
+      // Hide emoji bar
+      emojiSection.style.display='none';
+      // Scroll messages to bottom
+      messagesArea.scrollTop=messagesArea.scrollHeight;
+    }
+  }else{
+    // Keyboard is closed
+    if(isKeyboardOpen){
+      isKeyboardOpen=false;
+      footerWrapper.style.bottom='0px';
+    }
+  }
+});
+
+// Handle emoji toggle
+document.getElementById('emojiToggle').addEventListener('click',()=>{
+  if(emojiKeyboard.classList.contains('show')){
+    emojiKeyboard.classList.remove('show');
+    emojiSection.style.display='none';
+    footerWrapper.style.bottom='0px';
+  }else{
+    msgInput.blur();
+    emojiKeyboard.classList.add('show');
+    filePicker.classList.remove('show');
+    // Show emoji section above keyboard
+    if(isKeyboardOpen){
+      emojiSection.style.display='flex';
+      footerWrapper.style.bottom=keyboardHeight+'px';
+    }else{
+      emojiSection.style.display='none';
+    }
+  }
+});
+
+// Handle file toggle
+document.querySelector('.attach-btn').addEventListener('click',()=>{
+  if(filePicker.classList.contains('show')){
+    filePicker.classList.remove('show');
+    footerWrapper.style.bottom='0px';
+  }else{
+    msgInput.blur();
+    filePicker.classList.add('show');
+    emojiKeyboard.classList.remove('show');
+    emojiSection.style.display='none';
+    if(isKeyboardOpen){
+      footerWrapper.style.bottom=keyboardHeight+'px';
+    }
+  }
+});
 
 init();
 </script>
