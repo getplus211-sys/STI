@@ -2,281 +2,174 @@
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ngm-chats | Telegram Style</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ngm-chats</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        /* Layout Metrics */
-        :root {
-            --header-height: 90px;
-            --footer-height: 40px;
-            --tg-blue: #0088cc;
-            --ios-blue: #007AFF;
-        }
-
-        .ngm-header { 
-            height: var(--header-height); 
-            display: flex; 
-            align-items: flex-end; 
-            padding-bottom: 12px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-        }
-
-        .ngm-footer { 
-            height: var(--footer-height); 
-            display: flex; 
-            align-items: flex-start; 
-            padding-top: 5px;
-            background: rgba(248, 248, 248, 0.95);
-            backdrop-filter: blur(10px);
-        }
-
-        .ngm-main {
-            height: calc(100vh - var(--header-height) - var(--footer-height));
-            overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-
-        /* Skeleton Animation */
-        @keyframes shimmer {
-            0% { background-position: -468px 0; }
-            100% { background-position: 468px 0; }
-        }
-        .skeleton {
-            background: #f6f7f8;
-            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
-            background-repeat: no-repeat;
-            background-size: 800px 104px;
-            animation-duration: 1.2s;
-            animation-fill-mode: forwards;
-            animation-iteration-count: infinite;
-            animation-name: shimmer;
-            animation-timing-function: linear;
-        }
-
-        /* Ripple Effect */
-        .chat-item { transition: background 0.2s ease; border-bottom: 0.5px solid #efeff4; }
-        .chat-item:active { background: #d1d1d6; }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        :root { --h: 90px; --f: 40px; }
+        body { margin: 0; padding: 0; background: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto; }
+        .header { height: var(--h); background: #fff; border-bottom: 1px solid #ddd; display: flex; align-items: flex-end; padding: 0 15px 10px; position: fixed; top: 0; width: 100%; max-width: 448px; z-index: 100; }
+        .footer { height: var(--f); background: #f8f8f8; border-top: 1px solid #ddd; display: flex; align-items: flex-start; padding-top: 5px; position: fixed; bottom: 0; width: 100%; max-width: 448px; z-index: 100; }
+        .container { margin-top: var(--h); margin-bottom: var(--f); background: #fff; min-height: calc(100vh - var(--h) - var(--f)); overflow-y: auto; }
+        .chat-row { display: flex; align-items: center; padding: 12px 15px; border-bottom: 0.5px solid #eee; text-decoration: none; color: inherit; transition: 0.2s; }
+        .chat-row:active { background-color: #f2f2f2; }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px; flex-shrink: 0; }
+        .details { flex-grow: 1; margin-left: 12px; overflow: hidden; }
+        .top-row { display: flex; justify-content: space-between; align-items: baseline; }
+        .name { font-weight: 700; font-size: 16px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .time { font-size: 13px; color: #8e8e93; }
+        .msg-preview { font-size: 14px; color: #8e8e93; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .status-badge { font-size: 10px; background: #007aff; color: #fff; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+        #error-log { color: red; font-size: 12px; padding: 10px; text-align: center; display: none; }
+        .loading-spinner { display: flex; justify-content: center; padding: 50px; }
     </style>
 </head>
-<body class="bg-[#efeff4] flex justify-center overflow-hidden">
+<body>
 
-    <div class="w-full max-w-md bg-white h-screen flex flex-col shadow-2xl relative">
-        
-        <header class="ngm-header border-b border-gray-200 px-4 shrink-0 z-50">
-            <div class="flex justify-between items-center w-full">
-                <button id="editBtn" class="text-var(--ios-blue) text-[17px] font-normal hover:opacity-60 transition">Edit</button>
-                <div class="text-center">
-                    <h1 class="font-bold text-[17px] leading-tight">Chats</h1>
-                    <div id="connectionStatus" class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Connecting...</div>
-                </div>
-                <button class="text-var(--ios-blue) hover:opacity-60 transition">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </button>
-            </div>
-        </header>
-
-        <div class="px-3 py-2 bg-white shrink-0 z-40">
-            <div class="relative group">
-                <input type="text" id="searchInput" placeholder="Search for messages or users" 
-                    class="w-full bg-[#7676801F] rounded-xl py-1.5 pl-9 pr-4 outline-none text-[16px] focus:bg-[#7676802F] transition-all">
-                <svg class="absolute left-3 top-2.5 text-[#8E8E93]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
+<div class="max-w-md mx-auto shadow-2xl relative bg-white">
+    <div class="header">
+        <div class="flex justify-between items-center w-full">
+            <span style="color: #007aff; cursor: pointer;">Edit</span>
+            <span style="font-weight: bold; font-size: 17px;">Chats</span>
+            <span style="color: #007aff; cursor: pointer;">✎</span>
         </div>
-
-        <main id="mainContainer" class="ngm-main no-scrollbar bg-white">
-            <div id="skeletonLoader">
-                <div class="flex items-center gap-4 p-4">
-                    <div class="w-14 h-14 rounded-full skeleton shrink-0"></div>
-                    <div class="flex-1 space-y-2">
-                        <div class="h-4 w-1/3 skeleton rounded"></div>
-                        <div class="h-3 w-3/4 skeleton rounded"></div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4 p-4 border-t border-gray-50">
-                    <div class="w-14 h-14 rounded-full skeleton shrink-0"></div>
-                    <div class="flex-1 space-y-2">
-                        <div class="h-4 w-1/4 skeleton rounded"></div>
-                        <div class="h-3 w-1/2 skeleton rounded"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="chatList" class="hidden"></div>
-
-            <div id="emptyState" class="hidden h-full flex flex-col items-center justify-center p-10 text-center">
-                <div class="bg-gray-100 p-6 rounded-full mb-4">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                </div>
-                <h3 class="font-bold text-gray-800">No Chats Yet</h3>
-                <p class="text-sm text-gray-500 mt-1">When you start a conversation, it will appear here.</p>
-            </div>
-        </main>
-
-        <footer class="ngm-footer border-t border-gray-200 shrink-0 z-50">
-            <div class="flex justify-around items-center w-full px-2">
-                <nav class="flex flex-col items-center justify-center w-full">
-                    <span class="text-[10px] font-bold text-[#8E8E93]">CONTACTS</span>
-                </nav>
-                <nav class="flex flex-col items-center justify-center w-full">
-                    <span class="text-[10px] font-bold text-[#8E8E93]">CALLS</span>
-                </nav>
-                <nav class="flex flex-col items-center justify-center w-full">
-                    <span class="text-[10px] font-bold text-blue-500">CHATS</span>
-                </nav>
-                <nav class="flex flex-col items-center justify-center w-full">
-                    <span class="text-[10px] font-bold text-[#8E8E93]">SETTINGS</span>
-                </nav>
-            </div>
-        </footer>
     </div>
 
-    <script>
-        // Supabase Initialization
-        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div id="error-log"></div>
 
-        // Core State
-        let allChats = [];
+    <div class="container" id="chat-list-container">
+        <div class="loading-spinner" id="loader">
+            <svg class="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+        <div id="no-data" style="display: none; text-align: center; padding: 40px; color: #999;">
+            કોઈ ચેટ મળી નથી. તમારા 'ngm_chats' ટેબલમાં ડેટા ચેક કરો.
+        </div>
+        <div id="render-target"></div>
+    </div>
 
-        /**
-         * 1. Fetch Chats Logic
-         */
-        async function loadNgmChats() {
-            try {
-                const { data, error } = await _supabase
-                    .from('ngm_chats')
-                    .select('*')
-                    .order('updated_at', { ascending: false });
+    <div class="footer">
+        <div class="flex justify-around items-center w-full uppercase text-[10px] font-bold text-gray-400">
+            <span>Contacts</span>
+            <span>Calls</span>
+            <span style="color: #007aff;">Chats</span>
+            <span>Settings</span>
+        </div>
+    </div>
+</div>
 
-                if (error) throw error;
-                
-                allChats = data;
-                renderChats(data);
-                updateConnectionStatus('Online');
-            } catch (err) {
-                console.error("Fetch Error:", err);
-                updateConnectionStatus('Updating...', true);
-            }
+<script>
+    // Configuration
+    const CONFIG = {
+        URL: 'https://bhmycvrbucmbbrpzeane.supabase.co',
+        KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4'
+    };
+
+    let _supabase = null;
+
+    // 1. Initialize Supabase
+    function init() {
+        try {
+            _supabase = supabase.createClient(CONFIG.URL, CONFIG.KEY);
+            startApp();
+        } catch (e) {
+            showError("Initialization Failed: " + e.message);
+        }
+    }
+
+    // 2. Error Logger
+    function showError(msg) {
+        const log = document.getElementById('error-log');
+        log.style.display = 'block';
+        log.innerHTML = msg;
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    // 3. Main Logic
+    async function startApp() {
+        await getOriginalChats();
+        listenToChanges();
+    }
+
+    // 4. Fetch Real Data from ngm_chats
+    async function getOriginalChats() {
+        const loader = document.getElementById('loader');
+        const noData = document.getElementById('no-data');
+        const target = document.getElementById('render-target');
+
+        const { data, error } = await _supabase
+            .from('ngm_chats')
+            .select('*')
+            .order('updated_at', { ascending: false });
+
+        loader.style.display = 'none';
+
+        if (error) {
+            showError("Supabase Query Error: " + error.message);
+            return;
         }
 
-        /**
-         * 2. Rendering Logic
-         */
-        function renderChats(chats) {
-            const listEl = document.getElementById('chatList');
-            const skeleton = document.getElementById('skeletonLoader');
-            const empty = document.getElementById('emptyState');
+        if (!data || data.length === 0) {
+            noData.style.display = 'block';
+            target.innerHTML = '';
+            return;
+        }
 
-            skeleton.classList.add('hidden');
-            
-            if (chats.length === 0) {
-                listEl.classList.add('hidden');
-                empty.classList.remove('hidden');
-                return;
-            }
+        noData.style.display = 'none';
+        renderInterface(data);
+    }
 
-            empty.classList.add('hidden');
-            listEl.classList.remove('hidden');
+    // 5. Build HTML dynamically
+    function renderInterface(chats) {
+        const target = document.getElementById('render-target');
+        let html = '';
 
-            listEl.innerHTML = chats.map(chat => {
-                const initial = chat.chat_type === 'group' ? 'G' : 'U';
-                const color = chat.chat_type === 'group' ? 'bg-[#34C759]' : 'bg-[#007AFF]';
-                const time = formatTime(chat.updated_at || chat.created_at);
+        chats.forEach(chat => {
+            // Mapping colors based on chat type
+            const isGroup = chat.chat_type === 'group';
+            const bg = isGroup ? '#34c759' : '#007aff';
+            const label = isGroup ? 'Group' : 'Direct';
+            const dateStr = chat.updated_at ? new Date(chat.updated_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
 
-                return `
-                <div class="chat-item flex items-center gap-4 p-4 cursor-pointer" onclick="navigateToChat('${chat.chat_id}')">
-                    <div class="relative shrink-0">
-                        <div class="w-14 h-14 ${color} rounded-full flex items-center justify-center text-white font-bold text-xl shadow-inner">
-                            ${initial}
-                        </div>
-                        <div class="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+            html += `
+                <a href="ngm-chat-window.html?chat_id=${chat.chat_id}" class="chat-row">
+                    <div class="avatar" style="background-color: ${bg}">
+                        ${chat.chat_type.charAt(0).toUpperCase()}
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-baseline mb-0.5">
-                            <h3 class="font-bold text-[16px] text-[#000] truncate">
-                                ${chat.chat_type === 'group' ? 'NGM Project Group' : 'User: ' + chat.chat_id.substring(0, 8)}
-                            </h3>
-                            <span class="text-[13px] text-[#8E8E93] font-normal">${time}</span>
+                    <div class="details">
+                        <div class="top-row">
+                            <h3 class="name">Chat ID: ${chat.chat_id.substring(0, 8)}</h3>
+                            <span class="time">${dateStr}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <p class="text-[15px] text-[#8E8E93] truncate leading-tight">
-                                ${chat.chat_type === 'group' ? 'Welcome to the group chat...' : 'Tap to start messaging'}
-                            </p>
-                            <span class="bg-[#007AFF] text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ml-2 shadow-sm">
-                                1
-                            </span>
+                            <p class="msg-preview">${label} ચેટ જોવા માટે ક્લિક કરો...</p>
+                            <span class="status-badge">Active</span>
                         </div>
                     </div>
-                </div>
-                `;
-            }).join('');
-        }
-
-        /**
-         * 3. Utility Functions
-         */
-        function formatTime(timestamp) {
-            if (!timestamp) return "";
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-        }
-
-        function updateConnectionStatus(text, isError = false) {
-            const el = document.getElementById('connectionStatus');
-            el.innerText = text;
-            el.style.color = isError ? '#FF3B30' : '#8E8E93';
-        }
-
-        function navigateToChat(id) {
-            window.location.href = `ngm-chat-window.html?chat_id=${id}`;
-        }
-
-        /**
-         * 4. Search Logic
-         */
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allChats.filter(c => 
-                c.chat_id.toLowerCase().includes(term) || 
-                c.chat_type.toLowerCase().includes(term)
-            );
-            renderChats(filtered);
+                </a>
+            `;
         });
 
-        /**
-         * 5. Real-time Subscription
-         */
-        function subscribeToChanges() {
-            _supabase
-                .channel('schema-db-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'ngm_chats' }, (payload) => {
-                    console.log('Change received!', payload);
-                    loadNgmChats(); // Refresh list on any change
-                })
-                .subscribe();
-        }
+        target.innerHTML = html;
+    }
 
-        // Initialize
-        window.addEventListener('DOMContentLoaded', () => {
-            loadNgmChats();
-            subscribeToChanges();
-        });
+    // 6. Realtime Sync Function
+    function listenToChanges() {
+        _supabase
+            .channel('db-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'ngm_chats' }, (payload) => {
+                console.log('Realtime change detected:', payload);
+                getOriginalChats(); // Re-fetch data on any change
+            })
+            .subscribe();
+    }
 
-        // Offline Check
-        window.addEventListener('offline', () => updateConnectionStatus('Waiting for network...', true));
-        window.addEventListener('online', () => loadNgmChats());
+    // Start everything
+    init();
+</script>
 
-    </script>
 </body>
 </html>
