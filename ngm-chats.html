@@ -178,7 +178,9 @@
         // --- INITIALIZATION: Load Users for "Login" ---
         async function loadUsersForLogin() {
             // FIXED: Updated all calls to use supabaseClient
-            const { data, error } = await supabaseClient.from('ngm_users_display').select('*');
+          const { data, error } = await supabaseClient
+    .from('ngm_users_display')
+    .select('user_id, display_name, profile_picture_url');
             if (error) {
                 console.error('Error fetching users:', error);
                 alert("Error connecting to Supabase. Check console.");
