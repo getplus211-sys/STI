@@ -49,13 +49,13 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .msg-status{color:#0084ff;font-weight:600}
 .message.out .msg-status{color:#25d366}
 .typing{padding:8px 15px;font-size:13px;color:#999;font-style:italic;position:fixed;bottom:85px;left:10px;right:10px;max-width:460px;background:transparent;display:none;z-index:90;animation:fadeIn 0.2s}
-.footer-wrapper{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:200;transition:bottom 0.3s ease-out;width:100%}
+.footer-wrapper{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:200;transition:bottom 0.3s ease-out;width:100%;pointer-events:auto}
 .emoji-section{display:none;gap:6px;padding:8px;border-bottom:1px solid #e0e0e0;background:#fff;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;flex-shrink:0;width:100%}
 .emoji-section::-webkit-scrollbar{height:4px}
 .emoji-section::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 .emoji-quick{font-size:24px;padding:6px;cursor:pointer;border-radius:8px;transition:all 0.15s;min-width:32px;display:flex;align-items:center;justify-content:center}
 .emoji-quick:active{background:#f0f0f0;transform:scale(0.9)}
-.input-section{padding:12px 8px;display:flex;align-items:flex-end;gap:8px;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.05);width:100%;height:auto}
+.input-section{padding:12px 8px;display:flex;align-items:flex-end;gap:8px;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.05);width:100%;height:auto;position:relative}
 .emoji-btn,.attach-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;flex-shrink:0;border-radius:50%;font-size:20px;transition:all 0.2s;color:#666}
 .emoji-btn:active,.attach-btn:active{background:#f0f0f0;color:#333;transform:scale(0.95)}
 .attach-btn svg{width:24px;height:24px;fill:currentColor}
@@ -357,8 +357,6 @@ function openProfile(){otherUser&&(location.href='ngm-user-info.html?user='+othe
 
 document.addEventListener('click',e=>{!e.target.closest('.context-menu')&&document.getElementById('contextMenu').classList.remove('show');!e.target.closest('.menu-content')&&!e.target.closest('.menu-btn')&&closeMenu()});
 
-document.getElementById('msgInput').addEventListener('keypress',e=>{e.key==='Enter'&&!e.shiftKey&&(e.preventDefault(),sendMsg())});
-
 const msgInput=document.getElementById('msgInput');
 const footerWrapper=document.getElementById('footerWrapper');
 const inputSection=document.querySelector('.input-section');
@@ -373,6 +371,7 @@ let keyboardHeight=0;
 let isKeyboardOpen=false;
 let isEmojiMode=false;
 let initialWindowHeight=window.innerHeight;
+let emojiKeyboardHeight=0;
 
 const keyboardSvg='<svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm10 7H7v2h10v-2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>';
 
@@ -395,13 +394,16 @@ function closeAllPanels(){
 }
 
 function updateFooterPosition(){
-  if(isEmojiMode||filePicker.classList.contains('show')){
-    footerWrapper.style.bottom=isKeyboardOpen?keyboardHeight+'px':'0px';
+  let bottomPos='0px';
+  if(isEmojiMode){
+    emojiKeyboardHeight=emojiKeyboard.offsetHeight||300;
+    bottomPos=emojiKeyboardHeight+'px';
+  }else if(filePicker.classList.contains('show')){
+    bottomPos=isKeyboardOpen?keyboardHeight+'px':'0px';
   }else if(isKeyboardOpen){
-    footerWrapper.style.bottom=keyboardHeight+'px';
-  }else{
-    footerWrapper.style.bottom='0px';
+    bottomPos=keyboardHeight+'px';
   }
+  footerWrapper.style.bottom=bottomPos;
 }
 
 msgInput.addEventListener('focus',()=>{
@@ -417,6 +419,13 @@ msgInput.addEventListener('blur',()=>{
   setTimeout(()=>{
     updateFooterPosition();
   },100);
+});
+
+msgInput.addEventListener('keypress',(e)=>{
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    sendMsg();
+  }
 });
 
 window.visualViewport?.addEventListener('resize',()=>{
@@ -450,7 +459,7 @@ emojiToggle.addEventListener('click',(e)=>{
     msgInput.focus();
     updateEmojiButton();
     isKeyboardOpen=true;
-    updateFooterPosition();
+    setTimeout(()=>{updateFooterPosition();},50);
   }else{
     isEmojiMode=true;
     msgInput.blur();
