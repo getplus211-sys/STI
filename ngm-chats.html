@@ -3,74 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chats</title>
+    <title>NGM Messenger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --h: 90px; --f: 40px; }
-        body { background: #fff; margin: 0; font-family: -apple-system, sans-serif; overflow-x: hidden; }
-        .header { height: var(--h); border-bottom: 0.5px solid #ddd; display: flex; align-items: flex-end; padding: 12px 16px; position: sticky; top: 0; background: #fff; z-index: 10; }
-        .footer { height: var(--f); border-top: 0.5px solid #ddd; position: fixed; bottom: 0; width: 100%; max-width: 448px; background: #f8f8f8; display: flex; align-items: center; justify-content: space-around; font-size: 10px; font-weight: bold; color: #8e8e93; }
-        .chat-item { display: flex; align-items: center; padding: 12px 16px; gap: 15px; border-bottom: 0.5px solid #f0f0f0; cursor: pointer; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; background: #007aff; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+        .ios-header { height: var(--h); display: flex; align-items: flex-end; padding: 0 16px 12px; border-bottom: 0.5px solid #d1d1d1; position: sticky; top: 0; background: white; z-index: 50; }
+        .ios-footer { height: var(--f); position: fixed; bottom: 0; width: 100%; max-width: 448px; background: #f9f9f9; border-top: 0.5px solid #d1d1d1; display: flex; align-items: center; justify-content: space-around; z-index: 50; }
+        .chat-row { display: flex; padding: 12px 16px; gap: 12px; border-bottom: 0.5px solid #f2f2f2; cursor: pointer; transition: 0.2s; }
+        .chat-row:active { background-color: #e5e5ea; }
+        .avatar { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #5AC8FA, #007AFF); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; flex-shrink: 0; }
     </style>
 </head>
-<body class="flex justify-center">
-    <div class="w-full max-w-md bg-white min-h-screen shadow-lg">
-        <header class="header">
+<body class="bg-gray-100 flex justify-center">
+
+    <div class="w-full max-w-md bg-white min-h-screen relative flex flex-col shadow-xl">
+        
+        <header class="ios-header">
             <div class="flex justify-between items-center w-full">
-                <span class="text-blue-500 text-sm">Edit</span>
-                <h1 class="font-bold text-lg">Chats</h1>
-                <span class="text-blue-500 text-lg">✎</span>
+                <span class="text-[#007AFF] text-lg">Edit</span>
+                <h1 class="font-bold text-lg text-black">Chats</h1>
+                <span class="text-[#007AFF] text-2xl">✎</span>
             </div>
         </header>
 
-        <div id="loader" class="p-20 text-center text-gray-400">Loading...</div>
-        <div id="chat-list"></div>
+        <main class="flex-1 pb-[50px]">
+            <div id="loader" class="py-20 text-center text-gray-400">ચેટ્સ લોડ થઈ રહી છે...</div>
+            <div id="chat-list"></div>
+            <div id="empty-msg" class="hidden py-20 text-center px-10 text-gray-400">તમારા ડેટાબેઝમાં હજી કોઈ ચેટ નથી.</div>
+        </main>
 
-        <footer class="footer">
+        <footer class="ios-footer text-[10px] font-bold text-gray-400">
             <span>CONTACTS</span>
             <span>CALLS</span>
-            <span class="text-blue-500">CHATS</span>
+            <span class="text-[#007AFF]">CHATS</span>
             <span>SETTINGS</span>
         </footer>
     </div>
 
     <script>
-        const S_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        const _supabase = supabase.createClient(S_URL, S_KEY);
+        const API_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const _supabase = supabase.createClient(API_URL, API_KEY);
 
         async function init() {
-            // સીધું ngm_chats ટેબલ માંથી ડેટા લેવો
+            // રીયલ-ટાઇમ ડેટા ફેચિંગ ફંક્શન
             const { data, error } = await _supabase
                 .from('ngm_chats')
                 .select('*')
                 .order('updated_at', { ascending: false });
 
-            document.getElementById('loader').style.display = 'none';
+            document.getElementById('loader').classList.add('hidden');
 
             if (error) {
-                console.error("Error:", error.message);
-                document.getElementById('chat-list').innerHTML = `<p class="p-10 text-red-500 text-center">${error.message}</p>`;
+                console.error("Database Error:", error.message);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                document.getElementById('empty-msg').classList.remove('hidden');
                 return;
             }
 
             const list = document.getElementById('chat-list');
-            if (data.length === 0) {
-                list.innerHTML = `<p class="p-10 text-gray-400 text-center">No chats found.</p>`;
-                return;
-            }
-
             list.innerHTML = data.map(chat => `
-                <div class="chat-item" onclick="location.href='ngm-chat-window.html?chat_id=${chat.chat_id}'">
+                <div class="chat-row" onclick="location.href='ngm-chat-window.html?chat_id=${chat.chat_id}'">
                     <div class="avatar">${chat.chat_type[0].toUpperCase()}</div>
-                    <div class="flex-1 overflow-hidden">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-black">Chat: ${chat.chat_id.slice(0,8)}</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="font-bold text-[16px] truncate text-black">ID: ${chat.chat_id.slice(0, 8)}</h3>
                             <span class="text-xs text-gray-400">${chat.updated_at ? new Date(chat.updated_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</span>
                         </div>
-                        <p class="text-sm text-gray-500 truncate mt-0.5">${chat.chat_type} session</p>
+                        <p class="text-[14px] text-gray-500 truncate mt-0.5">Type: ${chat.chat_type}</p>
                     </div>
                 </div>
             `).join('');
