@@ -168,7 +168,7 @@
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
         let currentConversationId = null;
@@ -176,7 +176,7 @@
 
         // --- INITIALIZATION: Load Users for "Login" ---
         async function loadUsersForLogin() {
-            const { data, error } = await supabase.from('ngm_users_display').select('*');
+            const { data, error } = await supabaseClient.from('ngm_users_display').select('*');
             if (error) {
                 console.error('Error fetching users:', error);
                 alert("Error connecting to Supabase. Check console.");
@@ -204,7 +204,11 @@
         }
 
         function loginAs(user) {
-            currentUser = user;
+            currentUser = {
+                user_id: user.id || user.uuid || user.user_id,
+                display_name: user.display_name,
+                profile_picture_url: user.profile_picture_url
+            };
             document.getElementById('login-modal').style.display = 'none';
             document.getElementById('app-container').style.visibility = 'visible';
             document.getElementById('current-user-name').innerText = user.display_name;
@@ -221,7 +225,7 @@
             chatList.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">Loading chats...</p>';
 
             // 1. Get Conversation IDs where current user is a participant
-            const { data: participations, error: partError } = await supabase
+            const { data: participations, error: partError } = await supabaseClient
                 .from('ngm_conversation_participants')
                 .select('conversation_id')
                 .eq('user_id', currentUser.user_id);
@@ -239,7 +243,7 @@
 
             for (let chatId of conversationIds) {
                 // Get other participant info
-                const { data: members } = await supabase
+                const { data: members } = await supabaseClient
                     .from('ngm_conversation_participants')
                     .select('user_id')
                     .eq('conversation_id', chatId)
@@ -251,29 +255,35 @@
                 
                 if (members && members.length > 0) {
                     const otherUserId = members[0].user_id;
-                    const { data: otherUser } = await supabase
+                    const { data: otherUserList } = await supabaseClient
                         .from('ngm_users_display')
                         .select('*')
                         .eq('user_id', otherUserId)
-                        .single();
+                        .limit(1);
                     
-                    if (otherUser) {
+                    if (otherUserList && otherUserList.length > 0) {
+                        const otherUser = otherUserList[0];
                         chatName = otherUser.display_name;
                         chatImg = otherUser.profile_picture_url || chatImg;
                     }
                 }
 
                 // Get last message
-                const { data: lastMsg } = await supabase
+                const { data: lastMsgList } = await supabaseClient
                     .from('ngm_messages')
                     .select('content, created_at')
                     .eq('conversation_id', chatId)
                     .order('created_at', { ascending: false })
-                    .limit(1)
-                    .single();
+                    .limit(1);
                 
-                const preview = lastMsg ? lastMsg.content : "No messages yet";
-                const timeStr = lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+                let preview = "No messages yet";
+                let timeStr = "";
+                
+                if (lastMsgList && lastMsgList.length > 0) {
+                    const lastMsg = lastMsgList[0];
+                    preview = lastMsg.content;
+                    timeStr = new Date(lastMsg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
 
                 // Render Item
                 const item = document.createElement('div');
@@ -320,7 +330,7 @@
             const container = document.getElementById('messages-container');
             container.innerHTML = '<p style="text-align:center; color:#555; margin-top:20px;">Loading...</p>';
             
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('ngm_messages')
                 .select('*')
                 .eq('conversation_id', chatId)
@@ -365,7 +375,7 @@
             input.value = '';
 
             // Insert into Supabase
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('ngm_messages')
                 .insert({
                     conversation_id: currentConversationId,
@@ -387,10 +397,10 @@
         // --- REALTIME SUBSCRIPTION ---
         function subscribeToMessages(chatId) {
             if (realtimeSubscription) {
-                supabase.removeChannel(realtimeSubscription);
+                supabaseClient.removeChannel(realtimeSubscription);
             }
 
-            realtimeSubscription = supabase
+            realtimeSubscription = supabaseClient
                 .channel(`chat:${chatId}`)
                 .on('postgres_changes', { 
                     event: 'INSERT', 
