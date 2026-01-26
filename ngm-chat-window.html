@@ -372,14 +372,3 @@ init();
 </script>
 </body>
 </html>
-
-<script>
-// Keyboard detection for mobile
-window.visualViewport?.addEventListener('resize', () => {
-  const footer = document.querySelector('.footer-section');
-  if(footer) {
-    footer.style.position = 'fixed';
-    footer.style.bottom = '0';
-  }
-});
-</script>
