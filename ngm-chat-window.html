@@ -49,13 +49,13 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .msg-status{color:#0084ff;font-weight:600}
 .message.out .msg-status{color:#25d366}
 .typing{padding:8px 15px;font-size:13px;color:#999;font-style:italic;position:fixed;bottom:85px;left:10px;right:10px;max-width:460px;background:transparent;display:none;z-index:90;animation:fadeIn 0.2s}
-.footer-wrapper{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:200;width:100%;pointer-events:auto;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-transform:translateZ(0);transform:translateZ(0);contain:layout style paint}
+.footer-wrapper{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:200;width:100%;pointer-events:auto;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-transform:translateZ(0);transform:translateZ(0);contain:layout style paint;transition:bottom 0.2s ease-out}
 .emoji-section{display:none;gap:6px;padding:8px;border-bottom:1px solid #e0e0e0;background:#fff;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;flex-shrink:0;width:100%}
 .emoji-section::-webkit-scrollbar{height:4px}
 .emoji-section::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
 .emoji-quick{font-size:24px;padding:6px;cursor:pointer;border-radius:8px;transition:all 0.15s;min-width:32px;display:flex;align-items:center;justify-content:center}
 .emoji-quick:active{background:#f0f0f0;transform:scale(0.9)}
-.input-section{padding:12px 8px;display:flex;align-items:flex-end;gap:8px;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.05);width:100%;height:auto;position:relative}
+.input-section{padding:10px 8px;display:flex;align-items:flex-end;gap:8px;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.05);width:100%;height:auto;position:relative}
 .emoji-btn,.attach-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;flex-shrink:0;border-radius:50%;font-size:20px;transition:all 0.2s;color:#666}
 .emoji-btn:active,.attach-btn:active{background:#f0f0f0;color:#333;transform:scale(0.95)}
 .attach-btn svg{width:24px;height:24px;fill:currentColor}
@@ -372,8 +372,6 @@ let isFilePanelOpen=false;
 let keyboardHeight=0;
 let emojiKeyboardHeight=300;
 let screenHeight=window.screen.height;
-let lastBottom=0;
-let footerTransitionEnabled=true;
 
 const keyboardSvg='<svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm10 7H7v2h10v-2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>';
 
@@ -382,35 +380,16 @@ function calcRealKeyboardHeight(){
   return Math.max(0,screenHeight-window.visualViewport.height);
 }
 
-function enableFooterTransition(){
-  footerTransitionEnabled=true;
-  footerWrapper.style.transition='bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
-}
-
-function disableFooterTransition(){
-  footerTransitionEnabled=false;
-  footerWrapper.style.transition='none';
-}
-
 function syncFooterPosition(){
   let bottom=0;
   if(isEmojiMode){
     bottom=emojiKeyboardHeight;
   }else if(isFilePanelOpen){
-    bottom=keyboardHeight||calcRealKeyboardHeight();
+    bottom=keyboardHeight;
   }else if(isKeyboardOpen){
-    bottom=keyboardHeight||calcRealKeyboardHeight();
+    bottom=keyboardHeight;
   }
-  
-  if(lastBottom!==bottom){
-    lastBottom=bottom;
-    if(footerTransitionEnabled){
-      footerWrapper.style.transition='bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
-    }else{
-      footerWrapper.style.transition='none';
-    }
-    footerWrapper.style.bottom=bottom+'px';
-  }
+  footerWrapper.style.bottom=bottom+'px';
 }
 
 function updateEmojiButton(){
@@ -428,58 +407,44 @@ function closeAllPanels(){
 }
 
 if(window.visualViewport){
-  window.visualViewport.addEventListener('resize',()=>{
+  const handleViewportResize=()=>{
     const calcH=calcRealKeyboardHeight();
     
-    if(calcH>120&&!isKeyboardOpen){
-      isKeyboardOpen=true;
-      keyboardHeight=calcH;
-      enableFooterTransition();
-      syncFooterPosition();
-      setTimeout(()=>messagesArea.scrollTop=messagesArea.scrollHeight,150);
-    }else if(calcH<80&&isKeyboardOpen&&!isEmojiMode&&!isFilePanelOpen){
-      isKeyboardOpen=false;
-      keyboardHeight=0;
-      enableFooterTransition();
-      syncFooterPosition();
-    }else if(isKeyboardOpen||isEmojiMode||isFilePanelOpen){
-      if(calcH>120){
+    if(calcH>150){
+      if(!isKeyboardOpen){
+        isKeyboardOpen=true;
         keyboardHeight=calcH;
+        closeAllPanels();
+        syncFooterPosition();
+        setTimeout(()=>messagesArea.scrollTop=messagesArea.scrollHeight,200);
+      }else{
+        keyboardHeight=calcH;
+        syncFooterPosition();
       }
-      disableFooterTransition();
-      syncFooterPosition();
-      enableFooterTransition();
+    }else if(calcH<80){
+      if(isKeyboardOpen&&!isEmojiMode&&!isFilePanelOpen){
+        isKeyboardOpen=false;
+        keyboardHeight=0;
+        syncFooterPosition();
+      }
     }
-  });
+  };
   
-  window.visualViewport.addEventListener('scroll',()=>{
-    disableFooterTransition();
-    syncFooterPosition();
-    enableFooterTransition();
-  });
+  window.visualViewport.addEventListener('resize',handleViewportResize);
+  window.visualViewport.addEventListener('scroll',syncFooterPosition);
 }
-
-window.addEventListener('orientationchange',()=>{
-  screenHeight=window.screen.height;
-  disableFooterTransition();
-  setTimeout(()=>{
-    enableFooterTransition();
-    syncFooterPosition();
-  },200);
-});
 
 msgInput.addEventListener('focus',()=>{
   closeAllPanels();
   isKeyboardOpen=true;
-  enableFooterTransition();
   setTimeout(()=>{
     const calcH=calcRealKeyboardHeight();
-    if(calcH>120){
+    if(calcH>150){
       keyboardHeight=calcH;
     }
     syncFooterPosition();
     messagesArea.scrollTop=messagesArea.scrollHeight;
-  },400);
+  },500);
 });
 
 msgInput.addEventListener('blur',()=>{
@@ -488,9 +453,8 @@ msgInput.addEventListener('blur',()=>{
       isKeyboardOpen=false;
       keyboardHeight=0;
     }
-    enableFooterTransition();
     syncFooterPosition();
-  },150);
+  },200);
 });
 
 msgInput.addEventListener('keypress',(e)=>{
@@ -507,31 +471,27 @@ emojiToggle.addEventListener('click',(e)=>{
     emojiKeyboard.classList.remove('show');
     emojiSection.style.display='none';
     updateEmojiButton();
-    enableFooterTransition();
     msgInput.focus();
     isKeyboardOpen=true;
     setTimeout(()=>{
       const calcH=calcRealKeyboardHeight();
-      if(calcH>120){
+      if(calcH>150){
         keyboardHeight=calcH;
       }
       syncFooterPosition();
-    },400);
+    },500);
   }else{
+    isEmojiMode=true;
     msgInput.blur();
     setTimeout(()=>{
-      isEmojiMode=true;
       emojiKeyboardHeight=emojiKeyboard.offsetHeight||300;
       emojiKeyboard.classList.add('show');
       filePicker.classList.remove('show');
       isFilePanelOpen=false;
-      if(isKeyboardOpen){
-        emojiSection.style.display='flex';
-      }
+      emojiSection.style.display='flex';
       updateEmojiButton();
-      enableFooterTransition();
       syncFooterPosition();
-    },150);
+    },200);
   }
 });
 
@@ -540,7 +500,6 @@ attachBtn.addEventListener('click',(e)=>{
   if(isFilePanelOpen){
     filePicker.classList.remove('show');
     isFilePanelOpen=false;
-    enableFooterTransition();
     syncFooterPosition();
   }else{
     msgInput.blur();
@@ -548,26 +507,16 @@ attachBtn.addEventListener('click',(e)=>{
       closeAllPanels();
       filePicker.classList.add('show');
       isFilePanelOpen=true;
-      enableFooterTransition();
       syncFooterPosition();
-    },150);
+    },200);
   }
 });
 
 messagesArea.addEventListener('scroll',()=>{
   if(isKeyboardOpen||isEmojiMode||isFilePanelOpen){
-    disableFooterTransition();
     syncFooterPosition();
-    enableFooterTransition();
   }
 },false);
-
-document.addEventListener('touchmove',()=>{
-  if(isKeyboardOpen||isEmojiMode||isFilePanelOpen){
-    disableFooterTransition();
-    syncFooterPosition();
-  }
-},{passive:true});
 
 init();
 </script>
