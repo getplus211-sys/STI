@@ -434,13 +434,22 @@ function closeNotificationModal() {
   document.getElementById('notificationModal').classList.remove('show');
 }
 
-// Nandigram Chat Function
+// ⭐ FIXED: Nandigram Chat Function - Use NativeApp instead of ChatBridge
 function openNandigramChats() {
-  if (typeof window.ChatBridge !== 'undefined') {
-    // Android native app
-    window.ChatBridge.openChats();
+  console.log("openNandigramChats called");
+  console.log("typeof window.NativeApp:", typeof window.NativeApp);
+  
+  if (typeof window.NativeApp !== 'undefined' && window.NativeApp) {
+    try {
+      window.NativeApp.openNandigramChats();
+      console.log('Nandigram chats opened via NativeApp');
+    } catch (e) {
+      console.error('Error calling NativeApp:', e);
+      alert('Error opening chats: ' + e.message);
+    }
   } else {
     // Web browser fallback
+    console.warn('NativeApp not available');
     alert('Nandigram Chat feature available only in mobile app!');
   }
 }
