@@ -168,7 +168,8 @@
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         
-        let supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // FIXED: Using 'supabaseClient' instead of 'supabase' to avoid conflict with the library name
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
         let currentConversationId = null;
@@ -176,6 +177,7 @@
 
         // --- INITIALIZATION: Load Users for "Login" ---
         async function loadUsersForLogin() {
+            // FIXED: Updated all calls to use supabaseClient
             const { data, error } = await supabaseClient.from('ngm_users_display').select('*');
             if (error) {
                 console.error('Error fetching users:', error);
@@ -204,17 +206,11 @@
         }
 
         function loginAs(user) {
-            currentUser = {
-                user_id: user.id || user.uuid || user.user_id,
-                display_name: user.display_name,
-                profile_picture_url: user.profile_picture_url
-            };
+            currentUser = user;
             document.getElementById('login-modal').style.display = 'none';
             document.getElementById('app-container').style.visibility = 'visible';
             document.getElementById('current-user-name').innerText = user.display_name;
             loadConversations();
-            
-            // Subscribe to incoming messages globally (optional, purely for notification in real app)
         }
 
         loadUsersForLogin();
@@ -238,8 +234,7 @@
             const conversationIds = participations.map(p => p.conversation_id);
 
             // 2. Fetch Conversation Details
-            // Note: Ideally this is a View or JOIN, but doing client-side for simplicity
-            chatList.innerHTML = ''; // Clear loading
+            chatList.innerHTML = ''; 
 
             for (let chatId of conversationIds) {
                 // Get other participant info
@@ -255,35 +250,29 @@
                 
                 if (members && members.length > 0) {
                     const otherUserId = members[0].user_id;
-                    const { data: otherUserList } = await supabaseClient
+                    const { data: otherUser } = await supabaseClient
                         .from('ngm_users_display')
                         .select('*')
                         .eq('user_id', otherUserId)
-                        .limit(1);
+                        .single();
                     
-                    if (otherUserList && otherUserList.length > 0) {
-                        const otherUser = otherUserList[0];
+                    if (otherUser) {
                         chatName = otherUser.display_name;
                         chatImg = otherUser.profile_picture_url || chatImg;
                     }
                 }
 
                 // Get last message
-                const { data: lastMsgList } = await supabaseClient
+                const { data: lastMsg } = await supabaseClient
                     .from('ngm_messages')
                     .select('content, created_at')
                     .eq('conversation_id', chatId)
                     .order('created_at', { ascending: false })
-                    .limit(1);
+                    .limit(1)
+                    .single();
                 
-                let preview = "No messages yet";
-                let timeStr = "";
-                
-                if (lastMsgList && lastMsgList.length > 0) {
-                    const lastMsg = lastMsgList[0];
-                    preview = lastMsg.content;
-                    timeStr = new Date(lastMsg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                }
+                const preview = lastMsg ? lastMsg.content : "No messages yet";
+                const timeStr = lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
 
                 // Render Item
                 const item = document.createElement('div');
@@ -313,9 +302,7 @@
             document.getElementById('header-name').innerText = name;
             document.getElementById('header-avatar').src = img;
             
-            // Highlight sidebar item
             document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-            // (Ideally add ID to chat items to highlight specific one)
 
             await loadMessages(chatId);
             subscribeToMessages(chatId);
@@ -387,7 +374,6 @@
                 console.error("Send error:", error);
                 alert("Failed to send message");
             }
-            // Realtime subscription will handle appending the message to the UI
         }
 
         function handleEnter(e) {
