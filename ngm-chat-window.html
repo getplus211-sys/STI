@@ -23,7 +23,7 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .menu-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;flex-shrink:0;border-radius:50%;transition:background 0.2s}
 .menu-btn:active{background:rgba(255,255,255,0.2)}
 .menu-btn svg{width:22px;height:22px;fill:#fff}
-.messages-area{flex:1;overflow-y:auto;padding:110px 8px 70px;background:var(--bg);scroll-behavior:smooth}
+.messages-area{flex:1;overflow-y:auto;padding:110px 8px 20px;background:var(--bg);scroll-behavior:smooth}
 .messages-area::-webkit-scrollbar{width:6px}
 .messages-area::-webkit-scrollbar-track{background:transparent}
 .messages-area::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
@@ -49,7 +49,7 @@ body{font-family:-apple-system,'Segoe UI','Roboto',sans-serif;background:var(--b
 .msg-status{color:#0084ff;font-weight:600}
 .message.out .msg-status{color:#25d366}
 .typing{padding:8px 15px;font-size:13px;color:#999;font-style:italic;position:fixed;bottom:85px;left:10px;right:10px;max-width:460px;background:transparent;display:none;z-index:90;animation:fadeIn 0.2s}
-.footer-section{display:flex !important;position:fixed;bottom:0;left:0;right:0;width:100%;background:#fff;z-index:200;box-shadow:0 -2px 8px rgba(0,0,0,0.05);height:auto;align-items:center;padding:8px 0;margin:0;flex-direction:row}
+.footer-section{display:flex !important;position:sticky;bottom:0;left:0;right:0;width:100%;background:#fff;z-index:200;box-shadow:0 -2px 8px rgba(0,0,0,0.05);height:auto;align-items:center;padding:8px 0;margin:0;flex-direction:row}
 .emoji-section{display:none;gap:6px;padding:8px;border-bottom:1px solid #e0e0e0;background:#fff;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;flex-shrink:0}
 .emoji-section::-webkit-scrollbar{height:4px}
 .emoji-section::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
