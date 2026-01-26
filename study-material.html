@@ -2,174 +2,146 @@
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ngm-chats</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NGM Chat Window</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --h: 90px; --f: 40px; }
-        body { margin: 0; padding: 0; background: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto; }
-        .header { height: var(--h); background: #fff; border-bottom: 1px solid #ddd; display: flex; align-items: flex-end; padding: 0 15px 10px; position: fixed; top: 0; width: 100%; max-width: 448px; z-index: 100; }
-        .footer { height: var(--f); background: #f8f8f8; border-top: 1px solid #ddd; display: flex; align-items: flex-start; padding-top: 5px; position: fixed; bottom: 0; width: 100%; max-width: 448px; z-index: 100; }
-        .container { margin-top: var(--h); margin-bottom: var(--f); background: #fff; min-height: calc(100vh - var(--h) - var(--f)); overflow-y: auto; }
-        .chat-row { display: flex; align-items: center; padding: 12px 15px; border-bottom: 0.5px solid #eee; text-decoration: none; color: inherit; transition: 0.2s; }
-        .chat-row:active { background-color: #f2f2f2; }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px; flex-shrink: 0; }
-        .details { flex-grow: 1; margin-left: 12px; overflow: hidden; }
-        .top-row { display: flex; justify-content: space-between; align-items: baseline; }
-        .name { font-weight: 700; font-size: 16px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .time { font-size: 13px; color: #8e8e93; }
-        .msg-preview { font-size: 14px; color: #8e8e93; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .status-badge { font-size: 10px; background: #007aff; color: #fff; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
-        #error-log { color: red; font-size: 12px; padding: 10px; text-align: center; display: none; }
-        .loading-spinner { display: flex; justify-content: center; padding: 50px; }
+        :root { --h: 90px; --f: 60px; }
+        body { font-family: -apple-system, sans-serif; background-color: #E5DDD5; }
+        .ngm-header { height: var(--h); background: #517da2; color: white; position: fixed; top: 0; width: 100%; max-width: 448px; z-index: 100; display: flex; align-items: flex-end; padding: 0 15px 12px; }
+        .ngm-footer { height: var(--f); background: #f0f0f0; position: fixed; bottom: 0; width: 100%; max-width: 448px; z-index: 100; display: flex; align-items: center; padding: 0 10px; border-top: 1px solid #ddd; }
+        .chat-container { margin-top: var(--h); margin-bottom: var(--f); padding: 15px; display: flex; flex-direction: column; gap: 8px; min-height: calc(100vh - var(--h) - var(--f)); }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 15px; position: relative; line-height: 1.4; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .msg-sent { align-self: flex-end; background-color: #effdde; color: #000; border-bottom-right-radius: 2px; }
+        .msg-received { align-self: flex-start; background-color: #fff; color: #000; border-bottom-left-radius: 2px; }
+        .msg-time { font-size: 10px; color: #888; text-align: right; margin-top: 4px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        input:focus { outline: none; }
     </style>
 </head>
-<body>
+<body class="flex justify-center overflow-x-hidden">
 
-<div class="max-w-md mx-auto shadow-2xl relative bg-white">
-    <div class="header">
-        <div class="flex justify-between items-center w-full">
-            <span style="color: #007aff; cursor: pointer;">Edit</span>
-            <span style="font-weight: bold; font-size: 17px;">Chats</span>
-            <span style="color: #007aff; cursor: pointer;">✎</span>
+<div class="w-full max-w-md bg-transparent min-h-screen relative flex flex-col">
+    <header class="ngm-header shadow-md">
+        <div class="flex items-center w-full gap-3">
+            <button onclick="location.href='ngm-chats.html'" class="text-2xl font-light">←</button>
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg" id="chat-icon">?</div>
+            <div class="flex-1 overflow-hidden">
+                <h2 class="font-bold text-base truncate" id="chat-name">Loading...</h2>
+                <p class="text-[11px] opacity-80" id="chat-status">online</p>
+            </div>
+            <div class="text-xl">⋮</div>
         </div>
-    </div>
+    </header>
 
-    <div id="error-log"></div>
+    <main class="chat-container no-scrollbar" id="message-list">
+        </main>
 
-    <div class="container" id="chat-list-container">
-        <div class="loading-spinner" id="loader">
-            <svg class="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+    <footer class="ngm-footer">
+        <div class="flex w-full items-center gap-2">
+            <button class="text-gray-500 text-2xl px-1">📎</button>
+            <input type="text" id="msgInput" placeholder="Message" class="flex-1 bg-white rounded-full px-4 py-2 text-sm border-none shadow-sm">
+            <button onclick="sendMessage()" id="sendBtn" class="bg-[#517da2] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
         </div>
-        <div id="no-data" style="display: none; text-align: center; padding: 40px; color: #999;">
-            કોઈ ચેટ મળી નથી. તમારા 'ngm_chats' ટેબલમાં ડેટા ચેક કરો.
-        </div>
-        <div id="render-target"></div>
-    </div>
-
-    <div class="footer">
-        <div class="flex justify-around items-center w-full uppercase text-[10px] font-bold text-gray-400">
-            <span>Contacts</span>
-            <span>Calls</span>
-            <span style="color: #007aff;">Chats</span>
-            <span>Settings</span>
-        </div>
-    </div>
+    </footer>
 </div>
 
 <script>
-    // Configuration
     const CONFIG = {
         URL: 'https://bhmycvrbucmbbrpzeane.supabase.co',
         KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4'
     };
 
-    let _supabase = null;
+    const _supabase = supabase.createClient(CONFIG.URL, CONFIG.KEY);
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentChatId = urlParams.get('chat_id');
+    const myId = 'me'; // આને તમે તમારા રિયલ યુઝર આઈડી થી રિપ્લેસ કરી શકો છો
 
-    // 1. Initialize Supabase
-    function init() {
-        try {
-            _supabase = supabase.createClient(CONFIG.URL, CONFIG.KEY);
-            startApp();
-        } catch (e) {
-            showError("Initialization Failed: " + e.message);
+    // 1. Load Everything
+    async function init() {
+        if (!currentChatId) {
+            alert("Chat ID is missing!");
+            return;
         }
+        document.getElementById('chat-name').innerText = "ID: " + currentChatId.substring(0, 8);
+        await loadMessages();
+        subscribeToMessages();
     }
 
-    // 2. Error Logger
-    function showError(msg) {
-        const log = document.getElementById('error-log');
-        log.style.display = 'block';
-        log.innerHTML = msg;
-        document.getElementById('loader').style.display = 'none';
-    }
-
-    // 3. Main Logic
-    async function startApp() {
-        await getOriginalChats();
-        listenToChanges();
-    }
-
-    // 4. Fetch Real Data from ngm_chats
-    async function getOriginalChats() {
-        const loader = document.getElementById('loader');
-        const noData = document.getElementById('no-data');
-        const target = document.getElementById('render-target');
-
+    // 2. Fetch Messages from ngm_messages Table
+    async function loadMessages() {
         const { data, error } = await _supabase
-            .from('ngm_chats')
+            .from('ngm_messages')
             .select('*')
-            .order('updated_at', { ascending: false });
+            .eq('chat_id', currentChatId)
+            .order('created_at', { ascending: true });
 
-        loader.style.display = 'none';
+        if (error) console.error("Error loading messages:", error);
+        else renderMessages(data);
+    }
+
+    // 3. Render Logic
+    function renderMessages(messages) {
+        const list = document.getElementById('message-list');
+        list.innerHTML = messages.map(m => {
+            const isMe = m.sender_id === myId;
+            const time = new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            return `
+                <div class="msg ${isMe ? 'msg-sent' : 'msg-received'}">
+                    <div>${m.content}</div>
+                    <div class="msg-time">${time}</div>
+                </div>
+            `;
+        }).join('');
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    // 4. Send Message Function
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        const { error } = await _supabase
+            .from('ngm_messages')
+            .insert([{
+                chat_id: currentChatId,
+                sender_id: myId,
+                content: text,
+                message_type: 'text'
+            }]);
 
         if (error) {
-            showError("Supabase Query Error: " + error.message);
-            return;
+            console.error("Send error:", error);
+            alert("Message not sent!");
         }
-
-        if (!data || data.length === 0) {
-            noData.style.display = 'block';
-            target.innerHTML = '';
-            return;
-        }
-
-        noData.style.display = 'none';
-        renderInterface(data);
     }
 
-    // 5. Build HTML dynamically
-    function renderInterface(chats) {
-        const target = document.getElementById('render-target');
-        let html = '';
-
-        chats.forEach(chat => {
-            // Mapping colors based on chat type
-            const isGroup = chat.chat_type === 'group';
-            const bg = isGroup ? '#34c759' : '#007aff';
-            const label = isGroup ? 'Group' : 'Direct';
-            const dateStr = chat.updated_at ? new Date(chat.updated_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
-
-            html += `
-                <a href="ngm-chat-window.html?chat_id=${chat.chat_id}" class="chat-row">
-                    <div class="avatar" style="background-color: ${bg}">
-                        ${chat.chat_type.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="details">
-                        <div class="top-row">
-                            <h3 class="name">Chat ID: ${chat.chat_id.substring(0, 8)}</h3>
-                            <span class="time">${dateStr}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <p class="msg-preview">${label} ચેટ જોવા માટે ક્લિક કરો...</p>
-                            <span class="status-badge">Active</span>
-                        </div>
-                    </div>
-                </a>
-            `;
-        });
-
-        target.innerHTML = html;
-    }
-
-    // 6. Realtime Sync Function
-    function listenToChanges() {
+    // 5. Real-time Subscription (Live Chat)
+    function subscribeToMessages() {
         _supabase
-            .channel('db-changes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'ngm_chats' }, (payload) => {
-                console.log('Realtime change detected:', payload);
-                getOriginalChats(); // Re-fetch data on any change
+            .channel('public:ngm_messages')
+            .on('postgres_changes', { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'ngm_messages',
+                filter: `chat_id=eq.${currentChatId}`
+            }, (payload) => {
+                loadMessages(); // Refresh when new message arrives
             })
             .subscribe();
     }
 
-    // Start everything
+    // Enter Key Support
+    document.getElementById('msgInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
     init();
 </script>
-
 </body>
 </html>
