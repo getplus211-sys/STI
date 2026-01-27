@@ -251,7 +251,18 @@
         </div>
 
         <div class="contact-input-section">
-            <label>Enter Phone Numbers (નીચેના format માં):</label>
+            <label>Select Contacts:</label>
+            
+            <!-- Contact Picker Button (Browser API) -->
+            <button class="btn" id="pickContactsBtn" onclick="pickContacts()" style="margin-bottom: 16px; background: #3b82f6;">
+                📇 Select from Phone Contacts
+            </button>
+            
+            <div style="text-align: center; margin: 16px 0; color: #9ca3af; font-size: 14px;">
+                અથવા
+            </div>
+            
+            <label>Manual Entry (નીચેના format માં):</label>
             <textarea id="phoneNumbers" placeholder="+919876543210
 +919123456789
 +917894561230
@@ -263,7 +274,7 @@
 7894561230
 
 (દરેક number નવી line માં)"></textarea>
-            <p class="helper-text">💡 Tip: તમારા phone માંથી contacts copy-paste કરી શકો છો</p>
+            <p class="helper-text">💡 Tip: Phone માંથી contacts select કરો અથવા copy-paste કરો</p>
         </div>
 
         <button class="btn" id="syncBtn" onclick="syncContacts()">
@@ -328,6 +339,66 @@
             }
             currentUser = user;
             return user;
+        }
+
+        // Contact Picker API
+        async function pickContacts() {
+            const supported = ('contacts' in navigator && 'ContactsManager' in window);
+            
+            if (!supported) {
+                // Fallback for browsers that don't support Contact Picker API
+                showContactPermissionDialog();
+                return;
+            }
+
+            try {
+                const props = ['tel']; // Only request phone numbers
+                const opts = { multiple: true };
+
+                const contacts = await navigator.contacts.select(props, opts);
+                
+                if (contacts && contacts.length > 0) {
+                    const phoneNumbers = [];
+                    
+                    contacts.forEach(contact => {
+                        if (contact.tel && contact.tel.length > 0) {
+                            contact.tel.forEach(phone => {
+                                phoneNumbers.push(phone);
+                            });
+                        }
+                    });
+
+                    if (phoneNumbers.length > 0) {
+                        document.getElementById('phoneNumbers').value = phoneNumbers.join('\n');
+                        showStatus(`✅ ${phoneNumbers.length} contacts selected`, 'success');
+                    } else {
+                        showStatus('Selected contacts માં phone numbers નથી', 'error');
+                    }
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // User cancelled the picker
+                    showStatus('Contact selection cancelled', 'info');
+                } else {
+                    console.error('Contact picker error:', error);
+                    showContactPermissionDialog();
+                }
+            }
+        }
+
+        function showContactPermissionDialog() {
+            const message = `
+આ browser Contact Picker API support કરતું નથી.
+
+તમે આ રીતે contacts sync કરી શકો છો:
+
+1️⃣ તમારા phone માંથી contacts export કરો (VCF file)
+2️⃣ અથવા phone numbers manually paste કરો નીચે
+
+📱 Best experience માટે Chrome/Edge browser વાપરો Android પર.
+            `;
+            
+            showStatus(message, 'info');
         }
 
         function normalizePhoneNumber(phone) {
@@ -488,6 +559,18 @@
         window.addEventListener('DOMContentLoaded', async function() {
             initSupabase();
             await checkAuth();
+            
+            // Check if Contact Picker API is supported
+            const supported = ('contacts' in navigator && 'ContactsManager' in window);
+            const pickBtn = document.getElementById('pickContactsBtn');
+            
+            if (!supported) {
+                pickBtn.innerHTML = '📱 Contact Picker Not Supported';
+                pickBtn.style.background = '#9ca3af';
+                pickBtn.title = 'આ browser માં contact picker available નથી. Manual entry use કરો.';
+            } else {
+                pickBtn.title = 'Click to select contacts from your phone';
+            }
         });
     </script>
 </body>
