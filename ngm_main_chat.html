@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nandigram - Chat</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabaseClient/supabaseClient-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -627,7 +627,7 @@
                 document.getElementById('regularSection').style.display = 'none';
 
                 // Get all chat participants for current user
-                const { data: participants, error: partError } = await supabase
+                const { data: participants, error: partError } = await supabaseClient
                     .from('ngm_chat_participants')
                     .select('*, ngm_chats(*)')
                     .eq('user_id', currentUser.id)
@@ -654,7 +654,7 @@
                     };
 
                     // Get last message
-                    const { data: lastMsg } = await supabase
+                    const { data: lastMsg } = await supabaseClient
                         .from('ngm_messages')
                         .select('content, created_at, sender_id')
                         .eq('chat_id', chat.chat_id)
@@ -669,7 +669,7 @@
                     if (chat.chat_type === 'private') {
                         // Get other user details
                         const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
-                        const { data: userData } = await supabase
+                        const { data: userData } = await supabaseClient
                             .from('ngm_users')
                             .select('full_name, username, profile_picture_url, is_online')
                             .eq('user_id', otherUserId)
@@ -680,7 +680,7 @@
                         chatData.isOnline = userData?.is_online;
                     } else if (chat.chat_type === 'group') {
                         // Get group details
-                        const { data: groupData } = await supabase
+                        const { data: groupData } = await supabaseClient
                             .from('ngm_groups')
                             .select('group_name, group_picture_url')
                             .eq('chat_id', chat.chat_id)
@@ -690,7 +690,7 @@
                         chatData.avatar = groupData?.group_picture_url;
                     } else if (chat.chat_type === 'channel') {
                         // Get channel details
-                        const { data: channelData } = await supabase
+                        const { data: channelData } = await supabaseClient
                             .from('ngm_channels')
                             .select('channel_name, channel_picture_url')
                             .eq('chat_id', chat.chat_id)
@@ -808,7 +808,7 @@
 
         async function loadContacts() {
             try {
-                const { data: contacts, error } = await supabase
+                const { data: contacts, error } = await supabaseClient
                     .from('ngm_contacts')
                     .select(`
                         contact_id,
@@ -860,7 +860,7 @@
             } else {
                 // Create new private chat
                 try {
-                    const { data: newChat, error } = await supabase
+                    const { data: newChat, error } = await supabaseClient
                         .from('ngm_chats')
                         .insert({
                             chat_type: 'private',
@@ -926,7 +926,7 @@
         // Setup real-time subscription
         function setupRealtimeSubscription() {
             // Subscribe to new messages
-            supabase
+            supabaseClient
                 .channel('messages')
                 .on('postgres_changes', {
                     event: '*',
@@ -939,7 +939,7 @@
                 .subscribe();
 
             // Subscribe to chat participants changes
-            supabase
+            supabaseClient
                 .channel('participants')
                 .on('postgres_changes', {
                     event: '*',
