@@ -371,10 +371,10 @@
             const diffDays = Math.floor(diffMs / 86400000);
 
             if (diffMins < 1) return 'last seen just now';
-            if (diffMins < 60) return 'last seen recently'; // < 1 hour
-            if (diffHours < 24) return 'last seen recently'; // < 24 hours
-            if (diffDays < 7) return 'last seen recently'; // < 1 week
-            return 'last seen a while ago'; // > 1 week
+            if (diffMins < 60) return 'last seen recently';
+            if (diffHours < 24) return 'last seen recently';
+            if (diffDays < 7) return 'last seen recently';
+            return 'last seen a while ago';
         }
 
         // Update user status in UI
@@ -396,27 +396,24 @@
         // Setup live status updates via realtime
         let statusSubscription = null;
         function setupLiveStatusUpdates(otherUserId) {
-            // Clean up old subscription
             if (statusSubscription) {
                 supabaseClient.removeChannel(statusSubscription);
             }
 
-            // Subscribe to user status changes
             statusSubscription = supabaseClient
-                .channel(`user-status:${otherUserId}`)
+                .channel(\`user-status:\${otherUserId}\`)
                 .on('postgres_changes', {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'ngm_users',
-                    filter: `user_id=eq.${otherUserId}`
+                    filter: \`user_id=eq.\${otherUserId}\`
                 }, payload => {
-                    // Check if user is blocked
                     supabaseClient
                         .from('ngm_blocked_users')
                         .select('block_id')
                         .eq('user_id', otherUserId)
                         .eq('blocked_user_id', currentUser.id)
-                        .single()
+                        .maybeSingle()
                         .then(({ data }) => {
                             updateUserStatus(payload.new, !!data);
                         });
@@ -427,7 +424,6 @@
         // Load Chat Details
         async function loadChatDetails() {
             try {
-                // Get chat basic info
                 const { data: chat, error: chatError } = await supabaseClient
                     .from('ngm_chats')
                     .select('*')
@@ -438,11 +434,9 @@
 
                 currentChatData = chat;
 
-                // Load based on chat type (handle both 'personal' and 'private')
                 if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
                     const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
                     
-                    // Get user details
                     const { data: userData, error: userError } = await supabaseClient
                         .from('ngm_users')
                         .select('full_name, username, profile_picture_url, is_online, last_seen')
@@ -451,38 +445,33 @@
 
                     if (userError) throw userError;
 
-                    // Check if this user is in contacts with a saved name
                     const { data: contactData } = await supabaseClient
                         .from('ngm_contacts')
                         .select('contact_name')
                         .eq('user_id', currentUser.id)
                         .eq('contact_user_id', otherUserId)
-                        .single();
+                        .maybeSingle();
 
-                    // Check if other user has blocked me
                     const { data: blockedData } = await supabaseClient
                         .from('ngm_blocked_users')
                         .select('block_id')
                         .eq('user_id', otherUserId)
                         .eq('blocked_user_id', currentUser.id)
-                        .single();
+                        .maybeSingle();
 
                     const isBlocked = !!blockedData;
 
-                    // Priority: Contact Name > Full Name > Username
                     const name = contactData?.contact_name || userData.full_name || userData.username || 'Unknown User';
                     document.getElementById('chatName').textContent = name;
                     
-                    // Update status
                     updateUserStatus(userData, isBlocked);
 
                     if (userData.profile_picture_url) {
-                        document.getElementById('chatAvatar').style.backgroundImage = `url('${userData.profile_picture_url}')`;
+                        document.getElementById('chatAvatar').style.backgroundImage = \`url('\${userData.profile_picture_url}')\`;
                     } else {
                         document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
                     }
                     
-                    // Setup live status updates
                     setupLiveStatusUpdates(otherUserId);
                 } else if (chat.chat_type === 'group') {
                     const { data: groupData } = await supabaseClient
@@ -496,19 +485,18 @@
                     document.getElementById('chatStatus').textContent = 'Group';
 
                     if (groupData?.group_picture_url) {
-                        document.getElementById('chatAvatar').style.backgroundImage = `url('${groupData.group_picture_url}')`;
+                        document.getElementById('chatAvatar').style.backgroundImage = \`url('\${groupData.group_picture_url}')\`;
                     } else {
                         document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
                     }
 
-                    // Get member count
                     const { count } = await supabaseClient
                         .from('ngm_chat_participants')
                         .select('*', { count: 'exact', head: true })
                         .eq('chat_id', currentChatId)
                         .eq('is_active', true);
 
-                    document.getElementById('chatStatus').textContent = `${count} members`;
+                    document.getElementById('chatStatus').textContent = \`\${count} members\`;
                 } else if (chat.chat_type === 'channel') {
                     const { data: channelData } = await supabaseClient
                         .from('ngm_channels')
@@ -518,10 +506,10 @@
 
                     const name = channelData?.channel_name || 'Channel';
                     document.getElementById('chatName').textContent = name;
-                    document.getElementById('chatStatus').textContent = `${channelData?.subscriber_count || 0} subscribers`;
+                    document.getElementById('chatStatus').textContent = \`\${channelData?.subscriber_count || 0} subscribers\`;
 
                     if (channelData?.channel_picture_url) {
-                        document.getElementById('chatAvatar').style.backgroundImage = `url('${channelData.channel_picture_url}')`;
+                        document.getElementById('chatAvatar').style.backgroundImage = \`url('\${channelData.channel_picture_url}')\`;
                     } else {
                         document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
                     }
@@ -546,7 +534,6 @@
 
                 messages = msgs || [];
                 
-                // Hide loading first
                 const loadingEl = document.getElementById('loadingMessages');
                 if (loadingEl) {
                     loadingEl.style.display = 'none';
@@ -555,7 +542,6 @@
                 renderMessages();
                 scrollToBottom();
 
-                // Mark messages as read
                 await markMessagesAsRead();
 
             } catch (error) {
@@ -567,21 +553,13 @@
             }
         }
 
-        // Get message tick icon (WhatsApp style)
         function getMessageTick(msg) {
-            // Single gray tick - message sent but not delivered
             const singleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#8696a0"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"/></svg>';
             
-            // Double gray tick - message delivered but not read
             const doubleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#8696a0"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>';
             
-            // Double blue tick - message read
             const blueDoubleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#53bdeb"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>';
             
-            // Logic:
-            // 1. If read by all -> blue double tick
-            // 2. If delivered -> gray double tick  
-            // 3. Otherwise -> single gray tick (just sent)
             if (msg.is_read_by_all) {
                 return blueDoubleTick;
             } else if (msg.is_delivered) {
@@ -591,12 +569,11 @@
             }
         }
 
-        // Render Messages
         function renderMessages() {
             const messagesArea = document.getElementById('messagesArea');
             
             if (!messages || messages.length === 0) {
-                messagesArea.innerHTML = `
+                messagesArea.innerHTML = \`
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #9ca3af;">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 16px; opacity: 0.5;">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -604,7 +581,7 @@
                         <p style="font-size: 16px; margin-bottom: 8px;">No messages yet</p>
                         <p style="font-size: 14px;">Start the conversation!</p>
                     </div>
-                `;
+                \`;
                 return;
             }
             
@@ -615,19 +592,18 @@
                     minute: '2-digit' 
                 });
 
-                return `
-                    <div class="message ${isSent ? 'message-sent' : 'message-received'}">
-                        <div class="message-content">${msg.content}</div>
+                return \`
+                    <div class="message \${isSent ? 'message-sent' : 'message-received'}">
+                        <div class="message-content">\${msg.content}</div>
                         <div class="message-time">
-                            ${time}
-                            ${isSent ? getMessageTick(msg) : ''}
+                            \${time}
+                            \${isSent ? getMessageTick(msg) : ''}
                         </div>
                     </div>
-                `;
+                \`;
             }).join('');
         }
 
-        // Send Message
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
@@ -635,7 +611,6 @@
             if (!message) return;
 
             try {
-                // Insert message
                 const { data: newMsg, error } = await supabaseClient
                     .from('ngm_messages')
                     .insert({
@@ -649,35 +624,29 @@
 
                 if (error) throw error;
 
-                // Update chat last_message_at
                 await supabaseClient
                     .from('ngm_chats')
                     .update({ last_message_at: new Date().toISOString() })
                     .eq('chat_id', currentChatId);
 
-                // Clear input
                 input.value = '';
                 input.style.height = 'auto';
                 document.getElementById('sendBtn').disabled = true;
 
-                // Message will be added via realtime subscription
             } catch (error) {
                 console.error('Error sending message:', error);
                 alert('Failed to send message');
             }
         }
 
-        // Mark Messages as Read
         async function markMessagesAsRead() {
             try {
-                // Get unread message IDs
                 const unreadMsgIds = messages
                     .filter(msg => msg.sender_id !== currentUser.id)
                     .map(msg => msg.message_id);
 
                 if (unreadMsgIds.length === 0) return;
 
-                // Check which messages already have status
                 const { data: existingStatuses } = await supabaseClient
                     .from('ngm_message_status')
                     .select('message_id')
@@ -686,7 +655,6 @@
 
                 const existingMsgIds = new Set(existingStatuses?.map(s => s.message_id) || []);
 
-                // Only insert new statuses
                 const newStatuses = unreadMsgIds
                     .filter(msgId => !existingMsgIds.has(msgId))
                     .map(msgId => ({
@@ -701,7 +669,6 @@
                         .insert(newStatuses);
                 }
 
-                // Update participant unread count
                 await supabaseClient
                     .from('ngm_chat_participants')
                     .update({ 
@@ -726,31 +693,15 @@
             const input = document.getElementById('messageInput');
             const sendBtn = document.getElementById('sendBtn');
             
-            // Auto-resize
             input.style.height = 'auto';
             input.style.height = Math.min(input.scrollHeight, 100) + 'px';
 
-            // Enable/disable send button
             sendBtn.disabled = !input.value.trim();
         }
 
         function scrollToBottom() {
             const messagesArea = document.getElementById('messagesArea');
             messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-
-        function formatLastSeen(date) {
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-
-            if (minutes < 1) return 'just now';
-            if (minutes < 60) return `${minutes}m ago`;
-            if (hours < 24) return `${hours}h ago`;
-            if (days < 7) return `${days}d ago`;
-            return date.toLocaleDateString();
         }
 
         function goBack() {
@@ -765,22 +716,20 @@
             alert('Chat info page coming soon!');
         }
 
-        // Setup Real-time Subscription
         function setupRealtimeSubscription() {
             messagesSubscription = supabaseClient
-                .channel(`messages:${currentChatId}`)
+                .channel(\`messages:\${currentChatId}\`)
                 .on('postgres_changes', {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'ngm_messages',
-                    filter: `chat_id=eq.${currentChatId}`
+                    filter: \`chat_id=eq.\${currentChatId}\`
                 }, payload => {
                     console.log('New message received:', payload);
                     messages.push(payload.new);
                     renderMessages();
                     scrollToBottom();
 
-                    // Mark as read if not sent by current user
                     if (payload.new.sender_id !== currentUser.id) {
                         markMessagesAsRead();
                     }
@@ -789,7 +738,7 @@
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'ngm_messages',
-                    filter: `chat_id=eq.${currentChatId}`
+                    filter: \`chat_id=eq.\${currentChatId}\`
                 }, payload => {
                     console.log('Message updated:', payload);
                     const index = messages.findIndex(m => m.message_id === payload.new.message_id);
@@ -801,9 +750,8 @@
                 .subscribe();
         }
 
-        // Initialize
         window.addEventListener('DOMContentLoaded', async function() {
-            initSupabase(); // Initialize Supabase client
+            initSupabase();
             const user = await checkAuth();
             if (user) {
                 await loadChatDetails();
@@ -812,7 +760,6 @@
             }
         });
 
-        // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
             if (messagesSubscription) {
                 supabaseClient.removeChannel(messagesSubscription);
