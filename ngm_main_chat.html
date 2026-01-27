@@ -618,18 +618,35 @@
 
         // Check Authentication
         async function checkAuth() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) {
-                window.location.href = 'login.html';
+            try {
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
+                
+                if (error) {
+                    console.error('Auth error:', error);
+                }
+                
+                if (!user) {
+                    console.log('No user logged in - redirecting to login');
+                    // Comment out redirect for testing
+                    // window.location.href = 'login.html';
+                    alert('તમે login નથી કર્યું! Please login first.\n\nતમારી login.html page ખોલો અને login કરો.');
+                    return null;
+                }
+                
+                console.log('User logged in:', user.email);
+                currentUser = user;
+                return user;
+            } catch (error) {
+                console.error('CheckAuth failed:', error);
                 return null;
             }
-            currentUser = user;
-            return user;
         }
 
         // Load All Chats
         async function loadChats() {
             try {
+                console.log('Loading chats for user:', currentUser?.id);
+                
                 document.getElementById('loadingState').style.display = 'flex';
                 document.getElementById('emptyState').style.display = 'none';
                 document.getElementById('pinnedSection').style.display = 'none';
@@ -642,9 +659,44 @@
                     .eq('user_id', currentUser.id)
                     .eq('is_active', true);
 
-                if (partError) throw partError;
+                if (partError) {
+                    console.error('Participant error:', partError);
+                    throw partError;
+                }
+
+                console.log('Found participants:', participants?.length || 0);
 
                 if (!participants || participants.length === 0) {
+                    console.log('No chats found - showing empty state');
+                    
+                    // FOR TESTING: Add dummy data if no user logged in
+                    if (!currentUser) {
+                        console.log('Adding test data for demo...');
+                        allChats = [
+                            {
+                                id: 'test-1',
+                                name: 'Test User 1',
+                                type: 'private',
+                                lastMessage: 'Hello! This is a test message',
+                                lastMessageTime: new Date().toISOString(),
+                                isPinned: true,
+                                unreadCount: 3
+                            },
+                            {
+                                id: 'test-2',
+                                name: 'Test Group',
+                                type: 'group',
+                                lastMessage: 'Welcome to test group',
+                                lastMessageTime: new Date(Date.now() - 3600000).toISOString(),
+                                isPinned: false,
+                                unreadCount: 1
+                            }
+                        ];
+                        document.getElementById('loadingState').style.display = 'none';
+                        renderChats();
+                        return;
+                    }
+                    
                     document.getElementById('loadingState').style.display = 'none';
                     document.getElementById('emptyState').style.display = 'flex';
                     return;
@@ -730,9 +782,11 @@
                 });
 
                 allChats = await Promise.all(chatPromises);
+                console.log('Loaded chats:', allChats.length);
                 allChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
 
                 document.getElementById('loadingState').style.display = 'none';
+                console.log('Rendering chats...');
                 renderChats();
             } catch (error) {
                 console.error('Error loading chats:', error);
