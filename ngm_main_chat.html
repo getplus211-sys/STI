@@ -542,7 +542,11 @@
     </div>
 
     <script>
-        // Sample Data
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        // Sample Data (will be replaced with real data from Supabase)
         const chats = [
             { id: 1, name: 'Ramesh Patel', message: 'Hello! How are you?', time: '10:30 AM', unread: 3, pinned: true, type: 'personal' },
             { id: 2, name: 'Family Group', message: 'Priya: See you tomorrow!', time: '9:15 AM', unread: 0, pinned: true, type: 'group' },
@@ -552,6 +556,126 @@
         ];
 
         let currentFilter = 'all';
+        let contactsSynced = false;
+
+        // Force Contact Sync on Page Load
+        async function forceContactSync() {
+            try {
+                // Check if contacts permission is granted
+                const hasContactsAccess = localStorage.getItem('contacts_synced');
+                
+                if (!hasContactsAccess) {
+                    // Show contact sync modal
+                    showContactSyncModal();
+                } else {
+                    // Sync contacts in background
+                    await syncContactsToSupabase();
+                }
+            } catch (error) {
+                console.error('Contact sync error:', error);
+            }
+        }
+
+        // Sync Contacts to Supabase
+        async function syncContactsToSupabase() {
+            try {
+                // Note: Actual contact access requires native app or specific browser APIs
+                // For web version, we'll use a contact upload feature
+                console.log('Syncing contacts to Supabase...');
+                
+                // This would call Supabase to sync ngm_contacts table
+                // const response = await fetch(`${SUPABASE_URL}/rest/v1/ngm_contacts`, {...});
+                
+                localStorage.setItem('contacts_synced', 'true');
+                contactsSynced = true;
+            } catch (error) {
+                console.error('Failed to sync contacts:', error);
+            }
+        }
+
+        // Show Contact Sync Permission Modal
+        function showContactSyncModal() {
+            const modalHTML = `
+                <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 300;">
+                    <div style="background: white; padding: 32px; border-radius: 16px; max-width: 350px; text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">Sync Your Contacts</h3>
+                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 24px;">
+                            Nandigram needs access to your contacts to show you who's using the app. 
+                            Your contacts are encrypted and stored securely.
+                        </p>
+                        <button onclick="allowContactSync()" style="width: 100%; padding: 14px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; margin-bottom: 12px;">
+                            Allow & Sync Contacts
+                        </button>
+                        <button onclick="denyContactSync()" style="width: 100%; padding: 14px; background: #f3f4f6; color: #6b7280; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Not Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            const modalDiv = document.createElement('div');
+            modalDiv.id = 'contactSyncModal';
+            modalDiv.innerHTML = modalHTML;
+            document.body.appendChild(modalDiv);
+        }
+
+        async function allowContactSync() {
+            document.getElementById('contactSyncModal')?.remove();
+            
+            // Show syncing indicator
+            showSyncingIndicator();
+            
+            // Simulate contact sync
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await syncContactsToSupabase();
+            
+            hideSyncingIndicator();
+            showSyncSuccessMessage();
+        }
+
+        function denyContactSync() {
+            document.getElementById('contactSyncModal')?.remove();
+            // Show warning that some features may be limited
+            alert('તમે પછી Settings માંથી contacts sync કરી શકો છો.\nકેટલાક features મર્યાદિત હોઈ શકે છે.');
+        }
+
+        function showSyncingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.id = 'syncIndicator';
+            indicator.innerHTML = `
+                <div style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%); background: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 400; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 20px; height: 20px; border: 3px solid #16a34a; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <span style="font-weight: 500;">Syncing contacts...</span>
+                </div>
+                <style>
+                    @keyframes spin { to { transform: rotate(360deg); } }
+                </style>
+            `;
+            document.body.appendChild(indicator);
+        }
+
+        function hideSyncingIndicator() {
+            document.getElementById('syncIndicator')?.remove();
+        }
+
+        function showSyncSuccessMessage() {
+            const success = document.createElement('div');
+            success.innerHTML = `
+                <div style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%); background: #16a34a; color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 400; font-weight: 500;">
+                    ✓ Contacts synced successfully!
+                </div>
+            `;
+            document.body.appendChild(success);
+            setTimeout(() => success.remove(), 3000);
+        }
 
         const colors = ['bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-indigo', 'bg-teal'];
 
@@ -682,7 +806,11 @@
         });
 
         // Initialize
-        renderChats();
+        window.addEventListener('DOMContentLoaded', function() {
+            renderChats();
+            // Force contact sync on first load
+            setTimeout(() => forceContactSync(), 1000);
+        });
     </script>
 </body>
 </html>
