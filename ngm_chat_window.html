@@ -462,22 +462,45 @@
                 if (error) throw error;
 
                 messages = msgs || [];
+                
+                // Hide loading first
+                const loadingEl = document.getElementById('loadingMessages');
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
+                }
+                
                 renderMessages();
                 scrollToBottom();
 
                 // Mark messages as read
                 await markMessagesAsRead();
 
-                document.getElementById('loadingMessages').style.display = 'none';
             } catch (error) {
                 console.error('Error loading messages:', error);
-                document.getElementById('loadingMessages').innerHTML = '<p style="color: #ef4444;">Error loading messages</p>';
+                const loadingEl = document.getElementById('loadingMessages');
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<p style="color: #ef4444;">Error loading messages</p>';
+                }
             }
         }
 
         // Render Messages
         function renderMessages() {
             const messagesArea = document.getElementById('messagesArea');
+            
+            if (!messages || messages.length === 0) {
+                messagesArea.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #9ca3af;">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 16px; opacity: 0.5;">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <p style="font-size: 16px; margin-bottom: 8px;">No messages yet</p>
+                        <p style="font-size: 14px;">Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+            
             messagesArea.innerHTML = messages.map(msg => {
                 const isSent = msg.sender_id === currentUser.id;
                 const time = new Date(msg.created_at).toLocaleTimeString('en-US', { 
