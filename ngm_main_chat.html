@@ -796,6 +796,7 @@
         }
 
         function renderChats() {
+            console.log('renderChats called, total chats:', allChats.length);
             const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             
             let filteredChats = allChats.filter(chat => {
@@ -806,8 +807,12 @@
                 return true;
             });
 
+            console.log('Filtered chats:', filteredChats.length, 'Filter:', currentFilter);
+
             const pinned = filteredChats.filter(c => c.isPinned);
             const regular = filteredChats.filter(c => !c.isPinned);
+
+            console.log('Pinned:', pinned.length, 'Regular:', regular.length);
 
             const pinnedHTML = pinned.map(chat => createChatHTML(chat)).join('');
             const regularHTML = regular.map(chat => createChatHTML(chat)).join('');
@@ -818,9 +823,13 @@
             document.getElementById('pinnedSection').style.display = pinned.length > 0 ? 'block' : 'none';
             document.getElementById('regularSection').style.display = regular.length > 0 ? 'block' : 'none';
             document.getElementById('emptyState').style.display = (pinned.length === 0 && regular.length === 0) ? 'flex' : 'none';
+            
+            console.log('Render complete');
         }
 
         function createChatHTML(chat) {
+            console.log('Creating HTML for chat:', chat.name, chat);
+            
             const avatarHTML = chat.avatar 
                 ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
                 : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
