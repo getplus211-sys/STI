@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
@@ -42,21 +42,26 @@
         .header {
             background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             color: white;
-            height: 90px;
+            min-height: 60px;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 0 16px 12px 16px;
+            align-items: center;
+            padding: 8px 16px;
             flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .header.selection-mode {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
         }
 
         .header-content {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
         }
 
-        .back-btn {
+        .back-btn, .menu-btn {
             width: 40px;
             height: 40px;
             border: none;
@@ -66,6 +71,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .avatar-small {
@@ -80,15 +86,20 @@
             font-weight: 600;
             background-size: cover;
             background-position: center;
+            flex-shrink: 0;
         }
 
         .chat-info {
             flex: 1;
+            min-width: 0;
         }
 
         .chat-name {
             font-weight: 600;
             font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .chat-status {
@@ -127,6 +138,12 @@
         .header-actions {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+
+        .selection-count {
+            font-size: 18px;
+            font-weight: 600;
         }
 
         .icon-btn {
@@ -139,6 +156,68 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .icon-btn:active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            right: 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: dropdownSlide 0.2s ease-out;
+        }
+
+        @keyframes dropdownSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-size: 15px;
+            color: #1f2937;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+
+        .dropdown-item:active {
+            background: #e5e7eb;
+        }
+
+        .dropdown-item svg {
+            flex-shrink: 0;
         }
 
         .messages-area {
@@ -148,38 +227,95 @@
             background: #e5ddd5;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" font-size="100" fill="%23d1d5db" opacity="0.1" text-anchor="middle" dominant-baseline="middle">💬</text></svg>');
             transition: flex 0.3s ease;
+            position: relative;
         }
 
         .messages-area.with-emoji-picker {
             flex: 1;
-            max-height: calc(100vh - 90px - 64px - 350px);
+            max-height: calc(100vh - 60px - 80px - 350px);
+        }
+
+        /* Message Container */
+        .message-container {
+            margin-bottom: 12px;
+            display: flex;
+            position: relative;
+            touch-action: pan-y;
+        }
+
+        .message-container.sent {
+            justify-content: flex-end;
+        }
+
+        .message-container.received {
+            justify-content: flex-start;
+        }
+
+        .message-container.selected .message {
+            background: #b3d9ff;
+        }
+
+        .message-container.selected .message-sent {
+            background: #a3d9a5;
         }
 
         .message {
             max-width: 70%;
-            margin-bottom: 12px;
             padding: 8px 12px;
             border-radius: 8px;
             word-wrap: break-word;
-            display: flex;
+            display: inline-flex;
             flex-direction: column;
+            position: relative;
+            transition: transform 0.2s ease;
         }
 
         .message-sent {
             background: #dcf8c6;
-            margin-left: auto;
             border-bottom-right-radius: 2px;
         }
 
         .message-received {
             background: white;
-            margin-right: auto;
             border-bottom-left-radius: 2px;
         }
 
         .message-content {
             margin-bottom: 4px;
             white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Emoji-only messages */
+        .message.emoji-only {
+            background: transparent;
+            padding: 4px;
+        }
+
+        .message.emoji-only .message-content {
+            font-size: 60px;
+            line-height: 1;
+            animation: emojiPop 0.3s ease-out;
+        }
+
+        .message.emoji-two .message-content {
+            font-size: 40px;
+            animation: emojiPop 0.2s ease-out;
+        }
+
+        .message.emoji-three .message-content {
+            font-size: 28px;
+        }
+
+        @keyframes emojiPop {
+            0% { transform: scale(0.5); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .message-content .emoji-in-text {
+            font-size: 1.3em;
+            vertical-align: middle;
         }
 
         .message-time {
@@ -192,19 +328,128 @@
             gap: 4px;
         }
 
+        .message-reactions {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .reaction-item {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 2px 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .reaction-count {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
         .read-tick {
             width: 16px;
             height: 16px;
         }
 
-        .input-area {
+        /* Message Action Menu */
+        .message-action-menu {
+            position: fixed;
             background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .message-action-menu.show {
+            display: block;
+            animation: menuPop 0.2s ease-out;
+        }
+
+        @keyframes menuPop {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .message-action-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-size: 15px;
+            color: #1f2937;
+            transition: background 0.2s;
+        }
+
+        .message-action-item:hover {
+            background: #f3f4f6;
+        }
+
+        .message-action-item:active {
+            background: #e5e7eb;
+        }
+
+        .message-action-item.delete {
+            color: #ef4444;
+        }
+
+        .emoji-quick-bar {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .emoji-quick-item {
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: none;
+            background: transparent;
+            padding: 4px;
+        }
+
+        .emoji-quick-item:active {
+            transform: scale(1.3);
+        }
+
+        /* Input Area - Glassmorphic */
+        .input-area {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 8px;
             display: flex;
             gap: 8px;
             align-items: flex-end;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid rgba(229, 231, 235, 0.5);
             flex-shrink: 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .input-area.selection-mode {
+            background: rgba(30, 58, 138, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .emoji-btn {
@@ -222,11 +467,11 @@
         }
 
         .emoji-btn:hover {
-            background: #f3f4f6;
+            background: rgba(243, 244, 246, 0.8);
         }
 
         .emoji-btn.active {
-            background: #dcf8c6;
+            background: rgba(220, 252, 231, 0.8);
         }
 
         .emoji-picker {
@@ -342,13 +587,14 @@
 
         .message-input {
             flex: 1;
-            border: 1px solid #e5e7eb;
+            border: 1px solid rgba(229, 231, 235, 0.8);
             border-radius: 24px;
             padding: 10px 16px;
             font-size: 15px;
             outline: none;
             max-height: 100px;
             resize: none;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .send-btn {
@@ -396,7 +642,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Keyboard toggle button */
         .keyboard-btn {
             width: 40px;
             height: 40px;
@@ -412,17 +657,16 @@
         }
 
         .keyboard-btn:hover {
-            background: #f3f4f6;
+            background: rgba(243, 244, 246, 0.8);
         }
 
         .keyboard-btn.show {
             display: flex;
         }
 
-        /* Unread message badge */
         .unread-badge-floating {
             position: fixed;
-            bottom: 80px;
+            bottom: 90px;
             right: 20px;
             background: #16a34a;
             color: white;
@@ -457,13 +701,204 @@
                 opacity: 1;
             }
         }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .modal-overlay.show {
+            display: block;
+        }
+
+        /* Delete Confirmation Modal */
+        .delete-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            z-index: 1000;
+            display: none;
+            max-width: 320px;
+            width: 90%;
+        }
+
+        .delete-modal.show {
+            display: block;
+            animation: modalPop 0.2s ease-out;
+        }
+
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .delete-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .delete-modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .delete-option {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .delete-option:hover {
+            background: #f3f4f6;
+            border-color: #16a34a;
+        }
+
+        .delete-option.selected {
+            background: #dcf8c6;
+            border-color: #16a34a;
+        }
+
+        .delete-modal-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .modal-btn-cancel {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .modal-btn-cancel:active {
+            background: #e5e7eb;
+        }
+
+        .modal-btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .modal-btn-delete:active {
+            background: #dc2626;
+        }
+
+        /* Swipe indicators */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .swipe-indicator-left {
+            right: -40px;
+        }
+
+        .swipe-indicator-right {
+            left: -40px;
+        }
+
+        .message-container.swiping .swipe-indicator {
+            opacity: 1;
+        }
+
+        /* Reply Preview */
+        .reply-preview {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reply-preview.show {
+            display: flex;
+        }
+
+        .reply-preview-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .reply-preview-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #16a34a;
+            margin-bottom: 2px;
+        }
+
+        .reply-preview-text {
+            font-size: 13px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .reply-preview-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reply-preview-close:active {
+            background: #f3f4f6;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <!-- Header -->
+        <div class="header" id="header">
             <div class="header-content">
-                <button class="back-btn" onclick="goBack()">
+                <button class="back-btn" id="backBtn" onclick="goBack()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                         <path d="m15 18-6-6 6-6"/>
                     </svg>
@@ -473,23 +908,86 @@
                     <div class="chat-name" id="chatName">Loading...</div>
                     <div class="chat-status" id="chatStatus"></div>
                 </div>
-                <div class="header-actions">
+                <div class="header-actions" id="headerActions">
                     <button class="icon-btn" onclick="makeCall()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                         </svg>
                     </button>
-                    <button class="icon-btn" onclick="openChatInfo()">
+                    <button class="menu-btn" onclick="toggleMenu()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <line x1="4" x2="20" y1="12" y2="12"/>
-                            <line x1="4" x2="20" y1="6" y2="6"/>
-                            <line x1="4" x2="20" y1="18" y2="18"/>
+                            <circle cx="12" cy="12" r="1" fill="white"/>
+                            <circle cx="12" cy="5" r="1" fill="white"/>
+                            <circle cx="12" cy="19" r="1" fill="white"/>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Selection Mode Actions -->
+                <div class="header-actions" id="selectionActions" style="display: none;">
+                    <span class="selection-count" id="selectionCount">0</span>
+                    <button class="icon-btn" onclick="copySelectedMessages()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" onclick="forwardSelectedMessages()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <polyline points="15 17 20 12 15 7"/>
+                            <path d="M4 18v-2a4 4 0 0 1 4-4h12"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" onclick="showDeleteModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" onclick="exitSelectionMode()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
                     </button>
                 </div>
             </div>
         </div>
 
+        <!-- Dropdown Menu -->
+        <div class="dropdown-menu" id="dropdownMenu">
+            <button class="dropdown-item" onclick="toggleMute()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                    <line x1="23" y1="9" x2="17" y2="15"/>
+                    <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+                <span>Mute</span>
+            </button>
+            <button class="dropdown-item" onclick="openSearch()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <span>Search</span>
+            </button>
+            <button class="dropdown-item" onclick="changeWallpaper()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>Change Wallpaper</span>
+            </button>
+            <button class="dropdown-item" onclick="deleteChatConfirm()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>Delete Chat</span>
+            </button>
+        </div>
+
+        <!-- Messages Area -->
         <div class="messages-area" id="messagesArea">
             <div class="loading-messages" id="loadingMessages">
                 <div class="spinner"></div>
@@ -497,7 +995,22 @@
             </div>
         </div>
 
-        <div class="input-area">
+        <!-- Reply Preview -->
+        <div class="reply-preview" id="replyPreview">
+            <div class="reply-preview-content">
+                <div class="reply-preview-name" id="replyPreviewName">Replying to</div>
+                <div class="reply-preview-text" id="replyPreviewText">Message text</div>
+            </div>
+            <button class="reply-preview-close" onclick="cancelReply()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area" id="inputArea">
             <button class="emoji-btn" id="emojiBtn" onclick="toggleEmojiPicker()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
@@ -547,6 +1060,93 @@
                 <path d="m18 15-6-6-6 6"/>
             </svg>
         </div>
+
+        <!-- Message Action Menu -->
+        <div class="message-action-menu" id="messageActionMenu">
+            <div class="emoji-quick-bar">
+                <button class="emoji-quick-item" onclick="reactToMessage('❤️')">❤️</button>
+                <button class="emoji-quick-item" onclick="reactToMessage('👍')">👍</button>
+                <button class="emoji-quick-item" onclick="reactToMessage('😂')">😂</button>
+                <button class="emoji-quick-item" onclick="reactToMessage('😮')">😮</button>
+                <button class="emoji-quick-item" onclick="reactToMessage('😢')">😢</button>
+                <button class="emoji-quick-item" onclick="reactToMessage('🙏')">🙏</button>
+            </div>
+            <button class="message-action-item" onclick="showReadTime()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Read Time</span>
+            </button>
+            <button class="message-action-item" onclick="replyToMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 14 4 9 9 4"/>
+                    <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                </svg>
+                <span>Reply</span>
+            </button>
+            <button class="message-action-item" onclick="pinMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 17v5"/>
+                    <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>
+                </svg>
+                <span>Pin Message</span>
+            </button>
+            <button class="message-action-item" onclick="copyMessageText()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                <span>Copy Text</span>
+            </button>
+            <button class="message-action-item" onclick="forwardMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 17 20 12 15 7"/>
+                    <path d="M4 18v-2a4 4 0 0 1 4-4h12"/>
+                </svg>
+                <span>Forward</span>
+            </button>
+            <button class="message-action-item" onclick="editMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <span>Edit</span>
+            </button>
+            <button class="message-action-item" onclick="selectMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Select</span>
+            </button>
+            <button class="message-action-item delete" onclick="deleteMessageFromMenu()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>Delete</span>
+            </button>
+        </div>
+
+        <!-- Modal Overlay -->
+        <div class="modal-overlay" id="modalOverlay" onclick="closeAllModals()"></div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="delete-modal" id="deleteModal">
+            <div class="delete-modal-title">Delete Message?</div>
+            <div class="delete-modal-options">
+                <button class="delete-option" id="deleteForMe" onclick="selectDeleteOption('me')">
+                    Delete for me
+                </button>
+                <button class="delete-option" id="deleteForEveryone" onclick="selectDeleteOption('everyone')">
+                    Delete for everyone
+                </button>
+            </div>
+            <div class="delete-modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeAllModals()">Cancel</button>
+                <button class="modal-btn modal-btn-delete" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -574,12 +1174,17 @@
         let typingCheckInterval = null;
         let recentEmojis = [];
         let currentEmojiCategory = 'recent';
-        
-        // Unread badge variables
         let unreadCount = 0;
         let isUserAtBottom = true;
+        let selectedMessages = new Set();
+        let isSelectionMode = false;
+        let currentActionMessage = null;
+        let deleteOption = 'me';
+        let replyToMessageId = null;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isSwiping = false;
 
-        // Emoji data organized by categories
         const emojiData = {
             smileys: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾'],
             animals: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️','🦔'],
@@ -603,37 +1208,29 @@
             }
         }
 
-        // Save recent emojis to localStorage
         function saveRecentEmojis() {
             localStorage.setItem('ngm_recent_emojis', JSON.stringify(recentEmojis));
         }
 
-        // Add emoji to recent
         function addToRecent(emoji) {
-            // Remove if already exists
             recentEmojis = recentEmojis.filter(e => e !== emoji);
-            // Add to beginning
             recentEmojis.unshift(emoji);
-            // Keep only 25 most recent
             recentEmojis = recentEmojis.slice(0, 25);
             saveRecentEmojis();
         }
 
-        // Check if user is at bottom of messages
         function checkIfAtBottom() {
             const messagesArea = document.getElementById('messagesArea');
-            const threshold = 100; // pixels from bottom
+            const threshold = 100;
             isUserAtBottom = (messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight) < threshold;
             
             if (isUserAtBottom && unreadCount > 0) {
-                // User scrolled to bottom - clear unread badge
                 unreadCount = 0;
                 hideUnreadBadge();
                 markMessagesAsRead();
             }
         }
 
-        // Show unread badge
         function showUnreadBadge() {
             const badge = document.getElementById('unreadBadge');
             const countEl = document.getElementById('unreadCount');
@@ -644,13 +1241,11 @@
             badge.classList.add('show');
         }
 
-        // Hide unread badge
         function hideUnreadBadge() {
             const badge = document.getElementById('unreadBadge');
             badge.classList.remove('show');
         }
 
-        // Scroll to bottom and mark as read
         function scrollToBottomAndRead() {
             scrollToBottom();
             unreadCount = 0;
@@ -658,34 +1253,25 @@
             markMessagesAsRead();
         }
 
-        // Toggle emoji picker
         function toggleEmojiPicker() {
             const picker = document.getElementById('emojiPicker');
             const emojiBtn = document.getElementById('emojiBtn');
             const keyboardBtn = document.getElementById('keyboardBtn');
             const messagesArea = document.getElementById('messagesArea');
-            const messageInput = document.getElementById('messageInput');
             const isShowing = picker.classList.contains('show');
             
             if (isShowing) {
                 closeEmojiPicker();
             } else {
-                // Blur the input to hide keyboard
-                messageInput.blur();
-                
-                // Small delay to ensure keyboard is hidden
-                setTimeout(() => {
-                    picker.classList.add('show');
-                    emojiBtn.classList.add('active');
-                    keyboardBtn.classList.add('show');
-                    messagesArea.classList.add('with-emoji-picker');
-                    renderEmojis(currentEmojiCategory);
-                    scrollToBottom();
-                }, 100);
+                picker.classList.add('show');
+                emojiBtn.classList.add('active');
+                keyboardBtn.classList.add('show');
+                messagesArea.classList.add('with-emoji-picker');
+                renderEmojis(currentEmojiCategory);
+                scrollToBottom();
             }
         }
 
-        // Close emoji picker
         function closeEmojiPicker() {
             const picker = document.getElementById('emojiPicker');
             const emojiBtn = document.getElementById('emojiBtn');
@@ -696,26 +1282,19 @@
             emojiBtn.classList.remove('active');
             keyboardBtn.classList.remove('show');
             messagesArea.classList.remove('with-emoji-picker');
-            
-            // Focus back on input to show keyboard
-            document.getElementById('messageInput').focus();
         }
 
-        // Switch emoji category
         function switchEmojiCategory(category) {
             currentEmojiCategory = category;
             
-            // Update active button
             document.querySelectorAll('.emoji-category-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             document.querySelector(`[data-category="${category}"]`).classList.add('active');
             
-            // Render emojis for this category
             renderEmojis(category);
         }
 
-        // Render emojis
         function renderEmojis(category) {
             const grid = document.getElementById('emojiGrid');
             let html = '';
@@ -743,7 +1322,6 @@
             grid.innerHTML = html;
         }
 
-        // Search emoji
         function searchEmoji(query) {
             const grid = document.getElementById('emojiGrid');
             query = query.toLowerCase().trim();
@@ -753,14 +1331,11 @@
                 return;
             }
             
-            // Search in all categories
             let results = [];
             Object.values(emojiData).forEach(category => {
                 results = results.concat(category);
             });
             
-            // For now, just show all emojis when searching
-            // In a real app, you'd have emoji names/keywords to search
             let html = '<div class="emoji-section-title">Search Results</div>';
             html += '<div class="emoji-items">';
             results.slice(0, 64).forEach(emoji => {
@@ -771,38 +1346,31 @@
             grid.innerHTML = html;
         }
 
-        // Insert emoji into message input
         function insertEmoji(emoji) {
             const input = document.getElementById('messageInput');
             const start = input.selectionStart || 0;
             const end = input.selectionEnd || 0;
             const text = input.value;
             
-            // Insert emoji at cursor position
             input.value = text.substring(0, start) + emoji + text.substring(end);
             
-            // Move cursor after emoji
             const newPos = start + emoji.length;
             input.setSelectionRange(newPos, newPos);
             
-            // Add to recent
             addToRecent(emoji);
-            
-            // Update send button state
             handleInput();
-            
-            // Don't close emoji picker or focus input - keep emoji picker open
         }
 
-        // Close emoji picker when clicking outside
         document.addEventListener('click', function(e) {
             const picker = document.getElementById('emojiPicker');
             const emojiBtn = document.getElementById('emojiBtn');
             const keyboardBtn = document.getElementById('keyboardBtn');
             const messageInput = document.getElementById('messageInput');
+            const menu = document.getElementById('dropdownMenu');
+            const menuBtn = document.querySelector('.menu-btn');
+            const actionMenu = document.getElementById('messageActionMenu');
             
             if (picker && picker.classList.contains('show')) {
-                // Only close if clicking outside picker AND outside both buttons AND outside input
                 if (!picker.contains(e.target) && 
                     !emojiBtn.contains(e.target) && 
                     !keyboardBtn.contains(e.target) &&
@@ -810,9 +1378,20 @@
                     closeEmojiPicker();
                 }
             }
+
+            if (menu && menu.classList.contains('show')) {
+                if (!menu.contains(e.target) && !menuBtn.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            }
+
+            if (actionMenu && actionMenu.classList.contains('show')) {
+                if (!actionMenu.contains(e.target)) {
+                    closeMessageActionMenu();
+                }
+            }
         });
 
-        // Handle back button behavior
         let backButtonPressCount = 0;
         let backButtonTimeout = null;
 
@@ -820,7 +1399,6 @@
             const picker = document.getElementById('emojiPicker');
             const messageInput = document.getElementById('messageInput');
             
-            // Check if emoji picker is open or keyboard is focused
             const isEmojiPickerOpen = picker.classList.contains('show');
             const isInputFocused = document.activeElement === messageInput;
             
@@ -834,29 +1412,28 @@
                     messageInput.blur();
                     backButtonPressCount = 0;
                 }
+            } else if (isSelectionMode) {
+                e.preventDefault();
+                exitSelectionMode();
+                backButtonPressCount = 0;
             } else {
                 backButtonPressCount++;
                 
                 if (backButtonPressCount === 1) {
                     e.preventDefault();
                     
-                    // Reset counter after 2 seconds
                     if (backButtonTimeout) clearTimeout(backButtonTimeout);
                     backButtonTimeout = setTimeout(() => {
                         backButtonPressCount = 0;
                     }, 2000);
                 } else if (backButtonPressCount >= 2) {
-                    // Allow navigation on second press
                     backButtonPressCount = 0;
                     window.location.href = 'ngm_main_chat.html';
                 }
             }
         }
 
-        // Add popstate listener for back button
         window.addEventListener('popstate', handleBackButton);
-        
-        // Push initial state
         history.pushState(null, null, location.href);
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -937,7 +1514,6 @@
                 supabaseClient.removeChannel(typingSubscription);
             }
 
-            // Clear any existing check interval
             if (typingCheckInterval) {
                 clearInterval(typingCheckInterval);
             }
@@ -960,7 +1536,6 @@
                 })
                 .subscribe();
 
-            // Continuously check typing status every 2 seconds
             typingCheckInterval = setInterval(async () => {
                 try {
                     const { data } = await supabaseClient
@@ -971,7 +1546,6 @@
                         .maybeSingle();
 
                     if (data && data.is_typing) {
-                        // Check if typing was recent (within last 5 seconds)
                         const lastTyping = new Date(data.last_typing_at);
                         const now = new Date();
                         const diffSeconds = (now - lastTyping) / 1000;
@@ -1149,6 +1723,22 @@
             }
         }
 
+        function isEmojiOnly(text) {
+            const emojiRegex = /^(\p{Emoji_Presentation}|\p{Extended_Pictographic})+$/u;
+            return emojiRegex.test(text.trim());
+        }
+
+        function countEmojis(text) {
+            const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+            const matches = text.match(emojiRegex);
+            return matches ? matches.length : 0;
+        }
+
+        function wrapEmojisInText(text) {
+            const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
+            return text.replace(emojiRegex, '<span class="emoji-in-text">$1</span>');
+        }
+
         async function loadMessages() {
             try {
                 const { data: msgs, error } = await supabaseClient
@@ -1186,7 +1776,7 @@
                 }
                 
                 renderMessages();
-                scrollToBottom();
+                setTimeout(() => scrollToBottom(), 100);
 
                 await markMessagesAsRead();
 
@@ -1221,22 +1811,443 @@
                 return;
             }
             
-            messagesArea.innerHTML = messages.map(msg => {
+            messagesArea.innerHTML = messages.map((msg, index) => {
                 const isSent = msg.sender_id === currentUser.id;
                 const time = new Date(msg.created_at).toLocaleTimeString('en-US', { 
                     hour: 'numeric', 
                     minute: '2-digit' 
                 });
 
-                return '<div class="message ' + (isSent ? 'message-sent' : 'message-received') + '"><div class="message-content">' + msg.content + '</div><div class="message-time">' + time + (isSent ? getMessageTick(msg) : '') + '</div></div>';
+                const content = msg.content || '';
+                const emojiOnly = isEmojiOnly(content);
+                const emojiCount = emojiOnly ? countEmojis(content) : 0;
+                
+                let emojiClass = '';
+                let displayContent = content;
+                
+                if (emojiOnly) {
+                    if (emojiCount === 1) {
+                        emojiClass = 'emoji-only';
+                    } else if (emojiCount === 2) {
+                        emojiClass = 'emoji-only emoji-two';
+                    } else if (emojiCount === 3) {
+                        emojiClass = 'emoji-only emoji-three';
+                    }
+                    displayContent = content;
+                } else {
+                    displayContent = wrapEmojisInText(content);
+                }
+
+                const isSelected = selectedMessages.has(msg.message_id);
+
+                return `<div class="message-container ${isSent ? 'sent' : 'received'} ${isSelected ? 'selected' : ''}" 
+                            data-message-id="${msg.message_id}" 
+                            data-index="${index}"
+                            ontouchstart="handleTouchStart(event, '${msg.message_id}')"
+                            ontouchmove="handleTouchMove(event, '${msg.message_id}')"
+                            ontouchend="handleTouchEnd(event, '${msg.message_id}')">
+                    <div class="swipe-indicator swipe-indicator-left">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                            <polyline points="15 17 20 12 15 7"/>
+                            <path d="M4 18v-2a4 4 0 0 1 4-4h12"/>
+                        </svg>
+                    </div>
+                    <div class="swipe-indicator swipe-indicator-right">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                            <polyline points="9 14 4 9 9 4"/>
+                            <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                        </svg>
+                    </div>
+                    <div class="message ${isSent ? 'message-sent' : 'message-received'} ${emojiClass}" 
+                         onclick="${isSelectionMode ? `toggleMessageSelection('${msg.message_id}')` : ''}"
+                         oncontextmenu="return false;"
+                         data-long-press="false">
+                        <div class="message-content">${displayContent}</div>
+                        ${!emojiOnly ? `<div class="message-time">${time}${isSent ? getMessageTick(msg) : ''}</div>` : ''}
+                    </div>
+                </div>`;
             }).join('');
+
+            attachLongPressListeners();
+        }
+
+        function attachLongPressListeners() {
+            const messageElements = document.querySelectorAll('.message');
+            messageElements.forEach(msgEl => {
+                let pressTimer;
+                let startX, startY;
+                let moved = false;
+
+                msgEl.addEventListener('touchstart', function(e) {
+                    if (isSelectionMode) return;
+                    
+                    moved = false;
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                    
+                    pressTimer = setTimeout(() => {
+                        if (!moved) {
+                            const container = msgEl.closest('.message-container');
+                            const messageId = container.getAttribute('data-message-id');
+                            showMessageActionMenu(messageId, e.touches[0].clientX, e.touches[0].clientY);
+                        }
+                    }, 500);
+                });
+
+                msgEl.addEventListener('touchmove', function(e) {
+                    const currentX = e.touches[0].clientX;
+                    const currentY = e.touches[0].clientY;
+                    const diffX = Math.abs(currentX - startX);
+                    const diffY = Math.abs(currentY - startY);
+                    
+                    if (diffX > 10 || diffY > 10) {
+                        moved = true;
+                        clearTimeout(pressTimer);
+                    }
+                });
+
+                msgEl.addEventListener('touchend', function() {
+                    clearTimeout(pressTimer);
+                });
+            });
+        }
+
+        // Swipe gesture handlers
+        function handleTouchStart(event, messageId) {
+            if (isSelectionMode) return;
+            
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+            isSwiping = false;
+        }
+
+        function handleTouchMove(event, messageId) {
+            if (isSelectionMode) return;
+            if (!touchStartX) return;
+
+            const touchX = event.touches[0].clientX;
+            const touchY = event.touches[0].clientY;
+            const diffX = touchX - touchStartX;
+            const diffY = touchY - touchStartY;
+
+            if (Math.abs(diffY) > 50) {
+                return;
+            }
+
+            if (Math.abs(diffX) > 20) {
+                isSwiping = true;
+                const container = event.currentTarget;
+                const message = container.querySelector('.message');
+                
+                if (Math.abs(diffX) > 50) {
+                    container.classList.add('swiping');
+                    message.style.transform = `translateX(${diffX}px)`;
+                }
+            }
+        }
+
+        function handleTouchEnd(event, messageId) {
+            if (isSelectionMode) return;
+            if (!isSwiping) {
+                touchStartX = 0;
+                touchStartY = 0;
+                return;
+            }
+
+            const touchX = event.changedTouches[0].clientX;
+            const diffX = touchX - touchStartX;
+            const container = event.currentTarget;
+            const message = container.querySelector('.message');
+
+            if (Math.abs(diffX) > 100) {
+                const msg = messages.find(m => m.message_id === messageId);
+                const isSent = msg && msg.sender_id === currentUser.id;
+
+                if (diffX > 0 && !isSent) {
+                    replyToMessageById(messageId);
+                } else if (diffX < 0 && isSent) {
+                    forwardMessageById(messageId);
+                }
+            }
+
+            setTimeout(() => {
+                message.style.transform = '';
+                container.classList.remove('swiping');
+            }, 200);
+
+            touchStartX = 0;
+            touchStartY = 0;
+            isSwiping = false;
+        }
+
+        function showMessageActionMenu(messageId, x, y) {
+            currentActionMessage = messageId;
+            const menu = document.getElementById('messageActionMenu');
+            
+            menu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+            menu.style.top = Math.max(y - 200, 20) + 'px';
+            menu.classList.add('show');
+        }
+
+        function closeMessageActionMenu() {
+            const menu = document.getElementById('messageActionMenu');
+            menu.classList.remove('show');
+            currentActionMessage = null;
+        }
+
+        function reactToMessage(emoji) {
+            if (!currentActionMessage) return;
+            
+            console.log('React to message:', currentActionMessage, 'with', emoji);
+            closeMessageActionMenu();
+        }
+
+        function showReadTime() {
+            if (!currentActionMessage) return;
+            
+            const msg = messages.find(m => m.message_id === currentActionMessage);
+            if (msg) {
+                const readTime = new Date(msg.created_at).toLocaleString();
+                alert('Message read at: ' + readTime);
+            }
+            closeMessageActionMenu();
+        }
+
+        function replyToMessage() {
+            if (!currentActionMessage) return;
+            replyToMessageById(currentActionMessage);
+            closeMessageActionMenu();
+        }
+
+        function replyToMessageById(messageId) {
+            const msg = messages.find(m => m.message_id === messageId);
+            if (!msg) return;
+
+            replyToMessageId = messageId;
+            
+            const preview = document.getElementById('replyPreview');
+            const nameEl = document.getElementById('replyPreviewName');
+            const textEl = document.getElementById('replyPreviewText');
+            
+            nameEl.textContent = msg.sender_id === currentUser.id ? 'You' : 'Replying to';
+            textEl.textContent = msg.content.substring(0, 50) + (msg.content.length > 50 ? '...' : '');
+            
+            preview.classList.add('show');
+            document.getElementById('messageInput').focus();
+        }
+
+        function cancelReply() {
+            replyToMessageId = null;
+            document.getElementById('replyPreview').classList.remove('show');
+        }
+
+        function pinMessage() {
+            if (!currentActionMessage) return;
+            console.log('Pin message:', currentActionMessage);
+            alert('Message pinned!');
+            closeMessageActionMenu();
+        }
+
+        function copyMessageText() {
+            if (!currentActionMessage) return;
+            
+            const msg = messages.find(m => m.message_id === currentActionMessage);
+            if (msg) {
+                navigator.clipboard.writeText(msg.content).then(() => {
+                    alert('Message copied!');
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            }
+            closeMessageActionMenu();
+        }
+
+        function forwardMessage() {
+            if (!currentActionMessage) return;
+            forwardMessageById(currentActionMessage);
+            closeMessageActionMenu();
+        }
+
+        function forwardMessageById(messageId) {
+            localStorage.setItem('ngm_forward_messages', JSON.stringify([messageId]));
+            window.location.href = 'ngm_main_chat.html?action=forward';
+        }
+
+        function editMessage() {
+            if (!currentActionMessage) return;
+            
+            const msg = messages.find(m => m.message_id === currentActionMessage);
+            if (msg && msg.sender_id === currentUser.id) {
+                document.getElementById('messageInput').value = msg.content;
+                handleInput();
+            }
+            closeMessageActionMenu();
+        }
+
+        function selectMessage() {
+            if (!currentActionMessage) return;
+            
+            closeMessageActionMenu();
+            enterSelectionMode();
+            selectedMessages.add(currentActionMessage);
+            updateSelectionUI();
+        }
+
+        function deleteMessageFromMenu() {
+            if (!currentActionMessage) return;
+            
+            selectedMessages.clear();
+            selectedMessages.add(currentActionMessage);
+            closeMessageActionMenu();
+            showDeleteModal();
+        }
+
+        // Selection Mode Functions
+        function enterSelectionMode() {
+            isSelectionMode = true;
+            document.getElementById('header').classList.add('selection-mode');
+            document.getElementById('inputArea').classList.add('selection-mode');
+            document.getElementById('headerActions').style.display = 'none';
+            document.getElementById('selectionActions').style.display = 'flex';
+            renderMessages();
+        }
+
+        function exitSelectionMode() {
+            isSelectionMode = false;
+            selectedMessages.clear();
+            document.getElementById('header').classList.remove('selection-mode');
+            document.getElementById('inputArea').classList.remove('selection-mode');
+            document.getElementById('headerActions').style.display = 'flex';
+            document.getElementById('selectionActions').style.display = 'none';
+            renderMessages();
+        }
+
+        function toggleMessageSelection(messageId) {
+            if (selectedMessages.has(messageId)) {
+                selectedMessages.delete(messageId);
+            } else {
+                selectedMessages.add(messageId);
+            }
+            
+            if (selectedMessages.size === 0) {
+                exitSelectionMode();
+            } else {
+                updateSelectionUI();
+            }
+        }
+
+        function updateSelectionUI() {
+            document.getElementById('selectionCount').textContent = selectedMessages.size;
+            renderMessages();
+        }
+
+        function copySelectedMessages() {
+            const selectedMsgs = messages.filter(m => selectedMessages.has(m.message_id));
+            const text = selectedMsgs.map(m => m.content).join('\n');
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Messages copied!');
+                exitSelectionMode();
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        function forwardSelectedMessages() {
+            const msgIds = Array.from(selectedMessages);
+            localStorage.setItem('ngm_forward_messages', JSON.stringify(msgIds));
+            window.location.href = 'ngm_main_chat.html?action=forward';
+        }
+
+        // Delete Modal Functions
+        function showDeleteModal() {
+            document.getElementById('modalOverlay').classList.add('show');
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeAllModals() {
+            document.getElementById('modalOverlay').classList.remove('show');
+            document.getElementById('deleteModal').classList.remove('show');
+            document.getElementById('dropdownMenu').classList.remove('show');
+        }
+
+        function selectDeleteOption(option) {
+            deleteOption = option;
+            document.getElementById('deleteForMe').classList.remove('selected');
+            document.getElementById('deleteForEveryone').classList.remove('selected');
+            
+            if (option === 'me') {
+                document.getElementById('deleteForMe').classList.add('selected');
+            } else {
+                document.getElementById('deleteForEveryone').classList.add('selected');
+            }
+        }
+
+        async function confirmDelete() {
+            if (selectedMessages.size === 0) {
+                closeAllModals();
+                return;
+            }
+
+            try {
+                const msgIds = Array.from(selectedMessages);
+                
+                if (deleteOption === 'everyone') {
+                    await supabaseClient
+                        .from('ngm_messages')
+                        .update({ is_deleted: true })
+                        .in('message_id', msgIds);
+                } else {
+                    // For "delete for me", we'd need a separate table for user-specific deletions
+                    // For now, just remove from local display
+                    messages = messages.filter(m => !msgIds.includes(m.message_id));
+                    renderMessages();
+                }
+
+                selectedMessages.clear();
+                closeAllModals();
+                exitSelectionMode();
+            } catch (error) {
+                console.error('Error deleting messages:', error);
+                alert('Failed to delete messages');
+            }
+        }
+
+        // Header Menu Functions
+        function toggleMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('show');
+        }
+
+        function toggleMute() {
+            console.log('Toggle mute');
+            alert('Mute feature coming soon!');
+            toggleMenu();
+        }
+
+        function openSearch() {
+            console.log('Open search');
+            alert('Search feature coming soon!');
+            toggleMenu();
+        }
+
+        function changeWallpaper() {
+            console.log('Change wallpaper');
+            alert('Wallpaper change feature coming soon!');
+            toggleMenu();
+        }
+
+        function deleteChatConfirm() {
+            if (confirm('Delete entire chat history?')) {
+                console.log('Delete chat');
+                alert('Chat delete feature coming soon!');
+            }
+            toggleMenu();
         }
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
-            const picker = document.getElementById('emojiPicker');
-            const isEmojiPickerOpen = picker.classList.contains('show');
             
             if (!message) return;
 
@@ -1246,14 +2257,20 @@
             }
 
             try {
+                const msgData = {
+                    chat_id: currentChatId,
+                    sender_id: currentUser.id,
+                    message_type: 'text',
+                    content: message
+                };
+
+                if (replyToMessageId) {
+                    msgData.reply_to_message_id = replyToMessageId;
+                }
+
                 const { data: newMsg, error } = await supabaseClient
                     .from('ngm_messages')
-                    .insert({
-                        chat_id: currentChatId,
-                        sender_id: currentUser.id,
-                        message_type: 'text',
-                        content: message
-                    })
+                    .insert(msgData)
                     .select()
                     .single();
 
@@ -1268,9 +2285,8 @@
                 input.style.height = 'auto';
                 document.getElementById('sendBtn').disabled = true;
                 
-                // Don't close emoji picker or blur input if emoji picker is open
-                if (!isEmojiPickerOpen) {
-                    input.blur();
+                if (replyToMessageId) {
+                    cancelReply();
                 }
 
             } catch (error) {
@@ -1348,20 +2364,6 @@
                 }
             }
         }
-        
-        // Prevent input focus from showing keyboard when emoji picker is open
-        document.addEventListener('DOMContentLoaded', function() {
-            const messageInput = document.getElementById('messageInput');
-            
-            messageInput.addEventListener('focus', function(e) {
-                const picker = document.getElementById('emojiPicker');
-                if (picker.classList.contains('show')) {
-                    // If emoji picker is open, blur the input to prevent keyboard
-                    e.preventDefault();
-                    this.blur();
-                }
-            });
-        });
 
         function scrollToBottom() {
             const messagesArea = document.getElementById('messagesArea');
@@ -1370,15 +2372,15 @@
         }
 
         function goBack() {
-            window.location.href = 'ngm_main_chat.html';
+            if (isSelectionMode) {
+                exitSelectionMode();
+            } else {
+                window.location.href = 'ngm_main_chat.html';
+            }
         }
 
         function makeCall() {
             alert('Voice call feature coming soon!');
-        }
-
-        function openChatInfo() {
-            alert('Chat info page coming soon!');
         }
 
         function setupRealtimeSubscription() {
@@ -1395,19 +2397,15 @@
                     messages.push(payload.new);
                     renderMessages();
                     
-                    // Check if message is from other user
                     if (payload.new.sender_id !== currentUser.id) {
-                        // If user is not at bottom, show unread badge
                         if (!isUserAtBottom) {
                             unreadCount++;
                             showUnreadBadge();
                         } else {
-                            // User is at bottom - auto scroll and mark as read
                             scrollToBottom();
                             markMessagesAsRead();
                         }
                     } else {
-                        // Own message - always scroll to bottom
                         scrollToBottom();
                     }
                 })
@@ -1462,7 +2460,6 @@
                 await loadMessages();
                 setupRealtimeSubscription();
                 
-                // Add scroll listener to detect when user scrolls up
                 const messagesArea = document.getElementById('messagesArea');
                 messagesArea.addEventListener('scroll', checkIfAtBottom);
                 
