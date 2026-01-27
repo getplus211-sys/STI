@@ -171,6 +171,7 @@
 
         .message-content {
             margin-bottom: 4px;
+            white-space: pre-wrap;
         }
 
         .message-time {
@@ -293,7 +294,7 @@
         </div>
 
         <div class="input-area">
-            <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1" onkeypress="handleKeyPress(event)" oninput="handleInput()"></textarea>
+            <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1" onkeydown="handleKeyDown(event)" oninput="handleInput()"></textarea>
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <line x1="22" x2="11" y1="2" y2="13"/>
@@ -325,6 +326,7 @@
         let typingSubscription = null;
         let typingTimeout = null;
         let isTyping = false;
+        let typingCheckInterval = null;
 
         const urlParams = new URLSearchParams(window.location.search);
         currentChatId = urlParams.get('chat_id');
@@ -344,7 +346,6 @@
             return user;
         }
 
-        // Format last seen based on time difference - simplified without privacy settings
         function formatLastSeen(lastSeenStr, isOnline) {
             const lastSeen = new Date(lastSeenStr);
             const now = new Date();
@@ -354,12 +355,10 @@
             const diffHours = Math.floor(diffMs / 3600000);
             const diffDays = Math.floor(diffMs / 86400000);
             
-            // Show "online" only if last_seen is within 60 seconds AND is_online is true
             if (isOnline === true && diffSeconds <= 60) {
                 return 'online';
             }
             
-            // Show actual time based on difference
             if (diffMins < 1) return 'last seen just now';
             if (diffMins === 1) return 'last seen 1 min ago';
             if (diffMins < 60) return 'last seen ' + diffMins + ' min ago';
@@ -398,10 +397,18 @@
         let statusSubscription = null;
         let otherUserData = null;
         let isOtherUserBlocked = false;
+        let otherUserId = null;
 
-        function setupTypingIndicator(otherUserId) {
+        function setupTypingIndicator(userId) {
+            otherUserId = userId;
+            
             if (typingSubscription) {
                 supabaseClient.removeChannel(typingSubscription);
+            }
+
+            // Clear any existing check interval
+            if (typingCheckInterval) {
+                clearInterval(typingCheckInterval);
             }
 
             typingSubscription = supabaseClient
@@ -412,8 +419,7 @@
                     table: 'ngm_typing_status',
                     filter: 'chat_id=eq.' + currentChatId
                 }, payload => {
-                    // Only show typing if it's from the other user
-                    if (payload.new && payload.new.user_id === otherUserId) {
+                    if (payload.new && payload.new.user_id === userId) {
                         if (payload.new.is_typing) {
                             showTypingIndicator();
                         } else {
@@ -422,6 +428,35 @@
                     }
                 })
                 .subscribe();
+
+            // Continuously check typing status every 2 seconds
+            typingCheckInterval = setInterval(async () => {
+                try {
+                    const { data } = await supabaseClient
+                        .from('ngm_typing_status')
+                        .select('is_typing, last_typing_at')
+                        .eq('chat_id', currentChatId)
+                        .eq('user_id', userId)
+                        .maybeSingle();
+
+                    if (data && data.is_typing) {
+                        // Check if typing was recent (within last 5 seconds)
+                        const lastTyping = new Date(data.last_typing_at);
+                        const now = new Date();
+                        const diffSeconds = (now - lastTyping) / 1000;
+                        
+                        if (diffSeconds < 5) {
+                            showTypingIndicator();
+                        } else {
+                            hideTypingIndicator();
+                        }
+                    } else {
+                        hideTypingIndicator();
+                    }
+                } catch (error) {
+                    console.error('Error checking typing status:', error);
+                }
+            }, 2000);
         }
 
         async function setTypingStatus(typing) {
@@ -444,29 +479,28 @@
             }
         }
 
-        function setupLiveStatusUpdates(otherUserId) {
+        function setupLiveStatusUpdates(userId) {
             if (statusSubscription) {
                 supabaseClient.removeChannel(statusSubscription);
             }
             
-            // Clear any existing interval
             if (statusUpdateInterval) {
                 clearInterval(statusUpdateInterval);
             }
 
             statusSubscription = supabaseClient
-                .channel('user-status:' + otherUserId)
+                .channel('user-status:' + userId)
                 .on('postgres_changes', {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'ngm_users',
-                    filter: 'user_id=eq.' + otherUserId
+                    filter: 'user_id=eq.' + userId
                 }, payload => {
                     otherUserData = payload.new;
                     supabaseClient
                         .from('ngm_blocked_users')
                         .select('block_id')
-                        .eq('user_id', otherUserId)
+                        .eq('user_id', userId)
                         .eq('blocked_user_id', currentUser.id)
                         .maybeSingle()
                         .then(({ data }) => {
@@ -476,12 +510,11 @@
                 })
                 .subscribe();
             
-            // Update status every 10 seconds to show accurate time
             statusUpdateInterval = setInterval(() => {
                 if (otherUserData) {
                     updateUserStatus(otherUserData, isOtherUserBlocked);
                 }
-            }, 10000); // Update every 10 seconds
+            }, 10000);
         }
 
         async function loadChatDetails() {
@@ -598,13 +631,11 @@
 
                 messages = msgs || [];
                 
-                // For each message sent by current user, check if other user has read it
                 if (currentChatData && (currentChatData.chat_type === 'private' || currentChatData.chat_type === 'personal')) {
                     const otherUserId = currentChatData.user1_id === currentUser.id ? currentChatData.user2_id : currentChatData.user1_id;
                     
                     for (let msg of messages) {
                         if (msg.sender_id === currentUser.id) {
-                            // Check if other user has read this message
                             const { data: readStatus } = await supabaseClient
                                 .from('ngm_message_status')
                                 .select('status')
@@ -644,13 +675,9 @@
             
             const blueDoubleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#53bdeb"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>';
             
-            // Check if message has been read by checking message_status table
-            // For private chats, we need to check if the OTHER user has read it
             if (msg.has_been_read) {
-                // Blue double tick - message has been seen/read
                 return blueDoubleTick;
             } else {
-                // Single tick - message sent but not read yet
                 return singleTick;
             }
         }
@@ -680,7 +707,6 @@
             
             if (!message) return;
 
-            // Stop typing indicator
             setTypingStatus(false);
             if (typingTimeout) {
                 clearTimeout(typingTimeout);
@@ -758,11 +784,14 @@
             }
         }
 
-        function handleKeyPress(event) {
+        // FIXED: Use onkeydown instead of onkeypress
+        function handleKeyDown(event) {
+            // Only send message on Enter if Shift is NOT pressed (mobile keyboard Enter)
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
                 sendMessage();
             }
+            // If Shift+Enter, allow default behavior (new line)
         }
 
         function handleInput() {
@@ -774,22 +803,17 @@
 
             sendBtn.disabled = !input.value.trim();
 
-            // Track typing status
             if (input.value.trim()) {
-                // User is typing
                 setTypingStatus(true);
 
-                // Clear existing timeout
                 if (typingTimeout) {
                     clearTimeout(typingTimeout);
                 }
 
-                // Set timeout to stop typing status after 3 seconds of inactivity
                 typingTimeout = setTimeout(() => {
                     setTypingStatus(false);
                 }, 3000);
             } else {
-                // Input is empty, stop typing
                 setTypingStatus(false);
                 if (typingTimeout) {
                     clearTimeout(typingTimeout);
@@ -848,7 +872,6 @@
                 })
                 .subscribe();
             
-            // Subscribe to message_status changes to update read ticks
             supabaseClient
                 .channel('message-status:' + currentChatId)
                 .on('postgres_changes', {
@@ -857,7 +880,6 @@
                     table: 'ngm_message_status'
                 }, async payload => {
                     console.log('Message status updated:', payload);
-                    // If someone read a message, update the tick
                     if (payload.new && payload.new.status === 'read') {
                         const msgIndex = messages.findIndex(m => m.message_id === payload.new.message_id);
                         if (msgIndex !== -1 && messages[msgIndex].sender_id === currentUser.id) {
@@ -873,7 +895,6 @@
             initSupabase();
             const user = await checkAuth();
             if (user) {
-                // Set user as online when page loads
                 await supabaseClient
                     .from('ngm_users')
                     .update({ 
@@ -886,7 +907,6 @@
                 await loadMessages();
                 setupRealtimeSubscription();
                 
-                // Update last_seen every 30 seconds while on chat window
                 statusUpdateInterval = setInterval(async () => {
                     if (currentUser) {
                         await supabaseClient
@@ -913,11 +933,13 @@
             if (statusUpdateInterval) {
                 clearInterval(statusUpdateInterval);
             }
+            if (typingCheckInterval) {
+                clearInterval(typingCheckInterval);
+            }
             if (typingTimeout) {
                 clearTimeout(typingTimeout);
             }
             
-            // Stop typing and set user as offline when leaving page
             if (currentUser && currentChatId) {
                 setTypingStatus(false);
                 supabaseClient
@@ -930,11 +952,9 @@
             }
         });
 
-        // Handle visibility change (when tab is hidden/shown)
         document.addEventListener('visibilitychange', async () => {
             if (currentUser) {
                 if (document.hidden) {
-                    // Tab is hidden - set offline
                     await supabaseClient
                         .from('ngm_users')
                         .update({ 
@@ -943,7 +963,6 @@
                         })
                         .eq('user_id', currentUser.id);
                 } else {
-                    // Tab is visible again - set online
                     await supabaseClient
                         .from('ngm_users')
                         .update({ 
