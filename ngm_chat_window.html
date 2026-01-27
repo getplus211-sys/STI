@@ -325,7 +325,15 @@
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
 
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabaseClient;
+        
+        // Wait for DOM to load before initializing
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
 
         let currentUser = null;
         let currentChatId = null;
@@ -357,7 +365,7 @@
         async function loadChatDetails() {
             try {
                 // Get chat basic info
-                const { data: chat, error: chatError } = await supabase
+                const { data: chat, error: chatError } = await supabaseClient
                     .from('ngm_chats')
                     .select('*')
                     .eq('chat_id', currentChatId)
@@ -370,7 +378,7 @@
                 // Load based on chat type
                 if (chat.chat_type === 'private') {
                     const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
-                    const { data: userData, error: userError } = await supabase
+                    const { data: userData, error: userError } = await supabaseClient
                         .from('ngm_users')
                         .select('full_name, username, profile_picture_url, is_online, last_seen')
                         .eq('user_id', otherUserId)
@@ -394,7 +402,7 @@
                         document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
                     }
                 } else if (chat.chat_type === 'group') {
-                    const { data: groupData } = await supabase
+                    const { data: groupData } = await supabaseClient
                         .from('ngm_groups')
                         .select('group_name, group_picture_url')
                         .eq('chat_id', currentChatId)
@@ -411,7 +419,7 @@
                     }
 
                     // Get member count
-                    const { count } = await supabase
+                    const { count } = await supabaseClient
                         .from('ngm_chat_participants')
                         .select('*', { count: 'exact', head: true })
                         .eq('chat_id', currentChatId)
@@ -419,7 +427,7 @@
 
                     document.getElementById('chatStatus').textContent = `${count} members`;
                 } else if (chat.chat_type === 'channel') {
-                    const { data: channelData } = await supabase
+                    const { data: channelData } = await supabaseClient
                         .from('ngm_channels')
                         .select('channel_name, channel_picture_url, subscriber_count')
                         .eq('chat_id', currentChatId)
@@ -444,7 +452,7 @@
         // Load Messages
         async function loadMessages() {
             try {
-                const { data: msgs, error } = await supabase
+                const { data: msgs, error } = await supabaseClient
                     .from('ngm_messages')
                     .select('*')
                     .eq('chat_id', currentChatId)
@@ -499,7 +507,7 @@
 
             try {
                 // Insert message
-                const { data: newMsg, error } = await supabase
+                const { data: newMsg, error } = await supabaseClient
                     .from('ngm_messages')
                     .insert({
                         chat_id: currentChatId,
@@ -513,7 +521,7 @@
                 if (error) throw error;
 
                 // Update chat last_message_at
-                await supabase
+                await supabaseClient
                     .from('ngm_chats')
                     .update({ last_message_at: new Date().toISOString() })
                     .eq('chat_id', currentChatId);
@@ -542,7 +550,7 @@
 
                 // Update message status
                 for (const msgId of unreadMsgIds) {
-                    await supabase
+                    await supabaseClient
                         .from('ngm_message_status')
                         .upsert({
                             message_id: msgId,
@@ -552,7 +560,7 @@
                 }
 
                 // Update participant unread count
-                await supabase
+                await supabaseClient
                     .from('ngm_chat_participants')
                     .update({ 
                         unread_count: 0,
@@ -617,7 +625,7 @@
 
         // Setup Real-time Subscription
         function setupRealtimeSubscription() {
-            messagesSubscription = supabase
+            messagesSubscription = supabaseClient
                 .channel(`messages:${currentChatId}`)
                 .on('postgres_changes', {
                     event: 'INSERT',
@@ -653,6 +661,7 @@
 
         // Initialize
         window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase(); // Initialize Supabase client
             const user = await checkAuth();
             if (user) {
                 await loadChatDetails();
