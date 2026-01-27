@@ -147,6 +147,12 @@
             padding: 16px;
             background: #e5ddd5;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" font-size="100" fill="%23d1d5db" opacity="0.1" text-anchor="middle" dominant-baseline="middle">💬</text></svg>');
+            transition: flex 0.3s ease;
+        }
+
+        .messages-area.with-emoji-picker {
+            flex: 1;
+            max-height: calc(100vh - 90px - 64px - 350px);
         }
 
         .message {
@@ -224,21 +230,21 @@
         }
 
         .emoji-picker {
-            position: absolute;
-            bottom: 64px;
-            left: 0;
-            right: 0;
             background: white;
             display: none;
             flex-direction: column;
-            height: 350px;
-            z-index: 1000;
+            height: 0;
+            overflow: hidden;
+            z-index: 100;
             border-top: 1px solid #e5e7eb;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            transition: height 0.3s ease;
         }
 
         .emoji-picker.show {
             display: flex;
+            height: 350px;
         }
 
         .emoji-categories {
@@ -452,25 +458,6 @@
             </div>
         </div>
 
-        <!-- Emoji Picker -->
-        <div class="emoji-picker" id="emojiPicker">
-            <div class="emoji-categories" id="emojiCategories">
-                <button class="emoji-category-btn active" onclick="switchEmojiCategory('recent')" data-category="recent" title="Recent">🕒</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('smileys')" data-category="smileys" title="Smileys & People">😊</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('animals')" data-category="animals" title="Animals & Nature">🐶</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('food')" data-category="food" title="Food & Drink">🍔</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('activities')" data-category="activities" title="Activities">⚽</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('travel')" data-category="travel" title="Travel & Places">✈️</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('objects')" data-category="objects" title="Objects">💡</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('symbols')" data-category="symbols" title="Symbols">❤️</button>
-                <button class="emoji-category-btn" onclick="switchEmojiCategory('flags')" data-category="flags" title="Flags">🏁</button>
-            </div>
-            <div class="emoji-search">
-                <input type="text" id="emojiSearch" placeholder="Search emoji..." oninput="searchEmoji(this.value)">
-            </div>
-            <div class="emoji-grid" id="emojiGrid"></div>
-        </div>
-
         <div class="input-area">
             <button class="emoji-btn" id="emojiBtn" onclick="toggleEmojiPicker()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
@@ -493,6 +480,25 @@
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
             </button>
+        </div>
+
+        <!-- Emoji Picker -->
+        <div class="emoji-picker" id="emojiPicker">
+            <div class="emoji-categories" id="emojiCategories">
+                <button class="emoji-category-btn active" onclick="switchEmojiCategory('recent')" data-category="recent" title="Recent">🕒</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('smileys')" data-category="smileys" title="Smileys & People">😊</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('animals')" data-category="animals" title="Animals & Nature">🐶</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('food')" data-category="food" title="Food & Drink">🍔</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('activities')" data-category="activities" title="Activities">⚽</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('travel')" data-category="travel" title="Travel & Places">✈️</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('objects')" data-category="objects" title="Objects">💡</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('symbols')" data-category="symbols" title="Symbols">❤️</button>
+                <button class="emoji-category-btn" onclick="switchEmojiCategory('flags')" data-category="flags" title="Flags">🏁</button>
+            </div>
+            <div class="emoji-search">
+                <input type="text" id="emojiSearch" placeholder="Search emoji..." oninput="searchEmoji(this.value)">
+            </div>
+            <div class="emoji-grid" id="emojiGrid"></div>
         </div>
     </div>
 
@@ -567,6 +573,7 @@
             const picker = document.getElementById('emojiPicker');
             const emojiBtn = document.getElementById('emojiBtn');
             const keyboardBtn = document.getElementById('keyboardBtn');
+            const messagesArea = document.getElementById('messagesArea');
             const isShowing = picker.classList.contains('show');
             
             if (isShowing) {
@@ -575,7 +582,9 @@
                 picker.classList.add('show');
                 emojiBtn.classList.add('active');
                 keyboardBtn.classList.add('show');
+                messagesArea.classList.add('with-emoji-picker');
                 renderEmojis(currentEmojiCategory);
+                scrollToBottom();
             }
         }
 
@@ -584,10 +593,12 @@
             const picker = document.getElementById('emojiPicker');
             const emojiBtn = document.getElementById('emojiBtn');
             const keyboardBtn = document.getElementById('keyboardBtn');
+            const messagesArea = document.getElementById('messagesArea');
             
             picker.classList.remove('show');
             emojiBtn.classList.remove('active');
             keyboardBtn.classList.remove('show');
+            messagesArea.classList.remove('with-emoji-picker');
             
             // Focus back on input
             document.getElementById('messageInput').focus();
