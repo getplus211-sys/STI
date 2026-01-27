@@ -293,6 +293,7 @@
         let currentChatData = null;
         let messages = [];
         let messagesSubscription = null;
+        let statusUpdateInterval = null;
 
         const urlParams = new URLSearchParams(window.location.search);
         currentChatId = urlParams.get('chat_id');
@@ -312,7 +313,27 @@
             return user;
         }
 
-        function formatSmartLastSeen(lastSeenStr) {
+        // Format last seen based on time difference and privacy settings
+        function formatLastSeen(lastSeenStr, isOnline, showLastSeen) {
+            // If user is online (within 1 minute), always show "online"
+            if (isOnline) {
+                const lastSeen = new Date(lastSeenStr);
+                const now = new Date();
+                const diffMs = now - lastSeen;
+                const diffSeconds = Math.floor(diffMs / 1000);
+                
+                // Show "online" only if last seen within 60 seconds
+                if (diffSeconds <= 60) {
+                    return 'online';
+                }
+            }
+            
+            // If last seen is hidden by user
+            if (!showLastSeen) {
+                return 'last seen recently';
+            }
+            
+            // Show actual time
             const lastSeen = new Date(lastSeenStr);
             const now = new Date();
             const diffMs = now - lastSeen;
@@ -320,32 +341,41 @@
             const diffHours = Math.floor(diffMs / 3600000);
             const diffDays = Math.floor(diffMs / 86400000);
 
-            if (diffMins < 1) return 'last seen just now';
-            if (diffMins < 60) return 'last seen recently';
-            if (diffHours < 24) return 'last seen recently';
-            if (diffDays < 7) return 'last seen recently';
-            return 'last seen a while ago';
+            if (diffMins < 1) return 'online';
+            if (diffMins === 1) return 'last seen 1 min ago';
+            if (diffMins < 60) return 'last seen ' + diffMins + ' min ago';
+            if (diffHours === 1) return 'last seen 1 hour ago';
+            if (diffHours < 24) return 'last seen ' + diffHours + ' hours ago';
+            if (diffDays === 1) return 'last seen yesterday';
+            if (diffDays < 7) return 'last seen ' + diffDays + ' days ago';
+            return 'last seen ' + lastSeen.toLocaleDateString();
         }
 
         function updateUserStatus(userData, isBlocked) {
             let statusText = '';
             if (isBlocked) {
                 statusText = 'last seen a long time ago';
-            } else if (userData.is_online) {
-                statusText = 'online';
-            } else if (userData.last_seen) {
-                statusText = formatSmartLastSeen(userData.last_seen);
             } else {
-                statusText = 'last seen a while ago';
+                // Check if user has enabled show_last_seen
+                const showLastSeen = userData.show_last_seen !== false; // Default true if not set
+                statusText = formatLastSeen(userData.last_seen, userData.is_online, showLastSeen);
             }
             
             document.getElementById('chatStatus').textContent = statusText;
         }
 
         let statusSubscription = null;
+        let otherUserData = null;
+        let isOtherUserBlocked = false;
+
         function setupLiveStatusUpdates(otherUserId) {
             if (statusSubscription) {
                 supabaseClient.removeChannel(statusSubscription);
+            }
+            
+            // Clear any existing interval
+            if (statusUpdateInterval) {
+                clearInterval(statusUpdateInterval);
             }
 
             statusSubscription = supabaseClient
@@ -356,6 +386,7 @@
                     table: 'ngm_users',
                     filter: 'user_id=eq.' + otherUserId
                 }, payload => {
+                    otherUserData = payload.new;
                     supabaseClient
                         .from('ngm_blocked_users')
                         .select('block_id')
@@ -363,10 +394,18 @@
                         .eq('blocked_user_id', currentUser.id)
                         .maybeSingle()
                         .then(({ data }) => {
-                            updateUserStatus(payload.new, !!data);
+                            isOtherUserBlocked = !!data;
+                            updateUserStatus(otherUserData, isOtherUserBlocked);
                         });
                 })
                 .subscribe();
+            
+            // Update status every 10 seconds to show accurate time
+            statusUpdateInterval = setInterval(() => {
+                if (otherUserData) {
+                    updateUserStatus(otherUserData, isOtherUserBlocked);
+                }
+            }, 10000); // Update every 10 seconds
         }
 
         async function loadChatDetails() {
@@ -386,11 +425,13 @@
                     
                     const { data: userData, error: userError } = await supabaseClient
                         .from('ngm_users')
-                        .select('full_name, username, profile_picture_url, is_online, last_seen')
+                        .select('full_name, username, profile_picture_url, is_online, last_seen, show_last_seen')
                         .eq('user_id', otherUserId)
                         .single();
 
                     if (userError) throw userError;
+
+                    otherUserData = userData;
 
                     const { data: contactData } = await supabaseClient
                         .from('ngm_contacts')
@@ -406,12 +447,12 @@
                         .eq('blocked_user_id', currentUser.id)
                         .maybeSingle();
 
-                    const isBlocked = !!blockedData;
+                    isOtherUserBlocked = !!blockedData;
 
                     const name = contactData?.contact_name || userData.full_name || userData.username || 'Unknown User';
                     document.getElementById('chatName').textContent = name;
                     
-                    updateUserStatus(userData, isBlocked);
+                    updateUserStatus(userData, isOtherUserBlocked);
 
                     if (userData.profile_picture_url) {
                         document.getElementById('chatAvatar').style.backgroundImage = "url('" + userData.profile_picture_url + "')";
@@ -696,6 +737,9 @@
             }
             if (statusSubscription) {
                 supabaseClient.removeChannel(statusSubscription);
+            }
+            if (statusUpdateInterval) {
+                clearInterval(statusUpdateInterval);
             }
         });
     </script>
