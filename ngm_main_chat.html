@@ -589,6 +589,7 @@
         const colors = ['bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-indigo', 'bg-teal'];
 
         function getAvatarColor(name) {
+            if (!name) return colors[0];
             const index = name.charCodeAt(0) % colors.length;
             return colors[index];
         }
@@ -677,35 +678,52 @@
                     if (chat.chat_type === 'private') {
                         // Get other user details
                         const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
-                        const { data: userData } = await supabaseClient
+                        const { data: userData, error: userError } = await supabaseClient
                             .from('ngm_users')
                             .select('full_name, username, profile_picture_url, is_online')
                             .eq('user_id', otherUserId)
                             .single();
+
+                        if (userError) {
+                            console.error('Error loading user:', userError);
+                        }
 
                         chatData.name = userData?.full_name || userData?.username || 'Unknown User';
                         chatData.avatar = userData?.profile_picture_url;
                         chatData.isOnline = userData?.is_online;
                     } else if (chat.chat_type === 'group') {
                         // Get group details
-                        const { data: groupData } = await supabaseClient
+                        const { data: groupData, error: groupError } = await supabaseClient
                             .from('ngm_groups')
                             .select('group_name, group_picture_url')
                             .eq('chat_id', chat.chat_id)
                             .single();
 
+                        if (groupError) {
+                            console.error('Error loading group:', groupError);
+                        }
+
                         chatData.name = groupData?.group_name || 'Group Chat';
                         chatData.avatar = groupData?.group_picture_url;
                     } else if (chat.chat_type === 'channel') {
                         // Get channel details
-                        const { data: channelData } = await supabaseClient
+                        const { data: channelData, error: channelError } = await supabaseClient
                             .from('ngm_channels')
                             .select('channel_name, channel_picture_url')
                             .eq('chat_id', chat.chat_id)
                             .single();
 
+                        if (channelError) {
+                            console.error('Error loading channel:', channelError);
+                        }
+
                         chatData.name = channelData?.channel_name || 'Channel';
                         chatData.avatar = channelData?.channel_picture_url;
+                    }
+
+                    // Fallback if name is still not set
+                    if (!chatData.name) {
+                        chatData.name = 'Unknown Chat';
                     }
 
                     return chatData;
