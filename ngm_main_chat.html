@@ -475,6 +475,7 @@
 
         <!-- Menu Dropdown -->
         <div class="menu-dropdown" id="menuDropdown">
+            <div class="menu-item" onclick="window.location.href='ngm_sync_contacts.html'">🔄 Sync Contacts</div>
             <div class="menu-item" onclick="createNewGroup()">New Group</div>
             <div class="menu-item" onclick="createNewChannel()">New Channel</div>
             <div class="menu-item" style="border-top: 1px solid #e5e7eb; margin-top: 4px; padding-top: 12px;" onclick="goToProfile()">Profile</div>
@@ -626,14 +627,11 @@
                 }
                 
                 if (!user) {
-                    console.log('No user logged in - redirecting to login');
-                    // Comment out redirect for testing
-                    // window.location.href = 'login.html';
-                    alert('તમે login નથી કર્યું! Please login first.\n\nતમારી login.html page ખોલો અને login કરો.');
+                    // Redirect to login page
+                    window.location.href = 'login.html';
                     return null;
                 }
                 
-                console.log('User logged in:', user.email);
                 currentUser = user;
                 return user;
             } catch (error) {
@@ -645,8 +643,6 @@
         // Load All Chats
         async function loadChats() {
             try {
-                console.log('Loading chats for user:', currentUser?.id);
-                
                 document.getElementById('loadingState').style.display = 'flex';
                 document.getElementById('emptyState').style.display = 'none';
                 document.getElementById('pinnedSection').style.display = 'none';
@@ -664,39 +660,7 @@
                     throw partError;
                 }
 
-                console.log('Found participants:', participants?.length || 0);
-
                 if (!participants || participants.length === 0) {
-                    console.log('No chats found - showing empty state');
-                    
-                    // FOR TESTING: Add dummy data if no user logged in
-                    if (!currentUser) {
-                        console.log('Adding test data for demo...');
-                        allChats = [
-                            {
-                                id: 'test-1',
-                                name: 'Test User 1',
-                                type: 'private',
-                                lastMessage: 'Hello! This is a test message',
-                                lastMessageTime: new Date().toISOString(),
-                                isPinned: true,
-                                unreadCount: 3
-                            },
-                            {
-                                id: 'test-2',
-                                name: 'Test Group',
-                                type: 'group',
-                                lastMessage: 'Welcome to test group',
-                                lastMessageTime: new Date(Date.now() - 3600000).toISOString(),
-                                isPinned: false,
-                                unreadCount: 1
-                            }
-                        ];
-                        document.getElementById('loadingState').style.display = 'none';
-                        renderChats();
-                        return;
-                    }
-                    
                     document.getElementById('loadingState').style.display = 'none';
                     document.getElementById('emptyState').style.display = 'flex';
                     return;
@@ -787,11 +751,9 @@
                 });
 
                 allChats = await Promise.all(chatPromises);
-                console.log('Loaded chats:', allChats.length);
                 allChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
 
                 document.getElementById('loadingState').style.display = 'none';
-                console.log('Rendering chats...');
                 renderChats();
             } catch (error) {
                 console.error('Error loading chats:', error);
@@ -801,7 +763,6 @@
         }
 
         function renderChats() {
-            console.log('renderChats called, total chats:', allChats.length);
             const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             
             let filteredChats = allChats.filter(chat => {
@@ -812,12 +773,8 @@
                 return true;
             });
 
-            console.log('Filtered chats:', filteredChats.length, 'Filter:', currentFilter);
-
             const pinned = filteredChats.filter(c => c.isPinned);
             const regular = filteredChats.filter(c => !c.isPinned);
-
-            console.log('Pinned:', pinned.length, 'Regular:', regular.length);
 
             const pinnedHTML = pinned.map(chat => createChatHTML(chat)).join('');
             const regularHTML = regular.map(chat => createChatHTML(chat)).join('');
@@ -828,13 +785,9 @@
             document.getElementById('pinnedSection').style.display = pinned.length > 0 ? 'block' : 'none';
             document.getElementById('regularSection').style.display = regular.length > 0 ? 'block' : 'none';
             document.getElementById('emptyState').style.display = (pinned.length === 0 && regular.length === 0) ? 'flex' : 'none';
-            
-            console.log('Render complete');
         }
 
         function createChatHTML(chat) {
-            console.log('Creating HTML for chat:', chat.name, chat);
-            
             const avatarHTML = chat.avatar 
                 ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
                 : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
