@@ -375,26 +375,46 @@
 
                 currentChatData = chat;
 
-                // Load based on chat type
-                if (chat.chat_type === 'private') {
+                // Load based on chat type (handle both 'personal' and 'private')
+                if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
                     const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
+                    
+                    // Get user details
                     const { data: userData, error: userError } = await supabaseClient
                         .from('ngm_users')
-                        .select('full_name, username, profile_picture_url, is_online, last_seen')
+                        .select('full_name, username, profile_picture_url, is_online, last_seen, mobile')
                         .eq('user_id', otherUserId)
                         .single();
 
                     if (userError) throw userError;
 
-                    const name = userData.full_name || userData.username || 'Unknown User';
+                    // Check if this user is in contacts with a saved name
+                    const { data: contactData } = await supabaseClient
+                        .from('ngm_contacts')
+                        .select('contact_name')
+                        .eq('user_id', currentUser.id)
+                        .eq('contact_user_id', otherUserId)
+                        .single();
+
+                    // Priority: Contact Name > Full Name > Username
+                    const name = contactData?.contact_name || userData.full_name || userData.username || 'Unknown User';
                     document.getElementById('chatName').textContent = name;
                     
+                    // Show status with mobile number
+                    let statusText = '';
                     if (userData.is_online) {
-                        document.getElementById('chatStatus').textContent = 'online';
+                        statusText = 'online';
                     } else if (userData.last_seen) {
                         const lastSeen = new Date(userData.last_seen);
-                        document.getElementById('chatStatus').textContent = `Last seen ${formatLastSeen(lastSeen)}`;
+                        statusText = `last seen ${formatLastSeen(lastSeen)}`;
                     }
+                    
+                    // Add mobile number if available
+                    if (userData.mobile) {
+                        statusText = statusText ? `${statusText} • ${userData.mobile}` : userData.mobile;
+                    }
+                    
+                    document.getElementById('chatStatus').textContent = statusText || 'offline';
 
                     if (userData.profile_picture_url) {
                         document.getElementById('chatAvatar').style.backgroundImage = `url('${userData.profile_picture_url}')`;
