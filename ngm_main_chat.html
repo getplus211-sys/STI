@@ -705,9 +705,14 @@
                 // Load chat details based on chat type
                 const chatPromises = participants.map(async (participant) => {
                     const chat = participant.ngm_chats;
+                    
+                    // Normalize chat type
+                    let chatType = chat.chat_type;
+                    if (chatType === 'personal') chatType = 'private';
+                    
                     let chatData = {
                         id: chat.chat_id,
-                        type: chat.chat_type,
+                        type: chatType,
                         lastMessageAt: chat.last_message_at,
                         isPinned: participant.is_pinned,
                         unreadCount: participant.unread_count,
@@ -727,7 +732,7 @@
                     chatData.lastMessage = lastMsg?.content || 'No messages yet';
                     chatData.lastMessageTime = lastMsg?.created_at || chat.created_at;
 
-                    if (chat.chat_type === 'private') {
+                    if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
                         // Get other user details
                         const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
                         const { data: userData, error: userError } = await supabaseClient
