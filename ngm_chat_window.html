@@ -95,8 +95,8 @@
         }
 
         .chat-status.typing {
-            color: #16a34a;
-            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 400;
         }
 
         .typing-dots {
@@ -106,7 +106,7 @@
 
         .typing-dots span {
             animation: typingDot 1.4s infinite;
-            opacity: 0.4;
+            opacity: 0.6;
         }
 
         .typing-dots span:nth-child(2) {
@@ -118,7 +118,7 @@
         }
 
         @keyframes typingDot {
-            0%, 60%, 100% { opacity: 0.4; }
+            0%, 60%, 100% { opacity: 0.6; }
             30% { opacity: 1; }
         }
 
@@ -598,6 +598,26 @@
 
                 messages = msgs || [];
                 
+                // For each message sent by current user, check if other user has read it
+                if (currentChatData && (currentChatData.chat_type === 'private' || currentChatData.chat_type === 'personal')) {
+                    const otherUserId = currentChatData.user1_id === currentUser.id ? currentChatData.user2_id : currentChatData.user1_id;
+                    
+                    for (let msg of messages) {
+                        if (msg.sender_id === currentUser.id) {
+                            // Check if other user has read this message
+                            const { data: readStatus } = await supabaseClient
+                                .from('ngm_message_status')
+                                .select('status')
+                                .eq('message_id', msg.message_id)
+                                .eq('user_id', otherUserId)
+                                .eq('status', 'read')
+                                .maybeSingle();
+                            
+                            msg.has_been_read = !!readStatus;
+                        }
+                    }
+                }
+                
                 const loadingEl = document.getElementById('loadingMessages');
                 if (loadingEl) {
                     loadingEl.style.display = 'none';
@@ -624,11 +644,13 @@
             
             const blueDoubleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#53bdeb"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>';
             
-            if (msg.is_read_by_all) {
+            // Check if message has been read by checking message_status table
+            // For private chats, we need to check if the OTHER user has read it
+            if (msg.has_been_read) {
+                // Blue double tick - message has been seen/read
                 return blueDoubleTick;
-            } else if (msg.is_delivered) {
-                return doubleTick;
             } else {
+                // Single tick - message sent but not read yet
                 return singleTick;
             }
         }
@@ -802,6 +824,7 @@
                     filter: 'chat_id=eq.' + currentChatId
                 }, payload => {
                     console.log('New message received:', payload);
+                    payload.new.has_been_read = false;
                     messages.push(payload.new);
                     renderMessages();
                     scrollToBottom();
@@ -821,6 +844,26 @@
                     if (index !== -1) {
                         messages[index] = payload.new;
                         renderMessages();
+                    }
+                })
+                .subscribe();
+            
+            // Subscribe to message_status changes to update read ticks
+            supabaseClient
+                .channel('message-status:' + currentChatId)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'ngm_message_status'
+                }, async payload => {
+                    console.log('Message status updated:', payload);
+                    // If someone read a message, update the tick
+                    if (payload.new && payload.new.status === 'read') {
+                        const msgIndex = messages.findIndex(m => m.message_id === payload.new.message_id);
+                        if (msgIndex !== -1 && messages[msgIndex].sender_id === currentUser.id) {
+                            messages[msgIndex].has_been_read = true;
+                            renderMessages();
+                        }
                     }
                 })
                 .subscribe();
