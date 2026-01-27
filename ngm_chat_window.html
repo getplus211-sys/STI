@@ -571,15 +571,28 @@
 
                 if (unreadMsgIds.length === 0) return;
 
-                // Update message status
-                for (const msgId of unreadMsgIds) {
+                // Check which messages already have status
+                const { data: existingStatuses } = await supabaseClient
+                    .from('ngm_message_status')
+                    .select('message_id')
+                    .in('message_id', unreadMsgIds)
+                    .eq('user_id', currentUser.id);
+
+                const existingMsgIds = new Set(existingStatuses?.map(s => s.message_id) || []);
+
+                // Only insert new statuses
+                const newStatuses = unreadMsgIds
+                    .filter(msgId => !existingMsgIds.has(msgId))
+                    .map(msgId => ({
+                        message_id: msgId,
+                        user_id: currentUser.id,
+                        status: 'read'
+                    }));
+
+                if (newStatuses.length > 0) {
                     await supabaseClient
                         .from('ngm_message_status')
-                        .upsert({
-                            message_id: msgId,
-                            user_id: currentUser.id,
-                            status: 'read'
-                        });
+                        .insert(newStatuses);
                 }
 
                 // Update participant unread count
