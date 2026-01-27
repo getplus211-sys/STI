@@ -418,6 +418,45 @@
         .keyboard-btn.show {
             display: flex;
         }
+
+        /* Unread message badge */
+        .unread-badge-floating {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: #16a34a;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 13px;
+            font-weight: 600;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .unread-badge-floating.show {
+            display: flex;
+        }
+
+        .unread-badge-floating:active {
+            background: #15803d;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -500,6 +539,14 @@
             </div>
             <div class="emoji-grid" id="emojiGrid"></div>
         </div>
+
+        <!-- Unread Messages Badge -->
+        <div class="unread-badge-floating" id="unreadBadge" onclick="scrollToBottomAndRead()">
+            <span id="unreadCount">0</span> new message<span id="unreadPlural">s</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="m18 15-6-6-6 6"/>
+            </svg>
+        </div>
     </div>
 
     <script>
@@ -527,6 +574,8 @@
         let typingCheckInterval = null;
         let recentEmojis = [];
         let currentEmojiCategory = 'recent';
+        let unreadCount = 0;
+        let isUserAtBottom = true;
 
         // Emoji data organized by categories
         const emojiData = {
@@ -566,6 +615,45 @@
             // Keep only 25 most recent
             recentEmojis = recentEmojis.slice(0, 25);
             saveRecentEmojis();
+        }
+
+        // Check if user is at bottom of messages
+        function checkIfAtBottom() {
+            const messagesArea = document.getElementById('messagesArea');
+            const threshold = 100; // pixels from bottom
+            isUserAtBottom = (messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight) < threshold;
+            
+            if (isUserAtBottom && unreadCount > 0) {
+                // User scrolled to bottom - clear unread badge
+                unreadCount = 0;
+                hideUnreadBadge();
+                markMessagesAsRead();
+            }
+        }
+
+        // Show unread badge
+        function showUnreadBadge() {
+            const badge = document.getElementById('unreadBadge');
+            const countEl = document.getElementById('unreadCount');
+            const pluralEl = document.getElementById('unreadPlural');
+            
+            countEl.textContent = unreadCount;
+            pluralEl.textContent = unreadCount > 1 ? 's' : '';
+            badge.classList.add('show');
+        }
+
+        // Hide unread badge
+        function hideUnreadBadge() {
+            const badge = document.getElementById('unreadBadge');
+            badge.classList.remove('show');
+        }
+
+        // Scroll to bottom and mark as read
+        function scrollToBottomAndRead() {
+            scrollToBottom();
+            unreadCount = 0;
+            hideUnreadBadge();
+            markMessagesAsRead();
         }
 
         // Toggle emoji picker
@@ -1276,6 +1364,7 @@
         function scrollToBottom() {
             const messagesArea = document.getElementById('messagesArea');
             messagesArea.scrollTop = messagesArea.scrollHeight;
+            isUserAtBottom = true;
         }
 
         function goBack() {
@@ -1303,10 +1392,21 @@
                     payload.new.has_been_read = false;
                     messages.push(payload.new);
                     renderMessages();
-                    scrollToBottom();
-
+                    
+                    // Check if message is from other user
                     if (payload.new.sender_id !== currentUser.id) {
-                        markMessagesAsRead();
+                        // If user is not at bottom, show unread badge
+                        if (!isUserAtBottom) {
+                            unreadCount++;
+                            showUnreadBadge();
+                        } else {
+                            // User is at bottom - auto scroll and mark as read
+                            scrollToBottom();
+                            markMessagesAsRead();
+                        }
+                    } else {
+                        // Own message - always scroll to bottom
+                        scrollToBottom();
                     }
                 })
                 .on('postgres_changes', {
@@ -1359,6 +1459,10 @@
                 await loadChatDetails();
                 await loadMessages();
                 setupRealtimeSubscription();
+                
+                // Add scroll listener to detect when user scrolls up
+                const messagesArea = document.getElementById('messagesArea');
+                messagesArea.addEventListener('scroll', checkIfAtBottom);
                 
                 statusUpdateInterval = setInterval(async () => {
                     if (currentUser) {
