@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chat - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -75,6 +76,8 @@
             justify-content: center;
             color: white;
             font-weight: 600;
+            background-size: cover;
+            background-position: center;
         }
 
         .chat-info {
@@ -122,6 +125,8 @@
             padding: 8px 12px;
             border-radius: 8px;
             word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
         }
 
         .message-sent {
@@ -136,11 +141,23 @@
             border-bottom-left-radius: 2px;
         }
 
+        .message-content {
+            margin-bottom: 4px;
+        }
+
         .message-time {
             font-size: 11px;
             color: #667781;
-            margin-top: 4px;
             text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        .read-tick {
+            width: 16px;
+            height: 16px;
         }
 
         .input-area {
@@ -179,29 +196,102 @@
         .send-btn:active {
             background: #15803d;
         }
+
+        .send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .loading-messages {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #16a34a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            width: fit-content;
+            margin-bottom: 12px;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-4px);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="header-content">
-                <button class="back-btn" onclick="history.back()">
+                <button class="back-btn" onclick="goBack()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                         <path d="m15 18-6-6 6-6"/>
                     </svg>
                 </button>
-                <div class="avatar-small">R</div>
+                <div class="avatar-small" id="chatAvatar"></div>
                 <div class="chat-info">
-                    <div class="chat-name">Ramesh Patel</div>
-                    <div class="chat-status">online</div>
+                    <div class="chat-name" id="chatName">Loading...</div>
+                    <div class="chat-status" id="chatStatus"></div>
                 </div>
                 <div class="header-actions">
-                    <button class="icon-btn">
+                    <button class="icon-btn" onclick="makeCall()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                         </svg>
                     </button>
-                    <button class="icon-btn">
+                    <button class="icon-btn" onclick="openChatInfo()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <line x1="4" x2="20" y1="12" y2="12"/>
                             <line x1="4" x2="20" y1="6" y2="6"/>
@@ -213,27 +303,15 @@
         </div>
 
         <div class="messages-area" id="messagesArea">
-            <div class="message message-received">
-                <div>Hello! How are you?</div>
-                <div class="message-time">10:30 AM</div>
-            </div>
-            <div class="message message-sent">
-                <div>I'm good, thanks! How about you?</div>
-                <div class="message-time">10:31 AM</div>
-            </div>
-            <div class="message message-received">
-                <div>Doing great! Want to meet for coffee?</div>
-                <div class="message-time">10:32 AM</div>
-            </div>
-            <div class="message message-sent">
-                <div>Sure! When are you free?</div>
-                <div class="message-time">10:33 AM</div>
+            <div class="loading-messages" id="loadingMessages">
+                <div class="spinner"></div>
+                <p>Loading messages...</p>
             </div>
         </div>
 
         <div class="input-area">
-            <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1" onkeypress="handleKeyPress(event)"></textarea>
-            <button class="send-btn" onclick="sendMessage()">
+            <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1" onkeypress="handleKeyPress(event)" oninput="handleInput()"></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <line x1="22" x2="11" y1="2" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -243,28 +321,248 @@
     </div>
 
     <script>
-        function sendMessage() {
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+        let currentChatId = null;
+        let currentChatData = null;
+        let messages = [];
+        let messagesSubscription = null;
+
+        // Get chat ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        currentChatId = urlParams.get('chat_id');
+
+        if (!currentChatId) {
+            alert('No chat selected');
+            window.location.href = 'ngm_main_chat.html';
+        }
+
+        // Check Authentication
+        async function checkAuth() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        // Load Chat Details
+        async function loadChatDetails() {
+            try {
+                // Get chat basic info
+                const { data: chat, error: chatError } = await supabase
+                    .from('ngm_chats')
+                    .select('*')
+                    .eq('chat_id', currentChatId)
+                    .single();
+
+                if (chatError) throw chatError;
+
+                currentChatData = chat;
+
+                // Load based on chat type
+                if (chat.chat_type === 'private') {
+                    const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
+                    const { data: userData, error: userError } = await supabase
+                        .from('ngm_users')
+                        .select('full_name, username, profile_picture_url, is_online, last_seen')
+                        .eq('user_id', otherUserId)
+                        .single();
+
+                    if (userError) throw userError;
+
+                    const name = userData.full_name || userData.username || 'Unknown User';
+                    document.getElementById('chatName').textContent = name;
+                    
+                    if (userData.is_online) {
+                        document.getElementById('chatStatus').textContent = 'online';
+                    } else if (userData.last_seen) {
+                        const lastSeen = new Date(userData.last_seen);
+                        document.getElementById('chatStatus').textContent = `Last seen ${formatLastSeen(lastSeen)}`;
+                    }
+
+                    if (userData.profile_picture_url) {
+                        document.getElementById('chatAvatar').style.backgroundImage = `url('${userData.profile_picture_url}')`;
+                    } else {
+                        document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
+                    }
+                } else if (chat.chat_type === 'group') {
+                    const { data: groupData } = await supabase
+                        .from('ngm_groups')
+                        .select('group_name, group_picture_url')
+                        .eq('chat_id', currentChatId)
+                        .single();
+
+                    const name = groupData?.group_name || 'Group Chat';
+                    document.getElementById('chatName').textContent = name;
+                    document.getElementById('chatStatus').textContent = 'Group';
+
+                    if (groupData?.group_picture_url) {
+                        document.getElementById('chatAvatar').style.backgroundImage = `url('${groupData.group_picture_url}')`;
+                    } else {
+                        document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
+                    }
+
+                    // Get member count
+                    const { count } = await supabase
+                        .from('ngm_chat_participants')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('chat_id', currentChatId)
+                        .eq('is_active', true);
+
+                    document.getElementById('chatStatus').textContent = `${count} members`;
+                } else if (chat.chat_type === 'channel') {
+                    const { data: channelData } = await supabase
+                        .from('ngm_channels')
+                        .select('channel_name, channel_picture_url, subscriber_count')
+                        .eq('chat_id', currentChatId)
+                        .single();
+
+                    const name = channelData?.channel_name || 'Channel';
+                    document.getElementById('chatName').textContent = name;
+                    document.getElementById('chatStatus').textContent = `${channelData?.subscriber_count || 0} subscribers`;
+
+                    if (channelData?.channel_picture_url) {
+                        document.getElementById('chatAvatar').style.backgroundImage = `url('${channelData.channel_picture_url}')`;
+                    } else {
+                        document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading chat details:', error);
+                document.getElementById('chatName').textContent = 'Error loading chat';
+            }
+        }
+
+        // Load Messages
+        async function loadMessages() {
+            try {
+                const { data: msgs, error } = await supabase
+                    .from('ngm_messages')
+                    .select('*')
+                    .eq('chat_id', currentChatId)
+                    .eq('is_deleted', false)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                messages = msgs || [];
+                renderMessages();
+                scrollToBottom();
+
+                // Mark messages as read
+                await markMessagesAsRead();
+
+                document.getElementById('loadingMessages').style.display = 'none';
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                document.getElementById('loadingMessages').innerHTML = '<p style="color: #ef4444;">Error loading messages</p>';
+            }
+        }
+
+        // Render Messages
+        function renderMessages() {
+            const messagesArea = document.getElementById('messagesArea');
+            messagesArea.innerHTML = messages.map(msg => {
+                const isSent = msg.sender_id === currentUser.id;
+                const time = new Date(msg.created_at).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+
+                return `
+                    <div class="message ${isSent ? 'message-sent' : 'message-received'}">
+                        <div class="message-content">${msg.content}</div>
+                        <div class="message-time">
+                            ${time}
+                            ${isSent && msg.is_read_by_all ? '<svg class="read-tick" viewBox="0 0 16 15" fill="#4fc3f7"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>' : ''}
+                            ${isSent && msg.is_delivered && !msg.is_read_by_all ? '<svg class="read-tick" viewBox="0 0 16 15" fill="#92a3ab"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"/></svg>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Send Message
+        async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
             if (!message) return;
-            
-            const messagesArea = document.getElementById('messagesArea');
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message message-sent';
-            messageDiv.innerHTML = `
-                <div>${message}</div>
-                <div class="message-time">${time}</div>
-            `;
-            
-            messagesArea.appendChild(messageDiv);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-            
-            input.value = '';
-            input.style.height = 'auto';
+
+            try {
+                // Insert message
+                const { data: newMsg, error } = await supabase
+                    .from('ngm_messages')
+                    .insert({
+                        chat_id: currentChatId,
+                        sender_id: currentUser.id,
+                        message_type: 'text',
+                        content: message
+                    })
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Update chat last_message_at
+                await supabase
+                    .from('ngm_chats')
+                    .update({ last_message_at: new Date().toISOString() })
+                    .eq('chat_id', currentChatId);
+
+                // Clear input
+                input.value = '';
+                input.style.height = 'auto';
+                document.getElementById('sendBtn').disabled = true;
+
+                // Message will be added via realtime subscription
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message');
+            }
+        }
+
+        // Mark Messages as Read
+        async function markMessagesAsRead() {
+            try {
+                // Get unread message IDs
+                const unreadMsgIds = messages
+                    .filter(msg => msg.sender_id !== currentUser.id)
+                    .map(msg => msg.message_id);
+
+                if (unreadMsgIds.length === 0) return;
+
+                // Update message status
+                for (const msgId of unreadMsgIds) {
+                    await supabase
+                        .from('ngm_message_status')
+                        .upsert({
+                            message_id: msgId,
+                            user_id: currentUser.id,
+                            status: 'read'
+                        });
+                }
+
+                // Update participant unread count
+                await supabase
+                    .from('ngm_chat_participants')
+                    .update({ 
+                        unread_count: 0,
+                        last_read_message_id: messages[messages.length - 1]?.message_id 
+                    })
+                    .eq('chat_id', currentChatId)
+                    .eq('user_id', currentUser.id);
+            } catch (error) {
+                console.error('Error marking messages as read:', error);
+            }
         }
 
         function handleKeyPress(event) {
@@ -274,14 +572,101 @@
             }
         }
 
-        // Auto-resize textarea
-        document.getElementById('messageInput').addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        function handleInput() {
+            const input = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            // Auto-resize
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+
+            // Enable/disable send button
+            sendBtn.disabled = !input.value.trim();
+        }
+
+        function scrollToBottom() {
+            const messagesArea = document.getElementById('messagesArea');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function formatLastSeen(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        function goBack() {
+            window.location.href = 'ngm_main_chat.html';
+        }
+
+        function makeCall() {
+            alert('Voice call feature coming soon!');
+        }
+
+        function openChatInfo() {
+            alert('Chat info page coming soon!');
+        }
+
+        // Setup Real-time Subscription
+        function setupRealtimeSubscription() {
+            messagesSubscription = supabase
+                .channel(`messages:${currentChatId}`)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'ngm_messages',
+                    filter: `chat_id=eq.${currentChatId}`
+                }, payload => {
+                    console.log('New message received:', payload);
+                    messages.push(payload.new);
+                    renderMessages();
+                    scrollToBottom();
+
+                    // Mark as read if not sent by current user
+                    if (payload.new.sender_id !== currentUser.id) {
+                        markMessagesAsRead();
+                    }
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'ngm_messages',
+                    filter: `chat_id=eq.${currentChatId}`
+                }, payload => {
+                    console.log('Message updated:', payload);
+                    const index = messages.findIndex(m => m.message_id === payload.new.message_id);
+                    if (index !== -1) {
+                        messages[index] = payload.new;
+                        renderMessages();
+                    }
+                })
+                .subscribe();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            const user = await checkAuth();
+            if (user) {
+                await loadChatDetails();
+                await loadMessages();
+                setupRealtimeSubscription();
+            }
         });
 
-        // Scroll to bottom on load
-        document.getElementById('messagesArea').scrollTop = document.getElementById('messagesArea').scrollHeight;
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (messagesSubscription) {
+                supabase.removeChannel(messagesSubscription);
+            }
+        });
     </script>
 </body>
 </html>
