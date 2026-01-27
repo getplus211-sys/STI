@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings - Nandigram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 16px 12px 16px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            padding: 16px 16px 8px;
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .setting-item {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item:active {
+            background: #f9fafb;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-label {
+            color: #111827;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .setting-desc {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: #d1d5db;
+            border-radius: 14px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .toggle-switch.active {
+            background: #16a34a;
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(20px);
+        }
+
+        .select-value {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            stroke: #9ca3af;
+            fill: none;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <button class="back-btn" onclick="history.back()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </button>
+                <div class="header-title">Privacy & Security Settings</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Privacy Visibility Settings -->
+            <div class="section">
+                <div class="section-title">WHO CAN SEE MY INFO</div>
+                
+                <div class="setting-item" onclick="openPrivacyModal('phone')">
+                    <div class="setting-info">
+                        <div class="setting-label">Phone Number</div>
+                        <div class="setting-desc">Who can see your phone number</div>
+                    </div>
+                    <div class="select-value">Contacts</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('email')">
+                    <div class="setting-info">
+                        <div class="setting-label">Email</div>
+                        <div class="setting-desc">Who can see your email</div>
+                    </div>
+                    <div class="select-value">Contacts</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('dob')">
+                    <div class="setting-info">
+                        <div class="setting-label">Date of Birth</div>
+                        <div class="setting-desc">Who can see your DOB</div>
+                    </div>
+                    <div class="select-value">Contacts</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('profile_pic')">
+                    <div class="setting-info">
+                        <div class="setting-label">Profile Picture</div>
+                        <div class="setting-desc">Who can see your photo</div>
+                    </div>
+                    <div class="select-value">Everyone</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('bio')">
+                    <div class="setting-info">
+                        <div class="setting-label">Bio</div>
+                        <div class="setting-desc">Who can see your bio</div>
+                    </div>
+                    <div class="select-value">Everyone</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('last_seen')">
+                    <div class="setting-info">
+                        <div class="setting-label">Last Seen</div>
+                        <div class="setting-desc">Who can see when you were last online</div>
+                    </div>
+                    <div class="select-value">Contacts</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('online_status')">
+                    <div class="setting-info">
+                        <div class="setting-label">Online Status</div>
+                        <div class="setting-desc">Who can see when you're online</div>
+                    </div>
+                    <div class="select-value">Everyone</div>
+                </div>
+            </div>
+
+            <!-- Search Privacy -->
+            <div class="section">
+                <div class="section-title">WHO CAN FIND ME</div>
+                
+                <div class="setting-item" onclick="openPrivacyModal('search_phone')">
+                    <div class="setting-info">
+                        <div class="setting-label">Search by Phone Number</div>
+                        <div class="setting-desc">Who can find you by phone</div>
+                    </div>
+                    <div class="select-value">Everyone</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('search_username')">
+                    <div class="setting-info">
+                        <div class="setting-label">Search by Username</div>
+                        <div class="setting-desc">Who can find you by username</div>
+                    </div>
+                    <div class="select-value">Everyone</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('search_name')">
+                    <div class="setting-info">
+                        <div class="setting-label">Search by Name</div>
+                        <div class="setting-desc">Who can find you by name</div>
+                    </div>
+                    <div class="select-value">Contacts</div>
+                </div>
+            </div>
+
+            <!-- Interaction Privacy -->
+            <div class="section">
+                <div class="section-title">WHO CAN CONTACT ME</div>
+                
+                <div class="setting-item" onclick="openPrivacyModal('can_message')">
+                    <div class="setting-info">
+                        <div class="setting-label">Who Can Message Me</div>
+                        <div class="setting-desc">Control who can send you messages</div>
+                    </div>
+                    <div class="select-value">Everyone</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('add_to_groups')">
+                    <div class="setting-info">
+                        <div class="setting-label">Who Can Add Me to Groups</div>
+                        <div class="setting-desc">Control who can add you to groups</div>
+                    </div>
+                    <div class="select-value">Contacts</div>
+                </div>
+            </div>
+
+            <!-- Message Settings -->
+            <div class="section">
+                <div class="section-title">MESSAGE SETTINGS</div>
+                
+                <div class="setting-item" onclick="toggleSetting('read_receipts')">
+                    <div class="setting-info">
+                        <div class="setting-label">Read Receipts</div>
+                        <div class="setting-desc">Show when you've read messages</div>
+                    </div>
+                    <div class="toggle-switch active" id="toggle_read_receipts">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <div class="setting-item" onclick="toggleSetting('typing_indicator')">
+                    <div class="setting-info">
+                        <div class="setting-label">Typing Indicator</div>
+                        <div class="setting-desc">Show when you're typing</div>
+                    </div>
+                    <div class="toggle-switch active" id="toggle_typing_indicator">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="section">
+                <div class="section-title">SECURITY</div>
+                
+                <div class="setting-item" onclick="toggleSetting('two_factor')">
+                    <div class="setting-info">
+                        <div class="setting-label">Two-Factor Authentication</div>
+                        <div class="setting-desc">Extra security for your account</div>
+                    </div>
+                    <div class="toggle-switch" id="toggle_two_factor">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <div class="setting-item" onclick="toggleSetting('fingerprint')">
+                    <div class="setting-info">
+                        <div class="setting-label">Fingerprint Lock</div>
+                        <div class="setting-desc">Lock app with fingerprint</div>
+                    </div>
+                    <div class="toggle-switch" id="toggle_fingerprint">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Blocked Users</div>
+                        <div class="setting-desc">Manage blocked contacts</div>
+                    </div>
+                    <svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSetting(settingId) {
+            const toggle = document.getElementById('toggle_' + settingId);
+            toggle.classList.toggle('active');
+        }
+
+        function openPrivacyModal(type) {
+            const options = ['Everyone', 'Contacts', 'Nobody'];
+            if (type === 'add_to_groups') {
+                options.push('Admins Only');
+            }
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; z-index: 300;';
+            
+            const content = document.createElement('div');
+            content.style.cssText = 'background: white; width: 100%; border-radius: 24px 24px 0 0; padding: 24px; animation: slideUp 0.3s ease-out;';
+            
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="width: 40px; height: 4px; background: #d1d5db; border-radius: 2px; margin: 0 auto 16px;"></div>
+                    <h3 style="font-size: 18px; font-weight: 600;">Select Privacy Option</h3>
+                </div>
+                ${options.map(opt => `
+                    <div onclick="selectPrivacyOption('${type}', '${opt}')" style="padding: 16px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; background: #f9fafb;">
+                        <div style="font-weight: 500;">${opt}</div>
+                    </div>
+                `).join('')}
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+        }
+
+        function selectPrivacyOption(type, option) {
+            console.log('Selected:', type, option);
+            document.querySelectorAll('.select-value').forEach(el => {
+                // Update UI
+            });
+            event.target.closest('[style*="fixed"]').remove();
+        }
+    </script>
+
+    <style>
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+    </style>
+</body>
+</html>
