@@ -224,51 +224,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        .typing-indicator {
-            display: none;
-            padding: 8px 12px;
-            background: white;
-            border-radius: 8px;
-            width: fit-content;
-            margin-bottom: 12px;
-        }
-
-        .typing-indicator.active {
-            display: block;
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #9ca3af;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% {
-                opacity: 0.3;
-                transform: translateY(0);
-            }
-            30% {
-                opacity: 1;
-                transform: translateY(-4px);
-            }
-        }
     </style>
 </head>
 <body>
@@ -321,13 +276,11 @@
     </div>
 
     <script>
-        // Supabase Configuration
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
 
         let supabaseClient;
         
-        // Wait for DOM to load before initializing
         function initSupabase() {
             if (!supabaseClient) {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -341,7 +294,6 @@
         let messages = [];
         let messagesSubscription = null;
 
-        // Get chat ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         currentChatId = urlParams.get('chat_id');
 
@@ -350,7 +302,6 @@
             window.location.href = 'ngm_main_chat.html';
         }
 
-        // Check Authentication
         async function checkAuth() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
@@ -361,7 +312,6 @@
             return user;
         }
 
-        // Smart Last Seen Format (WhatsApp style)
         function formatSmartLastSeen(lastSeenStr) {
             const lastSeen = new Date(lastSeenStr);
             const now = new Date();
@@ -377,7 +327,6 @@
             return 'last seen a while ago';
         }
 
-        // Update user status in UI
         function updateUserStatus(userData, isBlocked) {
             let statusText = '';
             if (isBlocked) {
@@ -393,7 +342,6 @@
             document.getElementById('chatStatus').textContent = statusText;
         }
 
-        // Setup live status updates via realtime
         let statusSubscription = null;
         function setupLiveStatusUpdates(otherUserId) {
             if (statusSubscription) {
@@ -401,12 +349,12 @@
             }
 
             statusSubscription = supabaseClient
-                .channel(\`user-status:\${otherUserId}\`)
+                .channel('user-status:' + otherUserId)
                 .on('postgres_changes', {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'ngm_users',
-                    filter: \`user_id=eq.\${otherUserId}\`
+                    filter: 'user_id=eq.' + otherUserId
                 }, payload => {
                     supabaseClient
                         .from('ngm_blocked_users')
@@ -421,7 +369,6 @@
                 .subscribe();
         }
 
-        // Load Chat Details
         async function loadChatDetails() {
             try {
                 const { data: chat, error: chatError } = await supabaseClient
@@ -467,7 +414,7 @@
                     updateUserStatus(userData, isBlocked);
 
                     if (userData.profile_picture_url) {
-                        document.getElementById('chatAvatar').style.backgroundImage = \`url('\${userData.profile_picture_url}')\`;
+                        document.getElementById('chatAvatar').style.backgroundImage = "url('" + userData.profile_picture_url + "')";
                     } else {
                         document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
                     }
@@ -485,7 +432,7 @@
                     document.getElementById('chatStatus').textContent = 'Group';
 
                     if (groupData?.group_picture_url) {
-                        document.getElementById('chatAvatar').style.backgroundImage = \`url('\${groupData.group_picture_url}')\`;
+                        document.getElementById('chatAvatar').style.backgroundImage = "url('" + groupData.group_picture_url + "')";
                     } else {
                         document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
                     }
@@ -496,7 +443,7 @@
                         .eq('chat_id', currentChatId)
                         .eq('is_active', true);
 
-                    document.getElementById('chatStatus').textContent = \`\${count} members\`;
+                    document.getElementById('chatStatus').textContent = count + ' members';
                 } else if (chat.chat_type === 'channel') {
                     const { data: channelData } = await supabaseClient
                         .from('ngm_channels')
@@ -506,10 +453,10 @@
 
                     const name = channelData?.channel_name || 'Channel';
                     document.getElementById('chatName').textContent = name;
-                    document.getElementById('chatStatus').textContent = \`\${channelData?.subscriber_count || 0} subscribers\`;
+                    document.getElementById('chatStatus').textContent = (channelData?.subscriber_count || 0) + ' subscribers';
 
                     if (channelData?.channel_picture_url) {
-                        document.getElementById('chatAvatar').style.backgroundImage = \`url('\${channelData.channel_picture_url}')\`;
+                        document.getElementById('chatAvatar').style.backgroundImage = "url('" + channelData.channel_picture_url + "')";
                     } else {
                         document.getElementById('chatAvatar').textContent = name.charAt(0).toUpperCase();
                     }
@@ -520,7 +467,6 @@
             }
         }
 
-        // Load Messages
         async function loadMessages() {
             try {
                 const { data: msgs, error } = await supabaseClient
@@ -573,15 +519,7 @@
             const messagesArea = document.getElementById('messagesArea');
             
             if (!messages || messages.length === 0) {
-                messagesArea.innerHTML = \`
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #9ca3af;">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 16px; opacity: 0.5;">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <p style="font-size: 16px; margin-bottom: 8px;">No messages yet</p>
-                        <p style="font-size: 14px;">Start the conversation!</p>
-                    </div>
-                \`;
+                messagesArea.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #9ca3af;"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 16px; opacity: 0.5;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style="font-size: 16px; margin-bottom: 8px;">No messages yet</p><p style="font-size: 14px;">Start the conversation!</p></div>';
                 return;
             }
             
@@ -592,15 +530,7 @@
                     minute: '2-digit' 
                 });
 
-                return \`
-                    <div class="message \${isSent ? 'message-sent' : 'message-received'}">
-                        <div class="message-content">\${msg.content}</div>
-                        <div class="message-time">
-                            \${time}
-                            \${isSent ? getMessageTick(msg) : ''}
-                        </div>
-                    </div>
-                \`;
+                return '<div class="message ' + (isSent ? 'message-sent' : 'message-received') + '"><div class="message-content">' + msg.content + '</div><div class="message-time">' + time + (isSent ? getMessageTick(msg) : '') + '</div></div>';
             }).join('');
         }
 
@@ -718,12 +648,12 @@
 
         function setupRealtimeSubscription() {
             messagesSubscription = supabaseClient
-                .channel(\`messages:\${currentChatId}\`)
+                .channel('messages:' + currentChatId)
                 .on('postgres_changes', {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'ngm_messages',
-                    filter: \`chat_id=eq.\${currentChatId}\`
+                    filter: 'chat_id=eq.' + currentChatId
                 }, payload => {
                     console.log('New message received:', payload);
                     messages.push(payload.new);
@@ -738,7 +668,7 @@
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'ngm_messages',
-                    filter: \`chat_id=eq.\${currentChatId}\`
+                    filter: 'chat_id=eq.' + currentChatId
                 }, payload => {
                     console.log('Message updated:', payload);
                     const index = messages.findIndex(m => m.message_id === payload.new.message_id);
