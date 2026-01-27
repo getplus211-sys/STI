@@ -94,6 +94,34 @@
             opacity: 0.9;
         }
 
+        .chat-status.typing {
+            color: #16a34a;
+            font-weight: 500;
+        }
+
+        .typing-dots {
+            display: inline-block;
+            position: relative;
+        }
+
+        .typing-dots span {
+            animation: typingDot 1.4s infinite;
+            opacity: 0.4;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% { opacity: 0.4; }
+            30% { opacity: 1; }
+        }
+
         .header-actions {
             display: flex;
             gap: 8px;
@@ -294,6 +322,9 @@
         let messages = [];
         let messagesSubscription = null;
         let statusUpdateInterval = null;
+        let typingSubscription = null;
+        let typingTimeout = null;
+        let isTyping = false;
 
         const urlParams = new URLSearchParams(window.location.search);
         currentChatId = urlParams.get('chat_id');
@@ -347,12 +378,71 @@
                 statusText = formatLastSeen(userData.last_seen, userData.is_online);
             }
             
-            document.getElementById('chatStatus').textContent = statusText;
+            const statusEl = document.getElementById('chatStatus');
+            statusEl.textContent = statusText;
+            statusEl.classList.remove('typing');
+        }
+
+        function showTypingIndicator(userName) {
+            const statusEl = document.getElementById('chatStatus');
+            statusEl.innerHTML = 'typing<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
+            statusEl.classList.add('typing');
+        }
+
+        function hideTypingIndicator() {
+            if (otherUserData) {
+                updateUserStatus(otherUserData, isOtherUserBlocked);
+            }
         }
 
         let statusSubscription = null;
         let otherUserData = null;
         let isOtherUserBlocked = false;
+
+        function setupTypingIndicator(otherUserId) {
+            if (typingSubscription) {
+                supabaseClient.removeChannel(typingSubscription);
+            }
+
+            typingSubscription = supabaseClient
+                .channel('typing:' + currentChatId)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'ngm_typing_status',
+                    filter: 'chat_id=eq.' + currentChatId
+                }, payload => {
+                    // Only show typing if it's from the other user
+                    if (payload.new && payload.new.user_id === otherUserId) {
+                        if (payload.new.is_typing) {
+                            showTypingIndicator();
+                        } else {
+                            hideTypingIndicator();
+                        }
+                    }
+                })
+                .subscribe();
+        }
+
+        async function setTypingStatus(typing) {
+            if (isTyping === typing) return;
+            isTyping = typing;
+
+            try {
+                await supabaseClient
+                    .from('ngm_typing_status')
+                    .upsert({
+                        chat_id: currentChatId,
+                        user_id: currentUser.id,
+                        is_typing: typing,
+                        last_typing_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'chat_id,user_id'
+                    });
+            } catch (error) {
+                console.error('Error updating typing status:', error);
+            }
+        }
 
         function setupLiveStatusUpdates(otherUserId) {
             if (statusSubscription) {
@@ -447,6 +537,7 @@
                     }
                     
                     setupLiveStatusUpdates(otherUserId);
+                    setupTypingIndicator(otherUserId);
                 } else if (chat.chat_type === 'group') {
                     const { data: groupData } = await supabaseClient
                         .from('ngm_groups')
@@ -567,6 +658,12 @@
             
             if (!message) return;
 
+            // Stop typing indicator
+            setTypingStatus(false);
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+
             try {
                 const { data: newMsg, error } = await supabaseClient
                     .from('ngm_messages')
@@ -654,6 +751,28 @@
             input.style.height = Math.min(input.scrollHeight, 100) + 'px';
 
             sendBtn.disabled = !input.value.trim();
+
+            // Track typing status
+            if (input.value.trim()) {
+                // User is typing
+                setTypingStatus(true);
+
+                // Clear existing timeout
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                }
+
+                // Set timeout to stop typing status after 3 seconds of inactivity
+                typingTimeout = setTimeout(() => {
+                    setTypingStatus(false);
+                }, 3000);
+            } else {
+                // Input is empty, stop typing
+                setTypingStatus(false);
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                }
+            }
         }
 
         function scrollToBottom() {
@@ -745,12 +864,19 @@
             if (statusSubscription) {
                 supabaseClient.removeChannel(statusSubscription);
             }
+            if (typingSubscription) {
+                supabaseClient.removeChannel(typingSubscription);
+            }
             if (statusUpdateInterval) {
                 clearInterval(statusUpdateInterval);
             }
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
             
-            // Set user as offline when leaving page
-            if (currentUser) {
+            // Stop typing and set user as offline when leaving page
+            if (currentUser && currentChatId) {
+                setTypingStatus(false);
                 supabaseClient
                     .from('ngm_users')
                     .update({ 
