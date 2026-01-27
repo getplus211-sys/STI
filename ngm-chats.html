@@ -3,159 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NGM Messenger - Mobile</title>
+    <title>NGM Messenger</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #2481cc; --bg: #f0f2f5; --white: #ffffff; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; background: var(--bg); }
+        :root {
+            --primary: #2481cc;
+            --bg: #e6ebee;
+            --white: #ffffff;
+            --incoming: #ffffff;
+            --outgoing: #effdde;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; overflow: hidden; background: var(--bg); }
 
         .app-container { display: flex; width: 100vw; height: 100vh; position: relative; }
 
-        /* Sidebar / User List */
+        /* --- Sidebar (Chat List) --- */
         .sidebar { 
             width: 100%; height: 100%; background: var(--white); 
             display: flex; flex-direction: column; 
-            position: absolute; left: 0; transition: 0.3s; z-index: 10;
+            position: absolute; left: 0; transition: transform 0.3s ease; z-index: 10;
         }
-        .sidebar-header { padding: 15px; background: var(--primary); color: white; font-size: 18px; font-weight: bold; }
+
+        .sidebar-header { 
+            padding: 15px; background: var(--primary); color: white; 
+            font-size: 20px; font-weight: bold; display: flex; justify-content: space-between;
+        }
+
         .user-list { flex: 1; overflow-y: auto; }
         
         .user-item { 
-            display: flex; padding: 15px; border-bottom: 1px solid #eee; align-items: center; cursor: pointer;
+            display: flex; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; 
+            align-items: center; cursor: pointer;
         }
-        .user-item:active { background: #f0f0f0; }
 
         .avatar { 
-            width: 45px; height: 45px; border-radius: 50%; background: #ddd; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; color: white; margin-right: 12px; flex-shrink: 0;
-            overflow: hidden;
+            width: 50px; height: 50px; border-radius: 50%; background: #ccc; 
+            margin-right: 15px; display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: bold; font-size: 20px; overflow: hidden;
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        .user-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
-        .user-status { font-size: 12px; color: #888; }
+        .user-info { flex: 1; }
+        .user-name { font-weight: 600; font-size: 16px; color: #000; }
+        .user-status { font-size: 12px; color: #707579; }
 
-        /* Chat Area */
+        /* --- Chat Area --- */
         .chat-area { 
-            width: 100%; height: 100%; background: #e5ddd5; 
+            width: 100%; height: 100%; background: #dbe4ed; 
+            background-image: url('https://web.telegram.org/img/bg_0.png');
             display: flex; flex-direction: column; 
-            position: absolute; right: 0; transform: translateX(100%); transition: 0.3s; z-index: 20;
+            position: absolute; right: 0; transform: translateX(100%); 
+            transition: transform 0.3s ease; z-index: 20;
         }
 
-        /* Responsive Logic */
         .app-container.chat-open .sidebar { transform: translateX(-100%); }
         .app-container.chat-open .chat-area { transform: translateX(0); }
 
-        .chat-header { padding: 10px; background: var(--primary); color: white; display: flex; align-items: center; }
-        .back-btn { background: none; border: none; color: white; font-size: 24px; margin-right: 10px; cursor: pointer; }
-        
-        .messages-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 15px; }
-        .msg.sent { align-self: flex-end; background: #dcf8c6; }
-        .msg.received { align-self: flex-start; background: white; }
+        .chat-header { 
+            padding: 10px 15px; background: white; display: flex; 
+            align-items: center; border-bottom: 1px solid #ddd;
+        }
 
-        .input-bar { padding: 10px; background: #f0f0f0; display: flex; gap: 10px; }
-        .input-bar input { flex: 1; border: none; padding: 10px 15px; border-radius: 20px; outline: none; }
+        .back-btn { font-size: 24px; margin-right: 15px; cursor: pointer; border: none; background: none; }
+
+        .messages-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 15px; line-height: 1.4; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .msg.sent { align-self: flex-end; background: var(--outgoing); border-bottom-right-radius: 2px; }
+        .msg.received { align-self: flex-start; background: var(--incoming); border-bottom-left-radius: 2px; }
+
+        .input-bar { padding: 10px; background: white; display: flex; align-items: center; gap: 10px; }
+        .input-bar input { flex: 1; border: 1px solid #ddd; padding: 10px 15px; border-radius: 20px; outline: none; font-size: 16px; }
+        .send-btn { color: var(--primary); font-size: 24px; cursor: pointer; border: none; background: none; }
     </style>
 </head>
 <body>
 
 <div class="app-container" id="app">
     <div class="sidebar">
-        <div class="sidebar-header">NGM Messenger</div>
+        <div class="sidebar-header">
+            <span>Messenger</span>
+            <small style="font-size: 12px; font-weight: normal;">NGM Tables Only</small>
+        </div>
         <div class="user-list" id="userList">
-            <p id="loadingText" style="text-align: center; padding: 20px;">ડેટા લોડ થઈ રહ્યો છે...</p>
+            <p style="text-align: center; padding: 20px; color: #888;">લોડ થઈ રહ્યું છે...</p>
         </div>
     </div>
 
     <div class="chat-area">
         <div class="chat-header">
-            <button class="back-btn" onclick="closeChat()">←</button>
-            <div class="avatar" id="headerAvatar" style="width: 35px; height: 35px; font-size: 14px; background: #1c629d;">?</div>
-            <div>
-                <div class="user-name" id="headerName" style="color: white; font-size: 15px;">યુઝર</div>
-                <div id="headerStatus" style="font-size: 11px; color: #d1eaff;">ઓનલાઇન</div>
+            <button class="back-btn" onclick="closeChat()">&#8592;</button>
+            <div class="avatar" id="headerAvatar" style="width: 40px; height: 40px; font-size: 16px;"></div>
+            <div class="user-info">
+                <div class="user-name" id="headerName">યુઝર</div>
+                <div class="user-status" id="headerStatus">ઓનલાઇન</div>
             </div>
         </div>
+        
         <div class="messages-box" id="msgBox"></div>
+
         <div class="input-bar">
             <input type="text" id="msgInput" placeholder="મેસેજ લખો...">
-            <button onclick="sendMessage()" style="background:none; border:none; font-size: 20px; color: var(--primary);">➤</button>
+            <button class="send-btn" onclick="sendMessage()">&#10148;</button>
         </div>
     </div>
 </div>
 
 <script>
-    const SB_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-    
-    // Supabase Initialize
-    const _supabase = supabase.createClient(SB_URL, SB_KEY);
+    // 1. Supabase Initialization
+    const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    let selectedChatId = null;
     let selectedUserId = null;
-    let myId = '63a18e0a-487e-4d43-9861-689396e47f77'; // અહી તમારા ટેબલમાં હોય તેવો કોઈ એક UUID નાખો ટેસ્ટિંગ માટે
+    let myId = 'તમારી-UUID-અહીં-નાખો'; // લોગીન થયેલ યુઝરની ID
 
-    // --- ૧. યુઝર્સ લોડ કરવાનું ફંક્શન ---
-    async function fetchUsers() {
-        console.log("Fetching users from Supabase...");
+    // 2. Load Users from 'ngm_users_display'
+    async function loadUsers() {
         try {
+            // માત્ર એજ કોલમ મંગાવી જે તમારા ટેબલ સ્ટ્રક્ચરમાં છે
             const { data, error } = await _supabase
                 .from('ngm_users_display')
-                .select('*');
+                .select('user_id, display_name, profile_picture_url, is_online');
 
             if (error) throw error;
 
-            console.log("Users received:", data);
-
             const list = document.getElementById('userList');
+            list.innerHTML = '';
+
             if (data.length === 0) {
                 list.innerHTML = '<p style="text-align:center; padding:20px;">કોઈ યુઝર મળ્યા નથી.</p>';
                 return;
             }
 
-            list.innerHTML = ''; // લોડિંગ ટેક્સ્ટ કાઢી નાખો
             data.forEach(user => {
                 const item = document.createElement('div');
                 item.className = 'user-item';
                 item.onclick = () => openChat(user);
 
-                const avatarContent = user.profile_picture_url 
+                const profilePic = user.profile_picture_url 
                     ? `<img src="${user.profile_picture_url}">` 
                     : (user.display_name ? user.display_name[0] : '?');
 
                 item.innerHTML = `
-                    <div class="avatar" style="background-color: ${stringToColor(user.display_name)}">${avatarContent}</div>
+                    <div class="avatar" style="background-color: ${stringToColor(user.display_name || '?')}">${profilePic}</div>
                     <div class="user-info">
                         <div class="user-name">${user.display_name || 'Anonymous'}</div>
-                        <div class="user-status">${user.is_online ? '● ઓનલાઇન' : 'ઓફલાઇન'}</div>
+                        <div class="user-status">${user.is_online ? 'ઓનલાઇન' : 'ઓફલાઇન'}</div>
                     </div>
                 `;
                 list.appendChild(item);
             });
         } catch (err) {
-            console.error("Custom Error Log:", err.message);
-            document.getElementById('loadingText').innerText = "ભૂલ આવી: " + err.message;
+            document.getElementById('userList').innerHTML = `<p style="color:red; padding:20px;">Error: ${err.message}</p>`;
         }
     }
 
-    // --- ૨. ચેટ ખોલવા માટે ---
+    // 3. UI Navigation Logic
     function openChat(user) {
         selectedUserId = user.user_id;
         document.getElementById('app').classList.add('chat-open');
         document.getElementById('headerName').innerText = user.display_name;
-        document.getElementById('headerAvatar').innerText = user.display_name[0];
-        document.getElementById('msgBox').innerHTML = ''; // જૂની ચેટ ક્લીયર કરો
+        document.getElementById('headerAvatar').innerText = user.display_name ? user.display_name[0] : '?';
+        document.getElementById('headerStatus').innerText = user.is_online ? 'ઓનલાઇન' : 'ઓફલાઇન';
+        
         loadMessages();
+        setupRealtime();
     }
 
     function closeChat() {
         document.getElementById('app').classList.remove('chat-open');
     }
 
-    // --- ૩. મેસેજ લોડ કરવા માટે ---
+    // 4. Messages Logic (Using ngm_messages table)
     async function loadMessages() {
-        if (!selectedUserId) return;
         const { data, error } = await _supabase
             .from('ngm_messages')
             .select('*')
@@ -179,10 +202,11 @@
         const text = input.value.trim();
         if (!text) return;
 
+        // Inserting into ngm_messages
         const { error } = await _supabase.from('ngm_messages').insert([{
             content: text,
             sender_id: myId,
-            chat_id: 'c7c8529e-647a-4228-9121-66778f56641a' // ટેસ્ટિંગ માટે એક static UUID
+            message_type: 'text'
         }]);
 
         if (!error) {
@@ -191,15 +215,24 @@
         }
     }
 
-    // અવતાર માટે કલર જનરેટર
-    function stringToColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-        return `hsl(${hash % 360}, 60%, 50%)`;
+    // Realtime subscription
+    function setupRealtime() {
+        _supabase
+            .channel('any')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ngm_messages' }, payload => {
+                loadMessages();
+            })
+            .subscribe();
     }
 
-    // પેજ લોડ થાય ત્યારે ફંક્શન રન કરો
-    window.onload = fetchUsers;
+    function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        return `hsl(${hash % 360}, 65%, 45%)`;
+    }
+
+    // Initial Load
+    window.onload = loadUsers;
 </script>
 
 </body>
