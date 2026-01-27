@@ -313,8 +313,8 @@
             return user;
         }
 
-        // Format last seen based on time difference and privacy settings
-        function formatLastSeen(lastSeenStr, isOnline, showLastSeen) {
+        // Format last seen based on time difference - simplified without privacy settings
+        function formatLastSeen(lastSeenStr, isOnline) {
             // If user is online (within 1 minute), always show "online"
             if (isOnline) {
                 const lastSeen = new Date(lastSeenStr);
@@ -326,11 +326,6 @@
                 if (diffSeconds <= 60) {
                     return 'online';
                 }
-            }
-            
-            // If last seen is hidden by user
-            if (!showLastSeen) {
-                return 'last seen recently';
             }
             
             // Show actual time
@@ -356,9 +351,7 @@
             if (isBlocked) {
                 statusText = 'last seen a long time ago';
             } else {
-                // Check if user has enabled show_last_seen
-                const showLastSeen = userData.show_last_seen !== false; // Default true if not set
-                statusText = formatLastSeen(userData.last_seen, userData.is_online, showLastSeen);
+                statusText = formatLastSeen(userData.last_seen, userData.is_online);
             }
             
             document.getElementById('chatStatus').textContent = statusText;
@@ -425,7 +418,7 @@
                     
                     const { data: userData, error: userError } = await supabaseClient
                         .from('ngm_users')
-                        .select('full_name, username, profile_picture_url, is_online, last_seen, show_last_seen')
+                        .select('full_name, username, profile_picture_url, is_online, last_seen')
                         .eq('user_id', otherUserId)
                         .single();
 
