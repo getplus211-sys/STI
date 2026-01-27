@@ -572,11 +572,7 @@
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
 
-        let supabase;
-        if (!window.supabaseClient) {
-            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-        supabase = window.supabaseClient;
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
         let allChats = [];
@@ -613,7 +609,7 @@
 
         // Check Authentication
         async function checkAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'login.html';
                 return null;
@@ -877,7 +873,7 @@
                     if (error) throw error;
 
                     // Add participants
-                    await supabase.from('ngm_chat_participants').insert([
+                    await supabaseClient.from('ngm_chat_participants').insert([
                         { chat_id: newChat.chat_id, user_id: currentUser.id, role: 'member' },
                         { chat_id: newChat.chat_id, user_id: contactUserId, role: 'member' }
                     ]);
@@ -914,7 +910,7 @@
         }
 
         async function signOut() {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         }
 
