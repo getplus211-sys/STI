@@ -627,6 +627,7 @@
         let currentUser = null;
         let allChats = [];
         let currentFilter = 'all';
+        let statusUpdateInterval = null;
 
         const colors = ['bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-indigo', 'bg-teal'];
 
@@ -678,6 +679,22 @@
             } catch (error) {
                 console.error('CheckAuth failed:', error);
                 return null;
+            }
+        }
+
+        // Update user's online status
+        async function updateUserOnlineStatus() {
+            if (currentUser) {
+                try {
+                    await supabaseClient
+                        .from('ngm_users')
+                        .update({ 
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                } catch (error) {
+                    console.error('Error updating last_seen:', error);
+                }
             }
         }
 
@@ -1003,6 +1020,21 @@
         }
 
         async function signOut() {
+            // Set user as offline before signing out
+            if (currentUser) {
+                try {
+                    await supabaseClient
+                        .from('ngm_users')
+                        .update({ 
+                            is_online: false,
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                } catch (error) {
+                    console.error('Error updating status on signout:', error);
+                }
+            }
+            
             await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         }
@@ -1051,8 +1083,73 @@
             initSupabase(); // Initialize Supabase client
             const user = await checkAuth();
             if (user) {
+                // Set user as online when page loads
+                await supabaseClient
+                    .from('ngm_users')
+                    .update({ 
+                        is_online: true,
+                        last_seen: new Date().toISOString()
+                    })
+                    .eq('user_id', user.id);
+                
                 await loadChats();
                 setupRealtimeSubscription();
+                
+                // Update last_seen every 30 seconds
+                statusUpdateInterval = setInterval(updateUserOnlineStatus, 30000);
+            }
+        });
+
+        // Set user offline when page is closed/navigated away
+        window.addEventListener('beforeunload', async () => {
+            if (currentUser) {
+                // Use sendBeacon for reliable status update on page unload
+                const data = JSON.stringify({
+                    is_online: false,
+                    last_seen: new Date().toISOString()
+                });
+                
+                // Fallback to regular update
+                try {
+                    await supabaseClient
+                        .from('ngm_users')
+                        .update({ 
+                            is_online: false,
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                } catch (error) {
+                    console.error('Error updating status on unload:', error);
+                }
+            }
+            
+            if (statusUpdateInterval) {
+                clearInterval(statusUpdateInterval);
+            }
+        });
+
+        // Also handle visibility change (when tab is hidden/shown)
+        document.addEventListener('visibilitychange', async () => {
+            if (currentUser) {
+                if (document.hidden) {
+                    // Tab is hidden - set offline
+                    await supabaseClient
+                        .from('ngm_users')
+                        .update({ 
+                            is_online: false,
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                } else {
+                    // Tab is visible again - set online
+                    await supabaseClient
+                        .from('ngm_users')
+                        .update({ 
+                            is_online: true,
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                }
             }
         });
     </script>
