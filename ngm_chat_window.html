@@ -294,7 +294,7 @@
         </div>
 
         <div class="input-area">
-            <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1" onkeydown="handleKeyDown(event)" oninput="handleInput()"></textarea>
+            <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1" oninput="handleInput()"></textarea>
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <line x1="22" x2="11" y1="2" y2="13"/>
@@ -782,16 +782,6 @@
             } catch (error) {
                 console.error('Error marking messages as read:', error);
             }
-        }
-
-        // FIXED: Use onkeydown instead of onkeypress
-        function handleKeyDown(event) {
-            // Only send message on Enter if Shift is NOT pressed (mobile keyboard Enter)
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-            // If Shift+Enter, allow default behavior (new line)
         }
 
         function handleInput() {
