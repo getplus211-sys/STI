@@ -574,17 +574,24 @@
             const emojiBtn = document.getElementById('emojiBtn');
             const keyboardBtn = document.getElementById('keyboardBtn');
             const messagesArea = document.getElementById('messagesArea');
+            const messageInput = document.getElementById('messageInput');
             const isShowing = picker.classList.contains('show');
             
             if (isShowing) {
                 closeEmojiPicker();
             } else {
-                picker.classList.add('show');
-                emojiBtn.classList.add('active');
-                keyboardBtn.classList.add('show');
-                messagesArea.classList.add('with-emoji-picker');
-                renderEmojis(currentEmojiCategory);
-                scrollToBottom();
+                // Blur the input to hide keyboard
+                messageInput.blur();
+                
+                // Small delay to ensure keyboard is hidden
+                setTimeout(() => {
+                    picker.classList.add('show');
+                    emojiBtn.classList.add('active');
+                    keyboardBtn.classList.add('show');
+                    messagesArea.classList.add('with-emoji-picker');
+                    renderEmojis(currentEmojiCategory);
+                    scrollToBottom();
+                }, 100);
             }
         }
 
@@ -600,7 +607,7 @@
             keyboardBtn.classList.remove('show');
             messagesArea.classList.remove('with-emoji-picker');
             
-            // Focus back on input
+            // Focus back on input to show keyboard
             document.getElementById('messageInput').focus();
         }
 
@@ -677,8 +684,8 @@
         // Insert emoji into message input
         function insertEmoji(emoji) {
             const input = document.getElementById('messageInput');
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
             const text = input.value;
             
             // Insert emoji at cursor position
@@ -688,14 +695,13 @@
             const newPos = start + emoji.length;
             input.setSelectionRange(newPos, newPos);
             
-            // Focus back on input
-            input.focus();
-            
             // Add to recent
             addToRecent(emoji);
             
             // Update send button state
             handleInput();
+            
+            // Don't close emoji picker or focus input - keep emoji picker open
         }
 
         // Close emoji picker when clicking outside
@@ -703,13 +709,65 @@
             const picker = document.getElementById('emojiPicker');
             const emojiBtn = document.getElementById('emojiBtn');
             const keyboardBtn = document.getElementById('keyboardBtn');
+            const messageInput = document.getElementById('messageInput');
             
             if (picker && picker.classList.contains('show')) {
-                if (!picker.contains(e.target) && !emojiBtn.contains(e.target) && !keyboardBtn.contains(e.target)) {
+                // Only close if clicking outside picker AND outside both buttons AND outside input
+                if (!picker.contains(e.target) && 
+                    !emojiBtn.contains(e.target) && 
+                    !keyboardBtn.contains(e.target) &&
+                    !messageInput.contains(e.target)) {
                     closeEmojiPicker();
                 }
             }
         });
+
+        // Handle back button behavior
+        let backButtonPressCount = 0;
+        let backButtonTimeout = null;
+
+        function handleBackButton(e) {
+            const picker = document.getElementById('emojiPicker');
+            const messageInput = document.getElementById('messageInput');
+            
+            // Check if emoji picker is open or keyboard is focused
+            const isEmojiPickerOpen = picker.classList.contains('show');
+            const isInputFocused = document.activeElement === messageInput;
+            
+            if (isEmojiPickerOpen || isInputFocused) {
+                e.preventDefault();
+                
+                if (isEmojiPickerOpen) {
+                    closeEmojiPicker();
+                    backButtonPressCount = 0;
+                } else if (isInputFocused) {
+                    messageInput.blur();
+                    backButtonPressCount = 0;
+                }
+            } else {
+                backButtonPressCount++;
+                
+                if (backButtonPressCount === 1) {
+                    e.preventDefault();
+                    
+                    // Reset counter after 2 seconds
+                    if (backButtonTimeout) clearTimeout(backButtonTimeout);
+                    backButtonTimeout = setTimeout(() => {
+                        backButtonPressCount = 0;
+                    }, 2000);
+                } else if (backButtonPressCount >= 2) {
+                    // Allow navigation on second press
+                    backButtonPressCount = 0;
+                    window.location.href = 'ngm_main_chat.html';
+                }
+            }
+        }
+
+        // Add popstate listener for back button
+        window.addEventListener('popstate', handleBackButton);
+        
+        // Push initial state
+        history.pushState(null, null, location.href);
 
         const urlParams = new URLSearchParams(window.location.search);
         currentChatId = urlParams.get('chat_id');
@@ -1087,6 +1145,8 @@
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
+            const picker = document.getElementById('emojiPicker');
+            const isEmojiPickerOpen = picker.classList.contains('show');
             
             if (!message) return;
 
@@ -1117,6 +1177,11 @@
                 input.value = '';
                 input.style.height = 'auto';
                 document.getElementById('sendBtn').disabled = true;
+                
+                // Don't close emoji picker or blur input if emoji picker is open
+                if (!isEmojiPickerOpen) {
+                    input.blur();
+                }
 
             } catch (error) {
                 console.error('Error sending message:', error);
@@ -1193,6 +1258,20 @@
                 }
             }
         }
+        
+        // Prevent input focus from showing keyboard when emoji picker is open
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('messageInput');
+            
+            messageInput.addEventListener('focus', function(e) {
+                const picker = document.getElementById('emojiPicker');
+                if (picker.classList.contains('show')) {
+                    // If emoji picker is open, blur the input to prevent keyboard
+                    e.preventDefault();
+                    this.blur();
+                }
+            });
+        });
 
         function scrollToBottom() {
             const messagesArea = document.getElementById('messagesArea');
