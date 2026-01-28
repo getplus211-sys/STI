@@ -2,7 +2,10 @@
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Chat - Nandigram</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -25,18 +28,25 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #e5ddd5;
             height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
             overflow: hidden;
             touch-action: manipulation;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
         }
 
         .container {
             max-width: 480px;
             margin: 0 auto;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             background: white;
             position: relative;
+            overflow: hidden;
         }
 
         .header {
@@ -46,8 +56,12 @@
             display: flex;
             align-items: center;
             padding: 8px 16px;
+            padding-top: max(8px, env(safe-area-inset-top));
             flex-shrink: 0;
             transition: all 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header.selection-mode {
@@ -438,12 +452,16 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             padding: 8px;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
             display: flex;
             gap: 8px;
             align-items: flex-end;
             border-top: 1px solid rgba(229, 231, 235, 0.5);
             flex-shrink: 0;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            bottom: 0;
+            z-index: 99;
         }
 
         .input-area.selection-mode {
@@ -480,11 +498,13 @@
             flex-direction: column;
             height: 0;
             overflow: hidden;
-            z-index: 100;
+            z-index: 97;
             border-top: 1px solid #e5e7eb;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             flex-shrink: 0;
             transition: height 0.3s ease;
+            position: sticky;
+            bottom: 64px;
         }
 
         .emoji-picker.show {
@@ -850,6 +870,9 @@
             display: none;
             align-items: center;
             gap: 8px;
+            position: sticky;
+            bottom: 64px;
+            z-index: 98;
         }
 
         .reply-preview.show {
@@ -1902,10 +1925,7 @@
 
                 return `<div class="message-container ${isSent ? 'sent' : 'received'} ${isSelected ? 'selected' : ''}" 
                             data-message-id="${msg.message_id}" 
-                            data-index="${index}"
-                            ontouchstart="handleTouchStart(event, '${msg.message_id}')"
-                            ontouchmove="handleTouchMove(event, '${msg.message_id}')"
-                            ontouchend="handleTouchEnd(event, '${msg.message_id}')">
+                            data-index="${index}">
                     <div class="swipe-indicator swipe-indicator-left">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
                             <polyline points="15 17 20 12 15 7"/>
@@ -1919,9 +1939,7 @@
                         </svg>
                     </div>
                     <div class="message ${isSent ? 'message-sent' : 'message-received'} ${emojiClass}" 
-                         onclick="${isSelectionMode ? `toggleMessageSelection('${msg.message_id}')` : ''}"
-                         oncontextmenu="return false;"
-                         data-long-press="false">
+                         data-message-id="${msg.message_id}">
                         ${isPinned ? '<div style="font-size: 10px; color: #16a34a; margin-bottom: 4px;">📌 Pinned</div>' : ''}
                         <div class="message-content">${displayContent}</div>
                         ${!emojiOnly ? `<div class="message-time">${time}${isSent ? getMessageTick(msg) : ''}</div>` : ''}
@@ -1930,45 +1948,176 @@
             }).join('');
 
             attachLongPressListeners();
+            attachSwipeListeners();
+            attachSelectionListeners();
+        }
+
+        function attachSwipeListeners() {
+            const messageContainers = document.querySelectorAll('.message-container');
+            
+            messageContainers.forEach(container => {
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let isSwiping = false;
+                const messageId = container.getAttribute('data-message-id');
+                
+                container.addEventListener('touchstart', function(e) {
+                    if (isSelectionMode) return;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    isSwiping = false;
+                }, { passive: true });
+                
+                container.addEventListener('touchmove', function(e) {
+                    if (isSelectionMode) return;
+                    if (!touchStartX) return;
+
+                    const touchX = e.touches[0].clientX;
+                    const touchY = e.touches[0].clientY;
+                    const diffX = touchX - touchStartX;
+                    const diffY = touchY - touchStartY;
+
+                    if (Math.abs(diffY) > 50) {
+                        return;
+                    }
+
+                    if (Math.abs(diffX) > 20) {
+                        isSwiping = true;
+                        const message = container.querySelector('.message');
+                        
+                        if (Math.abs(diffX) > 50) {
+                            container.classList.add('swiping');
+                            message.style.transform = `translateX(${diffX}px)`;
+                        }
+                    }
+                }, { passive: true });
+                
+                container.addEventListener('touchend', function(e) {
+                    if (isSelectionMode) return;
+                    if (!isSwiping) {
+                        touchStartX = 0;
+                        touchStartY = 0;
+                        return;
+                    }
+
+                    const touchX = e.changedTouches[0].clientX;
+                    const diffX = touchX - touchStartX;
+                    const message = container.querySelector('.message');
+
+                    if (Math.abs(diffX) > 100) {
+                        const msg = messages.find(m => m.message_id === messageId);
+                        const isSent = msg && msg.sender_id === currentUser.id;
+
+                        if (diffX > 0 && !isSent) {
+                            replyToMessageById(messageId);
+                        } else if (diffX < 0 && isSent) {
+                            forwardMessageById(messageId);
+                        }
+                    }
+
+                    setTimeout(() => {
+                        message.style.transform = '';
+                        container.classList.remove('swiping');
+                    }, 200);
+
+                    touchStartX = 0;
+                    touchStartY = 0;
+                    isSwiping = false;
+                });
+            });
+        }
+
+        function attachSelectionListeners() {
+            if (!isSelectionMode) return;
+            
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msgEl => {
+                msgEl.addEventListener('click', function() {
+                    const messageId = msgEl.getAttribute('data-message-id');
+                    toggleMessageSelection(messageId);
+                });
+            });
         }
 
         function attachLongPressListeners() {
-            const messageElements = document.querySelectorAll('.message');
-            messageElements.forEach(msgEl => {
+            const messageContainers = document.querySelectorAll('.message-container');
+            console.log('Attaching listeners to', messageContainers.length, 'messages');
+            
+            messageContainers.forEach(container => {
+                const msgEl = container.querySelector('.message');
+                if (!msgEl) return;
+                
                 let pressTimer;
                 let startX, startY;
                 let moved = false;
+                let isLongPress = false;
 
-                msgEl.addEventListener('touchstart', function(e) {
+                const handleStart = function(e) {
                     if (isSelectionMode) return;
                     
+                    console.log('Touch start on message');
                     moved = false;
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
+                    isLongPress = false;
+                    
+                    const touch = e.touches ? e.touches[0] : e;
+                    startX = touch.clientX;
+                    startY = touch.clientY;
                     
                     pressTimer = setTimeout(() => {
                         if (!moved) {
-                            const container = msgEl.closest('.message-container');
+                            console.log('Long press detected!');
+                            isLongPress = true;
                             const messageId = container.getAttribute('data-message-id');
-                            showMessageActionMenu(messageId, e.touches[0].clientX, e.touches[0].clientY);
+                            const touch = e.touches ? e.touches[0] : e;
+                            showMessageActionMenu(messageId, touch.clientX, touch.clientY);
+                            
+                            // Vibrate for feedback
+                            if (navigator.vibrate) {
+                                navigator.vibrate(50);
+                            }
                         }
                     }, 500);
-                });
+                };
 
-                msgEl.addEventListener('touchmove', function(e) {
-                    const currentX = e.touches[0].clientX;
-                    const currentY = e.touches[0].clientY;
+                const handleMove = function(e) {
+                    const touch = e.touches ? e.touches[0] : e;
+                    const currentX = touch.clientX;
+                    const currentY = touch.clientY;
                     const diffX = Math.abs(currentX - startX);
                     const diffY = Math.abs(currentY - startY);
                     
                     if (diffX > 10 || diffY > 10) {
                         moved = true;
                         clearTimeout(pressTimer);
+                        console.log('Movement detected, canceling long press');
                     }
-                });
+                };
 
-                msgEl.addEventListener('touchend', function() {
+                const handleEnd = function(e) {
                     clearTimeout(pressTimer);
+                    
+                    if (isLongPress) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    
+                    isLongPress = false;
+                };
+
+                // Remove old listeners
+                msgEl.removeEventListener('touchstart', handleStart);
+                msgEl.removeEventListener('touchmove', handleMove);
+                msgEl.removeEventListener('touchend', handleEnd);
+                msgEl.removeEventListener('contextmenu', handleEnd);
+                
+                // Add new listeners
+                msgEl.addEventListener('touchstart', handleStart, { passive: true });
+                msgEl.addEventListener('touchmove', handleMove, { passive: true });
+                msgEl.addEventListener('touchend', handleEnd);
+                msgEl.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    const messageId = container.getAttribute('data-message-id');
+                    showMessageActionMenu(messageId, e.clientX, e.clientY);
                 });
             });
         }
@@ -2042,12 +2191,24 @@
         }
 
         function showMessageActionMenu(messageId, x, y) {
+            console.log('Show menu for message:', messageId);
             currentActionMessage = messageId;
             const menu = document.getElementById('messageActionMenu');
             
-            menu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
-            menu.style.top = Math.max(y - 200, 20) + 'px';
+            // Calculate position to keep menu on screen
+            const menuWidth = 220;
+            const menuHeight = 400;
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            let left = Math.min(x, screenWidth - menuWidth - 10);
+            let top = Math.max(Math.min(y - menuHeight/2, screenHeight - menuHeight - 10), 10);
+            
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
             menu.classList.add('show');
+            
+            console.log('Menu positioned at:', left, top);
         }
 
         function closeMessageActionMenu() {
@@ -2615,9 +2776,16 @@
         }
 
         window.addEventListener('DOMContentLoaded', async function() {
+            console.log('=== NANDIGRAM CHAT INITIALIZING ===');
+            console.log('Current URL:', window.location.href);
+            console.log('Chat ID:', currentChatId);
+            
             initSupabase();
             loadRecentEmojis();
             const user = await checkAuth();
+            
+            console.log('User authenticated:', user?.id);
+            
             if (user) {
                 await supabaseClient
                     .from('ngm_users')
@@ -2627,6 +2795,7 @@
                     })
                     .eq('user_id', user.id);
                 
+                console.log('Loading chat details...');
                 await loadChatDetails();
                 loadMuteStatus();
                 loadPinnedMessages();
@@ -2636,7 +2805,10 @@
                     document.getElementById('messagesArea').style.backgroundColor = savedWallpaper;
                 }
                 
+                console.log('Loading messages...');
                 await loadMessages();
+                
+                console.log('Setting up realtime...');
                 setupRealtimeSubscription();
                 
                 const messagesArea = document.getElementById('messagesArea');
@@ -2652,6 +2824,8 @@
                             .eq('user_id', currentUser.id);
                     }
                 }, 30000);
+                
+                console.log('=== INITIALIZATION COMPLETE ===');
             }
         });
 
