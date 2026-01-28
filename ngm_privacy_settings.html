@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Privacy & Security - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section {
+            padding: 0 16px;
+            border-top: 8px solid #f5f5f5;
+        }
+
+        .section-header {
+            padding: 16px 0 8px 0;
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .setting-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item:active {
+            background: #f9fafb;
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .setting-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .setting-title {
+            font-size: 15px;
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .setting-value {
+            font-size: 14px;
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .setting-description {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: #e5e7eb;
+            border-radius: 14px;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch.active {
+            background: #16a34a;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(20px);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            border-radius: 24px 24px 0 0;
+            max-height: 60vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #f3f4f6;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .modal-option {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-option:last-child {
+            border-bottom: none;
+        }
+
+        .modal-option:active {
+            background: #f9fafb;
+        }
+
+        .modal-option-selected {
+            background: #f0fdf4;
+        }
+
+        .checkmark {
+            color: #16a34a;
+            font-size: 20px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f4f6;
+            border-top-color: #16a34a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="header-title">Privacy & Security</div>
+        </div>
+
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div id="settingsContent" style="display: none;">
+            <!-- Who Can See My... -->
+            <div class="section">
+                <div class="section-header">Who Can See My</div>
+
+                <div class="setting-item" onclick="openPrivacyModal('profile_picture_visible')">
+                    <div class="setting-top">
+                        <div class="setting-title">Profile Photo</div>
+                        <div class="setting-value">
+                            <span id="profile_picture_visible_text">Everyone</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('bio_visible')">
+                    <div class="setting-top">
+                        <div class="setting-title">Bio</div>
+                        <div class="setting-value">
+                            <span id="bio_visible_text">Everyone</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('phone_visible')">
+                    <div class="setting-top">
+                        <div class="setting-title">Phone Number</div>
+                        <div class="setting-value">
+                            <span id="phone_visible_text">My Contacts</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="setting-description">Who can see my phone number</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('email_visible')">
+                    <div class="setting-top">
+                        <div class="setting-title">Email</div>
+                        <div class="setting-value">
+                            <span id="email_visible_text">My Contacts</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('last_seen_visible')">
+                    <div class="setting-top">
+                        <div class="setting-title">Last Seen</div>
+                        <div class="setting-value">
+                            <span id="last_seen_visible_text">My Contacts</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="setting-description">If you don't share your last seen, you won't see others' either</div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('online_status_visible')">
+                    <div class="setting-top">
+                        <div class="setting-title">Online Status</div>
+                        <div class="setting-value">
+                            <span id="online_status_visible_text">Everyone</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Who Can Find Me By... -->
+            <div class="section">
+                <div class="section-header">Who Can Find Me By</div>
+
+                <div class="setting-item" onclick="openPrivacyModal('searchable_by_phone')">
+                    <div class="setting-top">
+                        <div class="setting-title">Phone Number</div>
+                        <div class="setting-value">
+                            <span id="searchable_by_phone_text">Everyone</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('searchable_by_username')">
+                    <div class="setting-top">
+                        <div class="setting-title">Username</div>
+                        <div class="setting-value">
+                            <span id="searchable_by_username_text">Everyone</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messaging & Groups -->
+            <div class="section">
+                <div class="section-header">Messaging</div>
+
+                <div class="setting-item" onclick="openPrivacyModal('who_can_message')">
+                    <div class="setting-top">
+                        <div class="setting-title">Who Can Message Me</div>
+                        <div class="setting-value">
+                            <span id="who_can_message_text">Everyone</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item" onclick="openPrivacyModal('who_can_add_to_groups')">
+                    <div class="setting-top">
+                        <div class="setting-title">Who Can Add Me to Groups</div>
+                        <div class="setting-value">
+                            <span id="who_can_add_to_groups_text">Everyone</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="section">
+                <div class="section-header">Privacy Settings</div>
+
+                <div class="setting-item" onclick="toggleSetting('read_receipts_enabled')">
+                    <div class="setting-top">
+                        <div class="setting-title">Read Receipts</div>
+                        <div class="toggle-switch" id="read_receipts_enabled">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">If turned off, you won't see read receipts from others</div>
+                </div>
+
+                <div class="setting-item" onclick="toggleSetting('typing_indicator_enabled')">
+                    <div class="setting-top">
+                        <div class="setting-title">Typing Indicator</div>
+                        <div class="toggle-switch" id="typing_indicator_enabled">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">Show when you are typing</div>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="section">
+                <div class="section-header">Security</div>
+
+                <div class="setting-item" onclick="window.location.href='ngm_blocked_users.html'">
+                    <div class="setting-top">
+                        <div class="setting-title">Blocked Users</div>
+                        <div class="setting-value">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="setting-description">Manage blocked users</div>
+                </div>
+
+                <div class="setting-item" onclick="toggleSetting('two_factor_enabled')">
+                    <div class="setting-top">
+                        <div class="setting-title">Two-Factor Authentication</div>
+                        <div class="toggle-switch" id="two_factor_enabled">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">Add extra security to your account</div>
+                </div>
+
+                <div class="setting-item" onclick="changePassword()">
+                    <div class="setting-top">
+                        <div class="setting-title">Change Password</div>
+                        <div class="setting-value">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Options Modal -->
+    <div class="modal-overlay" id="privacyModal" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Select Option</div>
+            </div>
+            <div id="modalOptions">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let settings = null;
+        let currentEditField = null;
+
+        const privacyOptions = {
+            everyone: 'Everyone',
+            contacts: 'My Contacts',
+            nobody: 'Nobody'
+        };
+
+        const settingLabels = {
+            profile_picture_visible: 'Profile Photo',
+            bio_visible: 'Bio',
+            phone_visible: 'Phone Number',
+            email_visible: 'Email',
+            last_seen_visible: 'Last Seen',
+            online_status_visible: 'Online Status',
+            searchable_by_phone: 'Phone Number',
+            searchable_by_username: 'Username',
+            who_can_message: 'Who Can Message Me',
+            who_can_add_to_groups: 'Who Can Add Me to Groups'
+        };
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        async function loadSettings() {
+            try {
+                let { data, error } = await supabaseClient
+                    .from('ngm_user_settings')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                if (error && error.code === 'PGRST116') {
+                    // Settings don't exist, create default
+                    const { data: newSettings, error: insertError } = await supabaseClient
+                        .from('ngm_user_settings')
+                        .insert({ user_id: currentUser.id })
+                        .select()
+                        .single();
+
+                    if (insertError) throw insertError;
+                    data = newSettings;
+                } else if (error) {
+                    throw error;
+                }
+
+                settings = data;
+                updateUI();
+
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                alert('Failed to load settings');
+            }
+        }
+
+        function updateUI() {
+            // Update all privacy option texts
+            Object.keys(settingLabels).forEach(field => {
+                const value = settings[field] || 'everyone';
+                const textEl = document.getElementById(field + '_text');
+                if (textEl) {
+                    textEl.textContent = privacyOptions[value] || value;
+                }
+            });
+
+            // Update toggles
+            ['read_receipts_enabled', 'typing_indicator_enabled', 'two_factor_enabled'].forEach(field => {
+                const toggle = document.getElementById(field);
+                if (toggle) {
+                    if (settings[field]) {
+                        toggle.classList.add('active');
+                    } else {
+                        toggle.classList.remove('active');
+                    }
+                }
+            });
+
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('settingsContent').style.display = 'block';
+        }
+
+        function openPrivacyModal(field) {
+            currentEditField = field;
+            const modal = document.getElementById('privacyModal');
+            const title = document.getElementById('modalTitle');
+            const optionsContainer = document.getElementById('modalOptions');
+
+            title.textContent = settingLabels[field];
+
+            let html = '';
+            Object.keys(privacyOptions).forEach(key => {
+                const isSelected = settings[field] === key;
+                html += `
+                    <div class="modal-option ${isSelected ? 'modal-option-selected' : ''}" onclick="selectPrivacyOption('${key}')">
+                        <span>${privacyOptions[key]}</span>
+                        ${isSelected ? '<span class="checkmark">✓</span>' : ''}
+                    </div>
+                `;
+            });
+
+            optionsContainer.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        async function selectPrivacyOption(value) {
+            try {
+                const { error } = await supabaseClient
+                    .from('ngm_user_settings')
+                    .update({ 
+                        [currentEditField]: value,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                settings[currentEditField] = value;
+                updateUI();
+                closePrivacyModal();
+
+            } catch (error) {
+                console.error('Error updating setting:', error);
+                alert('Failed to update setting');
+            }
+        }
+
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').classList.remove('active');
+        }
+
+        function closeModalOnOverlay(e) {
+            if (e.target === e.currentTarget) {
+                closePrivacyModal();
+            }
+        }
+
+        async function toggleSetting(field) {
+            const toggle = document.getElementById(field);
+            const newValue = !settings[field];
+
+            try {
+                const { error } = await supabaseClient
+                    .from('ngm_user_settings')
+                    .update({ 
+                        [field]: newValue,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                settings[field] = newValue;
+
+                if (newValue) {
+                    toggle.classList.add('active');
+                } else {
+                    toggle.classList.remove('active');
+                }
+
+            } catch (error) {
+                console.error('Error toggling setting:', error);
+                alert('Failed to update setting');
+            }
+        }
+
+        function changePassword() {
+            alert('Password change feature coming soon!');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            const user = await checkAuth();
+            if (user) {
+                await loadSettings();
+            }
+        });
+    </script>
+</body>
+</html>

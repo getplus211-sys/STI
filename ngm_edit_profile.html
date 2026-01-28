@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Edit Profile - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .save-btn {
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .save-btn:active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Profile Photo Section */
+        .photo-section {
+            padding: 32px 16px;
+            text-align: center;
+            background: white;
+        }
+
+        .photo-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: #6b7280;
+            background-size: cover;
+            background-position: center;
+            border: 4px solid #f3f4f6;
+        }
+
+        .photo-edit-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            background: #16a34a;
+            border-radius: 50%;
+            border: 3px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .photo-upload-input {
+            display: none;
+        }
+
+        .photo-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .photo-action-btn {
+            padding: 8px 16px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #374151;
+        }
+
+        .photo-action-btn:active {
+            background: #f9fafb;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 0 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #16a34a;
+        }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .section-divider {
+            height: 8px;
+            background: #f5f5f5;
+            margin: 24px -16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+            margin: 24px 0 16px 0;
+        }
+
+        /* Quick Links */
+        .quick-links {
+            padding: 0 16px;
+        }
+
+        .quick-link-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .quick-link-item:last-child {
+            border-bottom: none;
+        }
+
+        .quick-link-item:active {
+            background: #f9fafb;
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .quick-link-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quick-link-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-link-text {
+            font-size: 15px;
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .quick-link-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .username-prefix {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .username-input-wrapper {
+            position: relative;
+        }
+
+        .username-input-wrapper input {
+            padding-left: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="header-title">Edit Profile</div>
+            <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save</button>
+        </div>
+
+        <!-- Profile Photo -->
+        <div class="photo-section">
+            <div class="photo-wrapper">
+                <div class="profile-photo" id="profilePhoto"></div>
+                <div class="photo-edit-btn" onclick="document.getElementById('photoInput').click()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                </div>
+                <input type="file" id="photoInput" class="photo-upload-input" accept="image/*" onchange="handlePhotoUpload(event)">
+            </div>
+            <div class="photo-actions">
+                <button class="photo-action-btn" onclick="document.getElementById('photoInput').click()">
+                    📷 Change Photo
+                </button>
+                <button class="photo-action-btn" onclick="removePhoto()" id="removePhotoBtn" style="display: none;">
+                    🗑️ Remove
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Fields -->
+        <div class="form-section">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-input" id="fullName" placeholder="Enter your name" maxlength="50">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <div class="username-input-wrapper">
+                    <span class="username-prefix">@</span>
+                    <input type="text" class="form-input" id="username" placeholder="username" maxlength="30" pattern="[a-z0-9_]+" style="text-transform: lowercase;">
+                </div>
+                <div class="char-count" id="usernameHint">Only lowercase letters, numbers, and underscores</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Bio/Status</label>
+                <textarea class="form-input" id="bio" placeholder="Tell about yourself..." maxlength="150" oninput="updateCharCount()"></textarea>
+                <div class="char-count"><span id="bioCount">0</span>/150</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" id="mobile" placeholder="+91 98765 43210" maxlength="15">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="email" placeholder="your@email.com" readonly style="background: #f9fafb;">
+                <div class="char-count">Email cannot be changed</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" class="form-input" id="dob">
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Quick Links -->
+        <div class="quick-links">
+            <div class="section-title">Settings</div>
+            
+            <div class="quick-link-item" onclick="window.location.href='ngm_privacy_settings.html'">
+                <div class="quick-link-left">
+                    <div class="quick-link-icon" style="background: #eff6ff;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="quick-link-text">Privacy & Security</div>
+                        <div class="quick-link-subtitle">Control who can see your info</div>
+                    </div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </div>
+
+            <div class="quick-link-item" onclick="window.location.href='ngm_my_posts.html'">
+                <div class="quick-link-left">
+                    <div class="quick-link-icon" style="background: #fef3c7;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="quick-link-text">My Posts</div>
+                        <div class="quick-link-subtitle">Manage your posts</div>
+                    </div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </div>
+
+            <div class="quick-link-item" onclick="window.location.href='ngm_followers.html'">
+                <div class="quick-link-left">
+                    <div class="quick-link-icon" style="background: #f0fdf4;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="quick-link-text">Followers & Following</div>
+                        <div class="quick-link-subtitle">See who follows you</div>
+                    </div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </div>
+        </div>
+
+        <div style="height: 40px;"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let currentData = null;
+        let uploadedPhotoFile = null;
+
+        const colors = ['#3b82f6', '#10b981', '#a855f7', '#ec4899', '#6366f1', '#14b8a6'];
+
+        function getAvatarColor(name) {
+            if (!name) return colors[0];
+            const index = name.charCodeAt(0) % colors.length;
+            return colors[index];
+        }
+
+        function getInitial(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        async function loadProfile() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('ngm_users')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                if (error) throw error;
+                currentData = data;
+
+                // Populate fields
+                document.getElementById('fullName').value = data.full_name || '';
+                document.getElementById('username').value = data.username || '';
+                document.getElementById('bio').value = data.bio || '';
+                document.getElementById('mobile').value = data.mobile || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('dob').value = data.date_of_birth || '';
+
+                // Update photo
+                const photoEl = document.getElementById('profilePhoto');
+                if (data.profile_picture_url) {
+                    photoEl.style.backgroundImage = `url('${data.profile_picture_url}')`;
+                    photoEl.textContent = '';
+                    document.getElementById('removePhotoBtn').style.display = 'inline-block';
+                } else {
+                    const name = data.full_name || data.username || 'User';
+                    photoEl.style.background = getAvatarColor(name);
+                    photoEl.textContent = getInitial(name);
+                }
+
+                updateCharCount();
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Failed to load profile');
+            }
+        }
+
+        function updateCharCount() {
+            const bio = document.getElementById('bio').value;
+            document.getElementById('bioCount').textContent = bio.length;
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size should be less than 5MB');
+                return;
+            }
+
+            uploadedPhotoFile = file;
+
+            // Preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const photoEl = document.getElementById('profilePhoto');
+                photoEl.style.backgroundImage = `url('${e.target.result}')`;
+                photoEl.textContent = '';
+                document.getElementById('removePhotoBtn').style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function removePhoto() {
+            if (confirm('Remove profile photo?')) {
+                uploadedPhotoFile = null;
+                const photoEl = document.getElementById('profilePhoto');
+                const name = document.getElementById('fullName').value || 'User';
+                photoEl.style.backgroundImage = '';
+                photoEl.style.background = getAvatarColor(name);
+                photoEl.textContent = getInitial(name);
+                document.getElementById('removePhotoBtn').style.display = 'none';
+                document.getElementById('photoInput').value = '';
+
+                // Also delete from database
+                try {
+                    await supabaseClient
+                        .from('ngm_users')
+                        .update({ profile_picture_url: null })
+                        .eq('user_id', currentUser.id);
+                } catch (error) {
+                    console.error('Error removing photo:', error);
+                }
+            }
+        }
+
+        async function uploadPhoto() {
+            if (!uploadedPhotoFile) return null;
+
+            try {
+                const fileExt = uploadedPhotoFile.name.split('.').pop();
+                const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+                const filePath = `profile_photos/${fileName}`;
+
+                const { data, error } = await supabaseClient.storage
+                    .from('user-uploads')
+                    .upload(filePath, uploadedPhotoFile, {
+                        cacheControl: '3600',
+                        upsert: true
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabaseClient.storage
+                    .from('user-uploads')
+                    .getPublicUrl(filePath);
+
+                return publicUrl;
+
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                throw error;
+            }
+        }
+
+        async function saveProfile() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const bio = document.getElementById('bio').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+            const dob = document.getElementById('dob').value;
+
+            // Validate
+            if (!fullName) {
+                alert('Please enter your name');
+                return;
+            }
+
+            if (username && !/^[a-z0-9_]+$/.test(username)) {
+                alert('Username can only contain lowercase letters, numbers, and underscores');
+                return;
+            }
+
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('saveBtn').disabled = true;
+
+            try {
+                let profilePictureUrl = currentData.profile_picture_url;
+
+                // Upload photo if changed
+                if (uploadedPhotoFile) {
+                    profilePictureUrl = await uploadPhoto();
+                }
+
+                // Check if username is taken
+                if (username && username !== currentData.username) {
+                    const { data: existingUser } = await supabaseClient
+                        .from('ngm_users')
+                        .select('user_id')
+                        .eq('username', username)
+                        .single();
+
+                    if (existingUser) {
+                        alert('Username already taken');
+                        document.getElementById('loadingOverlay').classList.remove('active');
+                        document.getElementById('saveBtn').disabled = false;
+                        return;
+                    }
+                }
+
+                // Update profile
+                const { error } = await supabaseClient
+                    .from('ngm_users')
+                    .update({
+                        full_name: fullName,
+                        username: username || null,
+                        bio: bio,
+                        mobile: mobile,
+                        date_of_birth: dob || null,
+                        profile_picture_url: profilePictureUrl,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                alert('Profile updated successfully!');
+                window.location.href = 'ngm_profile.html';
+
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('Failed to save profile: ' + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.remove('active');
+                document.getElementById('saveBtn').disabled = false;
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            const user = await checkAuth();
+            if (user) {
+                await loadProfile();
+            }
+        });
+
+        // Username validation
+        document.getElementById('username').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+        });
+    </script>
+</body>
+</html>
