@@ -30,6 +30,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
+            position: fixed;
         }
 
         body {
@@ -44,20 +45,31 @@
             left: 0;
             right: 0;
             bottom: 0;
+            margin: 0;
+            padding: 0;
         }
 
         .container {
             max-width: 480px;
             margin: 0 auto;
             height: 100%;
+            width: 100%;
             display: flex;
             flex-direction: column;
             background: white;
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             overflow: hidden;
         }
 
         .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             color: white;
             min-height: 90px;
@@ -66,10 +78,7 @@
             justify-content: flex-end;
             padding: 8px 16px 12px 16px;
             padding-top: max(8px, env(safe-area-inset-top));
-            flex-shrink: 0;
             transition: all 0.3s ease;
-            position: sticky;
-            top: 0;
             z-index: 100;
         }
 
@@ -188,8 +197,8 @@
 
         /* Dropdown Menu */
         .dropdown-menu {
-            position: absolute;
-            top: 60px;
+            position: fixed;
+            top: 90px;
             right: 16px;
             background: white;
             border-radius: 8px;
@@ -244,21 +253,21 @@
         }
 
         .messages-area {
-            flex: 1 1 auto;
+            position: absolute;
+            top: 90px;
+            bottom: 64px;
+            left: 0;
+            right: 0;
             overflow-y: scroll;
             overflow-x: hidden;
             padding: 16px;
             background: #e5ddd5;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" font-size="100" fill="%23d1d5db" opacity="0.1" text-anchor="middle" dominant-baseline="middle">💬</text></svg>');
-            position: relative;
             -webkit-overflow-scrolling: touch;
-            min-height: 0;
-            height: 100%;
         }
 
         .messages-area.with-emoji-picker {
-            flex: 1 1 auto;
-            max-height: calc(100% - 350px);
+            bottom: 414px; /* 64px input + 350px emoji picker */
         }
 
         /* Message Container */
@@ -462,9 +471,13 @@
             transform: scale(1.3);
         }
 
-        /* Input Area - Glassmorphic */
+        /* Input Area - WebView Fixed */
         .input-area {
-            background: rgba(255, 255, 255, 0.7);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             padding: 8px;
@@ -473,11 +486,9 @@
             gap: 8px;
             align-items: flex-end;
             border-top: 1px solid rgba(229, 231, 235, 0.5);
-            flex-shrink: 0;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            position: sticky;
-            bottom: 0;
             z-index: 99;
+            min-height: 64px;
         }
 
         .input-area.selection-mode {
@@ -509,18 +520,19 @@
         }
 
         .emoji-picker {
+            position: fixed;
+            bottom: 64px;
+            left: 0;
+            right: 0;
             background: white;
             display: none;
             flex-direction: column;
             height: 0;
             overflow: hidden;
-            z-index: 97;
+            z-index: 98;
             border-top: 1px solid #e5e7eb;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            flex-shrink: 0;
             transition: height 0.3s ease;
-            position: sticky;
-            bottom: 64px;
         }
 
         .emoji-picker.show {
@@ -904,6 +916,10 @@
 
         /* Reply Preview */
         .reply-preview {
+            position: fixed;
+            bottom: 64px;
+            left: 0;
+            right: 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -912,9 +928,7 @@
             display: none;
             align-items: center;
             gap: 8px;
-            position: sticky;
-            bottom: 64px;
-            z-index: 98;
+            z-index: 97;
         }
 
         .reply-preview.show {
@@ -1302,17 +1316,36 @@
             
             // Fix keyboard issues
             let initialHeight = window.innerHeight;
+            let isKeyboardOpen = false;
+            
             window.addEventListener('resize', function() {
                 const currentHeight = window.innerHeight;
                 const heightDiff = initialHeight - currentHeight;
                 
                 // Keyboard is open if height decreased significantly
                 if (heightDiff > 150) {
-                    console.log('Keyboard opened, height diff:', heightDiff);
-                    document.body.style.height = currentHeight + 'px';
+                    isKeyboardOpen = true;
+                    console.log('⌨️ Keyboard opened, adjusting layout. Height diff:', heightDiff);
+                    
+                    // Adjust messages area
+                    const messagesArea = document.getElementById('messagesArea');
+                    messagesArea.style.bottom = (heightDiff + 64) + 'px';
+                    
+                    // Scroll to keep focused element visible
+                    setTimeout(() => {
+                        if (isUserAtBottom) {
+                            scrollToBottom();
+                        }
+                    }, 300);
                 } else {
-                    console.log('Keyboard closed');
-                    document.body.style.height = '100%';
+                    if (isKeyboardOpen) {
+                        isKeyboardOpen = false;
+                        console.log('⌨️ Keyboard closed, resetting layout');
+                        
+                        // Reset messages area
+                        const messagesArea = document.getElementById('messagesArea');
+                        messagesArea.style.bottom = '64px';
+                    }
                 }
                 
                 const vh = currentHeight * 0.01;
@@ -3045,12 +3078,32 @@
         }
 
         window.addEventListener('DOMContentLoaded', async function() {
-            console.log('=== NANDIGRAM CHAT INITIALIZING ===');
+            console.log('=== NANDIGRAM CHAT (WebView Mode) ===');
             console.log('Current URL:', window.location.href);
             console.log('Chat ID:', currentChatId);
             console.log('Platform:', navigator.platform);
-            console.log('Touch Support:', 'ontouchstart' in window);
-            console.log('Screen Size:', window.innerWidth + 'x' + window.innerHeight);
+            console.log('User Agent:', navigator.userAgent);
+            console.log('Window Size:', window.innerWidth + 'x' + window.innerHeight);
+            
+            // WebView test function
+            window.testScroll = function() {
+                const area = document.getElementById('messagesArea');
+                console.log('📊 Scroll Test:', {
+                    exists: !!area,
+                    scrollHeight: area?.scrollHeight,
+                    clientHeight: area?.clientHeight,
+                    offsetHeight: area?.offsetHeight,
+                    style: {
+                        position: area?.style.position || getComputedStyle(area).position,
+                        overflow: getComputedStyle(area).overflow,
+                        overflowY: getComputedStyle(area).overflowY,
+                        top: getComputedStyle(area).top,
+                        bottom: getComputedStyle(area).bottom,
+                    }
+                });
+            };
+            
+            console.log('💡 Run window.testScroll() to debug scroll');
             
             initSupabase();
             loadRecentEmojis();
@@ -3086,6 +3139,11 @@
                 const messagesArea = document.getElementById('messagesArea');
                 messagesArea.addEventListener('scroll', checkIfAtBottom);
                 
+                // Test scroll after load
+                setTimeout(() => {
+                    window.testScroll();
+                }, 1000);
+                
                 statusUpdateInterval = setInterval(async () => {
                     if (currentUser) {
                         await supabaseClient
@@ -3098,13 +3156,7 @@
                 }, 30000);
                 
                 console.log('=== INITIALIZATION COMPLETE ===');
-                console.log('Total messages loaded:', messages.length);
-                console.log('Long press delay:', isAndroidWebView ? '400ms' : '500ms');
-                
-                // Test notification after 2 seconds
-                setTimeout(() => {
-                    console.log('✅ App is ready! Try long-pressing a message.');
-                }, 2000);
+                console.log('Messages loaded:', messages.length);
             }
         });
 
