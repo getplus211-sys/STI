@@ -562,15 +562,15 @@
 
         <!-- Stats -->
         <div class="stats">
-            <div class="stat-item">
+            <div class="stat-item" onclick="viewPosts()" style="cursor: pointer;">
                 <div class="stat-value" id="postsCount">0</div>
                 <div class="stat-label">Posts</div>
             </div>
-            <div class="stat-item">
+            <div class="stat-item" onclick="viewFollowers()" style="cursor: pointer;">
                 <div class="stat-value" id="followersCount">0</div>
                 <div class="stat-label">Followers</div>
             </div>
-            <div class="stat-item">
+            <div class="stat-item" onclick="viewFollowing()" style="cursor: pointer;">
                 <div class="stat-value" id="followingCount">0</div>
                 <div class="stat-label">Following</div>
             </div>
@@ -955,7 +955,7 @@
                         Message
                     </button>
                     <button class="action-btn action-btn-secondary" onclick="toggleFollow()" id="followBtn">
-                        ${isFollowing ? 'Following' : 'Follow'}
+                        ${isFollowing ? 'Followed' : 'Follow'}
                     </button>
                 `;
             }
@@ -1306,19 +1306,41 @@
         }
 
         function editProfile() {
-            alert('Edit Profile feature coming soon!');
+            window.location.href = 'ngm_edit_profile.html';
         }
 
         function privacySettings() {
-            alert('Privacy Settings coming soon!');
+            window.location.href = 'ngm_privacy_settings.html';
         }
 
         function viewAllPosts() {
-            alert('View All Posts coming soon!');
+            if (isOwnProfile) {
+                window.location.href = 'ngm_my_posts.html';
+            } else {
+                // Scroll to posts section
+                document.getElementById('postsSection')?.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         function viewPost(postId) {
             alert('Post viewer coming soon!');
+        }
+
+        function viewPosts() {
+            if (isOwnProfile) {
+                window.location.href = 'ngm_my_posts.html';
+            } else {
+                // Scroll to posts section
+                document.getElementById('postsSection')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function viewFollowers() {
+            window.location.href = `ngm_followers.html?user_id=${profileUserId}&tab=followers`;
+        }
+
+        function viewFollowing() {
+            window.location.href = `ngm_followers.html?user_id=${profileUserId}&tab=following`;
         }
 
         function goBack() {
