@@ -1905,25 +1905,16 @@
             return text.replace(emojiRegex, '<span class="emoji-in-text">$1</span>');
         }
 
-       
+        async function loadMessages() {
+            try {
+                const { data: msgs, error } = await supabaseClient
+                    .from('ngm_messages')
+                    .select('*')
+                    .eq('chat_id', currentChatId)
+                    .eq('is_deleted', false)
+                    .order('created_at', { ascending: true });
 
-async function loadMessages(chatId) {
-  const { data, error } = await supabase
-    .from('ngm_messages')
-    .select('message_id, chat_id, sender_id, content, message_type, created_at')
-    .eq('chat_id', chatId)
-    .eq('is_deleted', false)
-    .order('created_at', { ascending: false })
-    .limit(30);
-
-  if (error) return;
-
-  renderMessages(data.reverse());
-
-  if (data.length > 0) {
-    lastLoadedAt = data[data.length - 1].created_at;
-  }
-}
+                if (error) throw error;
 
                 messages = msgs || [];
                 
@@ -3016,4 +3007,4 @@ async function loadMessages(chatId) {
         });
     </script>
 </body>
-    </html>
+                    </html>
