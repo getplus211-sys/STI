@@ -15,7 +15,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
+            background: white;
         }
 
         .container {
@@ -27,8 +27,9 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-            color: white;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
             padding: 12px 16px;
             display: flex;
             align-items: center;
@@ -38,11 +39,11 @@
             z-index: 100;
         }
 
-        .back-btn {
-            width: 40px;
-            height: 40px;
+        .close-btn {
+            width: 36px;
+            height: 36px;
             border: none;
-            background: rgba(255,255,255,0.1);
+            background: transparent;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -50,24 +51,29 @@
             cursor: pointer;
         }
 
+        .close-btn:active {
+            background: #f3f4f6;
+        }
+
         .header-title {
             flex: 1;
             font-size: 18px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .post-btn {
             padding: 8px 20px;
-            background: rgba(255,255,255,0.2);
+            background: #1d9bf0;
             border: none;
             border-radius: 20px;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
         }
 
         .post-btn:active {
-            background: rgba(255,255,255,0.3);
+            background: #1a8cd8;
         }
 
         .post-btn:disabled {
@@ -75,186 +81,166 @@
             cursor: not-allowed;
         }
 
-        /* Media Upload */
-        .media-upload {
-            padding: 20px;
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
+        /* User Info */
+        .user-section {
+            padding: 16px;
+            display: flex;
+            gap: 12px;
         }
 
-        .upload-area {
-            aspect-ratio: 1;
-            background: white;
-            border: 2px dashed #d1d5db;
-            border-radius: 16px;
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e5e7eb;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .compose-area {
+            flex: 1;
+        }
+
+        /* Text Input */
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            border: none;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .text-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .char-count.warning {
+            color: #f97316;
+        }
+
+        .char-count.error {
+            color: #ef4444;
+        }
+
+        /* Photo Grid */
+        .photos-section {
+            padding: 0 16px 16px 76px;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .photo-item {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: #f3f4f6;
+            border: 2px dashed #d1d5db;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.2s;
         }
 
-        .upload-area:hover {
-            border-color: #16a34a;
-            background: #f0fdf4;
+        .photo-item.has-photo {
+            border: none;
+            background-size: cover;
+            background-position: center;
         }
 
-        .upload-icon {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.3;
+        .photo-placeholder {
+            color: #9ca3af;
+            text-align: center;
         }
 
-        .upload-text {
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
+        .photo-placeholder svg {
+            width: 32px;
+            height: 32px;
             margin-bottom: 4px;
         }
 
-        .upload-hint {
-            font-size: 13px;
-            color: #6b7280;
+        .photo-placeholder-text {
+            font-size: 12px;
         }
 
-        .media-preview {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        .media-preview.active {
-            display: block;
-        }
-
-        .remove-media {
+        .remove-photo {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 36px;
-            height: 36px;
-            background: rgba(0,0,0,0.6);
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0,0,0,0.7);
             border-radius: 50%;
             border: none;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-        }
-
-        .remove-media.active {
-            display: flex;
         }
 
         .file-input {
             display: none;
         }
 
-        /* Caption */
-        .caption-section {
-            padding: 20px;
-        }
-
-        .caption-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-
-        .caption-input {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 15px;
-            font-family: inherit;
-            resize: vertical;
-            outline: none;
-        }
-
-        .caption-input:focus {
-            border-color: #16a34a;
-        }
-
-        .char-count {
-            text-align: right;
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-
-        /* Options */
-        .options-section {
-            padding: 0 20px;
-        }
-
-        .option-item {
-            padding: 16px 0;
-            border-bottom: 1px solid #f3f4f6;
+        /* Options Bar */
+        .options-bar {
+            border-top: 1px solid #e5e7eb;
+            padding: 12px 16px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 16px;
         }
 
-        .option-item:last-child {
-            border-bottom: none;
-        }
-
-        .option-label {
-            font-size: 15px;
-            font-weight: 500;
-            color: #111827;
-        }
-
-        .option-description {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 48px;
-            height: 28px;
-            background: #e5e7eb;
-            border-radius: 14px;
-            transition: background 0.3s;
-            cursor: pointer;
-        }
-
-        .toggle-switch.active {
-            background: #16a34a;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 24px;
-            height: 24px;
-            background: white;
+        .option-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
             border-radius: 50%;
-            transition: transform 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #1d9bf0;
         }
 
-        .toggle-switch.active .toggle-slider {
-            transform: translateX(20px);
+        .option-btn:active {
+            background: #eff6ff;
         }
 
-        .select-input {
-            padding: 8px 12px;
+        .option-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .visibility-select {
+            margin-left: auto;
+            padding: 6px 12px;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #111827;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #1d9bf0;
+            font-weight: 600;
             background: white;
             cursor: pointer;
         }
@@ -263,7 +249,7 @@
         .loading-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             display: none;
             align-items: center;
             justify-content: center;
@@ -293,89 +279,83 @@
             margin-top: 16px;
             font-size: 16px;
         }
+
+        .progress-text {
+            color: white;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        /* Color classes */
+        .bg-blue { background: #3b82f6; }
+        .bg-green { background: #10b981; }
+        .bg-purple { background: #a855f7; }
+        .bg-pink { background: #ec4899; }
+        .bg-indigo { background: #6366f1; }
+        .bg-teal { background: #14b8a6; }
     </style>
 </head>
 <body>
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-text" id="loadingText">Creating post...</div>
+        <div class="progress-text" id="progressText"></div>
     </div>
 
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <button class="back-btn" onclick="goBack()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                    <path d="m15 18-6-6 6-6"/>
+            <button class="close-btn" onclick="handleClose()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
             </button>
             <div class="header-title">Create Post</div>
             <button class="post-btn" id="postBtn" onclick="createPost()">Post</button>
         </div>
 
-        <!-- Media Upload -->
-        <div class="media-upload">
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5">
+        <!-- User & Compose -->
+        <div class="user-section">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="compose-area">
+                <textarea 
+                    class="text-input" 
+                    id="textInput" 
+                    placeholder="What's happening?"
+                    maxlength="280"
+                    oninput="updateCharCount()"
+                ></textarea>
+                <div class="char-count" id="charCount">0 / 280</div>
+            </div>
+        </div>
+
+        <!-- Photos -->
+        <div class="photos-section" id="photosSection" style="display: none;">
+            <div class="photos-grid" id="photosGrid">
+                <!-- Photos dynamically added -->
+            </div>
+        </div>
+
+        <!-- Options Bar -->
+        <div class="options-bar">
+            <button class="option-btn" onclick="selectPhotos()" id="photoBtn" title="Add photos (max 5)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                     <circle cx="8.5" cy="8.5" r="1.5"/>
                     <polyline points="21 15 16 10 5 21"/>
                 </svg>
-                <div class="upload-text">Add Photo or Video</div>
-                <div class="upload-hint">Tap to select media</div>
-                
-                <img id="mediaPreview" class="media-preview" alt="Preview">
-                <video id="videoPreview" class="media-preview" controls></video>
-                
-                <button class="remove-media" id="removeMediaBtn" onclick="removeMedia(event)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
-            </div>
-            <input type="file" id="fileInput" class="file-input" accept="image/*,video/*" onchange="handleFileSelect(event)">
+            </button>
+            
+            <select class="visibility-select" id="visibilitySelect">
+                <option value="public">🌍 Everyone</option>
+                <option value="followers">👥 Followers</option>
+                <option value="private">🔒 Only me</option>
+            </select>
         </div>
-
-        <!-- Caption -->
-        <div class="caption-section">
-            <div class="caption-label">Caption</div>
-            <textarea 
-                class="caption-input" 
-                id="captionInput" 
-                placeholder="Write a caption..."
-                maxlength="500"
-                oninput="updateCharCount()"
-            ></textarea>
-            <div class="char-count"><span id="charCount">0</span>/500</div>
-        </div>
-
-        <!-- Options -->
-        <div class="options-section">
-            <div class="option-item">
-                <div>
-                    <div class="option-label">Post Type</div>
-                    <div class="option-description">Choose post or story</div>
-                </div>
-                <select class="select-input" id="postType">
-                    <option value="post">Post</option>
-                    <option value="story">Story (24h)</option>
-                </select>
-            </div>
-
-            <div class="option-item">
-                <div>
-                    <div class="option-label">Public Post</div>
-                    <div class="option-description">Everyone can see this post</div>
-                </div>
-                <div class="toggle-switch active" id="publicToggle" onclick="togglePublic()">
-                    <div class="toggle-slider"></div>
-                </div>
-            </div>
-        </div>
-
-        <div style="height: 40px;"></div>
     </div>
+
+    <input type="file" id="fileInput" class="file-input" accept="image/*" multiple onchange="handleFileSelect(event)">
 
     <script>
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
@@ -390,8 +370,21 @@
         }
 
         let currentUser = null;
-        let selectedFile = null;
-        let isPublic = true;
+        let selectedFiles = [];
+        const MAX_PHOTOS = 5;
+        const MAX_FILE_SIZE = 100 * 1024; // 100KB
+
+        const colors = ['bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-indigo', 'bg-teal'];
+
+        function getAvatarColor(name) {
+            if (!name) return colors[0];
+            const index = name.charCodeAt(0) % colors.length];
+            return colors[index];
+        }
+
+        function getInitial(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
 
         async function checkAuth() {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -400,161 +393,277 @@
                 return null;
             }
             currentUser = user;
+            
+            // Load user info
+            const { data: userData } = await supabaseClient
+                .from('ngm_users')
+                .select('full_name, username, profile_picture_url')
+                .eq('user_id', user.id)
+                .single();
+
+            if (userData) {
+                const name = userData.full_name || userData.username || 'User';
+                const avatarEl = document.getElementById('userAvatar');
+                
+                if (userData.profile_picture_url) {
+                    avatarEl.style.backgroundImage = `url('${userData.profile_picture_url}')`;
+                    avatarEl.textContent = '';
+                } else {
+                    avatarEl.className = 'user-avatar ' + getAvatarColor(name);
+                    avatarEl.textContent = getInitial(name);
+                }
+            }
+            
             return user;
         }
 
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        function updateCharCount() {
+            const text = document.getElementById('textInput').value;
+            const count = text.length;
+            const countEl = document.getElementById('charCount');
+            
+            countEl.textContent = `${count} / 280`;
+            
+            if (count > 260) {
+                countEl.classList.add('warning');
+            } else {
+                countEl.classList.remove('warning');
+            }
+            
+            if (count === 280) {
+                countEl.classList.add('error');
+            } else {
+                countEl.classList.remove('error');
+            }
 
-            // Validate file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File size should be less than 10MB');
+            updatePostButton();
+        }
+
+        function updatePostButton() {
+            const text = document.getElementById('textInput').value.trim();
+            const btn = document.getElementById('postBtn');
+            
+            btn.disabled = !text && selectedFiles.length === 0;
+        }
+
+        function selectPhotos() {
+            if (selectedFiles.length >= MAX_PHOTOS) {
+                alert(`Maximum ${MAX_PHOTOS} photos allowed`);
+                return;
+            }
+            document.getElementById('fileInput').click();
+        }
+
+        async function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            
+            // Check total count
+            if (selectedFiles.length + files.length > MAX_PHOTOS) {
+                alert(`Maximum ${MAX_PHOTOS} photos allowed`);
                 return;
             }
 
-            selectedFile = file;
-
-            // Preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if (file.type.startsWith('image/')) {
-                    const imgPreview = document.getElementById('mediaPreview');
-                    const videoPreview = document.getElementById('videoPreview');
-                    imgPreview.src = e.target.result;
-                    imgPreview.classList.add('active');
-                    videoPreview.classList.remove('active');
-                } else if (file.type.startsWith('video/')) {
-                    const imgPreview = document.getElementById('mediaPreview');
-                    const videoPreview = document.getElementById('videoPreview');
-                    videoPreview.src = e.target.result;
-                    videoPreview.classList.add('active');
-                    imgPreview.classList.remove('active');
+            for (const file of files) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Only images are allowed');
+                    continue;
                 }
-                
-                document.getElementById('removeMediaBtn').classList.add('active');
-            };
-            reader.readAsDataURL(file);
-        }
 
-        function removeMedia(event) {
-            event.stopPropagation();
-            
-            selectedFile = null;
-            document.getElementById('fileInput').value = '';
-            document.getElementById('mediaPreview').classList.remove('active');
-            document.getElementById('videoPreview').classList.remove('active');
-            document.getElementById('removeMediaBtn').classList.remove('active');
-        }
-
-        function updateCharCount() {
-            const caption = document.getElementById('captionInput').value;
-            document.getElementById('charCount').textContent = caption.length;
-        }
-
-        function togglePublic() {
-            isPublic = !isPublic;
-            const toggle = document.getElementById('publicToggle');
-            
-            if (isPublic) {
-                toggle.classList.add('active');
-            } else {
-                toggle.classList.remove('active');
+                // Compress image
+                const compressed = await compressImage(file);
+                selectedFiles.push(compressed);
             }
+
+            renderPhotos();
+            updatePostButton();
+            
+            // Clear input
+            event.target.value = '';
         }
 
-        async function uploadMedia() {
-            if (!selectedFile) return null;
-
-            try {
-                const fileExt = selectedFile.name.split('.').pop();
-                const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
-                const filePath = `posts/${fileName}`;
-
-                document.getElementById('loadingText').textContent = 'Uploading media...';
-
-                const { data, error } = await supabaseClient.storage
-                    .from('user-uploads')
-                    .upload(filePath, selectedFile, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
-
-                if (error) throw error;
-
-                const { data: { publicUrl } } = supabaseClient.storage
-                    .from('user-uploads')
-                    .getPublicUrl(filePath);
-
-                return {
-                    url: publicUrl,
-                    type: selectedFile.type.startsWith('image/') ? 'image' : 'video'
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Max dimensions 1200x1200
+                        const maxDim = 1200;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = (height / width) * maxDim;
+                                width = maxDim;
+                            } else {
+                                width = (width / height) * maxDim;
+                                height = maxDim;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to target size
+                        let quality = 0.7;
+                        
+                        function tryCompress() {
+                            canvas.toBlob((blob) => {
+                                if (blob.size > MAX_FILE_SIZE && quality > 0.1) {
+                                    quality -= 0.1;
+                                    tryCompress();
+                                } else {
+                                    const compressed = new File([blob], file.name, { type: 'image/jpeg' });
+                                    Object.defineProperty(compressed, 'preview', {
+                                        value: canvas.toDataURL('image/jpeg', quality)
+                                    });
+                                    resolve(compressed);
+                                }
+                            }, 'image/jpeg', quality);
+                        }
+                        
+                        tryCompress();
+                    };
+                    img.src = e.target.result;
                 };
+                reader.readAsDataURL(file);
+            });
+        }
 
-            } catch (error) {
-                console.error('Error uploading media:', error);
-                throw error;
+        function renderPhotos() {
+            const section = document.getElementById('photosSection');
+            const grid = document.getElementById('photosGrid');
+            
+            if (selectedFiles.length === 0) {
+                section.style.display = 'none';
+                return;
             }
+            
+            section.style.display = 'block';
+            
+            let html = '';
+            
+            // Show existing photos
+            selectedFiles.forEach((file, index) => {
+                html += `
+                    <div class="photo-item has-photo" style="background-image: url('${file.preview}')">
+                        <button class="remove-photo" onclick="removePhoto(${index})">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            // Show add more button if < 5
+            if (selectedFiles.length < MAX_PHOTOS) {
+                html += `
+                    <div class="photo-item" onclick="selectPhotos()">
+                        <div class="photo-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            <div class="photo-placeholder-text">Add photo</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
+        }
+
+        function removePhoto(index) {
+            selectedFiles.splice(index, 1);
+            renderPhotos();
+            updatePostButton();
+        }
+
+        async function uploadPhotos() {
+            if (selectedFiles.length === 0) return [];
+
+            const uploadedUrls = [];
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                
+                document.getElementById('progressText').textContent = `Uploading photo ${i + 1}/${selectedFiles.length}...`;
+                
+                try {
+                    const fileExt = 'jpg';
+                    const fileName = `${currentUser.id}_${Date.now()}_${i}.${fileExt}`;
+                    const filePath = `posts/${fileName}`;
+
+                    const { data, error } = await supabaseClient.storage
+                        .from('user-uploads')
+                        .upload(filePath, file, {
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+
+                    if (error) throw error;
+
+                    const { data: { publicUrl } } = supabaseClient.storage
+                        .from('user-uploads')
+                        .getPublicUrl(filePath);
+
+                    uploadedUrls.push(publicUrl);
+
+                } catch (error) {
+                    console.error('Error uploading photo:', error);
+                    throw error;
+                }
+            }
+
+            return uploadedUrls;
         }
 
         async function createPost() {
-            const caption = document.getElementById('captionInput').value.trim();
-            const postType = document.getElementById('postType').value;
+            const text = document.getElementById('textInput').value.trim();
+            const visibility = document.getElementById('visibilitySelect').value;
 
             // Validate
-            if (!selectedFile && !caption) {
-                alert('Please add a photo/video or write a caption');
+            if (!text && selectedFiles.length === 0) {
+                alert('Please write something or add photos');
                 return;
             }
 
             document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('loadingText').textContent = 'Creating post...';
             document.getElementById('postBtn').disabled = true;
 
             try {
-                // Upload media if selected
-                let mediaUrl = null;
-                let mediaType = null;
-                
-                if (selectedFile) {
-                    const uploadResult = await uploadMedia();
-                    mediaUrl = uploadResult.url;
-                    mediaType = uploadResult.type;
+                // Upload photos
+                let mediaUrls = [];
+                if (selectedFiles.length > 0) {
+                    mediaUrls = await uploadPhotos();
                 }
 
-                document.getElementById('loadingText').textContent = 'Creating post...';
+                document.getElementById('loadingText').textContent = 'Posting...';
+                document.getElementById('progressText').textContent = '';
 
-                // Calculate expiry for stories (24 hours)
-                let expiresAt = null;
-                if (postType === 'story') {
-                    const now = new Date();
-                    now.setHours(now.getHours() + 24);
-                    expiresAt = now.toISOString();
-                }
-
-                // Create post
+                // Create post - store media URLs as JSON array
                 const { error } = await supabaseClient
                     .from('ngm_user_posts')
                     .insert({
                         user_id: currentUser.id,
-                        post_type: postType,
-                        content: caption || null,
-                        media_url: mediaUrl,
-                        media_type: mediaType,
-                        thumbnail_url: mediaType === 'video' ? mediaUrl : null,
-                        is_public: isPublic,
-                        expires_at: expiresAt
+                        post_type: 'post',
+                        content: text || null,
+                        media_url: mediaUrls.length > 0 ? mediaUrls[0] : null,
+                        media_type: mediaUrls.length > 0 ? 'image' : null,
+                        thumbnail_url: mediaUrls.length > 0 ? mediaUrls[0] : null,
+                        is_public: visibility === 'public'
                     });
 
                 if (error) throw error;
 
-                // Update user posts count
-                await supabaseClient.rpc('increment', {
-                    table_name: 'ngm_users',
-                    column_name: 'posts_count',
-                    row_id: currentUser.id
-                });
-
-                alert(postType === 'story' ? 'Story created!' : 'Post created!');
                 window.location.href = 'ngm_my_posts.html';
 
             } catch (error) {
@@ -566,8 +675,10 @@
             }
         }
 
-        function goBack() {
-            if (selectedFile || document.getElementById('captionInput').value) {
+        function handleClose() {
+            const text = document.getElementById('textInput').value;
+            
+            if (text || selectedFiles.length > 0) {
                 if (confirm('Discard this post?')) {
                     window.history.back();
                 }
@@ -580,6 +691,7 @@
         window.addEventListener('DOMContentLoaded', async function() {
             initSupabase();
             await checkAuth();
+            updatePostButton();
         });
     </script>
 </body>
