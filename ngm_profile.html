@@ -244,18 +244,21 @@
         }
 
         .messages-area {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1 1 auto;
+            overflow-y: scroll;
+            overflow-x: hidden;
             padding: 16px;
             background: #e5ddd5;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" font-size="100" fill="%23d1d5db" opacity="0.1" text-anchor="middle" dominant-baseline="middle">💬</text></svg>');
-            transition: flex 0.3s ease;
             position: relative;
+            -webkit-overflow-scrolling: touch;
+            min-height: 0;
+            height: 100%;
         }
 
         .messages-area.with-emoji-picker {
-            flex: 1;
-            max-height: calc(100vh - 60px - 80px - 350px);
+            flex: 1 1 auto;
+            max-height: calc(100% - 350px);
         }
 
         /* Message Container */
@@ -1254,7 +1257,7 @@
         let pinnedMessages = new Set();
         
         // Pagination variables
-        const MESSAGES_PER_PAGE = 30;
+        const MESSAGES_PER_PAGE = 20; // Reduced from 30 for faster initial load
         let currentPage = 1;
         let totalMessages = 0;
         let isLoadingMore = false;
@@ -1434,12 +1437,12 @@
             if (scrollTimeout) clearTimeout(scrollTimeout);
             
             scrollTimeout = setTimeout(() => {
-                // Check if scrolled to top - load more messages
-                if (messagesArea.scrollTop < 200 && hasMoreMessages && !isLoadingMore) {
-                    console.log('Near top, loading more messages...');
+                // Check if scrolled to top - load more messages (increased from 200 to 300)
+                if (messagesArea.scrollTop < 300 && hasMoreMessages && !isLoadingMore) {
+                    console.log('📜 Near top (scrollTop:', messagesArea.scrollTop + 'px), loading more messages...');
                     loadMessages(true);
                 }
-            }, 200);
+            }, 150); // Reduced from 200ms to 150ms for faster response
             
             if (isUserAtBottom && unreadCount > 0) {
                 unreadCount = 0;
@@ -1957,6 +1960,8 @@
         }
 
         async function loadMessages(loadMore = false) {
+            const startTime = performance.now();
+            
             try {
                 if (loadMore && isLoadingMore) return;
                 if (loadMore && !hasMoreMessages) return;
@@ -1964,12 +1969,12 @@
                 if (loadMore) {
                     isLoadingMore = true;
                     document.getElementById('loadingMore').classList.add('show');
-                    console.log('Loading more messages, page:', currentPage + 1);
+                    console.log('📜 Loading more messages, page:', currentPage + 1);
                 }
 
-                // First time - load only recent 30 messages
+                // First time - load only recent 20 messages
                 if (!loadMore) {
-                    console.log('Initial load - fetching last 30 messages');
+                    console.log('⚡ Initial load START - fetching last 20 messages');
                     
                     const { data: msgs, error, count } = await supabaseClient
                         .from('ngm_messages')
@@ -1987,7 +1992,63 @@
                     currentPage = 1;
                     hasMoreMessages = totalMessages > MESSAGES_PER_PAGE;
                     
-                    console.log('Initial load complete:', messages.length, 'messages loaded out of', totalMessages);
+                    const loadTime = (performance.now() - startTime).toFixed(2);
+                    console.log('✅ Messages fetched:', messages.length, '/', totalMessages, 'in', loadTime + 'ms');
+                    
+                    // CRITICAL: Hide loading and render IMMEDIATELY
+                    const loadingEl = document.getElementById('loadingMessages');
+                    if (loadingEl) {
+                        loadingEl.style.display = 'none';
+                    }
+                    
+                    // RENDER WITHOUT waiting for read status
+                    renderMessages();
+                    console.log('🎨 Messages rendered');
+                    
+                    // Scroll to bottom immediately
+                    setTimeout(() => {
+                        scrollToBottom();
+                        console.log('⬇️ Scrolled to bottom');
+                    }, 10);
+                    
+                    // NOW fetch read status in background (don't block UI)
+                    if (currentChatData && (currentChatData.chat_type === 'private' || currentChatData.chat_type === 'personal')) {
+                        const otherUserId = currentChatData.user1_id === currentUser.id ? currentChatData.user2_id : currentChatData.user1_id;
+                        
+                        const sentMessageIds = messages
+                            .filter(m => m.sender_id === currentUser.id)
+                            .map(m => m.message_id);
+                        
+                        if (sentMessageIds.length > 0) {
+                            // Async - don't wait
+                            supabaseClient
+                                .from('ngm_message_status')
+                                .select('message_id')
+                                .in('message_id', sentMessageIds)
+                                .eq('user_id', otherUserId)
+                                .eq('status', 'read')
+                                .then(({ data: readStatuses }) => {
+                                    const readMessageIds = new Set(readStatuses?.map(s => s.message_id) || []);
+                                    
+                                    messages.forEach(msg => {
+                                        if (msg.sender_id === currentUser.id) {
+                                            msg.has_been_read = readMessageIds.has(msg.message_id);
+                                        }
+                                    });
+                                    
+                                    // Update ticks
+                                    renderMessages();
+                                    console.log('✓ Read status updated');
+                                });
+                        }
+                    }
+                    
+                    // Mark as read (async)
+                    markMessagesAsRead();
+                    
+                    const totalTime = (performance.now() - startTime).toFixed(2);
+                    console.log('⚡ TOTAL INITIAL LOAD TIME:', totalTime + 'ms');
+                    
                 } else {
                     // Load more - get next batch
                     const offset = currentPage * MESSAGES_PER_PAGE;
@@ -2004,71 +2065,39 @@
 
                     if (msgs && msgs.length > 0) {
                         const newMessages = msgs.reverse();
+                        
+                        // Save scroll position BEFORE adding messages
+                        const messagesArea = document.getElementById('messagesArea');
+                        const savedScrollHeight = messagesArea.scrollHeight;
+                        const savedScrollTop = messagesArea.scrollTop;
+                        
                         allMessagesCache = [...newMessages, ...allMessagesCache];
                         messages = [...allMessagesCache];
                         currentPage++;
                         
-                        console.log('Loaded', msgs.length, 'more messages. Total:', messages.length);
+                        console.log('📜 Loaded', msgs.length, 'more messages. Total:', messages.length);
+                        
+                        // Render
+                        renderMessages();
+                        
+                        // Restore scroll position
+                        const newScrollHeight = messagesArea.scrollHeight;
+                        messagesArea.scrollTop = savedScrollTop + (newScrollHeight - savedScrollHeight);
                     }
                     
                     hasMoreMessages = msgs && msgs.length === MESSAGES_PER_PAGE;
                     isLoadingMore = false;
                     document.getElementById('loadingMore').classList.remove('show');
                 }
-                
-                // Get read status for sent messages
-                if (currentChatData && (currentChatData.chat_type === 'private' || currentChatData.chat_type === 'personal')) {
-                    const otherUserId = currentChatData.user1_id === currentUser.id ? currentChatData.user2_id : currentChatData.user1_id;
-                    
-                    const sentMessageIds = messages
-                        .filter(m => m.sender_id === currentUser.id)
-                        .map(m => m.message_id);
-                    
-                    if (sentMessageIds.length > 0) {
-                        const { data: readStatuses } = await supabaseClient
-                            .from('ngm_message_status')
-                            .select('message_id')
-                            .in('message_id', sentMessageIds)
-                            .eq('user_id', otherUserId)
-                            .eq('status', 'read');
-                        
-                        const readMessageIds = new Set(readStatuses?.map(s => s.message_id) || []);
-                        
-                        messages.forEach(msg => {
-                            if (msg.sender_id === currentUser.id) {
-                                msg.has_been_read = readMessageIds.has(msg.message_id);
-                            }
-                        });
-                    }
-                }
-                
-                const loadingEl = document.getElementById('loadingMessages');
-                if (loadingEl) {
-                    loadingEl.style.display = 'none';
-                }
-                
-                const savedScrollHeight = document.getElementById('messagesArea').scrollHeight;
-                
-                renderMessages();
-                
-                if (!loadMore) {
-                    // Initial load - scroll to bottom
-                    setTimeout(() => scrollToBottom(), 100);
-                    await markMessagesAsRead();
-                } else {
-                    // Load more - maintain scroll position
-                    const newScrollHeight = document.getElementById('messagesArea').scrollHeight;
-                    document.getElementById('messagesArea').scrollTop = newScrollHeight - savedScrollHeight;
-                }
 
             } catch (error) {
-                console.error('Error loading messages:', error);
+                console.error('❌ Error loading messages:', error);
                 const loadingEl = document.getElementById('loadingMessages');
                 if (loadingEl) {
                     loadingEl.innerHTML = '<p style="color: #ef4444;">Error loading messages</p>';
                 }
                 isLoadingMore = false;
-                document.getElementById('loadingMore').classList.remove('show');
+                document.getElementById('loadingMore')?.classList.remove('show');
             }
         }
 
@@ -2929,8 +2958,18 @@
 
         function scrollToBottom() {
             const messagesArea = document.getElementById('messagesArea');
+            
+            console.log('📍 Scroll Debug:', {
+                scrollHeight: messagesArea.scrollHeight,
+                clientHeight: messagesArea.clientHeight,
+                scrollTop: messagesArea.scrollTop,
+                canScroll: messagesArea.scrollHeight > messagesArea.clientHeight
+            });
+            
             messagesArea.scrollTop = messagesArea.scrollHeight;
             isUserAtBottom = true;
+            
+            console.log('⬇️ Scrolled to:', messagesArea.scrollTop);
         }
 
         function goBack() {
