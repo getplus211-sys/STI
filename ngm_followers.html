@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Followers - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: white;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: white;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .username {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stat-info {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 64px;
+            background: white;
+            z-index: 50;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #16a34a;
+            border-bottom-color: #16a34a;
+        }
+
+        .tab:active {
+            background: #f9fafb;
+        }
+
+        /* Search */
+        .search-box {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            position: sticky;
+            top: 120px;
+            background: white;
+            z-index: 40;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            background: #f9fafb;
+        }
+
+        .search-input:focus {
+            border-color: #16a34a;
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        /* User List */
+        .user-list {
+            padding: 8px 0;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-item:active {
+            background: #f9fafb;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .verified-badge {
+            color: #3b82f6;
+            font-size: 14px;
+        }
+
+        .user-username {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .user-bio {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Follow Button */
+        .follow-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .follow-btn-primary {
+            background: #16a34a;
+            color: white;
+        }
+
+        .follow-btn-primary:active {
+            background: #15803d;
+        }
+
+        .follow-btn-secondary {
+            background: transparent;
+            color: #111827;
+            border: 1px solid #e5e7eb;
+        }
+
+        .follow-btn-secondary:active {
+            background: #f3f4f6;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .empty-description {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f4f6;
+            border-top-color: #16a34a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Color classes */
+        .bg-blue { background: #3b82f6; }
+        .bg-green { background: #10b981; }
+        .bg-purple { background: #a855f7; }
+        .bg-pink { background: #ec4899; }
+        .bg-indigo { background: #6366f1; }
+        .bg-teal { background: #14b8a6; }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="header-title">
+                <div class="username" id="headerUsername">@username</div>
+                <div class="stat-info" id="headerStat">0 Followers</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" id="followersTab" onclick="switchTab('followers')">
+                Followers
+            </div>
+            <div class="tab" id="followingTab" onclick="switchTab('following')">
+                Following
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-box">
+            <div class="search-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search people..." oninput="filterUsers()">
+            </div>
+        </div>
+
+        <!-- User List -->
+        <div id="userList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 16px; color: #6b7280;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let profileUserId = null;
+        let currentTab = 'followers';
+        let allUsers = [];
+        let profileData = null;
+
+        const colors = ['bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-indigo', 'bg-teal'];
+
+        function getAvatarColor(name) {
+            if (!name) return colors[0];
+            const index = name.charCodeAt(0) % colors.length;
+            return colors[index];
+        }
+
+        function getInitial(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        // Get URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        profileUserId = urlParams.get('user_id');
+        const tabParam = urlParams.get('tab');
+        if (tabParam === 'following') {
+            currentTab = 'following';
+        }
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            
+            // If no user_id provided, show current user's followers
+            if (!profileUserId) {
+                profileUserId = currentUser.id;
+            }
+            
+            return user;
+        }
+
+        async function loadProfile() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('ngm_users')
+                    .select('username, full_name, followers_count, following_count')
+                    .eq('user_id', profileUserId)
+                    .single();
+
+                if (error) throw error;
+                profileData = data;
+
+                // Update header
+                document.getElementById('headerUsername').textContent = '@' + (data.username || 'user');
+                updateHeaderStat();
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        function updateHeaderStat() {
+            if (currentTab === 'followers') {
+                document.getElementById('headerStat').textContent = (profileData.followers_count || 0) + ' Followers';
+            } else {
+                document.getElementById('headerStat').textContent = (profileData.following_count || 0) + ' Following';
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab UI
+            document.getElementById('followersTab').classList.remove('active');
+            document.getElementById('followingTab').classList.remove('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            
+            // Update header
+            updateHeaderStat();
+            
+            // Clear search
+            document.getElementById('searchInput').value = '';
+            
+            // Load users
+            loadUsers();
+        }
+
+        async function loadUsers() {
+            try {
+                document.getElementById('userList').innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 16px; color: #6b7280;">Loading...</p>
+                    </div>
+                `;
+
+                let query;
+                if (currentTab === 'followers') {
+                    // Get followers
+                    query = supabaseClient
+                        .from('ngm_user_followers')
+                        .select('follower_user_id')
+                        .eq('following_user_id', profileUserId);
+                } else {
+                    // Get following
+                    query = supabaseClient
+                        .from('ngm_user_followers')
+                        .select('following_user_id')
+                        .eq('follower_user_id', profileUserId);
+                }
+
+                const { data: followData, error: followError } = await query;
+                
+                if (followError) throw followError;
+
+                if (!followData || followData.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                // Get user IDs
+                const userIds = currentTab === 'followers' 
+                    ? followData.map(f => f.follower_user_id)
+                    : followData.map(f => f.following_user_id);
+
+                // Get user details
+                const { data: users, error: usersError } = await supabaseClient
+                    .from('ngm_users')
+                    .select('user_id, full_name, username, bio, profile_picture_url, is_verified')
+                    .in('user_id', userIds);
+
+                if (usersError) throw usersError;
+
+                // Check which users current user is following
+                const { data: currentUserFollowing } = await supabaseClient
+                    .from('ngm_user_followers')
+                    .select('following_user_id')
+                    .eq('follower_user_id', currentUser.id)
+                    .in('following_user_id', userIds);
+
+                const followingIds = new Set(currentUserFollowing?.map(f => f.following_user_id) || []);
+
+                // Add isFollowing flag
+                allUsers = users.map(user => ({
+                    ...user,
+                    isFollowing: followingIds.has(user.user_id)
+                }));
+
+                renderUsers();
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showErrorState();
+            }
+        }
+
+        function renderUsers() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = allUsers;
+            if (searchQuery) {
+                filtered = allUsers.filter(user => {
+                    const name = (user.full_name || '').toLowerCase();
+                    const username = (user.username || '').toLowerCase();
+                    const bio = (user.bio || '').toLowerCase();
+                    return name.includes(searchQuery) || username.includes(searchQuery) || bio.includes(searchQuery);
+                });
+            }
+
+            if (filtered.length === 0) {
+                document.getElementById('userList').innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <div class="empty-title">No results found</div>
+                        <div class="empty-description">Try a different search term</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = filtered.map(user => {
+                const name = user.full_name || user.username || 'User';
+                const avatarHTML = user.profile_picture_url
+                    ? `<div class="user-avatar" style="background-image: url('${user.profile_picture_url}')"></div>`
+                    : `<div class="user-avatar ${getAvatarColor(name)}">${getInitial(name)}</div>`;
+
+                const isOwnProfile = user.user_id === currentUser.id;
+                
+                let followButton = '';
+                if (!isOwnProfile) {
+                    if (user.isFollowing) {
+                        followButton = `<button class="follow-btn follow-btn-secondary" onclick="toggleFollow('${user.user_id}', event)">Following</button>`;
+                    } else {
+                        followButton = `<button class="follow-btn follow-btn-primary" onclick="toggleFollow('${user.user_id}', event)">Follow</button>`;
+                    }
+                }
+
+                return `
+                    <div class="user-item" onclick="viewProfile('${user.user_id}')">
+                        ${avatarHTML}
+                        <div class="user-info">
+                            <div class="user-name">
+                                ${name}
+                                ${user.is_verified ? '<span class="verified-badge">✓</span>' : ''}
+                            </div>
+                            <div class="user-username">@${user.username || 'user'}</div>
+                            ${user.bio ? `<div class="user-bio">${user.bio}</div>` : ''}
+                        </div>
+                        ${followButton}
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('userList').innerHTML = `<div class="user-list">${html}</div>`;
+        }
+
+        function showEmptyState() {
+            const title = currentTab === 'followers' ? 'No followers yet' : 'Not following anyone yet';
+            const description = currentTab === 'followers' 
+                ? 'When people follow this account, they will show up here'
+                : 'When this account follows people, they will show up here';
+
+            document.getElementById('userList').innerHTML = `
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <div class="empty-title">${title}</div>
+                    <div class="empty-description">${description}</div>
+                </div>
+            `;
+        }
+
+        function showErrorState() {
+            document.getElementById('userList').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-title">Error loading users</div>
+                    <div class="empty-description">Please try again</div>
+                </div>
+            `;
+        }
+
+        function filterUsers() {
+            renderUsers();
+        }
+
+        async function toggleFollow(userId, event) {
+            event.stopPropagation();
+            
+            const user = allUsers.find(u => u.user_id === userId);
+            if (!user) return;
+
+            try {
+                if (user.isFollowing) {
+                    // Unfollow
+                    await supabaseClient
+                        .from('ngm_user_followers')
+                        .delete()
+                        .eq('follower_user_id', currentUser.id)
+                        .eq('following_user_id', userId);
+
+                    user.isFollowing = false;
+                } else {
+                    // Follow
+                    await supabaseClient
+                        .from('ngm_user_followers')
+                        .insert({
+                            follower_user_id: currentUser.id,
+                            following_user_id: userId
+                        });
+
+                    user.isFollowing = true;
+                }
+
+                renderUsers();
+
+            } catch (error) {
+                console.error('Error toggling follow:', error);
+                alert('Failed to update follow status');
+            }
+        }
+
+        function viewProfile(userId) {
+            window.location.href = `ngm_profile.html?user_id=${userId}`;
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            const user = await checkAuth();
+            if (user) {
+                await loadProfile();
+                switchTab(currentTab);
+            }
+        });
+    </script>
+</body>
+</html>
