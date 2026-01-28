@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Posts - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .add-post-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 64px;
+            background: white;
+            z-index: 50;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .tab.active {
+            color: #16a34a;
+            border-bottom-color: #16a34a;
+        }
+
+        .tab:active {
+            background: #f9fafb;
+        }
+
+        /* Posts Grid */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            padding: 2px;
+        }
+
+        .post-card {
+            aspect-ratio: 1;
+            background: #f3f4f6;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .post-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: white;
+        }
+
+        .post-card:active .post-overlay {
+            opacity: 1;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .post-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 24px;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .empty-description {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .create-first-btn {
+            padding: 12px 32px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .create-first-btn:active {
+            background: #15803d;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f4f6;
+            border-top-color: #16a34a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: calc(50% - 240px + 24px);
+            width: 56px;
+            height: 56px;
+            background: #16a34a;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+            cursor: pointer;
+            z-index: 90;
+        }
+
+        .fab:active {
+            background: #15803d;
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 480px) {
+            .fab {
+                right: 24px;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="header-title">My Posts</div>
+            <button class="add-post-btn" onclick="createPost()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" id="postsTab" onclick="switchTab('posts')">
+                Posts <span id="postsCount"></span>
+            </div>
+            <div class="tab" id="storiesTab" onclick="switchTab('stories')">
+                Stories <span id="storiesCount"></span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="createPost()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+    </button>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let currentTab = 'posts';
+        let allPosts = [];
+        let allStories = [];
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            document.getElementById('postsTab').classList.remove('active');
+            document.getElementById('storiesTab').classList.remove('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            
+            renderContent();
+        }
+
+        async function loadPosts() {
+            try {
+                // Load posts
+                const { data: posts, error: postsError } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('post_type', 'post')
+                    .order('created_at', { ascending: false });
+
+                if (postsError) throw postsError;
+                allPosts = posts || [];
+
+                // Load stories (not expired)
+                const now = new Date().toISOString();
+                const { data: stories, error: storiesError } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('post_type', 'story')
+                    .gt('expires_at', now)
+                    .order('created_at', { ascending: false });
+
+                if (storiesError) throw storiesError;
+                allStories = stories || [];
+
+                // Update counts
+                document.getElementById('postsCount').textContent = allPosts.length ? `(${allPosts.length})` : '';
+                document.getElementById('storiesCount').textContent = allStories.length ? `(${allStories.length})` : '';
+
+                renderContent();
+
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                showError();
+            }
+        }
+
+        function renderContent() {
+            const content = document.getElementById('content');
+            const items = currentTab === 'posts' ? allPosts : allStories;
+
+            if (items.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            const html = items.map(post => {
+                const bgImage = post.media_url || post.thumbnail_url 
+                    ? `background-image: url('${post.thumbnail_url || post.media_url}')` 
+                    : 'background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)';
+
+                return `
+                    <div class="post-card" style="${bgImage}" onclick="viewPost('${post.post_id}')">
+                        <div class="post-overlay">
+                            <div class="post-stats">
+                                <div class="post-stat">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                    </svg>
+                                    ${post.likes_count || 0}
+                                </div>
+                                <div class="post-stat">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                    ${post.comments_count || 0}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            content.innerHTML = `<div class="posts-grid">${html}</div>`;
+        }
+
+        function showEmptyState() {
+            const content = document.getElementById('content');
+            const type = currentTab === 'posts' ? 'posts' : 'stories';
+            
+            content.innerHTML = `
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <div class="empty-title">No ${type} yet</div>
+                    <div class="empty-description">
+                        ${currentTab === 'posts' 
+                            ? 'Share your moments with posts that stay on your profile' 
+                            : 'Share quick updates with stories that disappear after 24 hours'}
+                    </div>
+                    <button class="create-first-btn" onclick="createPost()">
+                        Create ${currentTab === 'posts' ? 'Post' : 'Story'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function showError() {
+            document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-title">Failed to load ${currentTab}</div>
+                    <div class="empty-description">Please try again</div>
+                    <button class="create-first-btn" onclick="loadPosts()">Retry</button>
+                </div>
+            `;
+        }
+
+        function viewPost(postId) {
+            window.location.href = `ngm_view_post.html?post_id=${postId}`;
+        }
+
+        function createPost() {
+            window.location.href = 'ngm_create_post.html';
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            const user = await checkAuth();
+            if (user) {
+                await loadPosts();
+            }
+        });
+    </script>
+</body>
+</html>
