@@ -31,9 +31,8 @@
             border-bottom: 1px solid #e5e7eb;
             color: #111827;
             padding: 12px 16px;
-            min-height: 90px;
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             gap: 12px;
             position: sticky;
             top: 0;
@@ -379,7 +378,7 @@
 
         function getAvatarColor(name) {
             if (!name) return colors[0];
-            const index = name.charCodeAt(0) % colors.length];
+            const index = name.charCodeAt(0) % colors.length;
             return colors[index];
         }
 
