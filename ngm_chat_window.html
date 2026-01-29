@@ -15,19 +15,16 @@
             -webkit-user-select: none;
             user-select: none;
         }
-
         input, textarea, button {
             -webkit-user-select: text;
             user-select: text;
         }
-        
         html {
             height: 100%;
             width: 100%;
             overflow: hidden;
             position: fixed;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #e5ddd5;
@@ -40,7 +37,6 @@
             right: 0;
             bottom: 0;
         }
-
         .container {
             max-width: 480px;
             margin: 0 auto;
@@ -55,7 +51,6 @@
             bottom: 0;
             overflow: hidden;
         }
-
         .header {
             position: fixed;
             top: 0;
@@ -70,17 +65,14 @@
             padding: 8px 16px 12px 16px;
             z-index: 100;
         }
-
         .header.selection-mode {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
         }
-
         .header-content {
             display: flex;
             align-items: flex-end;
             gap: 12px;
         }
-
         .back-btn, .menu-btn {
             width: 40px;
             height: 40px;
@@ -92,7 +84,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .avatar-small {
             width: 40px;
             height: 40px;
@@ -106,12 +97,10 @@
             background-size: cover;
             background-position: center;
         }
-
         .chat-info {
             flex: 1;
             min-width: 0;
         }
-
         .chat-name {
             font-weight: 600;
             font-size: 16px;
@@ -119,30 +108,24 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .chat-status {
             font-size: 12px;
             opacity: 0.9;
         }
-
         .chat-status.typing {
             font-weight: 400;
         }
-
         .typing-dots span {
             animation: typingDot 1.4s infinite;
         }
-
         @keyframes typingDot {
             0%, 60%, 100% { opacity: 0.6; }
             30% { opacity: 1; }
         }
-
         .header-actions {
             display: flex;
             gap: 8px;
         }
-
         .icon-btn {
             width: 40px;
             height: 40px;
@@ -154,7 +137,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .messages-area {
             position: fixed;
             top: 90px;
@@ -167,21 +149,20 @@
             -webkit-overflow-scrolling: touch;
             transition: bottom 0.2s ease-out;
         }
-
         .message-container {
             margin-bottom: 12px;
             display: flex;
             position: relative;
         }
-
         .message-container.sent {
             justify-content: flex-end;
         }
-
         .message-container.received {
             justify-content: flex-start;
         }
-
+        .message-container.selected .message {
+            background: #b3d9ff !important;
+        }
         .message {
             max-width: 70%;
             padding: 8px 12px;
@@ -190,23 +171,19 @@
             display: inline-flex;
             flex-direction: column;
         }
-
         .message-sent {
             background: #dcf8c6;
             border-bottom-right-radius: 2px;
         }
-
         .message-received {
             background: white;
             border-bottom-left-radius: 2px;
         }
-
         .message-content {
             margin-bottom: 4px;
             white-space: pre-wrap;
             word-break: break-word;
         }
-
         .message-time {
             font-size: 11px;
             color: #667781;
@@ -216,7 +193,6 @@
             justify-content: flex-end;
             gap: 4px;
         }
-
         .message-reply-preview {
             background: rgba(0, 0, 0, 0.05);
             border-left: 3px solid #16a34a;
@@ -225,7 +201,6 @@
             border-radius: 4px;
             font-size: 13px;
         }
-
         .input-area {
             position: fixed;
             bottom: 0;
@@ -241,7 +216,6 @@
             z-index: 99;
             min-height: 64px;
         }
-
         .message-input {
             flex: 1;
             border: 1px solid #e5e7eb;
@@ -252,7 +226,6 @@
             max-height: 100px;
             resize: none;
         }
-
         .send-btn {
             width: 44px;
             height: 44px;
@@ -264,11 +237,9 @@
             justify-content: center;
             cursor: pointer;
         }
-
         .send-btn:disabled {
             background: #9ca3af;
         }
-
         .emoji-btn {
             width: 40px;
             height: 40px;
@@ -279,7 +250,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .spinner {
             width: 40px;
             height: 40px;
@@ -288,16 +258,13 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
         .read-tick {
             width: 16px;
             height: 16px;
         }
-
         .unread-badge-floating {
             position: fixed;
             bottom: 90px;
@@ -312,13 +279,11 @@
             font-size: 13px;
             font-weight: 600;
         }
-
         .unread-badge-floating.show {
             display: flex;
             gap: 8px;
             align-items: center;
         }
-
         .message-action-menu {
             position: fixed;
             background: white;
@@ -328,11 +293,9 @@
             display: none;
             min-width: 200px;
         }
-
         .message-action-menu.show {
             display: block;
         }
-
         .message-action-item {
             display: flex;
             align-items: center;
@@ -345,7 +308,9 @@
             text-align: left;
             font-size: 15px;
         }
-
+        .message-action-item:active {
+            background: #f3f4f6;
+        }
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -356,11 +321,9 @@
             z-index: 999;
             display: none;
         }
-
         .modal-overlay.show {
             display: block;
         }
-
         .loading-messages {
             display: flex;
             flex-direction: column;
@@ -425,7 +388,7 @@
         </div>
 
         <div class="input-area" id="inputArea">
-            <button class="emoji-btn" id="emojiBtn" onclick="toggleEmojiPicker()">
+            <button class="emoji-btn" id="emojiBtn">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
@@ -490,7 +453,6 @@
     </div>
 
     <script>
-        // ==================== CONFIG ====================
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
         const MESSAGES_PER_PAGE = 30;
@@ -503,7 +465,6 @@
             return supabaseClient;
         }
 
-        // ==================== GLOBAL STATE ====================
         let currentUser = null;
         let currentChatId = null;
         let currentChatData = null;
@@ -525,12 +486,10 @@
         let isLoadingMore = false;
         let hasMoreMessages = true;
         let otherUserData = null;
-        let isOtherUserBlocked = false;
         let otherUserId = null;
         let isKeyboardOpen = false;
         let originalViewportHeight = window.innerHeight;
 
-        // ==================== UTILITY FUNCTIONS ====================
         function debounce(func, wait) {
             let timeout;
             return function(...args) {
@@ -550,42 +509,19 @@
             };
         }
 
-        // ==================== EMOJI & MESSAGE HELPERS ====================
         function isEmojiOnly(text) {
             const emojiRegex = /^(\p{Emoji_Presentation}|\p{Extended_Pictographic})+$/u;
             return emojiRegex.test(text.trim());
         }
 
-        function countEmojis(text) {
-            const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
-            const matches = text.match(emojiRegex);
-            return matches ? matches.length : 0;
-        }
-
-        function wrapEmojisInText(text) {
-            const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
-            return text.replace(emojiRegex, '<span class="emoji-in-text">$1</span>');
-        }
-
-        function toggleEmojiPicker() {
-            // Emoji picker toggle logic
-        }
-
-        // ==================== MESSAGE TICKS ====================
         function getMessageTick(msg) {
             const singleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#8696a0"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512z"/></svg>';
-            
             const doubleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#8696a0"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>';
-            
             const blueDoubleTick = '<svg class="read-tick" width="16" height="15" viewBox="0 0 16 15" fill="#53bdeb"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.366.366 0 0 0-.515.006l-.423.433a.364.364 0 0 0 .006.514l3.258 3.185c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg>';
             
-            if (msg.is_read_by_all || msg.has_been_read) {
-                return blueDoubleTick;
-            } else if (msg.is_delivered) {
-                return doubleTick;
-            } else {
-                return singleTick;
-            }
+            if (msg.is_read_by_all || msg.has_been_read) return blueDoubleTick;
+            else if (msg.is_delivered) return doubleTick;
+            else return singleTick;
         }
 
         function updateMessageTicks() {
@@ -607,29 +543,11 @@
                 }
             });
         }
-// ==================== MESSAGE RENDERING ====================
+
         function createMessageHTML(msg, index) {
             const isSent = msg.sender_id === currentUser.id;
-            const time = new Date(msg.created_at).toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit' 
-            });
-
+            const time = new Date(msg.created_at).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
             const content = msg.content || '';
-            const emojiOnly = isEmojiOnly(content);
-            const emojiCount = emojiOnly ? countEmojis(content) : 0;
-            
-            let emojiClass = '';
-            let displayContent = content;
-            
-            if (emojiOnly) {
-                if (emojiCount === 1) emojiClass = 'emoji-only';
-                else if (emojiCount === 2) emojiClass = 'emoji-only emoji-two';
-                else if (emojiCount === 3) emojiClass = 'emoji-only emoji-three';
-            } else {
-                displayContent = wrapEmojisInText(content);
-            }
-
             const isSelected = selectedMessages.has(msg.message_id);
             
             let replyHTML = '';
@@ -644,13 +562,11 @@
                 }
             }
 
-            return `<div class="message-container ${isSent ? 'sent' : 'received'} ${isSelected ? 'selected' : ''}" 
-                        data-message-id="${msg.message_id}">
-                <div class="message ${isSent ? 'message-sent' : 'message-received'} ${emojiClass}" 
-                     data-message-id="${msg.message_id}">
+            return `<div class="message-container ${isSent ? 'sent' : 'received'} ${isSelected ? 'selected' : ''}" data-message-id="${msg.message_id}">
+                <div class="message ${isSent ? 'message-sent' : 'message-received'}" data-message-id="${msg.message_id}">
                     ${replyHTML}
-                    <div class="message-content">${displayContent}</div>
-                    ${!emojiOnly ? `<div class="message-time">${time}${msg.is_edited ? '<span style="font-size:10px;color:#8696a0;margin-left:4px;">edited</span>' : ''}${isSent ? getMessageTick(msg) : ''}</div>` : ''}
+                    <div class="message-content">${content}</div>
+                    <div class="message-time">${time}${msg.is_edited ? '<span style="font-size:10px;color:#8696a0;margin-left:4px;">edited</span>' : ''}${isSent ? getMessageTick(msg) : ''}</div>
                 </div>
             </div>`;
         }
@@ -708,26 +624,31 @@
                             if (navigator.vibrate) navigator.vibrate(50);
                         }
                     }, 400);
-                }, { passive: true });
+                }, {passive: true});
 
                 msgEl.addEventListener('touchmove', function(e) {
                     const touch = e.touches[0];
                     const diffX = Math.abs(touch.clientX - startX);
                     const diffY = Math.abs(touch.clientY - startY);
-                    
                     if (diffX > 10 || diffY > 10) {
                         moved = true;
                         clearTimeout(pressTimer);
                     }
-                }, { passive: true });
+                }, {passive: true});
 
                 msgEl.addEventListener('touchend', function() {
                     clearTimeout(pressTimer);
-                }, { passive: true });
+                }, {passive: true});
+                
+                if (isSelectionMode) {
+                    msgEl.addEventListener('click', function() {
+                        const messageId = msgEl.getAttribute('data-message-id');
+                        toggleMessageSelection(messageId);
+                    });
+                }
             });
         }
 
-        // ==================== KEYBOARD HANDLING ====================
         function setupKeyboardHandling() {
             const messagesArea = document.getElementById('messagesArea');
             const messageInput = document.getElementById('messageInput');
@@ -740,24 +661,25 @@
                     if (keyboardHeight > 100) {
                         isKeyboardOpen = true;
                         messagesArea.style.bottom = (64 + keyboardHeight) + 'px';
+                        console.log('⌨️ Keyboard opened, height:', keyboardHeight);
                         setTimeout(() => {
                             if (isUserAtBottom) scrollToBottom();
                         }, 100);
                     } else {
                         isKeyboardOpen = false;
                         messagesArea.style.bottom = '64px';
+                        console.log('⌨️ Keyboard closed');
                     }
                 });
             }
             
             messageInput.addEventListener('focus', () => {
                 setTimeout(() => {
-                    messageInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    messageInput.scrollIntoView({behavior: 'smooth', block: 'nearest'});
                 }, 300);
             });
         }
 
-        // ==================== SCROLL HANDLING ====================
         const checkIfAtBottomThrottled = throttle(() => {
             const messagesArea = document.getElementById('messagesArea');
             const threshold = 100;
@@ -798,22 +720,18 @@
             document.getElementById('unreadBadge').classList.remove('show');
         }
 
-        // ==================== LOAD MESSAGES ====================
         async function loadMessages(loadMore = false) {
             try {
                 if (loadMore && (isLoadingMore || !hasMoreMessages)) return;
-                
-                if (loadMore) {
-                    isLoadingMore = true;
-                }
+                if (loadMore) isLoadingMore = true;
 
                 if (!loadMore) {
-                    const { data: msgs, error, count } = await supabaseClient
+                    const {data: msgs, error, count} = await supabaseClient
                         .from('ngm_messages')
-                        .select('*', { count: 'exact' })
+                        .select('*', {count: 'exact'})
                         .eq('chat_id', currentChatId)
                         .eq('is_deleted', false)
-                        .order('created_at', { ascending: false })
+                        .order('created_at', {ascending: false})
                         .limit(MESSAGES_PER_PAGE);
 
                     if (error) throw error;
@@ -837,13 +755,12 @@
                     
                 } else {
                     const offset = currentPage * MESSAGES_PER_PAGE;
-                    
-                    const { data: msgs, error } = await supabaseClient
+                    const {data: msgs, error} = await supabaseClient
                         .from('ngm_messages')
                         .select('*')
                         .eq('chat_id', currentChatId)
                         .eq('is_deleted', false)
-                        .order('created_at', { ascending: false })
+                        .order('created_at', {ascending: false})
                         .range(offset, offset + MESSAGES_PER_PAGE - 1);
 
                     if (error) throw error;
@@ -855,20 +772,16 @@
                         
                         const newMessages = msgs.reverse();
                         newMessages.forEach(msg => messagesMap.set(msg.message_id, msg));
-                        
                         messages = [...newMessages, ...messages];
                         currentPage++;
                         
                         renderMessages(true);
-                        
-                        const newScrollHeight = messagesArea.scrollHeight;
-                        messagesArea.scrollTop = savedScrollTop + (newScrollHeight - savedScrollHeight);
+                        messagesArea.scrollTop = savedScrollTop + (messagesArea.scrollHeight - savedScrollHeight);
                     }
                     
                     hasMoreMessages = msgs && msgs.length === MESSAGES_PER_PAGE;
                     isLoadingMore = false;
                 }
-
             } catch (error) {
                 console.error('Error loading messages:', error);
                 isLoadingMore = false;
@@ -876,17 +789,14 @@
         }
 
         async function fetchReadStatus() {
-            if (!currentChatData || (currentChatData.chat_type !== 'private' && currentChatData.chat_type !== 'personal')) {
-                return;
-            }
+            if (!currentChatData || (currentChatData.chat_type !== 'private' && currentChatData.chat_type !== 'personal')) return;
             
             const otherUserId = currentChatData.user1_id === currentUser.id ? currentChatData.user2_id : currentChatData.user1_id;
             const sentMessageIds = messages.filter(m => m.sender_id === currentUser.id).map(m => m.message_id);
-            
             if (sentMessageIds.length === 0) return;
             
             try {
-                const { data: readStatuses } = await supabaseClient
+                const {data: readStatuses} = await supabaseClient
                     .from('ngm_message_status')
                     .select('message_id')
                     .in('message_id', sentMessageIds)
@@ -894,15 +804,12 @@
                     .eq('status', 'read');
                 
                 const readMessageIds = new Set(readStatuses?.map(s => s.message_id) || []);
-                
                 messages.forEach(msg => {
                     if (msg.sender_id === currentUser.id) {
                         msg.has_been_read = readMessageIds.has(msg.message_id);
                     }
                 });
-                
                 updateMessageTicks();
-                
             } catch (error) {
                 console.error('Error fetching read status:', error);
             }
@@ -910,40 +817,27 @@
 
         async function markMessagesAsRead() {
             try {
-                const unreadMsgIds = messages
-                    .filter(msg => msg.sender_id !== currentUser.id)
-                    .map(msg => msg.message_id);
-
+                const unreadMsgIds = messages.filter(msg => msg.sender_id !== currentUser.id).map(msg => msg.message_id);
                 if (unreadMsgIds.length === 0) return;
 
-                const { data: existingStatuses } = await supabaseClient
+                const {data: existingStatuses} = await supabaseClient
                     .from('ngm_message_status')
                     .select('message_id')
                     .in('message_id', unreadMsgIds)
                     .eq('user_id', currentUser.id);
 
                 const existingMsgIds = new Set(existingStatuses?.map(s => s.message_id) || []);
-
                 const newStatuses = unreadMsgIds
                     .filter(msgId => !existingMsgIds.has(msgId))
-                    .map(msgId => ({
-                        message_id: msgId,
-                        user_id: currentUser.id,
-                        status: 'read'
-                    }));
+                    .map(msgId => ({message_id: msgId, user_id: currentUser.id, status: 'read'}));
 
                 if (newStatuses.length > 0) {
-                    await supabaseClient
-                        .from('ngm_message_status')
-                        .insert(newStatuses);
+                    await supabaseClient.from('ngm_message_status').insert(newStatuses);
                 }
 
                 await supabaseClient
                     .from('ngm_chat_participants')
-                    .update({ 
-                        unread_count: 0,
-                        last_read_message_id: messages[messages.length - 1]?.message_id 
-                    })
+                    .update({unread_count: 0, last_read_message_id: messages[messages.length - 1]?.message_id})
                     .eq('chat_id', currentChatId)
                     .eq('user_id', currentUser.id);
             } catch (error) {
@@ -951,22 +845,14 @@
             }
         }
 
-        // ==================== REALTIME SUBSCRIPTIONS ====================
         function setupRealtimeSubscription() {
             messagesSubscription = supabaseClient
                 .channel('messages:' + currentChatId)
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'ngm_messages',
-                    filter: 'chat_id=eq.' + currentChatId
-                }, payload => {
+                .on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'ngm_messages', filter: 'chat_id=eq.' + currentChatId}, payload => {
                     const newMsg = payload.new;
                     newMsg.has_been_read = false;
-                    
                     messages.push(newMsg);
                     messagesMap.set(newMsg.message_id, newMsg);
-                    
                     renderMessages(false);
                     
                     if (newMsg.sender_id !== currentUser.id) {
@@ -981,12 +867,7 @@
                         scrollToBottom();
                     }
                 })
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'ngm_messages',
-                    filter: 'chat_id=eq.' + currentChatId
-                }, payload => {
+                .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'ngm_messages', filter: 'chat_id=eq.' + currentChatId}, payload => {
                     const updatedMsg = payload.new;
                     const index = messages.findIndex(m => m.message_id === updatedMsg.message_id);
                     if (index !== -1) {
@@ -999,11 +880,7 @@
             
             supabaseClient
                 .channel('message-status:' + currentChatId)
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'ngm_message_status'
-                }, payload => {
+                .on('postgres_changes', {event: '*', schema: 'public', table: 'ngm_message_status'}, payload => {
                     if (payload.new && payload.new.status === 'read') {
                         const msg = messagesMap.get(payload.new.message_id);
                         if (msg && msg.sender_id === currentUser.id) {
@@ -1016,20 +893,13 @@
                 .subscribe();
         }
 
-        // ==================== TYPING INDICATOR ====================
         const setTypingStatusDebounced = debounce(async (typing) => {
             if (isTyping === typing) return;
             isTyping = typing;
-
             try {
                 await supabaseClient
                     .from('ngm_typing_status')
-                    .upsert({
-                        chat_id: currentChatId,
-                        user_id: currentUser.id,
-                        is_typing: typing,
-                        last_typing_at: new Date().toISOString()
-                    }, { onConflict: 'chat_id,user_id' });
+                    .upsert({chat_id: currentChatId, user_id: currentUser.id, is_typing: typing, last_typing_at: new Date().toISOString()}, {onConflict: 'chat_id,user_id'});
             } catch (error) {
                 console.error('Typing error:', error);
             }
@@ -1037,19 +907,11 @@
 
         function setupTypingIndicator(userId) {
             otherUserId = userId;
-            
-            if (typingSubscription) {
-                supabaseClient.removeChannel(typingSubscription);
-            }
+            if (typingSubscription) supabaseClient.removeChannel(typingSubscription);
 
             typingSubscription = supabaseClient
                 .channel('typing:' + currentChatId)
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'ngm_typing_status',
-                    filter: 'chat_id=eq.' + currentChatId
-                }, payload => {
+                .on('postgres_changes', {event: '*', schema: 'public', table: 'ngm_typing_status', filter: 'chat_id=eq.' + currentChatId}, payload => {
                     if (payload.new && payload.new.user_id === userId) {
                         const statusEl = document.getElementById('chatStatus');
                         if (payload.new.is_typing) {
@@ -1065,24 +927,19 @@
                 })
                 .subscribe();
         }
-// ==================== INPUT HANDLING ====================
+
         function handleInput() {
             const input = document.getElementById('messageInput');
             const sendBtn = document.getElementById('sendBtn');
             
             input.style.height = 'auto';
             input.style.height = Math.min(input.scrollHeight, 100) + 'px';
-
             sendBtn.disabled = !input.value.trim();
 
             if (input.value.trim()) {
                 setTypingStatusDebounced(true);
-
                 if (typingTimeout) clearTimeout(typingTimeout);
-                
-                typingTimeout = setTimeout(() => {
-                    setTypingStatusDebounced(false);
-                }, 3000);
+                typingTimeout = setTimeout(() => setTypingStatusDebounced(false), 3000);
             } else {
                 setTypingStatusDebounced(false);
                 if (typingTimeout) clearTimeout(typingTimeout);
@@ -1092,7 +949,6 @@
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
-            
             if (!message) return;
 
             setTypingStatusDebounced(false);
@@ -1110,26 +966,15 @@
                     msgData.reply_to_message_id = replyToMessageId;
                 }
 
-                const { data: newMsg, error } = await supabaseClient
-                    .from('ngm_messages')
-                    .insert(msgData)
-                    .select()
-                    .single();
-
+                const {data: newMsg, error} = await supabaseClient.from('ngm_messages').insert(msgData).select().single();
                 if (error) throw error;
 
-                await supabaseClient
-                    .from('ngm_chats')
-                    .update({ last_message_at: new Date().toISOString() })
-                    .eq('chat_id', currentChatId);
+                await supabaseClient.from('ngm_chats').update({last_message_at: new Date().toISOString()}).eq('chat_id', currentChatId);
 
                 input.value = '';
                 input.style.height = 'auto';
                 document.getElementById('sendBtn').disabled = true;
-                
-                if (replyToMessageId) {
-                    replyToMessageId = null;
-                }
+                if (replyToMessageId) replyToMessageId = null;
 
             } catch (error) {
                 console.error('Error sending message:', error);
@@ -1145,7 +990,6 @@
             }
         });
 
-        // ==================== USER STATUS ====================
         function formatLastSeen(lastSeenStr, isOnline) {
             const lastSeen = new Date(lastSeenStr);
             const now = new Date();
@@ -1167,18 +1011,10 @@
         }
 
         function setupLiveStatusUpdates(userId) {
-            if (statusSubscription) {
-                supabaseClient.removeChannel(statusSubscription);
-            }
-            
+            if (statusSubscription) supabaseClient.removeChannel(statusSubscription);
             statusSubscription = supabaseClient
                 .channel('user-status:' + userId)
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'ngm_users',
-                    filter: 'user_id=eq.' + userId
-                }, payload => {
+                .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'ngm_users', filter: 'user_id=eq.' + userId}, payload => {
                     otherUserData = payload.new;
                     const statusEl = document.getElementById('chatStatus');
                     statusEl.textContent = formatLastSeen(payload.new.last_seen, payload.new.is_online);
@@ -1186,22 +1022,15 @@
                 .subscribe();
         }
 
-        // ==================== CHAT DETAILS ====================
         async function loadChatDetails() {
             try {
-                const { data: chat, error: chatError } = await supabaseClient
-                    .from('ngm_chats')
-                    .select('*')
-                    .eq('chat_id', currentChatId)
-                    .single();
-
+                const {data: chat, error: chatError} = await supabaseClient.from('ngm_chats').select('*').eq('chat_id', currentChatId).single();
                 if (chatError) throw chatError;
                 currentChatData = chat;
 
                 if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
                     const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
-                    
-                    const { data: userData, error: userError } = await supabaseClient
+                    const {data: userData, error: userError} = await supabaseClient
                         .from('ngm_users')
                         .select('full_name, username, profile_picture_url, is_online, last_seen')
                         .eq('user_id', otherUserId)
@@ -1210,7 +1039,7 @@
                     if (userError) throw userError;
                     otherUserData = userData;
 
-                    const { data: contactData } = await supabaseClient
+                    const {data: contactData} = await supabaseClient
                         .from('ngm_contacts')
                         .select('contact_name')
                         .eq('user_id', currentUser.id)
@@ -1236,19 +1065,15 @@
             }
         }
 
-        // ==================== MESSAGE ACTIONS ====================
         function showMessageActionMenu(messageId, x, y) {
             currentActionMessage = messageId;
             const menu = document.getElementById('messageActionMenu');
-            
             const menuWidth = 220;
             const menuHeight = 300;
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
-            
             let left = Math.min(x, screenWidth - menuWidth - 10);
             let top = Math.max(Math.min(y - menuHeight/2, screenHeight - menuHeight - 10), 10);
-            
             menu.style.left = left + 'px';
             menu.style.top = top + 'px';
             menu.classList.add('show');
@@ -1270,11 +1095,7 @@
             if (!currentActionMessage) return;
             const msg = messagesMap.get(currentActionMessage);
             if (msg) {
-                navigator.clipboard.writeText(msg.content).then(() => {
-                    alert('Message copied!');
-                }).catch(() => {
-                    alert('Failed to copy');
-                });
+                navigator.clipboard.writeText(msg.content).then(() => alert('Message copied!')).catch(() => alert('Failed to copy'));
             }
             closeMessageActionMenu();
         }
@@ -1288,13 +1109,8 @@
                     try {
                         await supabaseClient
                             .from('ngm_messages')
-                            .update({ 
-                                content: newContent.trim(),
-                                is_edited: true,
-                                edited_at: new Date().toISOString()
-                            })
+                            .update({content: newContent.trim(), is_edited: true, edited_at: new Date().toISOString()})
                             .eq('message_id', currentActionMessage);
-                        
                         msg.content = newContent.trim();
                         msg.is_edited = true;
                         renderMessages(true);
@@ -1320,21 +1136,16 @@
             if (confirm('Delete this message?')) {
                 const msg = messagesMap.get(currentActionMessage);
                 if (msg && msg.sender_id === currentUser.id) {
-                    supabaseClient
-                        .from('ngm_messages')
-                        .update({ is_deleted: true })
-                        .eq('message_id', currentActionMessage)
-                        .then(() => {
-                            messages = messages.filter(m => m.message_id !== currentActionMessage);
-                            messagesMap.delete(currentActionMessage);
-                            renderMessages(true);
-                        });
+                    supabaseClient.from('ngm_messages').update({is_deleted: true}).eq('message_id', currentActionMessage).then(() => {
+                        messages = messages.filter(m => m.message_id !== currentActionMessage);
+                        messagesMap.delete(currentActionMessage);
+                        renderMessages(true);
+                    });
                 }
             }
             closeMessageActionMenu();
         }
 
-        // ==================== SELECTION MODE ====================
         function enterSelectionMode() {
             isSelectionMode = true;
             document.getElementById('header').classList.add('selection-mode');
@@ -1351,6 +1162,19 @@
             renderMessages(true);
         }
 
+        function toggleMessageSelection(messageId) {
+            if (selectedMessages.has(messageId)) {
+                selectedMessages.delete(messageId);
+            } else {
+                selectedMessages.add(messageId);
+            }
+            if (selectedMessages.size === 0) {
+                exitSelectionMode();
+            } else {
+                updateSelectionUI();
+            }
+        }
+
         function updateSelectionUI() {
             document.getElementById('selectionCount').textContent = selectedMessages.size;
             renderMessages(true);
@@ -1365,7 +1189,6 @@
             });
         }
 
-        // ==================== HELPER FUNCTIONS ====================
         function closeAllModals() {
             document.getElementById('modalOverlay').classList.remove('show');
             closeMessageActionMenu();
@@ -1387,9 +1210,8 @@
             alert('Menu feature');
         }
 
-        // ==================== INITIALIZATION ====================
         async function checkAuth() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
+            const {data: {user}} = await supabaseClient.auth.getUser();
             if (!user) {
                 window.location.href = 'login.html';
                 return null;
@@ -1400,7 +1222,6 @@
 
         window.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 Nandigram Chat Fixed - Starting...');
-            
             const urlParams = new URLSearchParams(window.location.search);
             currentChatId = urlParams.get('chat_id');
 
@@ -1412,27 +1233,16 @@
 
             initSupabase();
             setupKeyboardHandling();
-            
             const user = await checkAuth();
             
             if (user) {
-                await supabaseClient
-                    .from('ngm_users')
-                    .update({ 
-                        is_online: true,
-                        last_seen: new Date().toISOString()
-                    })
-                    .eq('user_id', user.id);
-                
+                await supabaseClient.from('ngm_users').update({is_online: true, last_seen: new Date().toISOString()}).eq('user_id', user.id);
                 await loadChatDetails();
                 await loadMessages();
                 setupRealtimeSubscription();
-                
                 const messagesArea = document.getElementById('messagesArea');
                 messagesArea.addEventListener('scroll', checkIfAtBottomThrottled);
-                
-                console.log('✅ Chat initialized successfully!');
-                console.log('📊 Messages loaded:', messages.length);
+                console.log('✅ Chat initialized!');
             }
         });
 
@@ -1440,27 +1250,18 @@
             if (messagesSubscription) supabaseClient.removeChannel(messagesSubscription);
             if (statusSubscription) supabaseClient.removeChannel(statusSubscription);
             if (typingSubscription) supabaseClient.removeChannel(typingSubscription);
-            
             if (currentUser && currentChatId) {
                 setTypingStatusDebounced(false);
-                supabaseClient
-                    .from('ngm_users')
-                    .update({ 
-                        is_online: false,
-                        last_seen: new Date().toISOString()
-                    })
-                    .eq('user_id', currentUser.id);
+                supabaseClient.from('ngm_users').update({is_online: false, last_seen: new Date().toISOString()}).eq('user_id', currentUser.id);
             }
         });
 
-        // Click outside to close menus
         document.addEventListener('click', function(e) {
             const menu = document.getElementById('messageActionMenu');
             if (menu.classList.contains('show') && !menu.contains(e.target)) {
                 closeMessageActionMenu();
             }
         });
-
     </script>
 </body>
 </html>
