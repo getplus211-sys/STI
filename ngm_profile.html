@@ -168,21 +168,21 @@
         .action-buttons {
             padding: 16px;
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
         .action-btn {
             flex: 1;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
             border: none;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             transition: all 0.2s;
         }
 
@@ -805,7 +805,18 @@
         function updateStatus(isOnline, lastSeen) {
             const statusEl = document.getElementById('profileStatus');
             if (isOnline) {
-                statusEl.innerHTML = '<div class="online-dot"></div> Online';
+                // Check if last_seen is within last 60 seconds
+                const lastSeenDate = new Date(lastSeen);
+                const now = new Date();
+                const diffMs = now - lastSeenDate;
+                const diffSeconds = Math.floor(diffMs / 1000);
+                
+                if (diffSeconds < 60) {
+                    statusEl.innerHTML = '<div class="online-dot"></div> Online';
+                } else {
+                    const lastSeenText = formatLastSeen(lastSeen);
+                    statusEl.innerHTML = lastSeenText;
+                }
             } else if (lastSeen) {
                 const lastSeenText = formatLastSeen(lastSeen);
                 statusEl.innerHTML = lastSeenText;
@@ -957,7 +968,15 @@
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
                         </svg>
-                        Create Story
+                        Story
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="shareProfile()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                        Share
                     </button>
                 `;
             } else {
@@ -969,7 +988,7 @@
                         Message
                     </button>
                     <button class="action-btn action-btn-secondary" onclick="toggleFollow()" id="followBtn">
-                        ${isFollowing ? 'Followed' : 'Follow'}
+                        ${isFollowing ? 'Following' : 'Follow'}
                     </button>
                 `;
             }
@@ -1358,7 +1377,7 @@
         }
 
         function createStory() {
-            window.location.href = 'ngm_create_post.html?type=story';
+            window.location.href = 'ngm_create_story.html';
         }
 
         function goBack() {
