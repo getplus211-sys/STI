@@ -449,6 +449,58 @@
                     </div>
                 `;
 
+                // Check privacy settings if viewing someone else's list
+                if (profileUserId !== currentUser.id) {
+                    const { data: settings } = await supabaseClient
+                        .from('ngm_user_settings')
+                        .select('last_seen_visible, online_status_visible')
+                        .eq('user_id', profileUserId)
+                        .single();
+
+                    // If user has hidden their info, check if current user is in contacts
+                    if (settings) {
+                        const isContactsSetting = settings.last_seen_visible === 'contacts' || settings.online_status_visible === 'contacts';
+                        
+                        if (isContactsSetting) {
+                            const { data: contactCheck } = await supabaseClient
+                                .from('ngm_contacts')
+                                .select('contact_id')
+                                .eq('user_id', profileUserId)
+                                .eq('contact_user_id', currentUser.id)
+                                .single();
+
+                            if (!contactCheck) {
+                                // Not in contacts, don't show list
+                                document.getElementById('userList').innerHTML = `
+                                    <div class="empty-state">
+                                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                        </svg>
+                                        <div class="empty-title">Private</div>
+                                        <div class="empty-description">This user has set their ${currentTab} list to private</div>
+                                    </div>
+                                `;
+                                return;
+                            }
+                        }
+                        
+                        if (settings.last_seen_visible === 'nobody' || settings.online_status_visible === 'nobody') {
+                            document.getElementById('userList').innerHTML = `
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                    </svg>
+                                    <div class="empty-title">Private</div>
+                                    <div class="empty-description">This user has hidden their ${currentTab} list</div>
+                                </div>
+                            `;
+                            return;
+                        }
+                    }
+                }
+
                 let query;
                 if (currentTab === 'followers') {
                     // Get followers
