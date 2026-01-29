@@ -950,43 +950,76 @@
         }
 
         async function startChatWithContact(contactUserId) {
-            // Check if chat already exists
-            const existingChat = allChats.find(chat => 
-                chat.type === 'private' && 
-                (chat.participantData.ngm_chats.user1_id === contactUserId || 
-                 chat.participantData.ngm_chats.user2_id === contactUserId)
-            );
+            try {
+                // First check if a private chat already exists with this user
+                const { data: existingChats, error: checkError } = await supabaseClient
+                    .from('ngm_chats')
+                    .select('chat_id')
+                    .eq('chat_type', 'private')
+                    .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${contactUserId}),and(user1_id.eq.${contactUserId},user2_id.eq.${currentUser.id})`);
 
-            if (existingChat) {
-                openChat(existingChat.id);
-            } else {
-                // Create new private chat
-                try {
-                    const { data: newChat, error } = await supabaseClient
-                        .from('ngm_chats')
-                        .insert({
-                            chat_type: 'private',
-                            user1_id: currentUser.id,
-                            user2_id: contactUserId
-                        })
-                        .select()
-                        .single();
+                if (checkError) {
+                    console.error('Error checking existing chat:', checkError);
+                    throw checkError;
+                }
 
-                    if (error) throw error;
+                if (existingChats && existingChats.length > 0) {
+                    // Chat already exists, open it
+                    console.log('Chat already exists, opening:', existingChats[0].chat_id);
+                    openChat(existingChats[0].chat_id);
+                    closeNewChatModal();
+                    return;
+                }
 
-                    // Add participants
-                    await supabaseClient.from('ngm_chat_participants').insert([
-                        { chat_id: newChat.chat_id, user_id: currentUser.id, role: 'member' },
-                        { chat_id: newChat.chat_id, user_id: contactUserId, role: 'member' }
+                // No existing chat found, create new one
+                const { data: newChat, error } = await supabaseClient
+                    .from('ngm_chats')
+                    .insert({
+                        chat_type: 'private',
+                        user1_id: currentUser.id,
+                        user2_id: contactUserId,
+                        created_at: new Date().toISOString()
+                    })
+                    .select()
+                    .single();
+
+                if (error) {
+                    console.error('Error creating chat:', error);
+                    throw error;
+                }
+
+                // Add participants
+                const { error: participantsError } = await supabaseClient
+                    .from('ngm_chat_participants')
+                    .insert([
+                        { 
+                            chat_id: newChat.chat_id, 
+                            user_id: currentUser.id, 
+                            role: 'member',
+                            joined_at: new Date().toISOString()
+                        },
+                        { 
+                            chat_id: newChat.chat_id, 
+                            user_id: contactUserId, 
+                            role: 'member',
+                            joined_at: new Date().toISOString()
+                        }
                     ]);
 
-                    openChat(newChat.chat_id);
-                } catch (error) {
-                    console.error('Error creating chat:', error);
-                    alert('Failed to create chat');
+                if (participantsError) {
+                    console.error('Error adding participants:', participantsError);
+                    throw participantsError;
                 }
+
+                console.log('New chat created:', newChat.chat_id);
+                openChat(newChat.chat_id);
+                closeNewChatModal();
+
+            } catch (error) {
+                console.error('Error in startChatWithContact:', error);
+                alert('Failed to start chat. Please try again.');
+                closeNewChatModal();
             }
-            closeNewChatModal();
         }
 
         function openChat(chatId) {
