@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Story - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: black;
+            color: white;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: black;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .story-btn {
+            padding: 8px 20px;
+            background: #0095f6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .story-btn:active {
+            opacity: 0.8;
+        }
+
+        .story-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Photo Upload */
+        .upload-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .upload-area {
+            width: 100%;
+            aspect-ratio: 9/16;
+            max-height: 70vh;
+            border: 3px dashed rgba(255,255,255,0.3);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:active {
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .story-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .story-preview.active {
+            display: block;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            border: none;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .remove-btn.active {
+            display: flex;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Caption */
+        .caption-section {
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .caption-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .caption-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 16px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Creating story...</div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="close-btn" onclick="handleClose()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="header-title">Create Story</div>
+            <button class="story-btn" id="storyBtn" onclick="createStory()" disabled>Share</button>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="upload-section">
+            <div class="upload-area" onclick="selectPhoto()">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <div class="upload-text">Add Photo</div>
+                <div class="upload-hint">Tap to select a photo</div>
+                
+                <img id="storyPreview" class="story-preview" alt="Story Preview">
+                
+                <button class="remove-btn" id="removeBtn" onclick="removePhoto(event)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Caption -->
+        <div class="caption-section">
+            <input 
+                type="text" 
+                class="caption-input" 
+                id="captionInput" 
+                placeholder="Add a caption..."
+                maxlength="100"
+            >
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let selectedFile = null;
+        const MAX_FILE_SIZE = 100 * 1024; // 100KB
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        function selectPhoto() {
+            document.getElementById('fileInput').click();
+        }
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Only images are allowed');
+                return;
+            }
+
+            // Compress image
+            selectedFile = await compressImage(file);
+
+            // Preview
+            const preview = document.getElementById('storyPreview');
+            preview.src = selectedFile.preview;
+            preview.classList.add('active');
+            
+            document.getElementById('removeBtn').classList.add('active');
+            document.getElementById('storyBtn').disabled = false;
+
+            event.target.value = '';
+        }
+
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        
+                        // Story dimensions (9:16 aspect ratio)
+                        const maxWidth = 1080;
+                        const maxHeight = 1920;
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Scale to fit story dimensions
+                        if (width / height > maxWidth / maxHeight) {
+                            width = maxWidth;
+                            height = (img.height / img.width) * maxWidth;
+                        } else {
+                            height = maxHeight;
+                            width = (img.width / img.height) * maxHeight;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress
+                        let quality = 0.7;
+                        
+                        function tryCompress() {
+                            canvas.toBlob((blob) => {
+                                if (blob.size > MAX_FILE_SIZE && quality > 0.1) {
+                                    quality -= 0.1;
+                                    tryCompress();
+                                } else {
+                                    const compressed = new File([blob], file.name, { type: 'image/jpeg' });
+                                    Object.defineProperty(compressed, 'preview', {
+                                        value: canvas.toDataURL('image/jpeg', quality)
+                                    });
+                                    resolve(compressed);
+                                }
+                            }, 'image/jpeg', quality);
+                        }
+                        
+                        tryCompress();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removePhoto(event) {
+            event.stopPropagation();
+            
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('storyPreview').classList.remove('active');
+            document.getElementById('removeBtn').classList.remove('active');
+            document.getElementById('storyBtn').disabled = true;
+        }
+
+        async function uploadPhoto() {
+            if (!selectedFile) return null;
+
+            try {
+                const fileExt = 'jpg';
+                const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+                const filePath = `stories/${fileName}`;
+
+                const { data, error } = await supabaseClient.storage
+                    .from('user-uploads')
+                    .upload(filePath, selectedFile, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabaseClient.storage
+                    .from('user-uploads')
+                    .getPublicUrl(filePath);
+
+                return publicUrl;
+
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                throw error;
+            }
+        }
+
+        async function createStory() {
+            if (!selectedFile) {
+                alert('Please select a photo');
+                return;
+            }
+
+            const caption = document.getElementById('captionInput').value.trim();
+
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('storyBtn').disabled = true;
+
+            try {
+                // Upload photo
+                const photoUrl = await uploadPhoto();
+
+                // Calculate expiry (24 hours)
+                const expiresAt = new Date();
+                expiresAt.setHours(expiresAt.getHours() + 24);
+
+                // Create story
+                const { error } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .insert({
+                        user_id: currentUser.id,
+                        post_type: 'story',
+                        content: caption || null,
+                        media_url: photoUrl,
+                        media_type: 'image',
+                        thumbnail_url: photoUrl,
+                        is_public: true,
+                        expires_at: expiresAt.toISOString()
+                    });
+
+                if (error) throw error;
+
+                alert('Story created! It will disappear in 24 hours.');
+                window.location.href = 'ngm_profile.html';
+
+            } catch (error) {
+                console.error('Error creating story:', error);
+                alert('Failed to create story: ' + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.remove('active');
+                document.getElementById('storyBtn').disabled = false;
+            }
+        }
+
+        function handleClose() {
+            if (selectedFile) {
+                if (confirm('Discard this story?')) {
+                    window.history.back();
+                }
+            } else {
+                window.history.back();
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            await checkAuth();
+        });
+    </script>
+</body>
+</html>
