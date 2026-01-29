@@ -915,13 +915,13 @@
 
                 isBlocked = blockedData && blockedData.length > 0;
 
-                // Check if muted
+                // Check if chat exists
                 const { data: chatData } = await supabaseClient
                     .from('ngm_chats')
                     .select('chat_id')
                     .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${profileUserId}),and(user1_id.eq.${profileUserId},user2_id.eq.${currentUser.id})`)
                     .eq('chat_type', 'private')
-                    .single();
+                    .maybeSingle();
 
                 if (chatData) {
                     chatId = chatData.chat_id;
@@ -930,7 +930,7 @@
                         .select('is_muted')
                         .eq('chat_id', chatData.chat_id)
                         .eq('user_id', currentUser.id)
-                        .single();
+                        .maybeSingle();
 
                     isMuted = participantData?.is_muted || false;
                 }
@@ -941,7 +941,7 @@
                     .select('follow_id')
                     .eq('follower_user_id', currentUser.id)
                     .eq('following_user_id', profileUserId)
-                    .single();
+                    .maybeSingle();
 
                 isFollowing = !!followData;
 
@@ -1160,36 +1160,70 @@
         }
 
         async function sendMessage() {
-            if (!chatId) {
-                // Create new chat
-                try {
-                    const { data: newChat, error } = await supabaseClient
+            try {
+                // First, check if chat already exists
+                if (!chatId) {
+                    const { data: existingChat } = await supabaseClient
                         .from('ngm_chats')
-                        .insert({
-                            chat_type: 'private',
-                            user1_id: currentUser.id,
-                            user2_id: profileUserId
-                        })
-                        .select()
-                        .single();
+                        .select('chat_id')
+                        .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${profileUserId}),and(user1_id.eq.${profileUserId},user2_id.eq.${currentUser.id})`)
+                        .eq('chat_type', 'private')
+                        .maybeSingle();
 
-                    if (error) throw error;
+                    if (existingChat) {
+                        chatId = existingChat.chat_id;
+                    } else {
+                        // Create new chat
+                        const { data: newChat, error: chatError } = await supabaseClient
+                            .from('ngm_chats')
+                            .insert({
+                                chat_type: 'private',
+                                user1_id: currentUser.id,
+                                user2_id: profileUserId,
+                                created_at: new Date().toISOString()
+                            })
+                            .select()
+                            .single();
 
-                    // Add participants
-                    await supabaseClient.from('ngm_chat_participants').insert([
-                        { chat_id: newChat.chat_id, user_id: currentUser.id, role: 'member' },
-                        { chat_id: newChat.chat_id, user_id: profileUserId, role: 'member' }
-                    ]);
+                        if (chatError) {
+                            console.error('Chat creation error:', chatError);
+                            throw chatError;
+                        }
 
-                    chatId = newChat.chat_id;
-                } catch (error) {
-                    console.error('Error creating chat:', error);
-                    alert('Failed to create chat');
-                    return;
+                        // Add participants
+                        const { error: participantsError } = await supabaseClient
+                            .from('ngm_chat_participants')
+                            .insert([
+                                { 
+                                    chat_id: newChat.chat_id, 
+                                    user_id: currentUser.id, 
+                                    role: 'member',
+                                    joined_at: new Date().toISOString()
+                                },
+                                { 
+                                    chat_id: newChat.chat_id, 
+                                    user_id: profileUserId, 
+                                    role: 'member',
+                                    joined_at: new Date().toISOString()
+                                }
+                            ]);
+
+                        if (participantsError) {
+                            console.error('Participants error:', participantsError);
+                            throw participantsError;
+                        }
+
+                        chatId = newChat.chat_id;
+                    }
                 }
-            }
 
-            window.location.href = `ngm_chat_window.html?chat_id=${chatId}`;
+                // Redirect to chat window
+                window.location.href = `ngm_chat_window.html?chat_id=${chatId}`;
+
+            } catch (error) {
+                console.error('Error in sendMessage:', error);
+                alert('Failed to open chat. Please try again.');
+            }
         }
 
         async function toggleFollow() {
