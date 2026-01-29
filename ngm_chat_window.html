@@ -216,6 +216,17 @@
             z-index: 99;
             min-height: 64px;
         }
+        .input-area.blocked {
+            background: #fef2f2;
+            padding: 16px;
+            justify-content: center;
+        }
+        .blocked-message {
+            text-align: center;
+            color: #ef4444;
+            font-size: 14px;
+            font-weight: 500;
+        }
         .message-input {
             flex: 1;
             border: 1px solid #e5e7eb;
@@ -489,6 +500,8 @@
         let otherUserId = null;
         let isKeyboardOpen = false;
         let originalViewportHeight = window.innerHeight;
+        let isBlockedByMe = false;
+        let isBlockedByOther = false;
 
         function debounce(func, wait) {
             let timeout;
@@ -929,6 +942,11 @@
         }
 
         function handleInput() {
+            // Check if blocked before allowing input
+            if (isBlockedByMe || isBlockedByOther) {
+                return;
+            }
+
             const input = document.getElementById('messageInput');
             const sendBtn = document.getElementById('sendBtn');
             
@@ -947,6 +965,12 @@
         }
 
         async function sendMessage() {
+            // Check if blocked
+            if (isBlockedByMe || isBlockedByOther) {
+                alert('Cannot send message. This user is blocked.');
+                return;
+            }
+
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             if (!message) return;
@@ -1007,7 +1031,9 @@
             if (diffHours < 24) return `last seen ${diffHours} hours ago`;
             if (diffDays === 1) return 'last seen yesterday';
             if (diffDays < 7) return `last seen ${diffDays} days ago`;
-            return 'last seen ' + lastSeen.toLocaleDateString();
+            if (diffDays < 30) return `last seen ${Math.ceil(diffDays / 7)} weeks ago`;
+            if (diffDays < 365) return `last seen ${Math.ceil(diffDays / 30)} months ago`;
+            return 'last seen long time ago';
         }
 
         function setupLiveStatusUpdates(userId) {
@@ -1022,6 +1048,52 @@
                 .subscribe();
         }
 
+        async function checkBlockedStatus(otherUserId) {
+            try {
+                // Check if current user blocked the other user
+                const { data: blockedByMe } = await supabaseClient
+                    .from('ngm_blocked_users')
+                    .select('block_id')
+                    .eq('user_id', currentUser.id)
+                    .eq('blocked_user_id', otherUserId)
+                    .maybeSingle();
+
+                isBlockedByMe = !!blockedByMe;
+
+                // Check if other user blocked current user
+                const { data: blockedByOther } = await supabaseClient
+                    .from('ngm_blocked_users')
+                    .select('block_id')
+                    .eq('user_id', otherUserId)
+                    .eq('blocked_user_id', currentUser.id)
+                    .maybeSingle();
+
+                isBlockedByOther = !!blockedByOther;
+
+                // If either is blocked, disable messaging
+                if (isBlockedByMe || isBlockedByOther) {
+                    disableMessaging();
+                }
+
+            } catch (error) {
+                console.error('Error checking blocked status:', error);
+            }
+        }
+
+        function disableMessaging() {
+            const inputArea = document.getElementById('inputArea');
+            inputArea.classList.add('blocked');
+            
+            let blockMessage = '';
+            if (isBlockedByMe) {
+                blockMessage = 'You have blocked this user. Unblock to send messages.';
+            } else if (isBlockedByOther) {
+                blockMessage = 'You cannot send messages to this user.';
+            }
+            
+            inputArea.innerHTML = `<div class="blocked-message">${blockMessage}</div>`;
+        }
+
         async function loadChatDetails() {
             try {
                 const {data: chat, error: chatError} = await supabaseClient.from('ngm_chats').select('*').eq('chat_id', currentChatId).single();
@@ -1030,6 +1102,10 @@
 
                 if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
                     const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
+                    
+                    // Check blocked status first
+                    await checkBlockedStatus(otherUserId);
+
                     const {data: userData, error: userError} = await supabaseClient
                         .from('ngm_users')
                         .select('full_name, username, profile_picture_url, is_online, last_seen')
@@ -1057,7 +1133,11 @@
                     }
                     
                     setupLiveStatusUpdates(otherUserId);
-                    setupTypingIndicator(otherUserId);
+                    
+                    // Only setup typing if not blocked
+                    if (!isBlockedByMe && !isBlockedByOther) {
+                        setupTypingIndicator(otherUserId);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading chat details:', error);
