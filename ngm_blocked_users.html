@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blocked Users - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: white;
+            padding: 0 16px 12px 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 90px;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Content */
+        .content {
+            padding: 16px;
+        }
+
+        .info-banner {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        /* User List */
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .user-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-username {
+            font-size: 14px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .blocked-date {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .unblock-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #ef4444;
+            background: white;
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .unblock-btn:active {
+            background: #fef2f2;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .empty-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #16a34a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 16px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Confirmation Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 340px;
+            width: 100%;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .modal-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .modal-btn-confirm {
+            background: #16a34a;
+            color: white;
+        }
+
+        .modal-btn:active {
+            opacity: 0.8;
+        }
+
+        /* Stats */
+        .stats-bar {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ef4444;
+            margin-bottom: 4px;
+        }
+
+        .stats-label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="header-title">Blocked Users</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Info Banner -->
+            <div class="info-banner">
+                <div class="info-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div class="info-text">
+                    Blocked users cannot send you messages, see your posts, or interact with your content.
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-bar" id="statsBar">
+                <div class="stats-number" id="blockedCount">0</div>
+                <div class="stats-label">Blocked Users</div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading" id="loadingState">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading blocked users...</div>
+            </div>
+
+            <!-- User List -->
+            <div class="user-list hidden" id="userList">
+                <!-- Users will be loaded here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state hidden" id="emptyState">
+                <div class="empty-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="17" y1="11" x2="23" y2="11"/>
+                    </svg>
+                </div>
+                <div class="empty-title">No Blocked Users</div>
+                <div class="empty-subtitle">You haven't blocked anyone yet. Blocked users will appear here.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unblock Confirmation Modal -->
+    <div class="modal-overlay" id="unblockModal">
+        <div class="modal">
+            <div class="modal-title">Unblock User?</div>
+            <div class="modal-text" id="modalText">
+                Are you sure you want to unblock this user? They will be able to message you and see your content again.
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmUnblock()">Unblock</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let blockedUsers = [];
+        let selectedBlockId = null;
+        let selectedUserName = '';
+
+        const colors = ['#e74c3c', '#3498db', '#9b59b6', '#1abc9c', '#f39c12', '#e91e63', '#00bcd4', '#ff5722'];
+
+        function getAvatarColor(name) {
+            if (!name) return colors[0];
+            const index = name.charCodeAt(0) % colors.length;
+            return colors[index];
+        }
+
+        function getInitial(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        }
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        async function loadBlockedUsers() {
+            try {
+                // Get blocked users with their details
+                const { data: blocks, error } = await supabaseClient
+                    .from('ngm_blocked_users')
+                    .select(`
+                        block_id,
+                        blocked_user_id,
+                        blocked_at,
+                        blocked_user:ngm_users!ngm_blocked_users_blocked_user_id_fkey(
+                            user_id,
+                            full_name,
+                            username,
+                            profile_picture_url
+                        )
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .order('blocked_at', { ascending: false });
+
+                if (error) throw error;
+
+                blockedUsers = blocks || [];
+
+                // Update stats
+                document.getElementById('blockedCount').textContent = blockedUsers.length;
+
+                // Hide loading
+                document.getElementById('loadingState').classList.add('hidden');
+
+                // Show list or empty state
+                if (blockedUsers.length === 0) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                } else {
+                    renderBlockedUsers();
+                    document.getElementById('userList').classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Error loading blocked users:', error);
+                document.getElementById('loadingState').innerHTML = '<p style="color: #ef4444;">Failed to load blocked users</p>';
+            }
+        }
+
+        function renderBlockedUsers() {
+            const userList = document.getElementById('userList');
+            
+            userList.innerHTML = blockedUsers.map(block => {
+                const user = block.blocked_user;
+                const name = user.full_name || user.username || 'User';
+                const username = user.username ? '@' + user.username : '';
+                const blockedDate = formatDate(block.blocked_at);
+
+                let avatarHtml = '';
+                if (user.profile_picture_url) {
+                    avatarHtml = `<div class="user-avatar" style="background-image: url('${user.profile_picture_url}');"></div>`;
+                } else {
+                    avatarHtml = `<div class="user-avatar" style="background: ${getAvatarColor(name)};">${getInitial(name)}</div>`;
+                }
+
+                return `
+                    <div class="user-item">
+                        ${avatarHtml}
+                        <div class="user-info">
+                            <div class="user-name">${name}</div>
+                            ${username ? `<div class="user-username">${username}</div>` : ''}
+                            <div class="blocked-date">Blocked ${blockedDate}</div>
+                        </div>
+                        <button class="unblock-btn" onclick="showUnblockModal('${block.block_id}', '${name}')">
+                            Unblock
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showUnblockModal(blockId, userName) {
+            selectedBlockId = blockId;
+            selectedUserName = userName;
+            document.getElementById('modalText').textContent = 
+                `Are you sure you want to unblock ${userName}? They will be able to message you and see your content again.`;
+            document.getElementById('unblockModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('unblockModal').classList.remove('active');
+            selectedBlockId = null;
+            selectedUserName = '';
+        }
+
+        async function confirmUnblock() {
+            if (!selectedBlockId) return;
+
+            try {
+                // Delete block record
+                const { error } = await supabaseClient
+                    .from('ngm_blocked_users')
+                    .delete()
+                    .eq('block_id', selectedBlockId);
+
+                if (error) throw error;
+
+                // Remove from local array
+                blockedUsers = blockedUsers.filter(b => b.block_id !== selectedBlockId);
+
+                // Update UI
+                document.getElementById('blockedCount').textContent = blockedUsers.length;
+                
+                if (blockedUsers.length === 0) {
+                    document.getElementById('userList').classList.add('hidden');
+                    document.getElementById('emptyState').classList.remove('hidden');
+                } else {
+                    renderBlockedUsers();
+                }
+
+                // Show success message
+                showToast(`${selectedUserName} has been unblocked`);
+
+                closeModal();
+
+            } catch (error) {
+                console.error('Error unblocking user:', error);
+                alert('Failed to unblock user. Please try again.');
+            }
+        }
+
+        function showToast(message) {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #111827;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 10000;
+                animation: slideUp 0.3s;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideDown 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            const user = await checkAuth();
+            if (user) {
+                await loadBlockedUsers();
+            }
+        });
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+            @keyframes slideDown {
+                from { transform: translateX(-50%) translateY(0); opacity: 1; }
+                to { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
