@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#16a34a">
+    <meta name="theme-color" content="#FF6F00">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Chat - Nandigram</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --vh: 1vh;
+            --primary-color: #FF6F00;
+            --primary-dark: #E65100;
+            --primary-light: #FF8F00;
+            --primary-bg: #FFF3E0;
+            --primary-text: #FF6F00;
         }
         
         * {
@@ -60,15 +64,14 @@
             overflow: hidden;
         }
         
-        /* Header Styles */
+        /* Header Styles - 60px */
         .header {
             position: relative;
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: white;
-            min-height: 60px;
+            height: 60px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            align-items: flex-end;
             padding: 8px 16px;
             z-index: 100;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -83,11 +86,13 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            width: 100%;
+            padding-bottom: 4px;
         }
         
         .back-btn, .menu-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: none;
             background: rgba(255,255,255,0.1);
             border-radius: 50%;
@@ -104,15 +109,16 @@
         }
         
         .avatar-small {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: #10b981;
+            background: var(--primary-light);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
+            font-size: 14px;
             background-size: cover;
             background-position: center;
             cursor: pointer;
@@ -127,15 +133,17 @@
         
         .chat-name {
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.2;
         }
         
         .chat-status {
-            font-size: 12px;
+            font-size: 11px;
             opacity: 0.9;
+            line-height: 1.2;
         }
         
         .chat-status.typing {
@@ -167,12 +175,12 @@
         
         .header-actions {
             display: flex;
-            gap: 8px;
+            gap: 4px;
         }
         
         .icon-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: none;
             background: rgba(255,255,255,0.1);
             border-radius: 50%;
@@ -189,12 +197,187 @@
         }
         
         .selection-count {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            padding: 8px;
+            padding: 6px 8px;
+            color: white;
         }
         
-        /* Messages Area */
+        /* Search Bar - Sticky below header */
+        .search-bar {
+            position: sticky;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 8px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 99;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .search-bar.show {
+            display: flex;
+        }
+        
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 8px 36px 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .search-clear {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+        
+        .search-clear.show {
+            display: flex;
+        }
+        
+        .search-results-count {
+            font-size: 12px;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+        
+        .search-nav {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .search-nav button {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            border-radius: 50%;
+        }
+        
+        .search-nav button:active {
+            background: #f3f4f6;
+        }
+        
+        .search-nav button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .search-highlight {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        
+        /* Pinned Message Bar */
+        .pinned-message-bar {
+            background: var(--primary-bg);
+            padding: 8px 16px;
+            border-bottom: 1px solid #FFE0B2;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .pinned-message-bar.show {
+            display: flex;
+        }
+        
+        .pinned-icon {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        
+        .pinned-content {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+        
+        .pinned-title {
+            font-size: 11px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .pinned-text {
+            font-size: 13px;
+            color: var(--primary-dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .pinned-close {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        /* Unread Divider */
+        .unread-divider {
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .unread-divider::before,
+        .unread-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--primary-color);
+        }
+        
+        .unread-divider span {
+            color: var(--primary-color);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            background: var(--primary-bg);
+            border-radius: 12px;
+        }
+        
+        /* Messages Wrapper */
         .messages-wrapper {
             flex: 1;
             position: relative;
@@ -227,7 +410,6 @@
             background: rgba(0,0,0,0.2);
             border-radius: 3px;
         }
-        
         /* Date Divider */
         .date-divider {
             text-align: center;
@@ -243,12 +425,13 @@
             display: inline-block;
         }
         
-        /* Message Containers */
+        /* Message Containers with Swipe */
         .message-container {
             margin-bottom: 8px;
             display: flex;
             position: relative;
             animation: messageSlideIn 0.2s ease-out;
+            transition: transform 0.2s ease-out;
         }
         
         @keyframes messageSlideIn {
@@ -274,6 +457,10 @@
             background: #b3d9ff !important;
         }
         
+        .message-container.swiping {
+            transform: translateX(var(--swipe-amount, 0));
+        }
+        
         .message {
             max-width: 70%;
             padding: 8px 12px;
@@ -286,7 +473,7 @@
         }
         
         .message-sent {
-            background: #dcf8c6;
+            background: #FFE0B2;
             border-bottom-right-radius: 2px;
         }
         
@@ -315,7 +502,7 @@
         
         .message-reply-preview {
             background: rgba(0, 0, 0, 0.05);
-            border-left: 3px solid #16a34a;
+            border-left: 3px solid var(--primary-color);
             padding: 6px 8px;
             margin-bottom: 6px;
             border-radius: 4px;
@@ -329,7 +516,7 @@
         
         .reply-sender {
             font-weight: 600;
-            color: #16a34a;
+            color: var(--primary-color);
             font-size: 12px;
             margin-bottom: 2px;
         }
@@ -339,6 +526,26 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+        
+        .message-deleted {
+            font-style: italic;
+            color: #9ca3af;
+        }
+        
+        /* Reply Icon on Swipe */
+        .reply-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: #6b7280;
+        }
+        
+        .message-container.swiping .reply-icon {
+            opacity: 1;
         }
         
         /* Media Messages */
@@ -376,7 +583,7 @@
         .document-icon {
             width: 40px;
             height: 40px;
-            background: #16a34a;
+            background: var(--primary-color);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -416,7 +623,7 @@
         .voice-play-btn {
             width: 36px;
             height: 36px;
-            background: #16a34a;
+            background: var(--primary-color);
             border: none;
             border-radius: 50%;
             display: flex;
@@ -428,7 +635,7 @@
         }
         
         .voice-play-btn:active {
-            background: #15803d;
+            background: var(--primary-dark);
         }
         
         .voice-waveform {
@@ -441,7 +648,7 @@
         
         .voice-bar {
             flex: 1;
-            background: rgba(22, 163, 74, 0.3);
+            background: rgba(255, 111, 0, 0.3);
             border-radius: 2px;
             transition: height 0.1s;
         }
@@ -451,7 +658,8 @@
             color: #6b7280;
             flex-shrink: 0;
         }
-/* Input Area */
+        
+        /* Input Area - Fixed at bottom */
         .input-wrapper {
             flex-shrink: 0;
             background: white;
@@ -465,8 +673,7 @@
             gap: 8px;
             align-items: flex-end;
             background: #f0f0f0;
-            min-height: 64px;
-            max-height: 200px;
+            min-height: 56px;
         }
         
         .input-area.blocked {
@@ -502,7 +709,7 @@
         
         .reply-bar-title {
             font-size: 12px;
-            color: #16a34a;
+            color: var(--primary-color);
             font-weight: 600;
         }
         
@@ -515,8 +722,8 @@
         }
         
         .reply-bar-close {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border: none;
             background: transparent;
             cursor: pointer;
@@ -540,13 +747,12 @@
         }
         
         .message-input:focus {
-            border-color: #16a34a;
+            border-color: var(--primary-color);
         }
         
-        .attach-btn,
-        .emoji-btn {
-            width: 40px;
-            height: 40px;
+        .attach-btn {
+            width: 36px;
+            height: 36px;
             border: none;
             background: transparent;
             border-radius: 50%;
@@ -558,15 +764,14 @@
             flex-shrink: 0;
         }
         
-        .attach-btn:active,
-        .emoji-btn:active {
+        .attach-btn:active {
             background: rgba(0,0,0,0.05);
         }
         
         .send-btn {
-            width: 44px;
-            height: 44px;
-            background: #16a34a;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
             border: none;
             border-radius: 50%;
             display: flex;
@@ -578,20 +783,19 @@
         }
         
         .send-btn:active {
-            background: #15803d;
+            background: var(--primary-dark);
         }
         
         .send-btn:disabled {
             background: #9ca3af;
             cursor: not-allowed;
         }
-        
         /* Loading & Spinners */
         .spinner {
             width: 40px;
             height: 40px;
             border: 4px solid #f3f4f6;
-            border-top-color: #16a34a;
+            border-top-color: var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -620,9 +824,9 @@
         /* Unread Badge */
         .unread-badge-floating {
             position: fixed;
-            bottom: 90px;
+            bottom: 80px;
             right: 20px;
-            background: #16a34a;
+            background: var(--primary-color);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -690,6 +894,102 @@
             flex-shrink: 0;
         }
         
+        /* Delete Confirmation Modal */
+        .delete-modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            z-index: 1002;
+            transition: bottom 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        
+        .delete-modal.show {
+            bottom: 0;
+        }
+        
+        .delete-modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .delete-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .delete-modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            border-radius: 50%;
+        }
+        
+        .delete-modal-close:active {
+            background: #f3f4f6;
+        }
+        
+        .delete-modal-body {
+            padding: 16px;
+        }
+        
+        .delete-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background 0.15s;
+        }
+        
+        .delete-option:active {
+            background: #f3f4f6;
+        }
+        
+        .delete-option-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fef2f2;
+            color: #ef4444;
+            flex-shrink: 0;
+        }
+        
+        .delete-option-text {
+            flex: 1;
+        }
+        
+        .delete-option-title {
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+        
+        .delete-option-desc {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
         /* Modal Overlay */
         .modal-overlay {
             position: fixed;
@@ -711,7 +1011,8 @@
         .modal-overlay.show {
             display: block;
         }
-/* Profile Modal */
+        
+        /* Profile Modal */
         .profile-modal {
             position: fixed;
             top: 0;
@@ -731,7 +1032,7 @@
         }
         
         .profile-header {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             padding: 60px 20px 20px;
             color: white;
             text-align: center;
@@ -761,7 +1062,7 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: #10b981;
+            background: var(--primary-light);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -909,7 +1210,7 @@
         }
         
         .forward-search input:focus {
-            border-color: #16a34a;
+            border-color: var(--primary-color);
         }
         
         .forward-list {
@@ -933,21 +1234,21 @@
         }
         
         .forward-chat-item.selected {
-            background: #dcf8c6;
+            background: var(--primary-bg);
         }
         
         .forward-chat-item input[type="checkbox"] {
             width: 20px;
             height: 20px;
             cursor: pointer;
-            accent-color: #16a34a;
+            accent-color: var(--primary-color);
         }
         
         .forward-chat-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #10b981;
+            background: var(--primary-light);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -995,13 +1296,13 @@
         }
         
         .forward-send {
-            background: #16a34a;
+            background: var(--primary-color);
             color: white;
             border: none;
         }
         
         .forward-send:active {
-            background: #15803d;
+            background: var(--primary-dark);
         }
         
         .forward-send:disabled {
@@ -1072,102 +1373,6 @@
             font-size: 13px;
             color: #6b7280;
         }
-/* Search in Chat */
-        .search-bar {
-            position: absolute;
-            top: -60px;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 8px 16px;
-            border-bottom: 1px solid #e5e7eb;
-            z-index: 101;
-            transition: top 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .search-bar.show {
-            top: 0;
-        }
-        
-        .search-input-wrapper {
-            flex: 1;
-            position: relative;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 10px 40px 10px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 20px;
-            font-size: 15px;
-            outline: none;
-        }
-        
-        .search-input:focus {
-            border-color: #16a34a;
-        }
-        
-        .search-clear {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-        }
-        
-        .search-clear.show {
-            display: flex;
-        }
-        
-        .search-results-count {
-            font-size: 13px;
-            color: #6b7280;
-            white-space: nowrap;
-        }
-        
-        .search-nav {
-            display: flex;
-            gap: 4px;
-        }
-        
-        .search-nav button {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            border-radius: 50%;
-        }
-        
-        .search-nav button:active {
-            background: #f3f4f6;
-        }
-        
-        .search-nav button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-        
-        .search-highlight {
-            background-color: #fef08a;
-            padding: 2px 4px;
-            border-radius: 2px;
-        }
         
         /* Media Viewer */
         .media-viewer {
@@ -1222,65 +1427,9 @@
             object-fit: contain;
         }
         
-        /* Pinned Message Bar */
-        .pinned-message-bar {
-            background: #f0fdf4;
-            padding: 8px 16px;
-            border-bottom: 1px solid #bbf7d0;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        
-        .pinned-message-bar.show {
-            display: flex;
-        }
-        
-        .pinned-icon {
-            color: #16a34a;
-            flex-shrink: 0;
-        }
-        
-        .pinned-content {
-            flex: 1;
-            min-width: 0;
-            cursor: pointer;
-        }
-        
-        .pinned-title {
-            font-size: 12px;
-            color: #16a34a;
-            font-weight: 600;
-        }
-        
-        .pinned-text {
-            font-size: 13px;
-            color: #15803d;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .pinned-close {
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #16a34a;
-        }
-        
         /* Utility Classes */
         .hidden {
             display: none !important;
-        }
-        
-        .no-scroll {
-            overflow: hidden !important;
         }
         
         /* File Input Hidden */
@@ -1305,7 +1454,7 @@
         <div class="header" id="header">
             <div class="header-content">
                 <button class="back-btn" onclick="goBack()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                         <path d="m15 18-6-6 6-6"/>
                     </svg>
                 </button>
@@ -1316,13 +1465,13 @@
                 </div>
                 <div class="header-actions" id="headerActions">
                     <button class="icon-btn" onclick="showSearchBar()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <circle cx="11" cy="11" r="8"/>
                             <path d="m21 21-4.35-4.35"/>
                         </svg>
                     </button>
                     <button class="menu-btn" onclick="toggleMenu()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <circle cx="12" cy="12" r="1" fill="white"/>
                             <circle cx="12" cy="5" r="1" fill="white"/>
                             <circle cx="12" cy="19" r="1" fill="white"/>
@@ -1332,25 +1481,25 @@
                 <div class="header-actions" id="selectionActions" style="display: none;">
                     <span class="selection-count" id="selectionCount">0</span>
                     <button class="icon-btn" onclick="forwardSelectedMessages()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <polyline points="17 11 12 6 7 11"/>
                             <polyline points="17 18 12 13 7 18"/>
                         </svg>
                     </button>
                     <button class="icon-btn" onclick="copySelectedMessages()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                         </svg>
                     </button>
                     <button class="icon-btn" onclick="deleteSelectedMessages()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <path d="M3 6h18"/>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                         </svg>
                     </button>
                     <button class="icon-btn" onclick="exitSelectionMode()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"/>
                             <line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
@@ -1361,15 +1510,15 @@
 
         <!-- Search Bar -->
         <div class="search-bar" id="searchBar">
-            <button class="icon-btn" onclick="hideSearchBar()" style="width: 32px; height: 32px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="icon-btn" onclick="hideSearchBar()" style="width: 28px; height: 28px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="m15 18-6-6 6-6"/>
                 </svg>
             </button>
             <div class="search-input-wrapper">
                 <input type="text" class="search-input" id="searchInput" placeholder="Search messages...">
                 <button class="search-clear" id="searchClear" onclick="clearSearch()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
@@ -1378,12 +1527,12 @@
             <span class="search-results-count" id="searchResultsCount"></span>
             <div class="search-nav">
                 <button onclick="searchPrevious()" id="searchPrevBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m18 15-6-6-6 6"/>
                     </svg>
                 </button>
                 <button onclick="searchNext()" id="searchNextBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
                 </button>
@@ -1392,7 +1541,7 @@
 
         <!-- Pinned Message Bar -->
         <div class="pinned-message-bar" id="pinnedMessageBar">
-            <svg class="pinned-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="pinned-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" x2="12" y1="17" y2="22"/>
                 <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
             </svg>
@@ -1401,7 +1550,7 @@
                 <div class="pinned-text" id="pinnedMessageText"></div>
             </div>
             <button class="pinned-close" onclick="unpinMessage()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -1426,7 +1575,7 @@
                     <div class="reply-bar-text" id="replyToText"></div>
                 </div>
                 <button class="reply-bar-close" onclick="cancelReply()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
@@ -1434,13 +1583,13 @@
             </div>
             <div class="input-area" id="inputArea">
                 <button class="attach-btn" id="attachBtn" onclick="showAttachmentMenu()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
                     </svg>
                 </button>
                 <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
                 <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                         <line x1="22" x2="11" y1="2" y2="13"/>
                         <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                     </svg>
@@ -1449,13 +1598,12 @@
         </div>
 
         <!-- Unread Badge -->
-        <div class="unread-badge-floating" id="unreadBadge" onclick="scrollToBottomAndRead()">
-            <span id="unreadCount">0</span> new
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+        <div class="unread-badge-floating" id="unreadBadge" onclick="scrollToUnread()">
+            <span id="unreadCount">0</span> unread
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <path d="m18 15-6-6-6 6"/>
             </svg>
         </div>
-
         <!-- Message Action Menu -->
         <div class="message-action-menu" id="messageActionMenu">
             <button class="message-action-item" onclick="replyToMessage()">
@@ -1493,13 +1641,13 @@
                 </svg>
                 <span>Edit</span>
             </button>
-            <button class="message-action-item" onclick="selectMessage()">
+            <button class="message-action-item" onclick="selectMessageFromMenu()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="20 6 9 17 4 12"/>
                 </svg>
                 <span>Select</span>
             </button>
-            <button class="message-action-item danger" onclick="deleteMessageFromMenu()">
+            <button class="message-action-item danger" onclick="showDeleteModal()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -1508,14 +1656,56 @@
             </button>
         </div>
 
+        <!-- Delete Confirmation Modal -->
+        <div class="delete-modal" id="deleteModal">
+            <div class="delete-modal-header">
+                <div class="delete-modal-title">Delete Message?</div>
+                <button class="delete-modal-close" onclick="closeDeleteModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-option" onclick="deleteForMe()">
+                    <div class="delete-option-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="delete-option-text">
+                        <div class="delete-option-title">Delete for me</div>
+                        <div class="delete-option-desc">Message will be removed from this device</div>
+                    </div>
+                </div>
+                <div class="delete-option" onclick="deleteForEveryone()" id="deleteEveryoneOption">
+                    <div class="delete-option-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div class="delete-option-text">
+                        <div class="delete-option-title">Delete for everyone</div>
+                        <div class="delete-option-desc">Message will be removed for all chat members</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Overlay -->
         <div class="modal-overlay" id="modalOverlay" onclick="closeAllModals()"></div>
     </div>
-<!-- Profile Modal -->
+
+    <!-- Profile Modal -->
     <div class="profile-modal" id="profileModal">
         <div class="profile-header">
             <button class="profile-close-btn" onclick="closeProfile()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <path d="m15 18-6-6 6-6"/>
                 </svg>
             </button>
@@ -1599,7 +1789,7 @@
         <div class="forward-header">
             <h3>Forward to...</h3>
             <button class="forward-close-btn" onclick="closeForwardModal()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -1694,10 +1884,10 @@
     </div>
 
     <!-- Hidden File Inputs -->
-    <input type="file" id="cameraInput" accept="image/*" capture="camera" onchange="handleFileSelect(event, 'image')">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleFileSelect(event, 'image')">
     <input type="file" id="galleryInput" accept="image/*,video/*" multiple onchange="handleFileSelect(event, 'media')">
     <input type="file" id="documentInput" accept="*/*" multiple onchange="handleFileSelect(event, 'document')">
-<script>
+    <script>
         // Supabase Configuration
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
@@ -1724,6 +1914,7 @@
         let typingTimeout = null;
         let isTyping = false;
         let unreadCount = 0;
+        let firstUnreadMessageId = null;
         let isUserAtBottom = true;
         let selectedMessages = new Set();
         let isSelectionMode = false;
@@ -1743,6 +1934,13 @@
         let currentSearchIndex = -1;
         let forwardChats = [];
         let selectedForwardChats = new Set();
+        
+        // Swipe state
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+        let swipeCurrentX = 0;
+        let swipeElement = null;
+        let isSwipingMessage = false;
 
         // Utility Functions
         function debounce(func, wait) {
@@ -1791,6 +1989,11 @@
         }
 
         function formatLastSeen(lastSeenStr, isOnline) {
+            // If blocked, always show "last seen long time ago"
+            if (isBlockedByMe || isBlockedByOther) {
+                return 'last seen long time ago';
+            }
+            
             if (!lastSeenStr) return 'last seen recently';
             
             const lastSeen = new Date(lastSeenStr);
@@ -1844,12 +2047,11 @@
                 }
             });
         }
-
         // Create Message HTML
         function createMessageHTML(msg, index) {
             const isSent = msg.sender_id === currentUser.id;
             const time = formatTime(msg.created_at);
-            const content = msg.content || '';
+            const content = msg.is_deleted ? '<span class="message-deleted">This message was deleted</span>' : (msg.content || '');
             const isSelected = selectedMessages.has(msg.message_id);
             
             let replyHTML = '';
@@ -1865,13 +2067,13 @@
             }
 
             let mediaHTML = '';
-            if (msg.message_type === 'image' || msg.message_type === 'video') {
+            if (!msg.is_deleted && (msg.message_type === 'image' || msg.message_type === 'video')) {
                 const tag = msg.message_type === 'image' ? 'img' : 'video';
                 const controls = msg.message_type === 'video' ? 'controls' : '';
                 mediaHTML = `<div class="message-media">
                     <${tag} src="${msg.media_url || msg.content}" ${controls} onclick="openMediaViewer('${msg.media_url || msg.content}', '${msg.message_type}')" />
                 </div>`;
-            } else if (msg.message_type === 'document') {
+            } else if (!msg.is_deleted && msg.message_type === 'document') {
                 const fileName = msg.file_name || 'Document';
                 const fileSize = msg.file_size ? formatFileSize(msg.file_size) : '';
                 mediaHTML = `<div class="message-document" onclick="downloadFile('${msg.media_url}', '${fileName}')">
@@ -1886,7 +2088,7 @@
                         <div class="document-size">${fileSize}</div>
                     </div>
                 </div>`;
-            } else if (msg.message_type === 'voice') {
+            } else if (!msg.is_deleted && msg.message_type === 'voice') {
                 mediaHTML = `<div class="voice-message">
                     <button class="voice-play-btn" onclick="playVoice('${msg.media_url}', this)">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1905,7 +2107,13 @@
                 dateDivider = `<div class="date-divider"><span>${formatMessageDate(msg.created_at)}</span></div>`;
             }
 
-            return `${dateDivider}<div class="message-container ${isSent ? 'sent' : 'received'} ${isSelected ? 'selected' : ''}" data-message-id="${msg.message_id}">
+            // Check if this is the first unread message
+            let unreadDivider = '';
+            if (firstUnreadMessageId && msg.message_id === firstUnreadMessageId && msg.sender_id !== currentUser.id) {
+                unreadDivider = `<div class="unread-divider"><span>${unreadCount} unread message${unreadCount > 1 ? 's' : ''}</span></div>`;
+            }
+
+            return `${dateDivider}${unreadDivider}<div class="message-container ${isSent ? 'sent' : 'received'} ${isSelected ? 'selected' : ''}" data-message-id="${msg.message_id}">
                 <div class="message ${isSent ? 'message-sent' : 'message-received'}" data-message-id="${msg.message_id}">
                     ${replyHTML}
                     ${mediaHTML}
@@ -1916,6 +2124,10 @@
                         ${isSent ? getMessageTick(msg) : ''}
                     </div>
                 </div>
+                <svg class="reply-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 14 4 9 9 4"/>
+                    <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                </svg>
             </div>`;
         }
 
@@ -1947,7 +2159,7 @@
             attachMessageListeners();
         }
 
-        // Attach Message Event Listeners
+        // Attach Message Event Listeners with Swipe and Touch Support
         function attachMessageListeners() {
             const containers = document.querySelectorAll('.message-container');
             
@@ -1961,38 +2173,90 @@
                 let pressTimer;
                 let startX, startY;
                 let moved = false;
+                let swipeStartTime = 0;
 
+                // Touch start - for both swipe and long press
                 msgEl.addEventListener('touchstart', function(e) {
-                    if (isSelectionMode) return;
-                    moved = false;
                     const touch = e.touches[0];
                     startX = touch.clientX;
                     startY = touch.clientY;
+                    swipeStartX = startX;
+                    swipeStartY = startY;
+                    swipeStartTime = Date.now();
+                    moved = false;
+                    swipeElement = container;
                     
-                    pressTimer = setTimeout(() => {
-                        if (!moved) {
-                            const messageId = container.getAttribute('data-message-id');
-                            showMessageActionMenu(messageId, touch.clientX, touch.clientY);
-                            if (navigator.vibrate) navigator.vibrate(50);
-                        }
-                    }, 400);
-                }, {passive: true});
-
-                msgEl.addEventListener('touchmove', function(e) {
-                    const touch = e.touches[0];
-                    const diffX = Math.abs(touch.clientX - startX);
-                    const diffY = Math.abs(touch.clientY - startY);
-                    if (diffX > 10 || diffY > 10) {
-                        moved = true;
-                        clearTimeout(pressTimer);
+                    // Long press timer for menu
+                    if (!isSelectionMode) {
+                        pressTimer = setTimeout(() => {
+                            if (!moved) {
+                                const messageId = container.getAttribute('data-message-id');
+                                showMessageActionMenu(messageId, touch.clientX, touch.clientY);
+                                if (navigator.vibrate) navigator.vibrate(50);
+                            }
+                        }, 500);
                     }
                 }, {passive: true});
 
-                msgEl.addEventListener('touchend', function() {
+                // Touch move - detect swipe or drag
+                msgEl.addEventListener('touchmove', function(e) {
+                    const touch = e.touches[0];
+                    const diffX = touch.clientX - startX;
+                    const diffY = touch.clientY - startY;
+                    
+                    if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
+                        moved = true;
+                        clearTimeout(pressTimer);
+                    }
+                    
+                    // Horizontal swipe for reply
+                    if (Math.abs(diffX) > 30 && Math.abs(diffY) < 50 && !isSelectionMode) {
+                        isSwipingMessage = true;
+                        swipeCurrentX = diffX;
+                        const maxSwipe = 80;
+                        const swipeAmount = Math.min(Math.abs(diffX), maxSwipe) * (diffX > 0 ? 1 : -1);
+                        container.style.setProperty('--swipe-amount', `${swipeAmount}px`);
+                        container.classList.add('swiping');
+                    }
+                    
+                    // Vertical swipe up for multi-select (only in selection mode)
+                    if (isSelectionMode && diffY < -50 && Math.abs(diffX) < 30) {
+                        // Multi-select by swiping up
+                        const messageId = container.getAttribute('data-message-id');
+                        if (!selectedMessages.has(messageId)) {
+                            toggleMessageSelection(messageId);
+                        }
+                    }
+                }, {passive: true});
+
+                // Touch end
+                msgEl.addEventListener('touchend', function(e) {
                     clearTimeout(pressTimer);
+                    
+                    // Handle swipe to reply
+                    if (isSwipingMessage && Math.abs(swipeCurrentX) > 50) {
+                        const messageId = container.getAttribute('data-message-id');
+                        triggerReply(messageId);
+                    }
+                    
+                    // Reset swipe
+                    container.style.setProperty('--swipe-amount', '0');
+                    container.classList.remove('swiping');
+                    isSwipingMessage = false;
+                    swipeCurrentX = 0;
+                    
+                    // Handle tap (not moved, not long press)
+                    const touchDuration = Date.now() - swipeStartTime;
+                    if (!moved && touchDuration < 500) {
+                        if (isSelectionMode) {
+                            const messageId = msgEl.getAttribute('data-message-id');
+                            toggleMessageSelection(messageId);
+                        }
+                    }
                 }, {passive: true});
                 
-                msgEl.addEventListener('click', function() {
+                // Click handler for desktop
+                msgEl.addEventListener('click', function(e) {
                     if (isSelectionMode) {
                         const messageId = msgEl.getAttribute('data-message-id');
                         toggleMessageSelection(messageId);
@@ -2000,18 +2264,42 @@
                 });
             });
         }
-// Scroll Functions
+
+        // Trigger Reply from Swipe
+        function triggerReply(messageId) {
+            const msg = messagesMap.get(messageId);
+            if (!msg) return;
+
+            replyToMessageId = messageId;
+            
+            const replyBar = document.getElementById('replyBar');
+            const replyToName = document.getElementById('replyToName');
+            const replyToText = document.getElementById('replyToText');
+            
+            replyToName.textContent = msg.sender_id === currentUser.id ? 'yourself' : (otherUserData?.full_name || 'User');
+            replyToText.textContent = msg.content || 'Media';
+            
+            replyBar.classList.add('show');
+            document.getElementById('messageInput').focus();
+        }
+
+        // Scroll Functions
         function scrollToBottom() {
             const messagesArea = document.getElementById('messagesArea');
             messagesArea.scrollTop = messagesArea.scrollHeight;
             isUserAtBottom = true;
         }
 
-        function scrollToBottomAndRead() {
-            scrollToBottom();
-            unreadCount = 0;
-            hideUnreadBadge();
-            markMessagesAsRead();
+        function scrollToUnread() {
+            if (firstUnreadMessageId) {
+                scrollToMessage(firstUnreadMessageId);
+                markMessagesAsRead();
+                unreadCount = 0;
+                firstUnreadMessageId = null;
+                hideUnreadBadge();
+            } else {
+                scrollToBottom();
+            }
         }
 
         function scrollToMessage(messageId) {
@@ -2057,11 +2345,11 @@
             // Mark as read if at bottom
             if (isUserAtBottom && unreadCount > 0) {
                 unreadCount = 0;
+                firstUnreadMessageId = null;
                 hideUnreadBadge();
                 markMessagesAsRead();
             }
         }, 200);
-
         // Load Messages
         async function loadMessages(loadMore = false) {
             try {
@@ -2073,7 +2361,6 @@
                         .from('ngm_messages')
                         .select('*', {count: 'exact'})
                         .eq('chat_id', currentChatId)
-                        .eq('is_deleted', false)
                         .order('created_at', {ascending: false})
                         .limit(MESSAGES_PER_PAGE);
 
@@ -2088,11 +2375,24 @@
                     currentPage = 1;
                     hasMoreMessages = totalMessages > MESSAGES_PER_PAGE;
                     
+                    // Find first unread message
+                    await findFirstUnreadMessage();
+                    
                     const loadingEl = document.getElementById('loadingMessages');
                     if (loadingEl) loadingEl.style.display = 'none';
                     
                     renderMessages(true);
-                    setTimeout(() => scrollToBottom(), 10);
+                    
+                    if (firstUnreadMessageId) {
+                        // Scroll to first unread
+                        setTimeout(() => {
+                            scrollToMessage(firstUnreadMessageId);
+                            showUnreadBadge();
+                        }, 100);
+                    } else {
+                        setTimeout(() => scrollToBottom(), 10);
+                    }
+                    
                     fetchReadStatus();
                     markMessagesAsRead();
                     loadPinnedMessage();
@@ -2103,7 +2403,6 @@
                         .from('ngm_messages')
                         .select('*')
                         .eq('chat_id', currentChatId)
-                        .eq('is_deleted', false)
                         .order('created_at', {ascending: false})
                         .range(offset, offset + MESSAGES_PER_PAGE - 1);
 
@@ -2129,6 +2428,43 @@
             } catch (error) {
                 console.error('Error loading messages:', error);
                 isLoadingMore = false;
+            }
+        }
+
+        // Find First Unread Message
+        async function findFirstUnreadMessage() {
+            try {
+                const unreadMessages = messages.filter(msg => msg.sender_id !== currentUser.id);
+                
+                if (unreadMessages.length === 0) {
+                    unreadCount = 0;
+                    firstUnreadMessageId = null;
+                    return;
+                }
+
+                // Get read status
+                const unreadMsgIds = unreadMessages.map(m => m.message_id);
+                const {data: readStatuses} = await supabaseClient
+                    .from('ngm_message_status')
+                    .select('message_id')
+                    .in('message_id', unreadMsgIds)
+                    .eq('user_id', currentUser.id)
+                    .eq('status', 'read');
+
+                const readMsgIds = new Set(readStatuses?.map(s => s.message_id) || []);
+                
+                // Find first unread
+                const unread = unreadMessages.filter(msg => !readMsgIds.has(msg.message_id));
+                
+                if (unread.length > 0) {
+                    unreadCount = unread.length;
+                    firstUnreadMessageId = unread[0].message_id;
+                } else {
+                    unreadCount = 0;
+                    firstUnreadMessageId = null;
+                }
+            } catch (error) {
+                console.error('Error finding unread messages:', error);
             }
         }
 
@@ -2203,11 +2539,20 @@
             }
         }
 
-        // Load Pinned Message
+        // Load Pinned Message - Visible to all users
         async function loadPinnedMessage() {
             try {
-                const pinnedMsg = messages.find(m => m.is_pinned);
-                if (pinnedMsg) {
+                // Check for pinned message in chat
+                const {data: pinnedMsgs} = await supabaseClient
+                    .from('ngm_messages')
+                    .select('*')
+                    .eq('chat_id', currentChatId)
+                    .eq('is_pinned', true)
+                    .eq('is_deleted', false)
+                    .limit(1);
+
+                if (pinnedMsgs && pinnedMsgs.length > 0) {
+                    const pinnedMsg = pinnedMsgs[0];
                     pinnedMessageId = pinnedMsg.message_id;
                     showPinnedMessage(pinnedMsg);
                 }
@@ -2227,7 +2572,7 @@
             const pinnedBar = document.getElementById('pinnedMessageBar');
             pinnedBar.classList.remove('show');
         }
-// Setup Realtime Subscription
+        // Setup Realtime Subscription
         function setupRealtimeSubscription() {
             // Messages subscription
             messagesSubscription = supabaseClient
@@ -2239,7 +2584,6 @@
                     filter: 'chat_id=eq.' + currentChatId
                 }, payload => {
                     const newMsg = payload.new;
-                    if (newMsg.is_deleted) return;
                     
                     newMsg.has_been_read = false;
                     messages.push(newMsg);
@@ -2249,6 +2593,9 @@
                     if (newMsg.sender_id !== currentUser.id) {
                         if (!isUserAtBottom) {
                             unreadCount++;
+                            if (!firstUnreadMessageId) {
+                                firstUnreadMessageId = newMsg.message_id;
+                            }
                             showUnreadBadge();
                         } else {
                             scrollToBottom();
@@ -2298,6 +2645,10 @@
         const setTypingStatusDebounced = debounce(async (typing) => {
             if (isTyping === typing) return;
             isTyping = typing;
+            
+            // Don't send typing if blocked
+            if (isBlockedByMe || isBlockedByOther) return;
+            
             try {
                 await supabaseClient
                     .from('ngm_typing_status')
@@ -2453,7 +2804,7 @@
             const replyToText = document.getElementById('replyToText');
             
             replyToName.textContent = msg.sender_id === currentUser.id ? 'yourself' : (otherUserData?.full_name || 'User');
-            replyToText.textContent = msg.content || 'Media';
+            replyToText.textContent = msg.is_deleted ? 'This message was deleted' : (msg.content || 'Media');
             
             replyBar.classList.add('show');
             document.getElementById('messageInput').focus();
@@ -2470,7 +2821,7 @@
         function copyMessageText() {
             if (!currentActionMessage) return;
             const msg = messagesMap.get(currentActionMessage);
-            if (msg && msg.content) {
+            if (msg && msg.content && !msg.is_deleted) {
                 navigator.clipboard.writeText(msg.content)
                     .then(() => {
                         showToast('Message copied');
@@ -2486,7 +2837,7 @@
         async function editMessage() {
             if (!currentActionMessage) return;
             const msg = messagesMap.get(currentActionMessage);
-            if (!msg || msg.sender_id !== currentUser.id) return;
+            if (!msg || msg.sender_id !== currentUser.id || msg.is_deleted) return;
 
             const newContent = prompt('Edit message:', msg.content);
             if (newContent && newContent.trim() && newContent !== msg.content) {
@@ -2512,66 +2863,96 @@
             closeMessageActionMenu();
         }
 
-        // Delete Message
-        function deleteMessageFromMenu() {
+        // Delete Message Functions
+        function showDeleteModal() {
             if (!currentActionMessage) return;
             const msg = messagesMap.get(currentActionMessage);
-            if (!msg || msg.sender_id !== currentUser.id) return;
+            if (!msg) return;
 
-            const deleteType = confirm('Delete for everyone?\nOK = Delete for everyone\nCancel = Delete for me');
-            
-            if (deleteType !== null) {
-                deleteMessage(currentActionMessage, deleteType);
+            // Show/hide "Delete for everyone" option based on sender
+            const deleteEveryoneOption = document.getElementById('deleteEveryoneOption');
+            if (msg.sender_id === currentUser.id) {
+                deleteEveryoneOption.style.display = 'flex';
+            } else {
+                deleteEveryoneOption.style.display = 'none';
             }
+
             closeMessageActionMenu();
+            document.getElementById('deleteModal').classList.add('show');
+            document.getElementById('modalOverlay').classList.add('show');
         }
 
-        async function deleteMessage(messageId, forEveryone) {
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            document.getElementById('modalOverlay').classList.remove('show');
+        }
+
+        async function deleteForMe() {
+            if (!currentActionMessage) return;
+            
             try {
-                if (forEveryone) {
-                    // Delete for everyone
-                    await supabaseClient
-                        .from('ngm_messages')
-                        .update({
-                            is_deleted: true,
-                            deleted_at: new Date().toISOString(),
-                            content: 'This message was deleted'
-                        })
-                        .eq('message_id', messageId);
-                } else {
-                    // Just remove from local view
-                    messages = messages.filter(m => m.message_id !== messageId);
-                    messagesMap.delete(messageId);
-                }
+                // Just remove from local view
+                messages = messages.filter(m => m.message_id !== currentActionMessage);
+                messagesMap.delete(currentActionMessage);
                 
                 renderMessages(true);
                 showToast('Message deleted');
+                closeDeleteModal();
+                currentActionMessage = null;
             } catch (error) {
                 console.error('Delete error:', error);
                 alert('Failed to delete message');
             }
         }
 
-        // Pin Message
+        async function deleteForEveryone() {
+            if (!currentActionMessage) return;
+            const msg = messagesMap.get(currentActionMessage);
+            if (!msg || msg.sender_id !== currentUser.id) return;
+
+            try {
+                // Delete for everyone
+                await supabaseClient
+                    .from('ngm_messages')
+                    .update({
+                        is_deleted: true,
+                        deleted_at: new Date().toISOString(),
+                        content: 'This message was deleted'
+                    })
+                    .eq('message_id', currentActionMessage);
+                
+                msg.is_deleted = true;
+                msg.content = 'This message was deleted';
+                renderMessages(true);
+                showToast('Message deleted for everyone');
+                closeDeleteModal();
+                currentActionMessage = null;
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Failed to delete message');
+            }
+        }
+
+        // Pin Message - Visible to all users
         async function pinMessage() {
             if (!currentActionMessage) return;
             const msg = messagesMap.get(currentActionMessage);
-            if (!msg) return;
+            if (!msg || msg.is_deleted) return;
 
             try {
-                // Mark message as pinned
-                await supabaseClient
-                    .from('ngm_messages')
-                    .update({is_pinned: true})
-                    .eq('message_id', currentActionMessage);
-
-                // Unpin previous message
+                // Unpin previous message first
                 if (pinnedMessageId && pinnedMessageId !== currentActionMessage) {
                     await supabaseClient
                         .from('ngm_messages')
                         .update({is_pinned: false})
                         .eq('message_id', pinnedMessageId);
                 }
+
+                // Pin current message
+                await supabaseClient
+                    .from('ngm_messages')
+                    .update({is_pinned: true})
+                    .eq('message_id', currentActionMessage);
 
                 pinnedMessageId = currentActionMessage;
                 msg.is_pinned = true;
@@ -2603,8 +2984,8 @@
                 console.error('Unpin error:', error);
             }
         }
-// Selection Mode
-        function selectMessage() {
+        // Selection Mode
+        function selectMessageFromMenu() {
             if (!currentActionMessage) return;
             closeMessageActionMenu();
             enterSelectionMode();
@@ -2649,7 +3030,7 @@
 
         function copySelectedMessages() {
             const selectedMsgs = messages.filter(m => selectedMessages.has(m.message_id));
-            const text = selectedMsgs.map(m => m.content || '[Media]').join('\n');
+            const text = selectedMsgs.map(m => m.is_deleted ? '[Deleted]' : (m.content || '[Media]')).join('\n');
             
             navigator.clipboard.writeText(text)
                 .then(() => {
@@ -2664,20 +3045,40 @@
         async function deleteSelectedMessages() {
             if (selectedMessages.size === 0) return;
             
-            const confirmDelete = confirm(`Delete ${selectedMessages.size} message(s) for everyone?`);
+            const confirmDelete = confirm(`Delete ${selectedMessages.size} message(s)?`);
             if (!confirmDelete) return;
 
             try {
-                await supabaseClient
-                    .from('ngm_messages')
-                    .update({
-                        is_deleted: true,
-                        deleted_at: new Date().toISOString()
-                    })
-                    .in('message_id', Array.from(selectedMessages));
+                // Check if user owns all selected messages
+                const allOwned = Array.from(selectedMessages).every(msgId => {
+                    const msg = messagesMap.get(msgId);
+                    return msg && msg.sender_id === currentUser.id;
+                });
 
-                messages = messages.filter(m => !selectedMessages.has(m.message_id));
-                selectedMessages.forEach(id => messagesMap.delete(id));
+                if (allOwned) {
+                    // Delete for everyone
+                    await supabaseClient
+                        .from('ngm_messages')
+                        .update({
+                            is_deleted: true,
+                            deleted_at: new Date().toISOString(),
+                            content: 'This message was deleted'
+                        })
+                        .in('message_id', Array.from(selectedMessages));
+                    
+                    // Update local messages
+                    selectedMessages.forEach(msgId => {
+                        const msg = messagesMap.get(msgId);
+                        if (msg) {
+                            msg.is_deleted = true;
+                            msg.content = 'This message was deleted';
+                        }
+                    });
+                } else {
+                    // Delete for me only
+                    messages = messages.filter(m => !selectedMessages.has(m.message_id));
+                    selectedMessages.forEach(id => messagesMap.delete(id));
+                }
                 
                 showToast(`${selectedMessages.size} messages deleted`);
                 exitSelectionMode();
@@ -2782,8 +3183,6 @@
         }
 
         function filterForwardChats() {
-            const searchTerm = document.getElementById('forwardSearchInput').value.toLowerCase();
-            // Filter implementation can be added here
             renderForwardList();
         }
 
@@ -2791,7 +3190,7 @@
             if (selectedForwardChats.size === 0 || selectedMessages.size === 0) return;
 
             try {
-                const messagesToForward = Array.from(selectedMessages).map(id => messagesMap.get(id));
+                const messagesToForward = Array.from(selectedMessages).map(id => messagesMap.get(id)).filter(msg => !msg.is_deleted);
                 
                 for (const chatId of selectedForwardChats) {
                     for (const msg of messagesToForward) {
@@ -2834,7 +3233,7 @@
             document.getElementById('modalOverlay').classList.remove('show');
             selectedForwardChats.clear();
         }
-// Search in Chat
+        // Search in Chat
         function showSearchBar() {
             const searchBar = document.getElementById('searchBar');
             searchBar.classList.add('show');
@@ -2884,7 +3283,7 @@
             const regex = new RegExp(query, 'gi');
             
             messages.forEach(msg => {
-                if (msg.content && regex.test(msg.content)) {
+                if (msg.content && !msg.is_deleted && regex.test(msg.content)) {
                     searchResults.push(msg.message_id);
                 }
             });
@@ -2909,7 +3308,7 @@
                 if (!container) return;
                 
                 const contentEl = container.querySelector('.message-content');
-                if (!contentEl || !msg.content) return;
+                if (!contentEl || !msg.content || msg.is_deleted) return;
 
                 if (searchResults.includes(msg.message_id)) {
                     contentEl.innerHTML = msg.content.replace(regex, '<span class="search-highlight">$1</span>');
@@ -2950,7 +3349,7 @@
             prevBtn.disabled = disabled;
             nextBtn.disabled = disabled;
         }
-// Open User Profile Page (for name/avatar click)
+        // Open User Profile Page (for name/avatar click)
         function openUserProfile() {
             if (!otherUserId) return;
             // Navigate to profile page with user ID
@@ -3021,7 +3420,7 @@
             document.getElementById('modalOverlay').classList.remove('show');
         }
 
-        // Block User
+        // Block User - Both users cannot message
         async function blockUser() {
             if (!otherUserId) return;
 
@@ -3037,11 +3436,11 @@
                     isBlockedByMe = false;
                     showToast('User unblocked');
                     
-                    // Re-enable messaging
-                    location.reload();
+                    // Reload page to re-enable messaging
+                    setTimeout(() => location.reload(), 1000);
                 } else {
                     // Block
-                    const confirmBlock = confirm('Block this user? They won\'t be able to message you.');
+                    const confirmBlock = confirm('Block this user? Neither of you will be able to message each other.');
                     if (!confirmBlock) return;
 
                     await supabaseClient
@@ -3055,6 +3454,10 @@
                     isBlockedByMe = true;
                     showToast('User blocked');
                     disableMessaging();
+                    
+                    // Update status to show "last seen long time ago"
+                    const statusEl = document.getElementById('chatStatus');
+                    statusEl.textContent = 'last seen long time ago';
                 }
 
                 closeProfile();
@@ -3117,12 +3520,16 @@
                     .from('ngm_messages')
                     .update({
                         is_deleted: true,
-                        deleted_at: new Date().toISOString()
+                        deleted_at: new Date().toISOString(),
+                        content: 'This message was deleted'
                     })
                     .eq('chat_id', currentChatId);
 
-                messages = [];
-                messagesMap.clear();
+                messages.forEach(msg => {
+                    msg.is_deleted = true;
+                    msg.content = 'This message was deleted';
+                });
+                
                 renderMessages(true);
                 showToast('Chat history cleared');
                 closeProfile();
@@ -3175,7 +3582,7 @@
         function viewSharedMedia() {
             alert('Shared media feature coming soon!');
         }
-// Attachment Menu
+        // Attachment Menu
         function showAttachmentMenu() {
             document.getElementById('attachmentMenu').classList.add('show');
             document.getElementById('modalOverlay').classList.add('show');
@@ -3187,18 +3594,25 @@
         }
 
         function selectCamera() {
-            document.getElementById('cameraInput').click();
             closeAttachmentMenu();
+            // Small delay to ensure menu closes first
+            setTimeout(() => {
+                document.getElementById('cameraInput').click();
+            }, 100);
         }
 
         function selectGallery() {
-            document.getElementById('galleryInput').click();
             closeAttachmentMenu();
+            setTimeout(() => {
+                document.getElementById('galleryInput').click();
+            }, 100);
         }
 
         function selectDocument() {
-            document.getElementById('documentInput').click();
             closeAttachmentMenu();
+            setTimeout(() => {
+                document.getElementById('documentInput').click();
+            }, 100);
         }
 
         function selectLocation() {
@@ -3232,10 +3646,10 @@
                         alert('Failed to send location');
                     }
                 }, (error) => {
-                    alert('Failed to get location');
+                    alert('Failed to get location. Please enable location services.');
                 });
             } else {
-                alert('Geolocation is not supported');
+                alert('Geolocation is not supported by your device');
             }
         }
 
@@ -3254,6 +3668,8 @@
             const files = event.target.files;
             if (!files || files.length === 0) return;
 
+            showToast('Uploading...');
+
             for (let file of files) {
                 await uploadFile(file, type);
             }
@@ -3264,6 +3680,13 @@
 
         async function uploadFile(file, type) {
             try {
+                // Check file size (max 50MB)
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                if (file.size > maxSize) {
+                    alert('File too large. Maximum size is 50MB.');
+                    return;
+                }
+
                 // Upload to Supabase Storage
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -3271,7 +3694,10 @@
 
                 const {data: uploadData, error: uploadError} = await supabaseClient.storage
                     .from('chat-media')
-                    .upload(filePath, file);
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
 
                 if (uploadError) throw uploadError;
 
@@ -3329,10 +3755,10 @@
                         storage_url: publicUrl
                     });
 
-                showToast('File sent');
+                showToast('File sent successfully');
             } catch (error) {
                 console.error('Upload error:', error);
-                alert('Failed to upload file');
+                alert('Failed to upload file. Please try again.');
             }
         }
 
@@ -3352,7 +3778,14 @@
 
         function closeMediaViewer() {
             document.getElementById('mediaViewer').classList.remove('show');
-            document.getElementById('mediaViewerContent').innerHTML = '';
+            const content = document.getElementById('mediaViewerContent');
+            // Stop any playing video
+            const video = content.querySelector('video');
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+            content.innerHTML = '';
         }
 
         // Download File
@@ -3370,7 +3803,7 @@
         let currentAudio = null;
 
         function playVoice(url, button) {
-            if (currentAudio && !currentAudio.paused) {
+            if (currentAudio && !currentAudio.paused && currentAudio.src === url) {
                 currentAudio.pause();
                 button.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="5 3 19 12 5 21 5 3"/>
@@ -3378,7 +3811,7 @@
                 return;
             }
 
-            if (currentAudio) {
+            if (currentAudio && currentAudio.src !== url) {
                 currentAudio.pause();
             }
 
@@ -3396,7 +3829,7 @@
                 </svg>`;
             };
         }
-// Check Blocked Status
+        // Check Blocked Status - Both users cannot message
         async function checkBlockedStatus(otherUserId) {
             try {
                 // Check if current user blocked the other user
@@ -3498,40 +3931,26 @@
             }
         }
 
-        // Keyboard Handling - FIXED VERSION
-        function setupKeyboardHandling() {
-            const messageInput = document.getElementById('messageInput');
-            
-            // Prevent zoom on focus (iOS)
-            messageInput.style.fontSize = '16px';
-            
-            // No complex viewport handling - let browser handle it naturally
-            messageInput.addEventListener('focus', () => {
-                setTimeout(() => {
-                    if (isUserAtBottom) {
-                        scrollToBottom();
-                    }
-                }, 300);
-            });
-        }
-// Message Action Menu
+        // Message Action Menu
         function showMessageActionMenu(messageId, x, y) {
             currentActionMessage = messageId;
             const menu = document.getElementById('messageActionMenu');
             const msg = messagesMap.get(messageId);
             
-            // Show/hide edit button based on ownership
+            if (!msg) return;
+            
+            // Show/hide edit button based on ownership and deletion status
             const editBtn = document.getElementById('editMenuBtn');
             const pinBtn = document.getElementById('pinMenuBtn');
             
-            if (msg && msg.sender_id === currentUser.id) {
+            if (msg.sender_id === currentUser.id && !msg.is_deleted) {
                 editBtn.style.display = 'flex';
             } else {
                 editBtn.style.display = 'none';
             }
             
             // Update pin button text
-            if (msg && msg.is_pinned) {
+            if (msg.is_pinned) {
                 pinBtn.querySelector('span').textContent = 'Unpin';
             } else {
                 pinBtn.querySelector('span').textContent = 'Pin';
@@ -3558,11 +3977,15 @@
 
         // Close All Modals
         function closeAllModals() {
-            document.getElementById('modalOverlay').classList.remove('show');
-            closeMessageActionMenu();
-            closeForwardModal();
-            closeAttachmentMenu();
-            closeProfile();
+            const overlay = document.getElementById('modalOverlay');
+            if (overlay.classList.contains('show')) {
+                closeMessageActionMenu();
+                closeForwardModal();
+                closeAttachmentMenu();
+                closeProfile();
+                closeDeleteModal();
+                overlay.classList.remove('show');
+            }
         }
 
         // Navigation
@@ -3580,7 +4003,14 @@
 
         // Toast Notification
         function showToast(message) {
+            // Remove any existing toast
+            const existingToast = document.querySelector('.toast-notification');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
             const toast = document.createElement('div');
+            toast.className = 'toast-notification';
             toast.style.cssText = `
                 position: fixed;
                 bottom: 100px;
@@ -3613,7 +4043,8 @@
             currentUser = user;
             return user;
         }
-// Event Listeners
+
+        // Event Listeners
         document.getElementById('messageInput').addEventListener('input', handleInput);
         document.getElementById('messageInput').addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -3622,16 +4053,22 @@
             }
         });
 
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('messageActionMenu');
-            
-            if (menu.classList.contains('show') && !menu.contains(e.target)) {
-                closeMessageActionMenu();
-            }
-        });
+        // Prevent default touch behavior on overlay
+        document.getElementById('modalOverlay').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+        }, {passive: false});
 
         // Scroll event listener
         document.getElementById('messagesArea').addEventListener('scroll', checkIfAtBottomThrottled);
+
+        // Prevent body scroll
+        document.body.addEventListener('touchmove', function(e) {
+            const target = e.target;
+            const scrollableParent = target.closest('.messages-area, .forward-list, .profile-modal');
+            if (!scrollableParent) {
+                e.preventDefault();
+            }
+        }, {passive: false});
 
         // Initialize App
         window.addEventListener('DOMContentLoaded', async function() {
@@ -3647,25 +4084,30 @@
             }
 
             initSupabase();
-            setupKeyboardHandling();
             
             const user = await checkAuth();
             
             if (user) {
-                // Update user online status
-                await supabaseClient
-                    .from('ngm_users')
-                    .update({
-                        is_online: true,
-                        last_seen: new Date().toISOString()
-                    })
-                    .eq('user_id', user.id);
-                
-                await loadChatDetails();
-                await loadMessages();
-                setupRealtimeSubscription();
-                
-                console.log('✅ Chat initialized successfully!');
+                try {
+                    // Update user online status
+                    await supabaseClient
+                        .from('ngm_users')
+                        .update({
+                            is_online: true,
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', user.id);
+                    
+                    await loadChatDetails();
+                    await loadMessages();
+                    setupRealtimeSubscription();
+                    
+                    console.log('✅ Chat initialized successfully!');
+                    console.log('📱 Features: Swipe to reply, Long press for menu, Tap to select');
+                } catch (error) {
+                    console.error('❌ Initialization error:', error);
+                    alert('Failed to load chat. Please try again.');
+                }
             }
         });
 
@@ -3687,13 +4129,6 @@
             }
         });
 
-        // Prevent pull-to-refresh on mobile
-        document.body.addEventListener('touchmove', function(e) {
-            if (e.target.closest('.messages-area') || e.target.closest('.message-input')) {
-                return;
-            }
-        }, { passive: false });
-
         // Handle orientation change
         window.addEventListener('orientationchange', function() {
             setTimeout(() => {
@@ -3701,6 +4136,33 @@
                     scrollToBottom();
                 }
             }, 100);
+        });
+
+        // Handle visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden
+                if (currentUser) {
+                    supabaseClient
+                        .from('ngm_users')
+                        .update({
+                            is_online: false,
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                }
+            } else {
+                // Page is visible
+                if (currentUser) {
+                    supabaseClient
+                        .from('ngm_users')
+                        .update({
+                            is_online: true,
+                            last_seen: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                }
+            }
         });
     </script>
 </body>
