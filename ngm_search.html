@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Search - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        /* Header with Search */
+        .search-header {
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: none;
+            border-radius: 8px;
+            background: #efefef;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            stroke: #8e8e8e;
+        }
+
+        /* Tabs */
+        .search-tabs {
+            display: flex;
+            border-bottom: 1px solid #dbdbdb;
+            background: white;
+        }
+
+        .search-tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #8e8e8e;
+        }
+
+        .search-tab.active {
+            color: #262626;
+            border-bottom-color: #262626;
+        }
+
+        /* Content Area */
+        .search-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Random Posts Grid */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+        }
+
+        .grid-post {
+            aspect-ratio: 1;
+            background: #f0f0f0;
+            cursor: pointer;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .grid-post-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .grid-post:active .grid-post-overlay {
+            opacity: 1;
+        }
+
+        .grid-post-stats {
+            display: flex;
+            gap: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* User List */
+        .user-list {
+            padding: 0;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .user-item:active {
+            background: #fafafa;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #FF6F00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+        }
+
+        .user-username {
+            font-size: 13px;
+            color: #8e8e8e;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f4f6;
+            border-top-color: #FF6F00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 80px 20px;
+            text-align: center;
+            color: #8e8e8e;
+        }
+
+        .bg-orange { background: #FF6F00; }
+        .bg-blue { background: #2196F3; }
+        .bg-green { background: #4CAF50; }
+        .bg-purple { background: #9C27B0; }
+        .bg-pink { background: #E91E63; }
+        .bg-teal { background: #009688; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Search Header -->
+        <div class="search-header">
+            <button class="back-btn" onclick="goBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search..." oninput="handleSearch()" autofocus>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="search-tabs">
+            <div class="search-tab active" id="postsTab" onclick="switchTab('posts')">Posts</div>
+            <div class="search-tab" id="usersTab" onclick="switchTab('users')">People</div>
+        </div>
+
+        <!-- Content -->
+        <div class="search-content" id="searchContent">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let currentTab = 'posts';
+        let randomPosts = [];
+        let allUsers = [];
+
+        const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
+
+        function getAvatarColor(name) {
+            if (!name) return colors[0];
+            return colors[name.charCodeAt(0) % colors.length];
+        }
+
+        function getInitial(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        async function loadRandomPosts() {
+            try {
+                const { data: posts } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('*')
+                    .eq('post_type', 'post')
+                    .eq('is_public', true)
+                    .order('created_at', { ascending: false })
+                    .limit(30);
+
+                randomPosts = posts || [];
+                
+                // Shuffle
+                randomPosts.sort(() => Math.random() - 0.5);
+                
+                renderPosts();
+
+            } catch (error) {
+                console.error('Error loading posts:', error);
+            }
+        }
+
+        function renderPosts() {
+            const html = randomPosts.map(post => {
+                const bgImage = post.media_url || post.thumbnail_url
+                    ? `background-image: url('${post.thumbnail_url || post.media_url}')`
+                    : 'background: #f0f0f0';
+
+                return `
+                    <div class="grid-post" style="${bgImage}" onclick="window.location.href='ngm_view_post.html?post_id=${post.post_id}'">
+                        <div class="grid-post-overlay">
+                            <div class="grid-post-stats">
+                                <span>❤️ ${post.likes_count || 0}</span>
+                                <span>💬 ${post.comments_count || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('searchContent').innerHTML = `<div class="posts-grid">${html}</div>`;
+        }
+
+        async function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            if (!query) {
+                if (currentTab === 'posts') {
+                    renderPosts();
+                } else {
+                    loadAllUsers();
+                }
+                return;
+            }
+
+            if (currentTab === 'posts') {
+                const filtered = randomPosts.filter(post => 
+                    post.content?.toLowerCase().includes(query)
+                );
+                
+                const html = filtered.map(post => {
+                    const bgImage = post.media_url || post.thumbnail_url
+                        ? `background-image: url('${post.thumbnail_url || post.media_url}')`
+                        : 'background: #f0f0f0';
+
+                    return `
+                        <div class="grid-post" style="${bgImage}" onclick="window.location.href='ngm_view_post.html?post_id=${post.post_id}'">
+                            <div class="grid-post-overlay">
+                                <div class="grid-post-stats">
+                                    <span>❤️ ${post.likes_count || 0}</span>
+                                    <span>💬 ${post.comments_count || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('searchContent').innerHTML = html ? `<div class="posts-grid">${html}</div>` : '<div class="empty-state">No posts found</div>';
+
+            } else {
+                const filtered = allUsers.filter(user => 
+                    user.full_name?.toLowerCase().includes(query) ||
+                    user.username?.toLowerCase().includes(query)
+                );
+                
+                renderUsers(filtered);
+            }
+        }
+
+        async function loadAllUsers() {
+            try {
+                const { data: users } = await supabaseClient
+                    .from('ngm_users')
+                    .select('user_id, full_name, username, profile_picture_url')
+                    .neq('user_id', currentUser.id)
+                    .limit(50);
+
+                allUsers = users || [];
+                renderUsers(allUsers);
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function renderUsers(users) {
+            const html = users.map(user => {
+                const name = user.full_name || user.username || 'User';
+                const avatarHTML = user.profile_picture_url
+                    ? `<div class="user-avatar" style="background-image: url('${user.profile_picture_url}')"></div>`
+                    : `<div class="user-avatar ${getAvatarColor(name)}">${getInitial(name)}</div>`;
+
+                return `
+                    <div class="user-item" onclick="window.location.href='ngm_profile.html?user_id=${user.user_id}'">
+                        ${avatarHTML}
+                        <div class="user-info">
+                            <div class="user-name">${name}</div>
+                            <div class="user-username">@${user.username || 'user'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('searchContent').innerHTML = `<div class="user-list">${html}</div>`;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            document.getElementById('postsTab').classList.remove('active');
+            document.getElementById('usersTab').classList.remove('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+
+            document.getElementById('searchInput').value = '';
+
+            if (tab === 'posts') {
+                renderPosts();
+            } else {
+                loadAllUsers();
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            const user = await checkAuth();
+            if (user) {
+                await loadRandomPosts();
+            }
+        });
+    </script>
+</body>
+</html>

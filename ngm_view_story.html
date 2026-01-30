@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stories - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: black;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            position: relative;
+            background: black;
+        }
+
+        /* Progress Bars */
+        .progress-bars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+            z-index: 100;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 1px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .progress-bar-fill.active {
+            animation: progress 5s linear forwards;
+        }
+
+        @keyframes progress {
+            to { width: 100%; }
+        }
+
+        /* Header */
+        .story-header {
+            position: absolute;
+            top: 16px;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+            z-index: 100;
+            margin-top: 20px;
+        }
+
+        .story-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #FF6F00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .story-user-info {
+            flex: 1;
+        }
+
+        .story-username {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .story-time {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Story Content */
+        .story-content {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .story-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .story-caption {
+            position: absolute;
+            bottom: 100px;
+            left: 16px;
+            right: 16px;
+            color: white;
+            font-size: 14px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Navigation */
+        .story-nav {
+            position: absolute;
+            inset: 0;
+            display: flex;
+        }
+
+        .story-nav-left,
+        .story-nav-right {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* Bottom Actions */
+        .story-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            display: flex;
+            gap: 8px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.5));
+        }
+
+        .story-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 24px;
+            background: transparent;
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .story-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .story-action-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .bg-orange { background: #FF6F00; }
+        .bg-blue { background: #2196F3; }
+        .bg-green { background: #4CAF50; }
+        .bg-purple { background: #9C27B0; }
+        .bg-pink { background: #E91E63; }
+        .bg-teal { background: #009688; }
+
+        .paused .progress-bar-fill.active {
+            animation-play-state: paused;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="storyContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        let supabaseClient;
+        function initSupabase() {
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+            return supabaseClient;
+        }
+
+        let currentUser = null;
+        let stories = [];
+        let currentIndex = 0;
+        let autoPlayTimer = null;
+
+        const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
+
+        function getAvatarColor(name) {
+            if (!name) return colors[0];
+            return colors[name.charCodeAt(0) % colors.length];
+        }
+
+        function getInitial(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            currentUser = user;
+            return user;
+        }
+
+        async function loadStories() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get('user_id');
+
+                if (!userId) {
+                    alert('No user specified');
+                    window.history.back();
+                    return;
+                }
+
+                const now = new Date().toISOString();
+
+                const { data: userStories, error } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('*, ngm_users(full_name, username, profile_picture_url)')
+                    .eq('user_id', userId)
+                    .eq('post_type', 'story')
+                    .gt('expires_at', now)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                if (!userStories || userStories.length === 0) {
+                    alert('No active stories');
+                    window.history.back();
+                    return;
+                }
+
+                stories = userStories;
+                showStory(0);
+
+            } catch (error) {
+                console.error('Error loading stories:', error);
+                alert('Failed to load stories');
+                window.history.back();
+            }
+        }
+
+        function showStory(index) {
+            if (index < 0 || index >= stories.length) {
+                window.history.back();
+                return;
+            }
+
+            currentIndex = index;
+            const story = stories[index];
+            const user = story.ngm_users;
+            const name = user.full_name || user.username || 'User';
+
+            const avatarHTML = user.profile_picture_url
+                ? `<div class="story-user-avatar" style="background-image: url('${user.profile_picture_url}')"></div>`
+                : `<div class="story-user-avatar ${getAvatarColor(name)}">${getInitial(name)}</div>`;
+
+            const time = formatTime(story.created_at);
+
+            const progressBars = stories.map((_, i) => {
+                const fillClass = i < index ? 'progress-bar-fill' : i === index ? 'progress-bar-fill active' : '';
+                const width = i < index ? '100%' : '0%';
+                return `
+                    <div class="progress-bar">
+                        <div class="${fillClass}" style="width: ${width}"></div>
+                    </div>
+                `;
+            }).join('');
+
+            const container = document.getElementById('storyContainer');
+            container.innerHTML = `
+                <div class="progress-bars">
+                    ${progressBars}
+                </div>
+
+                <div class="story-header">
+                    ${avatarHTML}
+                    <div class="story-user-info">
+                        <div class="story-username">${name}</div>
+                        <div class="story-time">${time}</div>
+                    </div>
+                    <button class="close-btn" onclick="closeStory()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="story-content">
+                    <img class="story-image" src="${story.media_url}" alt="Story">
+                    ${story.content ? `<div class="story-caption">${story.content}</div>` : ''}
+                </div>
+
+                <div class="story-nav">
+                    <div class="story-nav-left" onclick="previousStory()"></div>
+                    <div class="story-nav-right" onclick="nextStory()"></div>
+                </div>
+
+                <div class="story-actions">
+                    <input type="text" class="story-input" placeholder="Send message..." onkeypress="if(event.key === 'Enter') sendReply(this.value)">
+                    <button class="story-action-btn" onclick="likeStory()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </button>
+                    <button class="story-action-btn" onclick="shareStory()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"/>
+                            <circle cx="6" cy="12" r="3"/>
+                            <circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            // Auto-play to next story after 5 seconds
+            if (autoPlayTimer) clearTimeout(autoPlayTimer);
+            autoPlayTimer = setTimeout(() => {
+                nextStory();
+            }, 5000);
+
+            // Pause on long press
+            let pressTimer;
+            container.addEventListener('touchstart', () => {
+                pressTimer = setTimeout(() => {
+                    container.classList.add('paused');
+                    if (autoPlayTimer) clearTimeout(autoPlayTimer);
+                }, 100);
+            });
+
+            container.addEventListener('touchend', () => {
+                clearTimeout(pressTimer);
+                container.classList.remove('paused');
+                // Resume auto-play
+                if (autoPlayTimer) clearTimeout(autoPlayTimer);
+                autoPlayTimer = setTimeout(() => nextStory(), 5000);
+            });
+        }
+
+        function previousStory() {
+            if (currentIndex > 0) {
+                showStory(currentIndex - 1);
+            } else {
+                closeStory();
+            }
+        }
+
+        function nextStory() {
+            if (currentIndex < stories.length - 1) {
+                showStory(currentIndex + 1);
+            } else {
+                closeStory();
+            }
+        }
+
+        function closeStory() {
+            if (autoPlayTimer) clearTimeout(autoPlayTimer);
+            window.history.back();
+        }
+
+        async function likeStory() {
+            try {
+                const story = stories[currentIndex];
+                await supabaseClient
+                    .from('ngm_post_likes')
+                    .insert({ post_id: story.post_id, user_id: currentUser.id });
+                
+                // Visual feedback
+                const btn = event.currentTarget;
+                btn.querySelector('svg').setAttribute('fill', '#ed4956');
+                btn.querySelector('svg').setAttribute('stroke', '#ed4956');
+                
+            } catch (error) {
+                console.error('Error liking story:', error);
+            }
+        }
+
+        function shareStory() {
+            const story = stories[currentIndex];
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Nandigram Story',
+                    url: `${window.location.origin}/ngm_view_story.html?user_id=${story.user_id}`
+                });
+            } else {
+                alert('Story link copied!');
+            }
+        }
+
+        function sendReply(message) {
+            if (!message.trim()) return;
+            alert(`Reply sent: ${message}`);
+            event.target.value = '';
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const hours = Math.floor(diff / 3600000);
+
+            if (hours < 1) return 'Just now';
+            if (hours < 24) return `${hours}h ago`;
+            return 'Yesterday';
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
+            initSupabase();
+            const user = await checkAuth();
+            if (user) {
+                await loadStories();
+            }
+        });
+    </script>
+</body>
+</html>
