@@ -29,48 +29,29 @@
             background: white;
         }
 
-        /* ✅ FIXED: Header with proper height and centered brand */
+        /* Header */
         .header {
             background: linear-gradient(135deg, #FF6F00 0%, #E65100 100%);
             color: white;
-            padding: 16px;
-            padding-top: max(16px, env(safe-area-inset-top));
-            min-height: 140px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top));
         }
 
-        /* ✅ FIXED: Brand centered with icons on sides */
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .header-left {
-            width: 80px;
-        }
-
-        .brand-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin-bottom: 16px;
         }
 
         .brand {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
 
-        .header-right {
-            width: 80px;
+        .header-icons {
             display: flex;
             gap: 8px;
-            justify-content: flex-end;
         }
 
         .icon-btn {
@@ -83,14 +64,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
         }
 
-        .icon-btn:active {
-            background: rgba(255,255,255,0.25);
-        }
-
-        /* ✅ FIXED: Filter tabs at bottom of header */
+        /* Glassmorphic Filter Tabs */
         .filter-tabs {
             display: flex;
             gap: 8px;
@@ -105,13 +81,13 @@
         }
 
         .filter-tab {
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
             cursor: pointer;
@@ -122,7 +98,6 @@
             background: rgba(255, 255, 255, 0.95);
             color: #FF6F00;
             border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         /* Global Search */
@@ -334,6 +309,24 @@
             background-position: center;
         }
 
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: #FF6F00;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 4px 16px rgba(255, 111, 0, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
         /* Share Modal */
         .share-modal {
             position: fixed;
@@ -438,14 +431,11 @@
 </head>
 <body>
     <div class="container">
-        <!-- ✅ FIXED: Header with centered brand and proper spacing -->
+        <!-- Header -->
         <div class="header">
             <div class="header-top">
-                <div class="header-left"></div>
-                <div class="brand-container">
-                    <div class="brand">Nandigram</div>
-                </div>
-                <div class="header-right">
+                <div class="brand">Nandigram</div>
+                <div class="header-icons">
                     <button class="icon-btn" onclick="openShareModal()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -551,6 +541,13 @@
             </button>
         </div>
 
+        <!-- FAB -->
+        <button class="fab" onclick="openNewChatModal()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
+        </button>
+
         <!-- Share Media Modal -->
         <div class="share-modal" id="shareModal" onclick="if(event.target === this) closeShareModal()">
             <div class="share-content">
@@ -614,6 +611,7 @@
                 }
                 currentUser = user;
                 
+                // Load user profile for avatar
                 const { data: userData } = await supabaseClient
                     .from('ngm_users')
                     .select('full_name, profile_picture_url')
@@ -826,10 +824,13 @@
                 return;
             }
             
+            // Search in chats
             const filtered = allChats.filter(chat => 
                 chat.name.toLowerCase().includes(query) ||
                 chat.lastMessage.toLowerCase().includes(query)
             );
+            
+            // TODO: Also search in messages and posts from database
             
             const html = filtered.map(chat => {
                 const avatarHTML = chat.avatar 
@@ -846,6 +847,10 @@
             }).join('');
 
             document.getElementById('chatList').innerHTML = html || '<div class="empty-state"><p>No results found</p></div>';
+        }
+
+        function openNewChatModal() {
+            alert('Opening new chat modal...');
         }
 
         function openFolderModal() {
