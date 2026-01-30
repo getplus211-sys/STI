@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nandigram</title>
+    <title>Profile - Nandigram</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -16,40 +16,48 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
-            height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 480px;
             margin: 0 auto;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
             background: white;
+            min-height: 100vh;
         }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #FF6F00 0%, #E65100 100%);
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             color: white;
             padding: 12px 16px;
-            padding-top: max(12px, env(safe-area-inset-top));
-        }
-
-        .header-top {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .brand {
-            font-size: 24px;
-            font-weight: 700;
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
 
-        .header-icons {
+        .header-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-actions {
             display: flex;
             gap: 8px;
         }
@@ -58,352 +66,455 @@
             width: 40px;
             height: 40px;
             border: none;
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.1);
             border-radius: 50%;
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        /* Glassmorphic Filter Tabs */
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            padding-bottom: 4px;
-        }
-
-        .filter-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .filter-tab {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            font-size: 13px;
-            font-weight: 500;
-            white-space: nowrap;
             cursor: pointer;
-            transition: all 0.3s;
         }
 
-        .filter-tab.active {
-            background: rgba(255, 255, 255, 0.95);
-            color: #FF6F00;
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Global Search */
-        .search-container {
-            padding: 12px 16px;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .search-box {
+        /* Profile Header */
+        .profile-header {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            padding: 24px 16px 80px 16px;
             position: relative;
         }
 
-        .search-input {
-            width: 100%;
-            padding: 12px 40px 12px 40px;
-            border: 1px solid #e5e7eb;
-            border-radius: 24px;
-            font-size: 14px;
-            outline: none;
-            background: #f9fafb;
-        }
-
-        .search-input:focus {
-            border-color: #FF6F00;
-            background: white;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            stroke: #9ca3af;
-        }
-
-        /* Menu Dropdown */
-        .menu-dropdown {
-            position: fixed;
-            top: 60px;
-            right: 16px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            width: 240px;
-            display: none;
-            z-index: 100;
-            overflow: hidden;
-        }
-
-        .menu-dropdown.active {
-            display: block;
-        }
-
-        .menu-item {
-            padding: 14px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid #f3f4f6;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-
-        .menu-item:active {
-            background: #fff3e0;
-        }
-
-        .menu-icon {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Chat List */
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .chat-item {
-            display: flex;
-            gap: 12px;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-            cursor: pointer;
-        }
-
-        .chat-item:active {
-            background: #fff3e0;
-        }
-
-        .avatar {
-            width: 52px;
-            height: 52px;
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
+            background: white;
+            margin: 0 auto 16px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 20px;
-            flex-shrink: 0;
+            font-size: 48px;
+            font-weight: 700;
+            color: #16a34a;
             background-size: cover;
             background-position: center;
+            border: 4px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
         }
 
-        .chat-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .profile-name {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
             margin-bottom: 4px;
         }
 
-        .chat-name {
-            font-weight: 600;
-            color: #111827;
-            font-size: 16px;
-        }
-
-        .chat-time {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        .chat-message {
-            font-size: 14px;
-            color: #6b7280;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .unread-badge {
-            background: #FF6F00;
-            color: white;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            min-width: 20px;
+        .profile-username {
             text-align: center;
-            margin-left: 8px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 4px;
         }
 
-        /* Footer Navigation */
-        .footer-nav {
-            background: white;
-            border-top: 1px solid #e5e7eb;
-            padding: 8px;
-            display: flex;
-            justify-content: space-around;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            color: #6b7280;
-        }
-
-        .nav-item.active {
-            color: #FF6F00;
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .profile-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #FF6F00;
-            color: white;
+        .profile-status {
+            text-align: center;
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            background: white;
+            margin: -60px 16px 0 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            border-right: 1px solid #f3f4f6;
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .stat-label {
             font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            padding: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: none;
             font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .action-btn-primary {
+            background: #16a34a;
+            color: white;
+        }
+
+        .action-btn-primary:active {
+            background: #15803d;
+        }
+
+        .action-btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .action-btn-secondary:active {
+            background: #e5e7eb;
+        }
+
+        /* Bio */
+        .bio-section {
+            padding: 16px;
+            border-top: 8px solid #f5f5f5;
+        }
+
+        .bio-title {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .bio-text {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        /* Info Items */
+        .info-section {
+            padding: 0 16px;
+            border-top: 8px solid #f5f5f5;
+        }
+
+        .info-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0fdf4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #111827;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Settings Menu */
+        .settings-section {
+            padding: 0 16px;
+            border-top: 8px solid #f5f5f5;
+        }
+
+        .settings-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item:active {
+            background: #f9fafb;
+            margin: 0 -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .settings-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .settings-content {
+            flex: 1;
+        }
+
+        .settings-title {
+            font-size: 15px;
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .settings-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .settings-arrow {
+            color: #9ca3af;
+        }
+
+        /* Posts Grid */
+        .posts-section {
+            padding: 16px;
+            border-top: 8px solid #f5f5f5;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .view-all-btn {
+            font-size: 14px;
+            color: #16a34a;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 4px 8px;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .post-item {
+            aspect-ratio: 1;
+            background: #f3f4f6;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
             background-size: cover;
             background-position: center;
         }
 
-        /* FAB */
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background: #FF6F00;
-            border-radius: 50%;
-            border: none;
-            box-shadow: 0 4px 16px rgba(255, 111, 0, 0.4);
-            cursor: pointer;
+        .post-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
 
-        /* Share Modal */
-        .share-modal {
+        .post-item:active .post-overlay {
+            opacity: 1;
+        }
+
+        .post-stats {
+            color: white;
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Modals */
+        .modal-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.5);
             display: none;
             align-items: flex-end;
-            z-index: 300;
+            z-index: 1000;
         }
 
-        .share-modal.active {
+        .modal-overlay.active {
             display: flex;
         }
 
-        .share-content {
+        .modal-content {
             background: white;
             width: 100%;
             border-radius: 24px 24px 0 0;
-            padding: 24px;
             max-height: 80vh;
             overflow-y: auto;
+            animation: slideUp 0.3s;
         }
 
-        .share-header {
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .modal-title {
             font-size: 18px;
             font-weight: 700;
-            margin-bottom: 16px;
         }
 
-        .media-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .media-option {
-            padding: 20px;
-            background: #fff3e0;
-            border-radius: 12px;
-            text-align: center;
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            border: 2px solid transparent;
         }
 
-        .media-option:active {
-            border-color: #FF6F00;
+        .modal-body {
+            padding: 20px;
         }
 
-        .media-icon {
-            font-size: 32px;
+        .menu-item {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border-radius: 12px;
             margin-bottom: 8px;
         }
 
-        .media-label {
-            font-size: 12px;
-            color: #666;
+        .menu-item:active {
+            background: #f3f4f6;
         }
 
-        .chat-select-list {
-            max-height: 300px;
-            overflow-y: auto;
+        .menu-item-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .loading-spinner {
+        .menu-item-text {
+            flex: 1;
+        }
+
+        .menu-item-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .menu-item-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .danger {
+            color: #ef4444 !important;
+        }
+
+        .danger-bg {
+            background: #fef2f2 !important;
+        }
+
+        /* Loading */
+        .loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 200px;
+            height: 100vh;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border: 4px solid #f3f4f6;
-            border-top-color: #FF6F00;
+            border-top-color: #16a34a;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -412,178 +523,159 @@
             to { transform: rotate(360deg); }
         }
 
-        .bg-orange { background: #FF6F00; }
-        .bg-blue { background: #2196F3; }
-        .bg-green { background: #4CAF50; }
-        .bg-purple { background: #9C27B0; }
-        .bg-pink { background: #E91E63; }
-        .bg-teal { background: #009688; }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            color: #9ca3af;
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p style="margin-top: 16px; color: #6b7280;">Loading profile...</p>
+    </div>
+
+    <div class="container hidden" id="profileContainer">
         <!-- Header -->
         <div class="header">
-            <div class="header-top">
-                <div class="brand">Nandigram</div>
-                <div class="header-icons">
-                    <button class="icon-btn" onclick="openShareModal()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                            <circle cx="12" cy="13" r="4"/>
-                        </svg>
-                    </button>
-                    <button class="icon-btn" onclick="toggleMenu()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <line x1="4" x2="20" y1="12" y2="12"/>
-                            <line x1="4" x2="20" y1="6" y2="6"/>
-                            <line x1="4" x2="20" y1="18" y2="18"/>
-                        </svg>
-                    </button>
+            <button class="back-btn" onclick="goBack()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+            <div class="header-title" id="headerTitle">Profile</div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="openOptionsMenu()" id="optionsBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar"></div>
+            <div class="profile-name" id="profileName">Loading...</div>
+            <div class="profile-username" id="profileUsername"></div>
+            <div class="profile-status" id="profileStatus"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-item" onclick="viewPosts()" style="cursor: pointer;">
+                <div class="stat-value" id="postsCount">0</div>
+                <div class="stat-label">Posts</div>
+            </div>
+            <div class="stat-item" onclick="viewFollowers()" style="cursor: pointer;">
+                <div class="stat-value" id="followersCount">0</div>
+                <div class="stat-label">Followers</div>
+            </div>
+            <div class="stat-item" onclick="viewFollowing()" style="cursor: pointer;">
+                <div class="stat-value" id="followingCount">0</div>
+                <div class="stat-label">Following</div>
+            </div>
+        </div>
+
+        <!-- Followers/Following Info -->
+        <div style="padding: 16px; text-align: center; font-size: 14px; color: #6b7280;">
+            <span onclick="viewFollowers()" style="cursor: pointer; font-weight: 600; color: #111827;">
+                <span id="followersCountText">0</span> followers
+            </span>
+            <span style="margin: 0 8px;">·</span>
+            <span onclick="viewFollowing()" style="cursor: pointer; font-weight: 600; color: #111827;">
+                <span id="followingCountText">0</span> following
+            </span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons" id="actionButtons">
+            <!-- Dynamically filled -->
+        </div>
+
+        <!-- Bio -->
+        <div class="bio-section" id="bioSection">
+            <div class="bio-title">BIO</div>
+            <div class="bio-text" id="bioText"></div>
+        </div>
+
+        <!-- User Info -->
+        <div class="info-section" id="infoSection">
+            <!-- Dynamically filled -->
+        </div>
+
+        <!-- Settings (only for own profile) -->
+        <div class="settings-section hidden" id="settingsSection">
+            <div class="settings-item" onclick="editProfile()">
+                <div class="settings-icon" style="background: #f0fdf4;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-title">Edit Profile</div>
+                    <div class="settings-subtitle">Change name, bio, photo</div>
+                </div>
+                <div class="settings-arrow">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
                 </div>
             </div>
-            <div class="filter-tabs" id="filterTabs">
-                <div class="filter-tab active" onclick="setFilter('all')">All Chats</div>
-                <div class="filter-tab" onclick="setFilter('groups')">Groups</div>
-                <div class="filter-tab" onclick="setFilter('channels')">Channels</div>
-                <div class="filter-tab" onclick="setFilter('unread')">Unread</div>
-                <div class="filter-tab" onclick="openFolderModal()">+ New Folder</div>
-            </div>
-        </div>
 
-        <!-- Global Search -->
-        <div class="search-container">
-            <div class="search-box">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="text" class="search-input" id="globalSearch" placeholder="Search chats, messages, posts..." oninput="globalSearchHandler()">
-            </div>
-        </div>
-
-        <!-- Menu Dropdown -->
-        <div class="menu-dropdown" id="menuDropdown">
-            <div class="menu-item" onclick="window.location.href='ngm_profile.html?user_id=' + currentUser.id">
-                <span class="menu-icon">👤</span>
-                <span>My Profile</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_new_group.html'">
-                <span class="menu-icon">👥</span>
-                <span>New Group</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_new_channel.html'">
-                <span class="menu-icon">📢</span>
-                <span>New Channel</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_sync_contacts.html'">
-                <span class="menu-icon">🔄</span>
-                <span>Sync Contacts</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_all_users.html'">
-                <span class="menu-icon">🌐</span>
-                <span>All Users</span>
-            </div>
-            <div class="menu-item" onclick="signOut()">
-                <span class="menu-icon">🚪</span>
-                <span>Sign Out</span>
-            </div>
-        </div>
-
-        <!-- Chat List -->
-        <div class="chat-list" id="chatList">
-            <div class="loading-spinner" id="loadingState">
-                <div class="spinner"></div>
-                <p style="margin-top: 16px; color: #6b7280;">Loading...</p>
-            </div>
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <p style="font-size: 18px; margin-bottom: 8px;">No chats yet</p>
-                <p style="font-size: 14px;">Start a conversation</p>
-            </div>
-        </div>
-
-        <!-- Footer Navigation -->
-        <div class="footer-nav">
-            <button class="nav-item" onclick="window.location.href='ngm_all_posts.html'">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                </svg>
-                <span class="nav-label">Posts</span>
-            </button>
-            <button class="nav-item active">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                <span class="nav-label">Chats</span>
-            </button>
-            <button class="nav-item" onclick="window.location.href='ngm_stories.html'">
-                <svg class="nav-icon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                <span class="nav-label">Stories</span>
-            </button>
-            <button class="nav-item" id="profileNavBtn">
-                <div class="profile-avatar" id="profileAvatar"></div>
-                <span class="nav-label">Profile</span>
-            </button>
-        </div>
-
-        <!-- FAB -->
-        <button class="fab" onclick="openNewChatModal()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                <path d="M5 12h14"/><path d="M12 5v14"/>
-            </svg>
-        </button>
-
-        <!-- Share Media Modal -->
-        <div class="share-modal" id="shareModal" onclick="if(event.target === this) closeShareModal()">
-            <div class="share-content">
-                <div class="share-header">Share Media</div>
-                <div class="media-options">
-                    <div class="media-option" onclick="selectMedia('photo')">
-                        <div class="media-icon">📷</div>
-                        <div class="media-label">Photo</div>
-                    </div>
-                    <div class="media-option" onclick="selectMedia('video')">
-                        <div class="media-icon">🎥</div>
-                        <div class="media-label">Video</div>
-                    </div>
-                    <div class="media-option" onclick="selectMedia('document')">
-                        <div class="media-icon">📄</div>
-                        <div class="media-label">Document</div>
-                    </div>
+            <div class="settings-item" onclick="privacySettings()">
+                <div class="settings-icon" style="background: #eff6ff;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
                 </div>
-                <div class="share-header" style="font-size: 14px; margin-top: 16px;">Select Chats</div>
-                <div class="chat-select-list" id="chatSelectList"></div>
+                <div class="settings-content">
+                    <div class="settings-title">Privacy Settings</div>
+                    <div class="settings-subtitle">Who can see your info</div>
+                </div>
+                <div class="settings-arrow">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts -->
+        <div class="posts-section" id="postsSection">
+            <div class="section-header">
+                <div class="section-title">Posts</div>
+                <button class="view-all-btn" onclick="viewAllPosts()">View All</button>
+            </div>
+            <div class="posts-grid" id="postsGrid">
+                <!-- Posts dynamically loaded -->
             </div>
         </div>
     </div>
 
-    <input type="file" id="mediaInput" style="display: none" accept="" onchange="handleMediaSelected()">
+    <!-- Options Menu Modal -->
+    <div class="modal-overlay" id="optionsModal" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Options</div>
+                <button class="close-btn" onclick="closeOptionsMenu()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="optionsMenuContent">
+                <!-- Dynamically filled based on viewing own/other profile -->
+            </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        
-        let supabaseClient;
-        let currentUser = null;
-        let allChats = [];
-        let currentFilter = 'all';
-        let selectedMedia = null;
 
+        let supabaseClient;
         function initSupabase() {
             if (!supabaseClient) {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -591,288 +683,748 @@
             return supabaseClient;
         }
 
-        const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
+        let currentUser = null;
+        let profileUserId = null;
+        let profileData = null;
+        let isOwnProfile = false;
+        let isBlocked = false;
+        let isMuted = false;
+        let isFollowing = false;
+        let chatId = null;
+
+        const colors = ['#3b82f6', '#10b981', '#a855f7', '#ec4899', '#6366f1', '#14b8a6'];
 
         function getAvatarColor(name) {
             if (!name) return colors[0];
-            return colors[name.charCodeAt(0) % colors.length];
+            const index = name.charCodeAt(0) % colors.length;
+            return colors[index];
         }
 
         function getInitial(name) {
             return name ? name.charAt(0).toUpperCase() : '?';
         }
 
+        // Get user ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        profileUserId = urlParams.get('user_id');
+
         async function checkAuth() {
-            try {
-                const { data: { user }, error } = await supabaseClient.auth.getUser();
-                if (!user) {
-                    window.location.href = 'login.html';
-                    return null;
-                }
-                currentUser = user;
-                
-                // Load user profile for avatar
-                const { data: userData } = await supabaseClient
-                    .from('ngm_users')
-                    .select('full_name, profile_picture_url')
-                    .eq('user_id', user.id)
-                    .single();
-                
-                const profileBtn = document.getElementById('profileNavBtn');
-                const avatar = document.getElementById('profileAvatar');
-                
-                if (userData?.profile_picture_url) {
-                    avatar.style.backgroundImage = `url('${userData.profile_picture_url}')`;
-                } else if (userData?.full_name) {
-                    avatar.textContent = userData.full_name.charAt(0).toUpperCase();
-                } else {
-                    avatar.textContent = '?';
-                }
-                
-                profileBtn.onclick = () => window.location.href = `ngm_profile.html?user_id=${user.id}`;
-                
-                return user;
-            } catch (error) {
-                console.error('Auth error:', error);
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
                 return null;
+            }
+            currentUser = user;
+            
+            // If no user_id in URL, show own profile
+            if (!profileUserId) {
+                profileUserId = currentUser.id;
+            }
+            
+            isOwnProfile = (profileUserId === currentUser.id);
+            return user;
+        }
+
+        async function loadProfile() {
+            try {
+                // Load user data
+                const { data: userData, error: userError } = await supabaseClient
+                    .from('ngm_users')
+                    .select('*')
+                    .eq('user_id', profileUserId)
+                    .single();
+
+                if (userError) throw userError;
+                profileData = userData;
+
+                // Update UI
+                document.getElementById('headerTitle').textContent = isOwnProfile ? 'My Profile' : userData.full_name || userData.username || 'Profile';
+                
+                const name = userData.full_name || userData.username || 'User';
+                const avatarEl = document.getElementById('profileAvatar');
+                if (userData.profile_picture_url) {
+                    avatarEl.style.backgroundImage = `url('${userData.profile_picture_url}')`;
+                    avatarEl.textContent = '';
+                } else {
+                    avatarEl.style.background = getAvatarColor(name);
+                    avatarEl.textContent = getInitial(name);
+                }
+
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('profileUsername').textContent = userData.username ? '@' + userData.username : '';
+                
+                // Status
+                updateStatus(userData.is_online, userData.last_seen);
+
+                // Stats
+                document.getElementById('postsCount').textContent = userData.posts_count || 0;
+                document.getElementById('followersCount').textContent = userData.followers_count || 0;
+                document.getElementById('followingCount').textContent = userData.following_count || 0;
+                
+                // Text counts
+                document.getElementById('followersCountText').textContent = userData.followers_count || 0;
+                document.getElementById('followingCountText').textContent = userData.following_count || 0;
+
+                // Bio
+                if (userData.bio) {
+                    document.getElementById('bioText').textContent = userData.bio;
+                } else {
+                    document.getElementById('bioSection').classList.add('hidden');
+                }
+
+                // User info
+                loadUserInfo(userData);
+
+                // Action buttons
+                loadActionButtons();
+
+                // Settings (only for own profile)
+                if (isOwnProfile) {
+                    document.getElementById('settingsSection').classList.remove('hidden');
+                    document.getElementById('optionsBtn').classList.add('hidden');
+                }
+
+                // Load relationship status (blocked, muted, following)
+                if (!isOwnProfile) {
+                    await loadRelationshipStatus();
+                }
+
+                // Load posts
+                await loadPosts();
+
+                // Show profile
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('profileContainer').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Failed to load profile');
             }
         }
 
-        async function loadChats() {
-            try {
-                const { data: participants } = await supabaseClient
-                    .from('ngm_chat_participants')
-                    .select('*, ngm_chats(*)')
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true);
+        function updateStatus(isOnline, lastSeen) {
+            const statusEl = document.getElementById('profileStatus');
+            if (isOnline) {
+                // Check if last_seen is within last 60 seconds
+                const lastSeenDate = new Date(lastSeen);
+                const now = new Date();
+                const diffMs = now - lastSeenDate;
+                const diffSeconds = Math.floor(diffMs / 1000);
+                
+                if (diffSeconds < 60) {
+                    statusEl.innerHTML = '<div class="online-dot"></div> Online';
+                } else {
+                    const lastSeenText = formatLastSeen(lastSeen);
+                    statusEl.innerHTML = lastSeenText;
+                }
+            } else if (lastSeen) {
+                const lastSeenText = formatLastSeen(lastSeen);
+                statusEl.innerHTML = lastSeenText;
+            } else {
+                statusEl.innerHTML = 'Offline';
+            }
+        }
 
-                if (!participants || participants.length === 0) {
-                    document.getElementById('loadingState').style.display = 'none';
-                    document.getElementById('emptyState').style.display = 'flex';
+        function formatLastSeen(lastSeenStr) {
+            const lastSeen = new Date(lastSeenStr);
+            const now = new Date();
+            const diffMs = now - lastSeen;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'last seen just now';
+            if (diffMins < 60) return `last seen ${diffMins} min ago`;
+            if (diffHours < 24) return `last seen ${diffHours} hours ago`;
+            if (diffDays === 1) return 'last seen yesterday';
+            if (diffDays < 7) return `last seen ${diffDays} days ago`;
+            return 'last seen recently';
+        }
+
+        function loadUserInfo(userData) {
+            const infoSection = document.getElementById('infoSection');
+            let html = '';
+
+            if (userData.mobile) {
+                html += `
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value">${userData.mobile}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (userData.email) {
+                html += `
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">${userData.email}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (userData.account_created_at) {
+                const joinedDate = new Date(userData.account_created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long'
+                });
+                html += `
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Joined</div>
+                            <div class="info-value">${joinedDate}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            infoSection.innerHTML = html;
+        }
+
+        async function loadRelationshipStatus() {
+            try {
+                // Check if blocked
+                const { data: blockedData } = await supabaseClient
+                    .from('ngm_blocked_users')
+                    .select('block_id')
+                    .or(`and(user_id.eq.${currentUser.id},blocked_user_id.eq.${profileUserId}),and(user_id.eq.${profileUserId},blocked_user_id.eq.${currentUser.id})`)
+                    .limit(1);
+
+                isBlocked = blockedData && blockedData.length > 0;
+
+                // Check if chat exists
+                const { data: chatData } = await supabaseClient
+                    .from('ngm_chats')
+                    .select('chat_id')
+                    .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${profileUserId}),and(user1_id.eq.${profileUserId},user2_id.eq.${currentUser.id})`)
+                    .eq('chat_type', 'private')
+                    .maybeSingle();
+
+                if (chatData) {
+                    chatId = chatData.chat_id;
+                    const { data: participantData } = await supabaseClient
+                        .from('ngm_chat_participants')
+                        .select('is_muted')
+                        .eq('chat_id', chatData.chat_id)
+                        .eq('user_id', currentUser.id)
+                        .maybeSingle();
+
+                    isMuted = participantData?.is_muted || false;
+                }
+
+                // Check if following
+                const { data: followData } = await supabaseClient
+                    .from('ngm_user_followers')
+                    .select('follow_id')
+                    .eq('follower_user_id', currentUser.id)
+                    .eq('following_user_id', profileUserId)
+                    .maybeSingle();
+
+                isFollowing = !!followData;
+
+            } catch (error) {
+                console.error('Error loading relationship status:', error);
+            }
+        }
+
+        function loadActionButtons() {
+            const buttonsContainer = document.getElementById('actionButtons');
+            let html = '';
+
+            if (isOwnProfile) {
+                html = `
+                    <button class="action-btn action-btn-primary" onclick="editProfile()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Edit Profile
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="createStory()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Story
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="shareProfile()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                        Share
+                    </button>
+                `;
+            } else {
+                html = `
+                    <button class="action-btn action-btn-primary" onclick="sendMessage()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                        Message
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="toggleFollow()" id="followBtn">
+                        ${isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                `;
+            }
+
+            buttonsContainer.innerHTML = html;
+        }
+
+        async function loadPosts() {
+            try {
+                const { data: posts, error } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('*')
+                    .eq('user_id', profileUserId)
+                    .eq('post_type', 'post')
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+
+                if (error) throw error;
+
+                const postsGrid = document.getElementById('postsGrid');
+                if (!posts || posts.length === 0) {
+                    postsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #9ca3af; padding: 40px;">No posts yet</p>';
                     return;
                 }
 
-                const chatPromises = participants.map(async (p) => {
-                    const chat = p.ngm_chats;
-                    let chatData = {
-                        id: chat.chat_id,
-                        type: chat.chat_type === 'personal' ? 'private' : chat.chat_type,
-                        unreadCount: p.unread_count
-                    };
+                postsGrid.innerHTML = posts.map(post => {
+                    const bgImage = post.media_url || post.thumbnail_url ? `background-image: url('${post.thumbnail_url || post.media_url}')` : '';
+                    return `
+                        <div class="post-item" style="${bgImage}" onclick="viewPost('${post.post_id}')">
+                            <div class="post-overlay">
+                                <div class="post-stats">
+                                    <span>❤️ ${post.likes_count}</span>
+                                    <span>💬 ${post.comments_count}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
-                    const { data: lastMsg } = await supabaseClient
-                        .from('ngm_messages')
-                        .select('content, created_at')
-                        .eq('chat_id', chat.chat_id)
-                        .eq('is_deleted', false)
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .single();
-
-                    chatData.lastMessage = lastMsg?.content || 'No messages';
-                    chatData.lastMessageTime = lastMsg?.created_at || chat.created_at;
-
-                    if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
-                        const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
-                        const { data: userData } = await supabaseClient
-                            .from('ngm_users')
-                            .select('full_name, username, profile_picture_url')
-                            .eq('user_id', otherUserId)
-                            .single();
-                        
-                        chatData.name = userData?.full_name || userData?.username || 'Unknown';
-                        chatData.avatar = userData?.profile_picture_url;
-                    } else if (chat.chat_type === 'group') {
-                        const { data: groupData } = await supabaseClient
-                            .from('ngm_groups')
-                            .select('group_name, group_picture_url')
-                            .eq('chat_id', chat.chat_id)
-                            .single();
-                        
-                        chatData.name = groupData?.group_name || 'Group';
-                        chatData.avatar = groupData?.group_picture_url;
-                    } else if (chat.chat_type === 'channel') {
-                        const { data: channelData } = await supabaseClient
-                            .from('ngm_channels')
-                            .select('channel_name, channel_picture_url')
-                            .eq('chat_id', chat.chat_id)
-                            .single();
-                        
-                        chatData.name = channelData?.channel_name || 'Channel';
-                        chatData.avatar = channelData?.channel_picture_url;
-                    }
-
-                    return chatData;
-                });
-
-                allChats = await Promise.all(chatPromises);
-                allChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
-
-                document.getElementById('loadingState').style.display = 'none';
-                renderChats();
             } catch (error) {
-                console.error('Error loading chats:', error);
-                document.getElementById('loadingState').style.display = 'none';
+                console.error('Error loading posts:', error);
             }
         }
 
-        function renderChats() {
-            let filtered = allChats.filter(chat => {
-                if (currentFilter === 'groups') return chat.type === 'group';
-                if (currentFilter === 'channels') return chat.type === 'channel';
-                if (currentFilter === 'unread') return chat.unreadCount > 0;
-                return true;
-            });
+        function openOptionsMenu() {
+            const modal = document.getElementById('optionsModal');
+            const content = document.getElementById('optionsMenuContent');
 
-            const html = filtered.map(chat => {
-                const avatarHTML = chat.avatar 
-                    ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
-                    : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
+            let html = '';
 
-                return `<div class="chat-item" onclick="window.location.href='ngm_chat_window.html?chat_id=${chat.id}'">
-                    ${avatarHTML}
-                    <div class="chat-info">
-                        <div class="chat-header">
-                            <div class="chat-name">${chat.name}</div>
-                            <div class="chat-time">${formatTime(chat.lastMessageTime)}</div>
+            if (isOwnProfile) {
+                // Own profile options
+                html = `
+                    <div class="menu-item" onclick="editProfile()">
+                        <div class="menu-item-icon" style="background: #f0fdf4;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
                         </div>
-                        <div style="display: flex; align-items: center;">
-                            <div class="chat-message">${chat.lastMessage}</div>
-                            ${chat.unreadCount > 0 ? `<div class="unread-badge">${chat.unreadCount}</div>` : ''}
+                        <div class="menu-item-text">
+                            <div class="menu-item-title">Edit Profile</div>
+                            <div class="menu-item-subtitle">Change your info</div>
                         </div>
                     </div>
-                </div>`;
-            }).join('');
+                `;
+            } else {
+                // Other user's profile options
+                html = `
+                    <div class="menu-item" onclick="sendMessage()">
+                        <div class="menu-item-icon" style="background: #f0fdf4;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </div>
+                        <div class="menu-item-text">
+                            <div class="menu-item-title">Send Message</div>
+                            <div class="menu-item-subtitle">Start conversation</div>
+                        </div>
+                    </div>
 
-            document.getElementById('chatList').innerHTML = html || '<div class="empty-state"><p>No chats found</p></div>';
+                    <div class="menu-item" onclick="toggleMute()">
+                        <div class="menu-item-icon" style="background: #eff6ff;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                                ${isMuted 
+                                    ? '<path d="M11 5 6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/>'
+                                    : '<path d="M11 5 6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>'
+                                }
+                            </svg>
+                        </div>
+                        <div class="menu-item-text">
+                            <div class="menu-item-title">${isMuted ? 'Unmute' : 'Mute'}</div>
+                            <div class="menu-item-subtitle">${isMuted ? 'Turn on notifications' : 'Turn off notifications'}</div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" onclick="addToContacts()">
+                        <div class="menu-item-icon" style="background: #f0fdf4;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <line x1="19" y1="8" x2="19" y2="14"/>
+                                <line x1="22" y1="11" x2="16" y2="11"/>
+                            </svg>
+                        </div>
+                        <div class="menu-item-text">
+                            <div class="menu-item-title">Add to Contacts</div>
+                            <div class="menu-item-subtitle">Save in your contacts</div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" onclick="shareProfile()">
+                        <div class="menu-item-icon" style="background: #fef3c7;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                            </svg>
+                        </div>
+                        <div class="menu-item-text">
+                            <div class="menu-item-title">Share Profile</div>
+                            <div class="menu-item-subtitle">Send to others</div>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 8px solid #f5f5f5; margin: 16px -20px; padding-top: 16px;"></div>
+
+                    <div class="menu-item" onclick="reportUser()">
+                        <div class="menu-item-icon" style="background: #fff7ed;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2">
+                                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        <div class="menu-item-text">
+                            <div class="menu-item-title" style="color: #f97316;">Report User</div>
+                            <div class="menu-item-subtitle">Report spam or abuse</div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item" onclick="toggleBlock()">
+                        <div class="menu-item-icon danger-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                            </svg>
+                        </div>
+                        <div class="menu-item-text">
+                            <div class="menu-item-title danger">${isBlocked ? 'Unblock User' : 'Block User'}</div>
+                            <div class="menu-item-subtitle">${isBlocked ? 'Allow messages again' : 'Stop receiving messages'}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+            modal.classList.add('active');
         }
 
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            
-            if (days === 0) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            if (days === 1) return 'Yesterday';
-            if (days < 7) return `${days}d ago`;
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        function closeOptionsMenu() {
+            document.getElementById('optionsModal').classList.remove('active');
         }
 
-        function setFilter(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            renderChats();
-        }
-
-        function toggleMenu() {
-            document.getElementById('menuDropdown').classList.toggle('active');
-        }
-
-        function openShareModal() {
-            document.getElementById('shareModal').classList.add('active');
-            loadChatSelectList();
-        }
-
-        function closeShareModal() {
-            document.getElementById('shareModal').classList.remove('active');
-        }
-
-        function selectMedia(type) {
-            const input = document.getElementById('mediaInput');
-            if (type === 'photo') input.accept = 'image/*';
-            else if (type === 'video') input.accept = 'video/*';
-            else input.accept = '*/*';
-            selectedMedia = type;
-            input.click();
-        }
-
-        function handleMediaSelected() {
-            const files = document.getElementById('mediaInput').files;
-            if (files.length > 0) {
-                alert(`Selected ${files.length} file(s). Now select chats to share.`);
+        function closeModalOnOverlay(e) {
+            if (e.target === e.currentTarget) {
+                closeOptionsMenu();
             }
         }
 
-        function loadChatSelectList() {
-            const html = allChats.map(chat => {
-                const avatarHTML = chat.avatar 
-                    ? `<div class="avatar" style="width: 40px; height: 40px; font-size: 16px; background-image: url('${chat.avatar}')"></div>`
-                    : `<div class="avatar ${getAvatarColor(chat.name)}" style="width: 40px; height: 40px; font-size: 16px;">${getInitial(chat.name)}</div>`;
-                
-                return `<div class="chat-item" onclick="shareToChat('${chat.id}')">
-                    ${avatarHTML}
-                    <div class="chat-info">
-                        <div class="chat-name">${chat.name}</div>
-                    </div>
-                </div>`;
-            }).join('');
-            
-            document.getElementById('chatSelectList').innerHTML = html;
+        async function sendMessage() {
+            try {
+                // First, check if chat already exists
+                if (!chatId) {
+                    const { data: existingChat } = await supabaseClient
+                        .from('ngm_chats')
+                        .select('chat_id')
+                        .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${profileUserId}),and(user1_id.eq.${profileUserId},user2_id.eq.${currentUser.id})`)
+                        .eq('chat_type', 'private')
+                        .maybeSingle();
+
+                    if (existingChat) {
+                        chatId = existingChat.chat_id;
+                    } else {
+                        // Create new chat
+                        const { data: newChat, error: chatError } = await supabaseClient
+                            .from('ngm_chats')
+                            .insert({
+                                chat_type: 'private',
+                                user1_id: currentUser.id,
+                                user2_id: profileUserId,
+                                created_at: new Date().toISOString()
+                            })
+                            .select()
+                            .single();
+
+                        if (chatError) {
+                            console.error('Chat creation error:', chatError);
+                            throw chatError;
+                        }
+
+                        // Add participants
+                        const { error: participantsError } = await supabaseClient
+                            .from('ngm_chat_participants')
+                            .insert([
+                                { 
+                                    chat_id: newChat.chat_id, 
+                                    user_id: currentUser.id, 
+                                    role: 'member',
+                                    joined_at: new Date().toISOString()
+                                },
+                                { 
+                                    chat_id: newChat.chat_id, 
+                                    user_id: profileUserId, 
+                                    role: 'member',
+                                    joined_at: new Date().toISOString()
+                                }
+                            ]);
+
+                        if (participantsError) {
+                            console.error('Participants error:', participantsError);
+                            throw participantsError;
+                        }
+
+                        chatId = newChat.chat_id;
+                    }
+                }
+
+                // Redirect to chat window
+                window.location.href = `ngm_chat_window.html?chat_id=${chatId}`;
+
+            } catch (error) {
+                console.error('Error in sendMessage:', error);
+                alert('Failed to open chat. Please try again.');
+            }
         }
 
-        function shareToChat(chatId) {
-            alert(`Sharing to chat ${chatId}`);
-            closeShareModal();
+        async function toggleFollow() {
+            try {
+                if (isFollowing) {
+                    // Unfollow
+                    await supabaseClient
+                        .from('ngm_user_followers')
+                        .delete()
+                        .eq('follower_user_id', currentUser.id)
+                        .eq('following_user_id', profileUserId);
+
+                    isFollowing = false;
+                } else {
+                    // Follow
+                    await supabaseClient
+                        .from('ngm_user_followers')
+                        .insert({
+                            follower_user_id: currentUser.id,
+                            following_user_id: profileUserId
+                        });
+
+                    isFollowing = true;
+                }
+
+                loadActionButtons();
+                loadProfile(); // Reload to update counts
+
+            } catch (error) {
+                console.error('Error toggling follow:', error);
+                alert('Failed to update follow status');
+            }
         }
 
-        async function globalSearchHandler() {
-            const query = document.getElementById('globalSearch').value.toLowerCase();
-            if (!query) {
-                renderChats();
+        async function toggleMute() {
+            if (!chatId) {
+                alert('No chat exists yet');
                 return;
             }
-            
-            // Search in chats
-            const filtered = allChats.filter(chat => 
-                chat.name.toLowerCase().includes(query) ||
-                chat.lastMessage.toLowerCase().includes(query)
-            );
-            
-            // TODO: Also search in messages and posts from database
-            
-            const html = filtered.map(chat => {
-                const avatarHTML = chat.avatar 
-                    ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
-                    : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
 
-                return `<div class="chat-item" onclick="window.location.href='ngm_chat_window.html?chat_id=${chat.id}'">
-                    ${avatarHTML}
-                    <div class="chat-info">
-                        <div class="chat-name">${chat.name}</div>
-                        <div class="chat-message">${chat.lastMessage}</div>
-                    </div>
-                </div>`;
-            }).join('');
+            try {
+                await supabaseClient
+                    .from('ngm_chat_participants')
+                    .update({ is_muted: !isMuted })
+                    .eq('chat_id', chatId)
+                    .eq('user_id', currentUser.id);
 
-            document.getElementById('chatList').innerHTML = html || '<div class="empty-state"><p>No results found</p></div>';
-        }
+                isMuted = !isMuted;
+                alert(isMuted ? 'Muted successfully' : 'Unmuted successfully');
+                closeOptionsMenu();
 
-        function openNewChatModal() {
-            alert('Opening new chat modal...');
-        }
-
-        function openFolderModal() {
-            alert('Create folder feature coming soon!');
-        }
-
-        async function signOut() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
-        }
-
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('menuDropdown');
-            if (!e.target.closest('.icon-btn') && !menu.contains(e.target)) {
-                menu.classList.remove('active');
+            } catch (error) {
+                console.error('Error toggling mute:', error);
+                alert('Failed to update mute status');
             }
-        });
+        }
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        async function toggleBlock() {
+            try {
+                if (isBlocked) {
+                    // Unblock
+                    await supabaseClient
+                        .from('ngm_blocked_users')
+                        .delete()
+                        .or(`and(user_id.eq.${currentUser.id},blocked_user_id.eq.${profileUserId}),and(user_id.eq.${profileUserId},blocked_user_id.eq.${currentUser.id})`);
+
+                    isBlocked = false;
+                    alert('User unblocked');
+                } else {
+                    // Block
+                    if (confirm('Are you sure you want to block this user?')) {
+                        await supabaseClient
+                            .from('ngm_blocked_users')
+                            .insert({
+                                user_id: currentUser.id,
+                                blocked_user_id: profileUserId
+                            });
+
+                        isBlocked = true;
+                        alert('User blocked');
+                    }
+                }
+
+                closeOptionsMenu();
+                loadActionButtons();
+
+            } catch (error) {
+                console.error('Error toggling block:', error);
+                alert('Failed to update block status');
+            }
+        }
+
+        async function addToContacts() {
+            try {
+                // Check if already in contacts
+                const { data: existing } = await supabaseClient
+                    .from('ngm_contacts')
+                    .select('contact_id')
+                    .eq('user_id', currentUser.id)
+                    .eq('contact_user_id', profileUserId)
+                    .single();
+
+                if (existing) {
+                    alert('Already in contacts');
+                    return;
+                }
+
+                await supabaseClient
+                    .from('ngm_contacts')
+                    .insert({
+                        user_id: currentUser.id,
+                        contact_user_id: profileUserId,
+                        contact_name: profileData.full_name || profileData.username
+                    });
+
+                alert('Added to contacts!');
+                closeOptionsMenu();
+
+            } catch (error) {
+                console.error('Error adding to contacts:', error);
+                alert('Failed to add to contacts');
+            }
+        }
+
+        function shareProfile() {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: profileData.full_name || profileData.username,
+                    text: 'Check out this profile on Nandigram',
+                    url: url
+                }).catch(() => {});
+            } else {
+                // Copy to clipboard
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Profile link copied!');
+                });
+            }
+            closeOptionsMenu();
+        }
+
+        function reportUser() {
+            if (confirm('Report this user for spam or abuse?')) {
+                alert('User reported. Our team will review it.');
+                closeOptionsMenu();
+            }
+        }
+
+        function editProfile() {
+            window.location.href = 'ngm_edit_profile.html';
+        }
+
+        function privacySettings() {
+            window.location.href = 'ngm_privacy_settings.html';
+        }
+
+        function viewAllPosts() {
+            if (isOwnProfile) {
+                window.location.href = 'ngm_my_posts.html';
+            } else {
+                // Scroll to posts section
+                document.getElementById('postsSection')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function viewPost(postId) {
+            alert('Post viewer coming soon!');
+        }
+
+        function viewPosts() {
+            if (isOwnProfile) {
+                window.location.href = 'ngm_my_posts.html';
+            } else {
+                // Scroll to posts section
+                document.getElementById('postsSection')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function viewFollowers() {
+            window.location.href = `ngm_followers.html?user_id=${profileUserId}&tab=followers`;
+        }
+
+        function viewFollowing() {
+            window.location.href = `ngm_followers.html?user_id=${profileUserId}&tab=following`;
+        }
+
+        function createStory() {
+            window.location.href = 'ngm_create_story.html';
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
             initSupabase();
             const user = await checkAuth();
-            if (user) await loadChats();
+            if (user) {
+                await loadProfile();
+            }
         });
     </script>
 </body>
