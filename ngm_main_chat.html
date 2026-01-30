@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nandigram - Chat</title>
+    <title>Nandigram</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -11,22 +11,13 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        input {
-            -webkit-user-select: text;
-            user-select: text;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #fff;
+            background: #f5f5f5;
             height: 100vh;
             overflow: hidden;
-            touch-action: manipulation;
         }
 
         .container {
@@ -38,27 +29,19 @@
             background: white;
         }
 
-        /* Header - 90px */
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            background: linear-gradient(135deg, #FF6F00 0%, #E65100 100%);
             color: white;
-            height: 90px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 0 16px 12px 16px;
+            padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top));
         }
 
-        .header-content {
+        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .brand {
@@ -66,15 +49,7 @@
             font-weight: 700;
         }
 
-        .beta-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .header-actions {
+        .header-icons {
             display: flex;
             gap: 8px;
         }
@@ -83,63 +58,96 @@
             width: 40px;
             height: 40px;
             border: none;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
         }
 
-        .icon-btn:active {
-            background: rgba(255,255,255,0.2);
+        /* Glassmorphic Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 4px;
         }
 
-        .icon {
-            width: 20px;
-            height: 20px;
-            stroke: white;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        /* Search Bar */
-        .search-bar {
-            padding: 12px 16px;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
+        .filter-tabs::-webkit-scrollbar {
             display: none;
         }
 
-        .search-bar.active {
-            display: block;
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: #FF6F00;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Global Search */
+        .search-container {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .search-box {
+            position: relative;
         }
 
         .search-input {
             width: 100%;
-            padding: 10px 16px;
-            border: 1px solid #d1d5db;
+            padding: 12px 40px 12px 40px;
+            border: 1px solid #e5e7eb;
             border-radius: 24px;
             font-size: 14px;
             outline: none;
+            background: #f9fafb;
         }
 
         .search-input:focus {
-            border-color: #16a34a;
+            border-color: #FF6F00;
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            stroke: #9ca3af;
         }
 
         /* Menu Dropdown */
         .menu-dropdown {
             position: fixed;
-            top: 80px;
+            top: 60px;
             right: 16px;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 200px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 240px;
             display: none;
             z-index: 100;
+            overflow: hidden;
         }
 
         .menu-dropdown.active {
@@ -147,10 +155,13 @@
         }
 
         .menu-item {
-            padding: 12px 16px;
+            padding: 14px 16px;
             cursor: pointer;
             border-bottom: 1px solid #f3f4f6;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .menu-item:last-child {
@@ -158,7 +169,12 @@
         }
 
         .menu-item:active {
-            background: #f9fafb;
+            background: #fff3e0;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
         }
 
         /* Chat List */
@@ -166,17 +182,6 @@
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-        }
-
-        .section-header {
-            background: #f9fafb;
-            padding: 8px 16px;
-            font-size: 11px;
-            color: #6b7280;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .chat-item {
@@ -188,19 +193,19 @@
         }
 
         .chat-item:active {
-            background: #f9fafb;
+            background: #fff3e0;
         }
 
         .avatar {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 18px;
+            font-size: 20px;
             flex-shrink: 0;
             background-size: cover;
             background-position: center;
@@ -221,31 +226,16 @@
         .chat-name {
             font-weight: 600;
             color: #111827;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .pin-icon {
-            width: 12px;
-            height: 12px;
-            fill: #9ca3af;
+            font-size: 16px;
         }
 
         .chat-time {
             font-size: 11px;
             color: #9ca3af;
-            flex-shrink: 0;
-        }
-
-        .chat-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .chat-message {
-            font-size: 13px;
+            font-size: 14px;
             color: #6b7280;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -253,13 +243,14 @@
         }
 
         .unread-badge {
-            background: #16a34a;
+            background: #FF6F00;
             color: white;
             font-size: 11px;
             padding: 2px 8px;
             border-radius: 12px;
             min-width: 20px;
             text-align: center;
+            margin-left: 8px;
         }
 
         /* Footer Navigation */
@@ -269,6 +260,7 @@
             padding: 8px;
             display: flex;
             justify-content: space-around;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
         }
 
         .nav-item {
@@ -283,16 +275,18 @@
             border: none;
             background: none;
             color: #6b7280;
-            transition: all 0.2s;
         }
 
         .nav-item.active {
-            color: #16a34a;
-            background: #f0fdf4;
+            color: #FF6F00;
         }
 
-        .nav-item:active {
-            background: #e5e7eb;
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
         }
 
         .nav-label {
@@ -300,107 +294,130 @@
             font-weight: 500;
         }
 
-        /* Floating Action Button */
+        .profile-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #FF6F00;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* FAB */
         .fab {
             position: fixed;
             bottom: 80px;
             right: 20px;
             width: 56px;
             height: 56px;
-            background: #16a34a;
+            background: #FF6F00;
             border-radius: 50%;
             border: none;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+            box-shadow: 0 4px 16px rgba(255, 111, 0, 0.4);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 50;
-            transition: background 0.2s;
         }
 
-        .fab:active {
-            background: #15803d;
-        }
-
-        /* New Chat Modal */
-        .modal-overlay {
+        /* Share Modal */
+        .share-modal {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.5);
             display: none;
             align-items: flex-end;
-            z-index: 200;
+            z-index: 300;
         }
 
-        .modal-overlay.active {
+        .share-modal.active {
             display: flex;
         }
 
-        .modal-content {
+        .share-content {
             background: white;
             width: 100%;
             border-radius: 24px 24px 0 0;
             padding: 24px;
-            animation: slideUp 0.3s ease-out;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-title {
-            font-size: 20px;
+        .share-header {
+            font-size: 18px;
             font-weight: 700;
+            margin-bottom: 16px;
         }
 
-        .close-btn {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: #f3f4f6;
-            border-radius: 50%;
+        .media-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .media-option {
+            padding: 20px;
+            background: #fff3e0;
+            border-radius: 12px;
+            text-align: center;
             cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .media-option:active {
+            border-color: #FF6F00;
+        }
+
+        .media-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .media-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .chat-select-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .loading-spinner {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            height: 200px;
         }
 
-        .modal-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: #f0fdf4;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            border: none;
-            width: 100%;
-            text-align: left;
-        }
-
-        .modal-option:active {
-            background: #dcfce7;
-        }
-
-        .modal-option-icon {
+        .spinner {
             width: 40px;
             height: 40px;
-            background: #16a34a;
+            border: 4px solid #f3f4f6;
+            border-top-color: #FF6F00;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            animation: spin 1s linear infinite;
         }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .bg-orange { background: #FF6F00; }
+        .bg-blue { background: #2196F3; }
+        .bg-green { background: #4CAF50; }
+        .bg-purple { background: #9C27B0; }
+        .bg-pink { background: #E91E63; }
+        .bg-teal { background: #009688; }
 
         .empty-state {
             display: flex;
@@ -410,213 +427,163 @@
             height: 300px;
             color: #9ca3af;
         }
-
-        .empty-icon {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            stroke: #d1d5db;
-        }
-
-        .loading-spinner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top-color: #16a34a;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Colors for avatars */
-        .bg-blue { background: #3b82f6; }
-        .bg-green { background: #10b981; }
-        .bg-purple { background: #a855f7; }
-        .bg-pink { background: #ec4899; }
-        .bg-indigo { background: #6366f1; }
-        .bg-teal { background: #14b8a6; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <div class="brand">Nandigram</div>
-                    <div class="beta-badge">BETA</div>
-                </div>
-                <div class="header-actions">
-                    <button class="icon-btn" onclick="toggleSearch()">
-                        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <div class="header-top">
+                <div class="brand">Nandigram</div>
+                <div class="header-icons">
+                    <button class="icon-btn" onclick="openShareModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
                     </button>
                     <button class="icon-btn" onclick="toggleMenu()">
-                        <svg class="icon" viewBox="0 0 24 24"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="4" x2="20" y1="12" y2="12"/>
+                            <line x1="4" x2="20" y1="6" y2="6"/>
+                            <line x1="4" x2="20" y1="18" y2="18"/>
+                        </svg>
                     </button>
                 </div>
             </div>
+            <div class="filter-tabs" id="filterTabs">
+                <div class="filter-tab active" onclick="setFilter('all')">All Chats</div>
+                <div class="filter-tab" onclick="setFilter('groups')">Groups</div>
+                <div class="filter-tab" onclick="setFilter('channels')">Channels</div>
+                <div class="filter-tab" onclick="setFilter('unread')">Unread</div>
+                <div class="filter-tab" onclick="openFolderModal()">+ New Folder</div>
+            </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="search-bar" id="searchBar">
-            <input type="text" class="search-input" placeholder="Search chats..." id="searchInput" oninput="filterChats()">
+        <!-- Global Search -->
+        <div class="search-container">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" class="search-input" id="globalSearch" placeholder="Search chats, messages, posts..." oninput="globalSearchHandler()">
+            </div>
         </div>
 
         <!-- Menu Dropdown -->
         <div class="menu-dropdown" id="menuDropdown">
-            <div class="menu-item" onclick="window.location.href='ngm_all_users.html'">👥 All Users</div>
-            <div class="menu-item" onclick="window.location.href='ngm_sync_contacts.html'">🔄 Sync Contacts</div>
-            <div class="menu-item" onclick="createNewGroup()">New Group</div>
-            <div class="menu-item" onclick="createNewChannel()">New Channel</div>
-            <div class="menu-item" style="border-top: 1px solid #e5e7eb; margin-top: 4px; padding-top: 12px;" onclick="goToProfile()">Profile</div>
-            <div class="menu-item" onclick="goToSettings()">Settings</div>
-            <div class="menu-item" onclick="signOut()">Sign Out</div>
+            <div class="menu-item" onclick="window.location.href='ngm_profile.html?user_id=' + currentUser.id">
+                <span class="menu-icon">👤</span>
+                <span>My Profile</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='ngm_new_group.html'">
+                <span class="menu-icon">👥</span>
+                <span>New Group</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='ngm_new_channel.html'">
+                <span class="menu-icon">📢</span>
+                <span>New Channel</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='ngm_sync_contacts.html'">
+                <span class="menu-icon">🔄</span>
+                <span>Sync Contacts</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='ngm_all_users.html'">
+                <span class="menu-icon">🌐</span>
+                <span>All Users</span>
+            </div>
+            <div class="menu-item" onclick="signOut()">
+                <span class="menu-icon">🚪</span>
+                <span>Sign Out</span>
+            </div>
         </div>
 
         <!-- Chat List -->
         <div class="chat-list" id="chatList">
-            <!-- Contact Sync Banner -->
-            <div id="syncBanner" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; margin: 16px; border-radius: 12px; border: 2px dashed #16a34a; cursor: pointer;" onclick="window.location.href='ngm_sync_contacts.html'">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div style="width: 48px; height: 48px; background: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                    </div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: #166534; margin-bottom: 4px;">📱 Find Friends on Nandigram</div>
-                        <div style="font-size: 13px; color: #15803d;">Sync your contacts to discover who's using Nandigram</div>
-                    </div>
-                    <div>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
-                            <path d="m9 18 6-6-6-6"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Loading State -->
             <div class="loading-spinner" id="loadingState">
                 <div class="spinner"></div>
-                <p style="margin-top: 16px; color: #6b7280;">Loading chats...</p>
+                <p style="margin-top: 16px; color: #6b7280;">Loading...</p>
             </div>
-
-            <!-- Pinned Chats Section -->
-            <div id="pinnedSection" style="display: none;">
-                <div class="section-header">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#6b7280"><path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></svg>
-                    PINNED CHATS
-                </div>
-                <div id="pinnedChats"></div>
-            </div>
-
-            <!-- Regular Chats Section -->
-            <div id="regularSection" style="display: none;">
-                <div class="section-header" id="allChatsHeader">ALL CHATS</div>
-                <div id="regularChats"></div>
-            </div>
-
-            <!-- Empty State -->
             <div class="empty-state" id="emptyState" style="display: none;">
-                <svg class="empty-icon" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <p style="font-size: 18px; margin-bottom: 8px;">No chats yet</p>
-                <p style="font-size: 14px;">Start a new conversation</p>
+                <p style="font-size: 14px;">Start a conversation</p>
             </div>
         </div>
 
         <!-- Footer Navigation -->
         <div class="footer-nav">
-            <button class="nav-item active" onclick="setActiveTab('all')">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span class="nav-label">All Chats</span>
+            <button class="nav-item" onclick="window.location.href='ngm_all_posts.html'">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span class="nav-label">Posts</span>
             </button>
-            <button class="nav-item" onclick="setActiveTab('groups')">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span class="nav-label">Groups</span>
+            <button class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span class="nav-label">Chats</span>
             </button>
-            <button class="nav-item" onclick="setActiveTab('channels')">
-                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
-                <span class="nav-label">Channels</span>
+            <button class="nav-item" onclick="window.location.href='ngm_stories.html'">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span class="nav-label">Stories</span>
             </button>
-            <button class="nav-item" onclick="setActiveTab('contacts')">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                <span class="nav-label">Contacts</span>
+            <button class="nav-item" id="profileNavBtn">
+                <div class="profile-avatar" id="profileAvatar"></div>
+                <span class="nav-label">Profile</span>
             </button>
         </div>
 
-        <!-- Floating Action Button -->
+        <!-- FAB -->
         <button class="fab" onclick="openNewChatModal()">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
         </button>
 
-        <!-- New Chat Modal -->
-        <div class="modal-overlay" id="newChatModal" onclick="closeModalOnOverlay(event)">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">New Chat</div>
-                    <button class="close-btn" onclick="closeNewChatModal()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+        <!-- Share Media Modal -->
+        <div class="share-modal" id="shareModal" onclick="if(event.target === this) closeShareModal()">
+            <div class="share-content">
+                <div class="share-header">Share Media</div>
+                <div class="media-options">
+                    <div class="media-option" onclick="selectMedia('photo')">
+                        <div class="media-icon">📷</div>
+                        <div class="media-label">Photo</div>
+                    </div>
+                    <div class="media-option" onclick="selectMedia('video')">
+                        <div class="media-icon">🎥</div>
+                        <div class="media-label">Video</div>
+                    </div>
+                    <div class="media-option" onclick="selectMedia('document')">
+                        <div class="media-icon">📄</div>
+                        <div class="media-label">Document</div>
+                    </div>
                 </div>
-                
-                <!-- Sync Contacts Option - Prominent -->
-                <button class="modal-option" onclick="window.location.href='ngm_sync_contacts.html'" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #16a34a;">
-                    <div class="modal-option-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600; color: #166534;">🔄 Sync Contacts</div>
-                        <div style="font-size: 12px; color: #15803d; margin-top: 2px;">Find friends on Nandigram</div>
-                    </div>
-                </button>
-                
-                <button class="modal-option" onclick="createNewGroup()">
-                    <div class="modal-option-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                    <span style="font-weight: 500;">Create New Group</span>
-                </button>
-                <button class="modal-option" onclick="createNewChannel()">
-                    <div class="modal-option-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
-                    </div>
-                    <span style="font-weight: 500;">Create New Channel</span>
-                </button>
-                <div style="border-top: 1px solid #e5e7eb; margin: 16px 0; padding-top: 16px;">
-                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">Contacts</div>
-                    <div id="contactsList" style="max-height: 200px; overflow-y: auto;"></div>
-                </div>
+                <div class="share-header" style="font-size: 14px; margin-top: 16px;">Select Chats</div>
+                <div class="chat-select-list" id="chatSelectList"></div>
             </div>
         </div>
     </div>
 
+    <input type="file" id="mediaInput" style="display: none" accept="" onchange="handleMediaSelected()">
+
     <script>
-        // Supabase Configuration
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-
-        let supabaseClient;
         
-        // Wait for DOM to load before initializing
+        let supabaseClient;
+        let currentUser = null;
+        let allChats = [];
+        let currentFilter = 'all';
+        let selectedMedia = null;
+
         function initSupabase() {
             if (!supabaseClient) {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -624,82 +591,60 @@
             return supabaseClient;
         }
 
-        let currentUser = null;
-        let allChats = [];
-        let currentFilter = 'all';
-
-        const colors = ['bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-indigo', 'bg-teal'];
+        const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
 
         function getAvatarColor(name) {
             if (!name) return colors[0];
-            const index = name.charCodeAt(0) % colors.length;
-            return colors[index];
+            return colors[name.charCodeAt(0) % colors.length];
         }
 
         function getInitial(name) {
             return name ? name.charAt(0).toUpperCase() : '?';
         }
 
-        function formatTime(timestamp) {
-            if (!timestamp) return '';
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-            if (days === 0) {
-                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            } else if (days === 1) {
-                return 'Yesterday';
-            } else if (days < 7) {
-                return `${days} days ago`;
-            } else {
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            }
-        }
-
-        // Check Authentication
         async function checkAuth() {
             try {
                 const { data: { user }, error } = await supabaseClient.auth.getUser();
-                
-                if (error) {
-                    console.error('Auth error:', error);
-                }
-                
                 if (!user) {
-                    // Redirect to login page
                     window.location.href = 'login.html';
                     return null;
                 }
-                
                 currentUser = user;
+                
+                // Load user profile for avatar
+                const { data: userData } = await supabaseClient
+                    .from('ngm_users')
+                    .select('full_name, profile_picture_url')
+                    .eq('user_id', user.id)
+                    .single();
+                
+                const profileBtn = document.getElementById('profileNavBtn');
+                const avatar = document.getElementById('profileAvatar');
+                
+                if (userData?.profile_picture_url) {
+                    avatar.style.backgroundImage = `url('${userData.profile_picture_url}')`;
+                } else if (userData?.full_name) {
+                    avatar.textContent = userData.full_name.charAt(0).toUpperCase();
+                } else {
+                    avatar.textContent = '?';
+                }
+                
+                profileBtn.onclick = () => window.location.href = `ngm_profile.html?user_id=${user.id}`;
+                
                 return user;
             } catch (error) {
-                console.error('CheckAuth failed:', error);
+                console.error('Auth error:', error);
                 return null;
             }
         }
 
-        // Load All Chats
         async function loadChats() {
             try {
-                document.getElementById('loadingState').style.display = 'flex';
-                document.getElementById('emptyState').style.display = 'none';
-                document.getElementById('pinnedSection').style.display = 'none';
-                document.getElementById('regularSection').style.display = 'none';
-
-                // Get all chat participants for current user
-                const { data: participants, error: partError } = await supabaseClient
+                const { data: participants } = await supabaseClient
                     .from('ngm_chat_participants')
                     .select('*, ngm_chats(*)')
                     .eq('user_id', currentUser.id)
                     .eq('is_active', true);
-
-                if (partError) {
-                    console.error('Participant error:', partError);
-                    throw partError;
-                }
 
                 if (!participants || participants.length === 0) {
                     document.getElementById('loadingState').style.display = 'none';
@@ -707,85 +652,54 @@
                     return;
                 }
 
-                // Load chat details based on chat type
-                const chatPromises = participants.map(async (participant) => {
-                    const chat = participant.ngm_chats;
-                    
-                    // Normalize chat type
-                    let chatType = chat.chat_type;
-                    if (chatType === 'personal') chatType = 'private';
-                    
+                const chatPromises = participants.map(async (p) => {
+                    const chat = p.ngm_chats;
                     let chatData = {
                         id: chat.chat_id,
-                        type: chatType,
-                        lastMessageAt: chat.last_message_at,
-                        isPinned: participant.is_pinned,
-                        unreadCount: participant.unread_count,
-                        participantData: participant
+                        type: chat.chat_type === 'personal' ? 'private' : chat.chat_type,
+                        unreadCount: p.unread_count
                     };
 
-                    // Get last message
                     const { data: lastMsg } = await supabaseClient
                         .from('ngm_messages')
-                        .select('content, created_at, sender_id')
+                        .select('content, created_at')
                         .eq('chat_id', chat.chat_id)
                         .eq('is_deleted', false)
                         .order('created_at', { ascending: false })
                         .limit(1)
                         .single();
 
-                    chatData.lastMessage = lastMsg?.content || 'No messages yet';
+                    chatData.lastMessage = lastMsg?.content || 'No messages';
                     chatData.lastMessageTime = lastMsg?.created_at || chat.created_at;
 
                     if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
-                        // Get other user details
                         const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
-                        const { data: userData, error: userError } = await supabaseClient
+                        const { data: userData } = await supabaseClient
                             .from('ngm_users')
-                            .select('full_name, username, profile_picture_url, is_online')
+                            .select('full_name, username, profile_picture_url')
                             .eq('user_id', otherUserId)
                             .single();
-
-                        if (userError) {
-                            console.error('Error loading user:', userError);
-                        }
-
-                        chatData.name = userData?.full_name || userData?.username || 'Unknown User';
+                        
+                        chatData.name = userData?.full_name || userData?.username || 'Unknown';
                         chatData.avatar = userData?.profile_picture_url;
-                        chatData.isOnline = userData?.is_online;
                     } else if (chat.chat_type === 'group') {
-                        // Get group details
-                        const { data: groupData, error: groupError } = await supabaseClient
+                        const { data: groupData } = await supabaseClient
                             .from('ngm_groups')
                             .select('group_name, group_picture_url')
                             .eq('chat_id', chat.chat_id)
                             .single();
-
-                        if (groupError) {
-                            console.error('Error loading group:', groupError);
-                        }
-
-                        chatData.name = groupData?.group_name || 'Group Chat';
+                        
+                        chatData.name = groupData?.group_name || 'Group';
                         chatData.avatar = groupData?.group_picture_url;
                     } else if (chat.chat_type === 'channel') {
-                        // Get channel details
-                        const { data: channelData, error: channelError } = await supabaseClient
+                        const { data: channelData } = await supabaseClient
                             .from('ngm_channels')
                             .select('channel_name, channel_picture_url')
                             .eq('chat_id', chat.chat_id)
                             .single();
-
-                        if (channelError) {
-                            console.error('Error loading channel:', channelError);
-                        }
-
+                        
                         chatData.name = channelData?.channel_name || 'Channel';
                         chatData.avatar = channelData?.channel_picture_url;
-                    }
-
-                    // Fallback if name is still not set
-                    if (!chatData.name) {
-                        chatData.name = 'Unknown Chat';
                     }
 
                     return chatData;
@@ -794,254 +708,153 @@
                 allChats = await Promise.all(chatPromises);
                 allChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
 
-                // Show sync banner if user has less than 3 chats
-                if (allChats.length < 3) {
-                    document.getElementById('syncBanner').style.display = 'block';
-                }
-
                 document.getElementById('loadingState').style.display = 'none';
                 renderChats();
             } catch (error) {
                 console.error('Error loading chats:', error);
                 document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('emptyState').style.display = 'flex';
             }
         }
 
         function renderChats() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-            
-            let filteredChats = allChats.filter(chat => {
-                if (searchQuery && !chat.name.toLowerCase().includes(searchQuery)) return false;
-                if (currentFilter === 'groups' && chat.type !== 'group') return false;
-                if (currentFilter === 'channels' && chat.type !== 'channel') return false;
-                if (currentFilter === 'contacts' && chat.type !== 'private') return false;
+            let filtered = allChats.filter(chat => {
+                if (currentFilter === 'groups') return chat.type === 'group';
+                if (currentFilter === 'channels') return chat.type === 'channel';
+                if (currentFilter === 'unread') return chat.unreadCount > 0;
                 return true;
             });
 
-            const pinned = filteredChats.filter(c => c.isPinned);
-            const regular = filteredChats.filter(c => !c.isPinned);
+            const html = filtered.map(chat => {
+                const avatarHTML = chat.avatar 
+                    ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
+                    : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
 
-            const pinnedHTML = pinned.map(chat => createChatHTML(chat)).join('');
-            const regularHTML = regular.map(chat => createChatHTML(chat)).join('');
-
-            document.getElementById('pinnedChats').innerHTML = pinnedHTML;
-            document.getElementById('regularChats').innerHTML = regularHTML;
-
-            document.getElementById('pinnedSection').style.display = pinned.length > 0 ? 'block' : 'none';
-            document.getElementById('regularSection').style.display = regular.length > 0 ? 'block' : 'none';
-            document.getElementById('emptyState').style.display = (pinned.length === 0 && regular.length === 0) ? 'flex' : 'none';
-        }
-
-        function createChatHTML(chat) {
-            const avatarHTML = chat.avatar 
-                ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
-                : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
-
-            return `
-                <div class="chat-item" onclick="openChat('${chat.id}')">
+                return `<div class="chat-item" onclick="window.location.href='ngm_chat_window.html?chat_id=${chat.id}'">
                     ${avatarHTML}
                     <div class="chat-info">
                         <div class="chat-header">
-                            <div class="chat-name">
-                                ${chat.name}
-                                ${chat.isPinned ? '<svg class="pin-icon" viewBox="0 0 24 24"><path d="M16 9V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"/></svg>' : ''}
-                            </div>
+                            <div class="chat-name">${chat.name}</div>
                             <div class="chat-time">${formatTime(chat.lastMessageTime)}</div>
                         </div>
-                        <div class="chat-footer">
+                        <div style="display: flex; align-items: center;">
                             <div class="chat-message">${chat.lastMessage}</div>
                             ${chat.unreadCount > 0 ? `<div class="unread-badge">${chat.unreadCount}</div>` : ''}
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
+            }).join('');
+
+            document.getElementById('chatList').innerHTML = html || '<div class="empty-state"><p>No chats found</p></div>';
         }
 
-        function toggleSearch() {
-            const searchBar = document.getElementById('searchBar');
-            searchBar.classList.toggle('active');
-            if (searchBar.classList.contains('active')) {
-                document.getElementById('searchInput').focus();
-            } else {
-                document.getElementById('searchInput').value = '';
-                renderChats();
-            }
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            renderChats();
         }
 
         function toggleMenu() {
             document.getElementById('menuDropdown').classList.toggle('active');
         }
 
-        function filterChats() {
-            renderChats();
+        function openShareModal() {
+            document.getElementById('shareModal').classList.add('active');
+            loadChatSelectList();
         }
 
-        function setActiveTab(tab) {
-            currentFilter = tab;
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
-            renderChats();
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('active');
+        }
+
+        function selectMedia(type) {
+            const input = document.getElementById('mediaInput');
+            if (type === 'photo') input.accept = 'image/*';
+            else if (type === 'video') input.accept = 'video/*';
+            else input.accept = '*/*';
+            selectedMedia = type;
+            input.click();
+        }
+
+        function handleMediaSelected() {
+            const files = document.getElementById('mediaInput').files;
+            if (files.length > 0) {
+                alert(`Selected ${files.length} file(s). Now select chats to share.`);
+            }
+        }
+
+        function loadChatSelectList() {
+            const html = allChats.map(chat => {
+                const avatarHTML = chat.avatar 
+                    ? `<div class="avatar" style="width: 40px; height: 40px; font-size: 16px; background-image: url('${chat.avatar}')"></div>`
+                    : `<div class="avatar ${getAvatarColor(chat.name)}" style="width: 40px; height: 40px; font-size: 16px;">${getInitial(chat.name)}</div>`;
+                
+                return `<div class="chat-item" onclick="shareToChat('${chat.id}')">
+                    ${avatarHTML}
+                    <div class="chat-info">
+                        <div class="chat-name">${chat.name}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            document.getElementById('chatSelectList').innerHTML = html;
+        }
+
+        function shareToChat(chatId) {
+            alert(`Sharing to chat ${chatId}`);
+            closeShareModal();
+        }
+
+        async function globalSearchHandler() {
+            const query = document.getElementById('globalSearch').value.toLowerCase();
+            if (!query) {
+                renderChats();
+                return;
+            }
+            
+            // Search in chats
+            const filtered = allChats.filter(chat => 
+                chat.name.toLowerCase().includes(query) ||
+                chat.lastMessage.toLowerCase().includes(query)
+            );
+            
+            // TODO: Also search in messages and posts from database
+            
+            const html = filtered.map(chat => {
+                const avatarHTML = chat.avatar 
+                    ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
+                    : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
+
+                return `<div class="chat-item" onclick="window.location.href='ngm_chat_window.html?chat_id=${chat.id}'">
+                    ${avatarHTML}
+                    <div class="chat-info">
+                        <div class="chat-name">${chat.name}</div>
+                        <div class="chat-message">${chat.lastMessage}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('chatList').innerHTML = html || '<div class="empty-state"><p>No results found</p></div>';
         }
 
         function openNewChatModal() {
-            document.getElementById('newChatModal').classList.add('active');
-            loadContacts();
+            alert('Opening new chat modal...');
         }
 
-        function closeNewChatModal() {
-            document.getElementById('newChatModal').classList.remove('active');
-        }
-
-        function closeModalOnOverlay(event) {
-            if (event.target === event.currentTarget) {
-                closeNewChatModal();
-            }
-        }
-
-        async function loadContacts() {
-            try {
-                // Get contacts
-                const { data: contacts, error } = await supabaseClient
-                    .from('ngm_contacts')
-                    .select('contact_id, contact_name, contact_user_id')
-                    .eq('user_id', currentUser.id);
-
-                if (error) throw error;
-
-                if (!contacts || contacts.length === 0) {
-                    document.getElementById('contactsList').innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 16px;">No contacts yet. Click "Sync Contacts" to add.</p>';
-                    return;
-                }
-
-                // Get user details for each contact
-                const userIds = contacts.map(c => c.contact_user_id);
-                const { data: users } = await supabaseClient
-                    .from('ngm_users')
-                    .select('user_id, full_name, username, profile_picture_url')
-                    .in('user_id', userIds);
-
-                // Create a map of user details
-                const userMap = {};
-                users?.forEach(user => {
-                    userMap[user.user_id] = user;
-                });
-
-                const html = contacts.map(contact => {
-                    const user = userMap[contact.contact_user_id];
-                    const name = contact.contact_name || user?.full_name || user?.username || 'Unknown';
-                    const avatarHTML = user?.profile_picture_url 
-                        ? `<div class="avatar" style="width: 40px; height: 40px; font-size: 16px; background-image: url('${user.profile_picture_url}')"></div>`
-                        : `<div class="avatar ${getAvatarColor(name)}" style="width: 40px; height: 40px; font-size: 16px;">${getInitial(name)}</div>`;
-
-                    return `
-                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; border-radius: 8px;" onclick="startChatWithContact('${contact.contact_user_id}')" onmousedown="this.style.background='#f9fafb'" onmouseup="this.style.background=''" onmouseleave="this.style.background=''">
-                            ${avatarHTML}
-                            <span>${name}</span>
-                        </div>
-                    `;
-                }).join('');
-
-                document.getElementById('contactsList').innerHTML = html;
-            } catch (error) {
-                console.error('Error loading contacts:', error);
-                document.getElementById('contactsList').innerHTML = '<p style="text-align: center; color: #ef4444; padding: 16px;">Error loading contacts</p>';
-            }
-        }
-
-        async function startChatWithContact(contactUserId) {
-            try {
-                // First check if a private chat already exists with this user
-                const { data: existingChats, error: checkError } = await supabaseClient
-                    .from('ngm_chats')
-                    .select('chat_id')
-                    .eq('chat_type', 'private')
-                    .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${contactUserId}),and(user1_id.eq.${contactUserId},user2_id.eq.${currentUser.id})`);
-
-                if (checkError) {
-                    console.error('Error checking existing chat:', checkError);
-                    throw checkError;
-                }
-
-                if (existingChats && existingChats.length > 0) {
-                    // Chat already exists, open it
-                    console.log('Chat already exists, opening:', existingChats[0].chat_id);
-                    openChat(existingChats[0].chat_id);
-                    closeNewChatModal();
-                    return;
-                }
-
-                // No existing chat found, create new one
-                const { data: newChat, error } = await supabaseClient
-                    .from('ngm_chats')
-                    .insert({
-                        chat_type: 'private',
-                        user1_id: currentUser.id,
-                        user2_id: contactUserId,
-                        created_at: new Date().toISOString()
-                    })
-                    .select()
-                    .single();
-
-                if (error) {
-                    console.error('Error creating chat:', error);
-                    throw error;
-                }
-
-                // Add participants
-                const { error: participantsError } = await supabaseClient
-                    .from('ngm_chat_participants')
-                    .insert([
-                        { 
-                            chat_id: newChat.chat_id, 
-                            user_id: currentUser.id, 
-                            role: 'member',
-                            joined_at: new Date().toISOString()
-                        },
-                        { 
-                            chat_id: newChat.chat_id, 
-                            user_id: contactUserId, 
-                            role: 'member',
-                            joined_at: new Date().toISOString()
-                        }
-                    ]);
-
-                if (participantsError) {
-                    console.error('Error adding participants:', participantsError);
-                    throw participantsError;
-                }
-
-                console.log('New chat created:', newChat.chat_id);
-                openChat(newChat.chat_id);
-                closeNewChatModal();
-
-            } catch (error) {
-                console.error('Error in startChatWithContact:', error);
-                alert('Failed to start chat. Please try again.');
-                closeNewChatModal();
-            }
-        }
-
-        function openChat(chatId) {
-            window.location.href = `ngm_chat_window.html?chat_id=${chatId}`;
-        }
-
-        function createNewGroup() {
-            alert('Group creation feature coming soon!');
-            closeNewChatModal();
-        }
-
-        function createNewChannel() {
-            alert('Channel creation feature coming soon!');
-            closeNewChatModal();
-        }
-
-        function goToProfile() {
-            alert('Profile page coming soon!');
-        }
-
-        function goToSettings() {
-            alert('Settings page coming soon!');
+        function openFolderModal() {
+            alert('Create folder feature coming soon!');
         }
 
         async function signOut() {
@@ -1049,81 +862,17 @@
             window.location.href = 'login.html';
         }
 
-        // Close menu when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', (e) => {
             const menu = document.getElementById('menuDropdown');
-            const menuBtn = event.target.closest('.icon-btn');
-            if (!menuBtn && !menu.contains(event.target)) {
+            if (!e.target.closest('.icon-btn') && !menu.contains(e.target)) {
                 menu.classList.remove('active');
             }
         });
 
-        // Setup real-time subscription
-        function setupRealtimeSubscription() {
-            // Subscribe to new messages
-            supabaseClient
-                .channel('messages')
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'ngm_messages'
-                }, async (payload) => {
-                    console.log('New message received:', payload);
-                    
-                    // Find the chat this message belongs to
-                    const chatIndex = allChats.findIndex(c => c.id === payload.new.chat_id);
-                    
-                    if (chatIndex !== -1) {
-                        // Update last message
-                        allChats[chatIndex].lastMessage = payload.new.content;
-                        allChats[chatIndex].lastMessageTime = payload.new.created_at;
-                        
-                        // If message is not from current user, increment unread count
-                        if (payload.new.sender_id !== currentUser.id) {
-                            allChats[chatIndex].unreadCount = (allChats[chatIndex].unreadCount || 0) + 1;
-                        }
-                        
-                        // Re-sort chats (bring this chat to top)
-                        allChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
-                        
-                        // Re-render
-                        renderChats();
-                    } else {
-                        // New chat - reload all
-                        loadChats();
-                    }
-                })
-                .subscribe();
-
-            // Subscribe to chat participants changes (for unread count updates)
-            supabaseClient
-                .channel('participants')
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'ngm_chat_participants',
-                    filter: `user_id=eq.${currentUser.id}`
-                }, (payload) => {
-                    console.log('Participant updated:', payload);
-                    
-                    // Update unread count in our local data
-                    const chatIndex = allChats.findIndex(c => c.id === payload.new.chat_id);
-                    if (chatIndex !== -1) {
-                        allChats[chatIndex].unreadCount = payload.new.unread_count;
-                        renderChats();
-                    }
-                })
-                .subscribe();
-        }
-
-        // Initialize
-        window.addEventListener('DOMContentLoaded', async function() {
-            initSupabase(); // Initialize Supabase client
+        window.addEventListener('DOMContentLoaded', async () => {
+            initSupabase();
             const user = await checkAuth();
-            if (user) {
-                await loadChats();
-                setupRealtimeSubscription();
-            }
+            if (user) await loadChats();
         });
     </script>
 </body>
