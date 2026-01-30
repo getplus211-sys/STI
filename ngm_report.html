@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Post - Nandigram</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7f9f9;
+            color: #0f1419;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF6F00 0%, #E65100 100%);
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #0f1419;
+        }
+
+        .reason-option {
+            padding: 16px;
+            border: 2px solid #eff3f4;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reason-option:hover {
+            border-color: #FF6F00;
+            background: #fff5ec;
+        }
+
+        .reason-option.selected {
+            border-color: #FF6F00;
+            background: #fff5ec;
+        }
+
+        .reason-option input[type="radio"] {
+            display: none;
+        }
+
+        .reason-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .reason-icon {
+            width: 24px;
+            height: 24px;
+            stroke: #FF6F00;
+            fill: none;
+        }
+
+        .details-section {
+            margin-top: 24px;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 2px solid #eff3f4;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .textarea:focus {
+            outline: none;
+            border-color: #FF6F00;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #FF6F00;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .submit-btn:not(:disabled):hover {
+            background: #E65100;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="history.back()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div class="header-title">Report Post</div>
+        </div>
+
+        <div class="content">
+            <div class="warning">
+                ⚠️ False reports may result in account restrictions. Only report content that violates our guidelines.
+            </div>
+
+            <div class="section-title">Why are you reporting this post?</div>
+
+            <div class="reason-option" onclick="selectReason('spam')">
+                <input type="radio" name="reason" value="spam" id="spam">
+                <label class="reason-label" for="spam">
+                    <svg class="reason-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Spam or misleading
+                </label>
+            </div>
+
+            <div class="reason-option" onclick="selectReason('harassment')">
+                <input type="radio" name="reason" value="harassment" id="harassment">
+                <label class="reason-label" for="harassment">
+                    <svg class="reason-icon" viewBox="0 0 24 24">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Harassment or hate speech
+                </label>
+            </div>
+
+            <div class="reason-option" onclick="selectReason('inappropriate')">
+                <input type="radio" name="reason" value="inappropriate" id="inappropriate">
+                <label class="reason-label" for="inappropriate">
+                    <svg class="reason-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    Inappropriate content
+                </label>
+            </div>
+
+            <div class="reason-option" onclick="selectReason('false_info')">
+                <input type="radio" name="reason" value="false_info" id="false_info">
+                <label class="reason-label" for="false_info">
+                    <svg class="reason-icon" viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="M12 8v4M12 16h.01"/>
+                    </svg>
+                    False or misleading information
+                </label>
+            </div>
+
+            <div class="reason-option" onclick="selectReason('violence')">
+                <input type="radio" name="reason" value="violence" id="violence">
+                <label class="reason-label" for="violence">
+                    <svg class="reason-icon" viewBox="0 0 24 24">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Violence or dangerous content
+                </label>
+            </div>
+
+            <div class="reason-option" onclick="selectReason('other')">
+                <input type="radio" name="reason" value="other" id="other">
+                <label class="reason-label" for="other">
+                    <svg class="reason-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="19" cy="12" r="1"/>
+                        <circle cx="5" cy="12" r="1"/>
+                    </svg>
+                    Other
+                </label>
+            </div>
+
+            <div class="details-section">
+                <div class="section-title">Additional details (optional)</div>
+                <textarea class="textarea" id="reportDetails" placeholder="Provide more context about why you're reporting this post..."></textarea>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" disabled onclick="submitReport()">Submit Report</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let selectedReason = null;
+        let postId = null;
+        let currentUser = null;
+
+        async function init() {
+            // Get post ID from URL
+            const params = new URLSearchParams(window.location.search);
+            postId = params.get('post_id');
+
+            if (!postId) {
+                alert('No post specified');
+                history.back();
+                return;
+            }
+
+            // Check auth
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = user;
+        }
+
+        function selectReason(reason) {
+            selectedReason = reason;
+            
+            // Update UI
+            document.querySelectorAll('.reason-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Update radio
+            document.getElementById(reason).checked = true;
+            
+            // Enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        async function submitReport() {
+            if (!selectedReason || !postId) return;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const details = document.getElementById('reportDetails').value.trim();
+
+                const { error } = await supabaseClient
+                    .from('ngm_post_reports')
+                    .insert({
+                        post_id: postId,
+                        reported_by: currentUser.id,
+                        report_reason: selectedReason,
+                        report_details: details || null
+                    });
+
+                if (error) {
+                    if (error.code === '23505') {
+                        alert('You have already reported this post.');
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    alert('Report submitted successfully. We will review it shortly.');
+                    history.back();
+                }
+
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                alert('Failed to submit report. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Report';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
