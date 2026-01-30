@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nandigram</title>
+    <title>Posts - Nandigram</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -15,44 +15,48 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            height: 100vh;
-            overflow: hidden;
+            background: #fafafa;
+            overflow-x: hidden;
         }
 
         .container {
             max-width: 480px;
             margin: 0 auto;
-            height: 100vh;
+            background: white;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: white;
         }
 
-        /* Header */
+        /* Header - 70px */
         .header {
             background: linear-gradient(135deg, #FF6F00 0%, #E65100 100%);
             color: white;
-            header: 110px;
+            height: 70px;
+            display: flex;
+            align-items: flex-end;
             padding: 12px 16px;
-            padding-top: max(12px, env(safe-area-inset-top));
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .header-top {
+        .header-content {
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
         }
 
         .brand {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
-        .header-icons {
+        .header-actions {
             display: flex;
-            gap: 8px;
+            gap: 12px;
         }
 
         .icon-btn {
@@ -65,203 +69,244 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.2s;
         }
 
-        /* Glassmorphic Filter Tabs */
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
+        .icon-btn:active {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Stories Row */
+        .stories-container {
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 16px 0;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
-            padding-bottom: 4px;
         }
 
-        .filter-tabs::-webkit-scrollbar {
+        .stories-container::-webkit-scrollbar {
             display: none;
         }
 
-        .filter-tab {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            font-size: 13px;
-            font-weight: 500;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .filter-tab.active {
-            background: rgba(255, 255, 255, 0.95);
-            color: #FF6F00;
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Global Search */
-        .search-container {
-            padding: 12px 16px;
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .search-box {
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 40px 12px 40px;
-            border: 1px solid #e5e7eb;
-            border-radius: 24px;
-            font-size: 14px;
-            outline: none;
-            background: #f9fafb;
-        }
-
-        .search-input:focus {
-            border-color: #FF6F00;
-            background: white;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            stroke: #9ca3af;
-        }
-
-        /* Menu Dropdown */
-        .menu-dropdown {
-            position: fixed;
-            top: 60px;
-            right: 16px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            width: 240px;
-            display: none;
-            z-index: 100;
-            overflow: hidden;
-        }
-
-        .menu-dropdown.active {
-            display: block;
-        }
-
-        .menu-item {
-            padding: 14px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid #f3f4f6;
-            font-size: 14px;
+        .stories-row {
             display: flex;
+            gap: 16px;
+            padding: 0 16px;
+        }
+
+        .story-item {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-        }
-
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-
-        .menu-item:active {
-            background: #fff3e0;
-        }
-
-        .menu-icon {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Chat List */
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .chat-item {
-            display: flex;
-            gap: 12px;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
+            gap: 8px;
             cursor: pointer;
+            min-width: 70px;
         }
 
-        .chat-item:active {
-            background: #fff3e0;
-        }
-
-        .avatar {
-            width: 52px;
-            height: 52px;
+        .story-ring {
+            width: 66px;
+            height: 66px;
             border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+        }
+
+        .story-ring.viewed {
+            background: #dbdbdb;
+        }
+
+        .story-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 600;
-            font-size: 20px;
-            flex-shrink: 0;
+            font-size: 24px;
+            color: white;
             background-size: cover;
             background-position: center;
         }
 
-        .chat-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .chat-name {
-            font-weight: 600;
-            color: #111827;
-            font-size: 16px;
-        }
-
-        .chat-time {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        .chat-message {
-            font-size: 14px;
-            color: #6b7280;
+        .story-username {
+            font-size: 12px;
+            color: #262626;
+            max-width: 70px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .unread-badge {
+        /* Posts Feed */
+        .posts-feed {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 70px;
+        }
+
+        .section-header {
+            padding: 16px;
+            background: #fafafa;
+            border-bottom: 1px solid #dbdbdb;
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+            position: sticky;
+            top: 70px;
+            z-index: 50;
+        }
+
+        /* Post Card - Twitter Style */
+        .post-card {
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            margin-bottom: 0;
+        }
+
+        .post-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             background: #FF6F00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            min-width: 20px;
-            text-align: center;
-            margin-left: 8px;
+            font-weight: 600;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .post-user-info {
+            flex: 1;
+        }
+
+        .post-username {
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .post-menu-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Post Content - Text First */
+        .post-content {
+            padding: 0 16px 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #262626;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Post Media - Below Text */
+        .post-media {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+        }
+
+        .post-media-grid {
+            display: grid;
+            gap: 2px;
+        }
+
+        .post-media-grid.count-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .post-media-grid.count-3,
+        .post-media-grid.count-4,
+        .post-media-grid.count-5 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .post-media-grid img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        /* Post Actions */
+        .post-actions {
+            padding: 8px 16px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #262626;
+            font-size: 14px;
+        }
+
+        .action-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .action-btn.liked svg {
+            fill: #ed4956;
+            stroke: #ed4956;
+        }
+
+        .post-likes {
+            padding: 0 16px 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #262626;
         }
 
         /* Footer Navigation */
         .footer-nav {
             background: white;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #dbdbdb;
             padding: 8px;
             display: flex;
             justify-content: space-around;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            z-index: 100;
         }
 
         .nav-item {
@@ -275,7 +320,7 @@
             cursor: pointer;
             border: none;
             background: none;
-            color: #6b7280;
+            color: #262626;
         }
 
         .nav-item.active {
@@ -310,100 +355,17 @@
             background-position: center;
         }
 
-        /* FAB */
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background: #FF6F00;
-            border-radius: 50%;
-            border: none;
-            box-shadow: 0 4px 16px rgba(255, 111, 0, 0.4);
-            cursor: pointer;
+        /* Loading */
+        .loading {
             display: flex;
-            align-items: center;
             justify-content: center;
-            z-index: 50;
-        }
-
-        /* Share Modal */
-        .share-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: flex-end;
-            z-index: 300;
-        }
-
-        .share-modal.active {
-            display: flex;
-        }
-
-        .share-content {
-            background: white;
-            width: 100%;
-            border-radius: 24px 24px 0 0;
-            padding: 24px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .share-header {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .media-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .media-option {
-            padding: 20px;
-            background: #fff3e0;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .media-option:active {
-            border-color: #FF6F00;
-        }
-
-        .media-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .media-label {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .chat-select-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .loading-spinner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
+            padding: 40px 20px;
         }
 
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid #f3f4f6;
+            border: 3px solid #f3f4f6;
             border-top-color: #FF6F00;
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -413,6 +375,21 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Empty State */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #8e8e8e;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            opacity: 0.3;
+        }
+
+        /* Colors */
         .bg-orange { background: #FF6F00; }
         .bg-blue { background: #2196F3; }
         .bg-green { background: #4CAF50; }
@@ -420,13 +397,8 @@
         .bg-pink { background: #E91E63; }
         .bg-teal { background: #009688; }
 
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            color: #9ca3af;
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -434,87 +406,44 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-top">
+            <div class="header-content">
                 <div class="brand">Nandigram</div>
-                <div class="header-icons">
-                    <button class="icon-btn" onclick="openShareModal()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                            <circle cx="12" cy="13" r="4"/>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="window.location.href='ngm_create_post.html'">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
                         </svg>
                     </button>
-                    <button class="icon-btn" onclick="toggleMenu()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <line x1="4" x2="20" y1="12" y2="12"/>
-                            <line x1="4" x2="20" y1="6" y2="6"/>
-                            <line x1="4" x2="20" y1="18" y2="18"/>
+                    <button class="icon-btn" onclick="window.location.href='ngm_notifications.html'">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                         </svg>
                     </button>
                 </div>
             </div>
-            <div class="filter-tabs" id="filterTabs">
-                <div class="filter-tab active" onclick="setFilter('all')">All Chats</div>
-                <div class="filter-tab" onclick="setFilter('groups')">Groups</div>
-                <div class="filter-tab" onclick="setFilter('channels')">Channels</div>
-                <div class="filter-tab" onclick="setFilter('unread')">Unread</div>
-                <div class="filter-tab" onclick="openFolderModal()">+ New Folder</div>
+        </div>
+
+        <!-- Stories Row -->
+        <div class="stories-container">
+            <div class="stories-row" id="storiesRow">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Global Search -->
-        <div class="search-container">
-            <div class="search-box">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="text" class="search-input" id="globalSearch" placeholder="Search chats, messages, posts..." oninput="globalSearchHandler()">
-            </div>
-        </div>
-
-        <!-- Menu Dropdown -->
-        <div class="menu-dropdown" id="menuDropdown">
-            <div class="menu-item" onclick="window.location.href='ngm_profile.html?user_id=' + currentUser.id">
-                <span class="menu-icon">👤</span>
-                <span>My Profile</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_new_group.html'">
-                <span class="menu-icon">👥</span>
-                <span>New Group</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_new_channel.html'">
-                <span class="menu-icon">📢</span>
-                <span>New Channel</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_sync_contacts.html'">
-                <span class="menu-icon">🔄</span>
-                <span>Sync Contacts</span>
-            </div>
-            <div class="menu-item" onclick="window.location.href='ngm_all_users.html'">
-                <span class="menu-icon">🌐</span>
-                <span>All Users</span>
-            </div>
-            <div class="menu-item" onclick="signOut()">
-                <span class="menu-icon">🚪</span>
-                <span>Sign Out</span>
-            </div>
-        </div>
-
-        <!-- Chat List -->
-        <div class="chat-list" id="chatList">
-            <div class="loading-spinner" id="loadingState">
+        <!-- Posts Feed -->
+        <div class="posts-feed" id="postsFeed">
+            <div class="loading">
                 <div class="spinner"></div>
-                <p style="margin-top: 16px; color: #6b7280;">Loading...</p>
-            </div>
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <p style="font-size: 18px; margin-bottom: 8px;">No chats yet</p>
-                <p style="font-size: 14px;">Start a conversation</p>
             </div>
         </div>
 
         <!-- Footer Navigation -->
         <div class="footer-nav">
-            <button class="nav-item" onclick="window.location.href='ngm_all_posts.html'">
+            <button class="nav-item active">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7"/>
                     <rect x="14" y="3" width="7" height="7"/>
@@ -523,74 +452,43 @@
                 </svg>
                 <span class="nav-label">Posts</span>
             </button>
-            <button class="nav-item active">
+            <button class="nav-item" onclick="window.location.href='ngm_main_chat.html'">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
                 <span class="nav-label">Chats</span>
             </button>
-            <button class="nav-item" onclick="window.location.href='ngm_stories.html'">
+            <button class="nav-item" onclick="openSearchModal()">
                 <svg class="nav-icon" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
                 </svg>
-                <span class="nav-label">Stories</span>
+                <span class="nav-label">Search</span>
             </button>
             <button class="nav-item" id="profileNavBtn">
                 <div class="profile-avatar" id="profileAvatar"></div>
                 <span class="nav-label">Profile</span>
             </button>
         </div>
-
-        <!-- FAB -->
-        <button class="fab" onclick="openNewChatModal()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                <path d="M5 12h14"/><path d="M12 5v14"/>
-            </svg>
-        </button>
-
-        <!-- Share Media Modal -->
-        <div class="share-modal" id="shareModal" onclick="if(event.target === this) closeShareModal()">
-            <div class="share-content">
-                <div class="share-header">Share Media</div>
-                <div class="media-options">
-                    <div class="media-option" onclick="selectMedia('photo')">
-                        <div class="media-icon">📷</div>
-                        <div class="media-label">Photo</div>
-                    </div>
-                    <div class="media-option" onclick="selectMedia('video')">
-                        <div class="media-icon">🎥</div>
-                        <div class="media-label">Video</div>
-                    </div>
-                    <div class="media-option" onclick="selectMedia('document')">
-                        <div class="media-icon">📄</div>
-                        <div class="media-label">Document</div>
-                    </div>
-                </div>
-                <div class="share-header" style="font-size: 14px; margin-top: 16px;">Select Chats</div>
-                <div class="chat-select-list" id="chatSelectList"></div>
-            </div>
-        </div>
     </div>
-
-    <input type="file" id="mediaInput" style="display: none" accept="" onchange="handleMediaSelected()">
 
     <script>
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        
-        let supabaseClient;
-        let currentUser = null;
-        let allChats = [];
-        let currentFilter = 'all';
-        let selectedMedia = null;
 
+        let supabaseClient;
         function initSupabase() {
             if (!supabaseClient) {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
             return supabaseClient;
         }
+
+        let currentUser = null;
+        let followingPosts = [];
+        let suggestedPosts = [];
+        let stories = [];
+        let likedPosts = new Set();
 
         const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
 
@@ -604,276 +502,340 @@
         }
 
         async function checkAuth() {
-            try {
-                const { data: { user }, error } = await supabaseClient.auth.getUser();
-                if (!user) {
-                    window.location.href = 'login.html';
-                    return null;
-                }
-                currentUser = user;
-                
-                // Load user profile for avatar
-                const { data: userData } = await supabaseClient
-                    .from('ngm_users')
-                    .select('full_name, profile_picture_url')
-                    .eq('user_id', user.id)
-                    .single();
-                
-                const profileBtn = document.getElementById('profileNavBtn');
-                const avatar = document.getElementById('profileAvatar');
-                
-                if (userData?.profile_picture_url) {
-                    avatar.style.backgroundImage = `url('${userData.profile_picture_url}')`;
-                } else if (userData?.full_name) {
-                    avatar.textContent = userData.full_name.charAt(0).toUpperCase();
-                } else {
-                    avatar.textContent = '?';
-                }
-                
-                profileBtn.onclick = () => window.location.href = `ngm_profile.html?user_id=${user.id}`;
-                
-                return user;
-            } catch (error) {
-                console.error('Auth error:', error);
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
                 return null;
             }
+            currentUser = user;
+
+            // Load user profile
+            const { data: userData } = await supabaseClient
+                .from('ngm_users')
+                .select('full_name, profile_picture_url')
+                .eq('user_id', user.id)
+                .single();
+
+            const avatar = document.getElementById('profileAvatar');
+            if (userData?.profile_picture_url) {
+                avatar.style.backgroundImage = `url('${userData.profile_picture_url}')`;
+            } else if (userData?.full_name) {
+                avatar.textContent = userData.full_name.charAt(0).toUpperCase();
+            }
+
+            document.getElementById('profileNavBtn').onclick = () => {
+                window.location.href = `ngm_profile.html?user_id=${user.id}`;
+            };
+
+            return user;
         }
 
-        async function loadChats() {
+        async function loadStories() {
             try {
-                const { data: participants } = await supabaseClient
-                    .from('ngm_chat_participants')
-                    .select('*, ngm_chats(*)')
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true);
+                // Get following users
+                const { data: following } = await supabaseClient
+                    .from('ngm_user_followers')
+                    .select('following_user_id')
+                    .eq('follower_user_id', currentUser.id);
 
-                if (!participants || participants.length === 0) {
-                    document.getElementById('loadingState').style.display = 'none';
-                    document.getElementById('emptyState').style.display = 'flex';
+                if (!following || following.length === 0) {
+                    document.getElementById('storiesRow').innerHTML = `
+                        <div class="empty-state" style="padding: 20px;">
+                            <p style="font-size: 14px; color: #8e8e8e;">Follow people to see their stories</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                const chatPromises = participants.map(async (p) => {
-                    const chat = p.ngm_chats;
-                    let chatData = {
-                        id: chat.chat_id,
-                        type: chat.chat_type === 'personal' ? 'private' : chat.chat_type,
-                        unreadCount: p.unread_count
-                    };
+                const userIds = following.map(f => f.following_user_id);
+                const now = new Date().toISOString();
 
-                    const { data: lastMsg } = await supabaseClient
-                        .from('ngm_messages')
-                        .select('content, created_at')
-                        .eq('chat_id', chat.chat_id)
-                        .eq('is_deleted', false)
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .single();
+                // Get active stories from following
+                const { data: activeStories } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('*, ngm_users(full_name, username, profile_picture_url)')
+                    .in('user_id', userIds)
+                    .eq('post_type', 'story')
+                    .gt('expires_at', now)
+                    .order('created_at', { ascending: false });
 
-                    chatData.lastMessage = lastMsg?.content || 'No messages';
-                    chatData.lastMessageTime = lastMsg?.created_at || chat.created_at;
-
-                    if (chat.chat_type === 'private' || chat.chat_type === 'personal') {
-                        const otherUserId = chat.user1_id === currentUser.id ? chat.user2_id : chat.user1_id;
-                        const { data: userData } = await supabaseClient
-                            .from('ngm_users')
-                            .select('full_name, username, profile_picture_url')
-                            .eq('user_id', otherUserId)
-                            .single();
-                        
-                        chatData.name = userData?.full_name || userData?.username || 'Unknown';
-                        chatData.avatar = userData?.profile_picture_url;
-                    } else if (chat.chat_type === 'group') {
-                        const { data: groupData } = await supabaseClient
-                            .from('ngm_groups')
-                            .select('group_name, group_picture_url')
-                            .eq('chat_id', chat.chat_id)
-                            .single();
-                        
-                        chatData.name = groupData?.group_name || 'Group';
-                        chatData.avatar = groupData?.group_picture_url;
-                    } else if (chat.chat_type === 'channel') {
-                        const { data: channelData } = await supabaseClient
-                            .from('ngm_channels')
-                            .select('channel_name, channel_picture_url')
-                            .eq('chat_id', chat.chat_id)
-                            .single();
-                        
-                        chatData.name = channelData?.channel_name || 'Channel';
-                        chatData.avatar = channelData?.channel_picture_url;
+                // Group by user
+                const storiesByUser = {};
+                activeStories?.forEach(story => {
+                    if (!storiesByUser[story.user_id]) {
+                        storiesByUser[story.user_id] = {
+                            user: story.ngm_users,
+                            stories: []
+                        };
                     }
-
-                    return chatData;
+                    storiesByUser[story.user_id].stories.push(story);
                 });
 
-                allChats = await Promise.all(chatPromises);
-                allChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
+                stories = Object.values(storiesByUser);
 
-                document.getElementById('loadingState').style.display = 'none';
-                renderChats();
+                renderStories();
+
             } catch (error) {
-                console.error('Error loading chats:', error);
-                document.getElementById('loadingState').style.display = 'none';
+                console.error('Error loading stories:', error);
+                document.getElementById('storiesRow').innerHTML = '';
             }
         }
 
-        function renderChats() {
-            let filtered = allChats.filter(chat => {
-                if (currentFilter === 'groups') return chat.type === 'group';
-                if (currentFilter === 'channels') return chat.type === 'channel';
-                if (currentFilter === 'unread') return chat.unreadCount > 0;
-                return true;
-            });
-
-            const html = filtered.map(chat => {
-                const avatarHTML = chat.avatar 
-                    ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
-                    : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
-
-                return `<div class="chat-item" onclick="window.location.href='ngm_chat_window.html?chat_id=${chat.id}'">
-                    ${avatarHTML}
-                    <div class="chat-info">
-                        <div class="chat-header">
-                            <div class="chat-name">${chat.name}</div>
-                            <div class="chat-time">${formatTime(chat.lastMessageTime)}</div>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                            <div class="chat-message">${chat.lastMessage}</div>
-                            ${chat.unreadCount > 0 ? `<div class="unread-badge">${chat.unreadCount}</div>` : ''}
-                        </div>
+        function renderStories() {
+            if (stories.length === 0) {
+                document.getElementById('storiesRow').innerHTML = `
+                    <div class="empty-state" style="padding: 20px;">
+                        <p style="font-size: 14px; color: #8e8e8e;">No stories available</p>
                     </div>
-                </div>`;
+                `;
+                return;
+            }
+
+            const html = stories.map(storyData => {
+                const user = storyData.user;
+                const name = user.full_name || user.username || 'User';
+                
+                const avatarHTML = user.profile_picture_url
+                    ? `<div class="story-avatar" style="background-image: url('${user.profile_picture_url}')"></div>`
+                    : `<div class="story-avatar ${getAvatarColor(name)}">${getInitial(name)}</div>`;
+
+                return `
+                    <div class="story-item" onclick="viewStory('${storyData.stories[0].user_id}')">
+                        <div class="story-ring">
+                            ${avatarHTML}
+                        </div>
+                        <div class="story-username">${name}</div>
+                    </div>
+                `;
             }).join('');
 
-            document.getElementById('chatList').innerHTML = html || '<div class="empty-state"><p>No chats found</p></div>';
+            document.getElementById('storiesRow').innerHTML = html;
+        }
+
+        async function loadPosts() {
+            try {
+                // Get following users
+                const { data: following } = await supabaseClient
+                    .from('ngm_user_followers')
+                    .select('following_user_id')
+                    .eq('follower_user_id', currentUser.id);
+
+                const followingIds = following?.map(f => f.following_user_id) || [];
+
+                // Load following posts
+                if (followingIds.length > 0) {
+                    const { data: posts } = await supabaseClient
+                        .from('ngm_user_posts')
+                        .select('*, ngm_users(full_name, username, profile_picture_url)')
+                        .in('user_id', followingIds)
+                        .eq('post_type', 'post')
+                        .eq('is_public', true)
+                        .order('created_at', { ascending: false })
+                        .limit(20);
+
+                    followingPosts = posts || [];
+                }
+
+                // Load suggested posts (from users not following)
+                const { data: suggested } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('*, ngm_users(full_name, username, profile_picture_url)')
+                    .not('user_id', 'in', `(${[currentUser.id, ...followingIds].join(',')})`)
+                    .eq('post_type', 'post')
+                    .eq('is_public', true)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                suggestedPosts = suggested || [];
+
+                // Load liked posts
+                const { data: likes } = await supabaseClient
+                    .from('ngm_post_likes')
+                    .select('post_id')
+                    .eq('user_id', currentUser.id);
+
+                likedPosts = new Set(likes?.map(l => l.post_id) || []);
+
+                renderPosts();
+
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                showError();
+            }
+        }
+
+        function renderPosts() {
+            let html = '';
+
+            // Following Posts Section
+            if (followingPosts.length > 0) {
+                html += '<div class="section-header">Following</div>';
+                html += followingPosts.map(post => createPostCard(post)).join('');
+            }
+
+            // Suggested Posts Section
+            if (suggestedPosts.length > 0) {
+                html += '<div class="section-header">Suggested Posts</div>';
+                html += suggestedPosts.map(post => createPostCard(post)).join('');
+            }
+
+            if (!html) {
+                html = `
+                    <div class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No posts yet</div>
+                        <div style="font-size: 14px;">Follow people to see their posts</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('postsFeed').innerHTML = html;
+        }
+
+        function createPostCard(post) {
+            const user = post.ngm_users;
+            const name = user.full_name || user.username || 'User';
+            const time = formatTime(post.created_at);
+            const isLiked = likedPosts.has(post.post_id);
+
+            const avatarHTML = user.profile_picture_url
+                ? `<div class="post-avatar" style="background-image: url('${user.profile_picture_url}')"></div>`
+                : `<div class="post-avatar ${getAvatarColor(name)}">${getInitial(name)}</div>`;
+
+            let mediaHTML = '';
+            if (post.media_url) {
+                mediaHTML = `<img class="post-media" src="${post.media_url}" alt="Post">`;
+            }
+
+            return `
+                <div class="post-card">
+                    <div class="post-header">
+                        ${avatarHTML}
+                        <div class="post-user-info">
+                            <div class="post-username">${name}</div>
+                            <div class="post-time">${time}</div>
+                        </div>
+                        <button class="post-menu-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="1"/>
+                                <circle cx="12" cy="5" r="1"/>
+                                <circle cx="12" cy="19" r="1"/>
+                            </svg>
+                        </button>
+                    </div>
+                    ${post.content ? `<div class="post-content">${post.content}</div>` : ''}
+                    ${mediaHTML}
+                    <div class="post-actions">
+                        <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${post.post_id}', event)">
+                            <svg viewBox="0 0 24 24" fill="${isLiked ? '#ed4956' : 'none'}" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                            <span>${post.likes_count || 0}</span>
+                        </button>
+                        <button class="action-btn" onclick="window.location.href='ngm_view_post.html?post_id=${post.post_id}'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span>${post.comments_count || 0}</span>
+                        </button>
+                        <button class="action-btn" onclick="sharePost('${post.post_id}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="18" cy="5" r="3"/>
+                                <circle cx="6" cy="12" r="3"/>
+                                <circle cx="18" cy="19" r="3"/>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function toggleLike(postId, event) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            const isLiked = likedPosts.has(postId);
+
+            try {
+                if (isLiked) {
+                    await supabaseClient
+                        .from('ngm_post_likes')
+                        .delete()
+                        .eq('post_id', postId)
+                        .eq('user_id', currentUser.id);
+                    likedPosts.delete(postId);
+                } else {
+                    await supabaseClient
+                        .from('ngm_post_likes')
+                        .insert({ post_id: postId, user_id: currentUser.id });
+                    likedPosts.add(postId);
+                }
+
+                // Update UI
+                await loadPosts();
+
+            } catch (error) {
+                console.error('Error toggling like:', error);
+            }
         }
 
         function formatTime(timestamp) {
             const date = new Date(timestamp);
             const now = new Date();
             const diff = now - date;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            
-            if (days === 0) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m`;
+            if (hours < 24) return `${hours}h`;
             if (days === 1) return 'Yesterday';
-            if (days < 7) return `${days}d ago`;
+            if (days < 7) return `${days}d`;
+            
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
 
-        function setFilter(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            renderChats();
+        function viewStory(userId) {
+            window.location.href = `ngm_view_story.html?user_id=${userId}`;
         }
 
-        function toggleMenu() {
-            document.getElementById('menuDropdown').classList.toggle('active');
-        }
-
-        function openShareModal() {
-            document.getElementById('shareModal').classList.add('active');
-            loadChatSelectList();
-        }
-
-        function closeShareModal() {
-            document.getElementById('shareModal').classList.remove('active');
-        }
-
-        function selectMedia(type) {
-            const input = document.getElementById('mediaInput');
-            if (type === 'photo') input.accept = 'image/*';
-            else if (type === 'video') input.accept = 'video/*';
-            else input.accept = '*/*';
-            selectedMedia = type;
-            input.click();
-        }
-
-        function handleMediaSelected() {
-            const files = document.getElementById('mediaInput').files;
-            if (files.length > 0) {
-                alert(`Selected ${files.length} file(s). Now select chats to share.`);
+        function sharePost(postId) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Nandigram Post',
+                    url: `${window.location.origin}/ngm_view_post.html?post_id=${postId}`
+                });
+            } else {
+                alert('Post link copied!');
             }
         }
 
-        function loadChatSelectList() {
-            const html = allChats.map(chat => {
-                const avatarHTML = chat.avatar 
-                    ? `<div class="avatar" style="width: 40px; height: 40px; font-size: 16px; background-image: url('${chat.avatar}')"></div>`
-                    : `<div class="avatar ${getAvatarColor(chat.name)}" style="width: 40px; height: 40px; font-size: 16px;">${getInitial(chat.name)}</div>`;
-                
-                return `<div class="chat-item" onclick="shareToChat('${chat.id}')">
-                    ${avatarHTML}
-                    <div class="chat-info">
-                        <div class="chat-name">${chat.name}</div>
-                    </div>
-                </div>`;
-            }).join('');
-            
-            document.getElementById('chatSelectList').innerHTML = html;
+        function openSearchModal() {
+            window.location.href = 'ngm_search.html';
         }
 
-        function shareToChat(chatId) {
-            alert(`Sharing to chat ${chatId}`);
-            closeShareModal();
+        function showError() {
+            document.getElementById('postsFeed').innerHTML = `
+                <div class="empty-state">
+                    <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Failed to load posts</p>
+                    <button onclick="loadPosts()" style="padding: 8px 24px; background: #FF6F00; color: white; border: none; border-radius: 8px; cursor: pointer;">Retry</button>
+                </div>
+            `;
         }
 
-        async function globalSearchHandler() {
-            const query = document.getElementById('globalSearch').value.toLowerCase();
-            if (!query) {
-                renderChats();
-                return;
-            }
-            
-            // Search in chats
-            const filtered = allChats.filter(chat => 
-                chat.name.toLowerCase().includes(query) ||
-                chat.lastMessage.toLowerCase().includes(query)
-            );
-            
-            // TODO: Also search in messages and posts from database
-            
-            const html = filtered.map(chat => {
-                const avatarHTML = chat.avatar 
-                    ? `<div class="avatar" style="background-image: url('${chat.avatar}')"></div>`
-                    : `<div class="avatar ${getAvatarColor(chat.name)}">${getInitial(chat.name)}</div>`;
-
-                return `<div class="chat-item" onclick="window.location.href='ngm_chat_window.html?chat_id=${chat.id}'">
-                    ${avatarHTML}
-                    <div class="chat-info">
-                        <div class="chat-name">${chat.name}</div>
-                        <div class="chat-message">${chat.lastMessage}</div>
-                    </div>
-                </div>`;
-            }).join('');
-
-            document.getElementById('chatList').innerHTML = html || '<div class="empty-state"><p>No results found</p></div>';
-        }
-
-        function openNewChatModal() {
-            alert('Opening new chat modal...');
-        }
-
-        function openFolderModal() {
-            alert('Create folder feature coming soon!');
-        }
-
-        async function signOut() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
-        }
-
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('menuDropdown');
-            if (!e.target.closest('.icon-btn') && !menu.contains(e.target)) {
-                menu.classList.remove('active');
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', async () => {
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async function() {
             initSupabase();
             const user = await checkAuth();
-            if (user) await loadChats();
+            if (user) {
+                await Promise.all([loadStories(), loadPosts()]);
+            }
         });
     </script>
 </body>
