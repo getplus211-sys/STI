@@ -58,14 +58,19 @@
             border-right: 1px solid var(--border-color);
         }
 
-        /* Header */
-        .header {
+        /* Primary Header */
+        .header-primary {
             background: var(--header-bg);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 101;
+            transition: transform 0.3s ease;
+        }
+
+        .header-primary.hidden {
+            transform: translateY(-100%);
         }
 
         .header-top {
@@ -79,7 +84,7 @@
         .brand {
             font-size: 20px;
             font-weight: 700;
-            color: var(--text-primary);
+            color: var(--accent-color);
         }
 
         .header-actions {
@@ -144,10 +149,27 @@
             opacity: 0;
         }
 
-        /* Tab Navigation */
+        /* Secondary Header - Tab Navigation */
+        .header-secondary {
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 53px;
+            z-index: 100;
+            transition: transform 0.3s ease, top 0.3s ease;
+        }
+
+        .header-secondary.hidden {
+            transform: translateY(-100%);
+        }
+
+        .header-primary.hidden + .header-secondary {
+            top: 0;
+        }
+
         .tab-nav {
             display: flex;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .tab-btn {
@@ -187,7 +209,7 @@
         /* New Posts Notification */
         .new-posts-notify {
             position: fixed;
-            top: 70px;
+            top: 120px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--accent-color);
@@ -276,7 +298,7 @@
         .post-verified {
             width: 18px;
             height: 18px;
-            fill: #1d9bf0;
+            fill: var(--accent-color);
         }
 
         .post-handle {
@@ -292,6 +314,76 @@
         .post-time {
             color: var(--text-secondary);
             font-size: 15px;
+        }
+
+        .post-menu-btn {
+            margin-left: auto;
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .post-menu-btn:hover {
+            background: var(--bg-hover);
+            color: var(--accent-color);
+        }
+
+        /* Post Menu Dropdown */
+        .post-menu {
+            position: fixed;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .post-menu.active {
+            display: block;
+        }
+
+        .post-menu-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .post-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .post-menu-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .post-menu-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+        }
+
+        .post-menu-item.danger {
+            color: #f91880;
+        }
+
+        .post-menu-item.primary {
+            color: var(--accent-color);
         }
 
         /* Post Content */
@@ -380,16 +472,16 @@
         }
 
         .action-btn.liked {
-            color: #f91880;
+            color: var(--accent-color);
         }
 
         .action-btn.liked:hover {
-            background: rgba(249, 24, 128, 0.1);
+            background: rgba(255, 111, 0, 0.15);
         }
 
         .action-btn.liked svg {
-            fill: #f91880;
-            stroke: #f91880;
+            fill: var(--accent-color);
+            stroke: var(--accent-color);
         }
 
         .action-btn.saved {
@@ -637,9 +729,10 @@
             color: var(--text-secondary);
         }
 
-        /* Footer Navigation */
+        /* Footer Navigation - Glassmorphic */
         .footer-nav {
-            background: var(--bg-primary);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
             border-top: 1px solid var(--border-color);
             padding: 8px;
             display: flex;
@@ -651,6 +744,16 @@
             max-width: 600px;
             margin: 0 auto;
             z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        body.dark-mode .footer-nav {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        .footer-nav.hidden {
+            transform: translateY(100%);
         }
 
         .nav-item {
@@ -699,8 +802,8 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
+        <!-- Primary Header -->
+        <div class="header-primary" id="headerPrimary">
             <div class="header-top">
                 <div class="brand">Nandigram</div>
                 <div class="header-actions">
@@ -728,8 +831,10 @@
                     </button>
                 </div>
             </div>
-            
-            <!-- Tab Navigation -->
+        </div>
+
+        <!-- Secondary Header - Tab Navigation -->
+        <div class="header-secondary" id="headerSecondary">
             <div class="tab-nav">
                 <button class="tab-btn active" data-tab="foryou">For you</button>
                 <button class="tab-btn" data-tab="following">Following</button>
@@ -745,6 +850,33 @@
         <div class="posts-feed" id="postsFeed">
             <div class="loading">
                 <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Post Menu Dropdown -->
+        <div class="post-menu" id="postMenu">
+            <div class="post-menu-item primary" id="menuFollow">
+                <svg viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <line x1="20" y1="8" x2="20" y2="14"/>
+                    <line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+                <span>Follow</span>
+            </div>
+            <div class="post-menu-item" id="menuInterested">
+                <svg viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span>Interested</span>
+            </div>
+            <div class="post-menu-item danger" id="menuReport">
+                <svg viewBox="0 0 24 24" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>Report</span>
             </div>
         </div>
 
@@ -804,7 +936,7 @@
         </div>
 
         <!-- Footer Navigation -->
-        <div class="footer-nav">
+        <div class="footer-nav" id="footerNav">
             <button class="nav-item active">
                 <svg class="nav-icon" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7"/>
@@ -851,9 +983,13 @@
         let posts = [];
         let likedPosts = new Set();
         let savedPosts = new Set();
+        let followingUsers = new Set();
         let lastPostId = null;
         let checkNewPostsInterval = null;
         let currentSharePostId = null;
+        let currentMenuPostId = null;
+        let currentMenuPostUserId = null;
+        let lastScrollY = 0;
 
         const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
 
@@ -864,6 +1000,37 @@
 
         function getInitial(name) {
             return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        // Scroll behavior for headers and footer
+        let ticking = false;
+        document.getElementById('postsFeed').addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        function handleScroll() {
+            const currentScrollY = document.getElementById('postsFeed').scrollTop;
+            const headerPrimary = document.getElementById('headerPrimary');
+            const headerSecondary = document.getElementById('headerSecondary');
+            const footerNav = document.getElementById('footerNav');
+
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                // Scrolling down
+                headerPrimary.classList.add('hidden');
+                footerNav.classList.add('hidden');
+            } else {
+                // Scrolling up
+                headerPrimary.classList.remove('hidden');
+                footerNav.classList.remove('hidden');
+            }
+
+            lastScrollY = currentScrollY;
         }
 
         // Theme Toggle
@@ -1011,6 +1178,13 @@
                 .eq('user_id', currentUser.id);
 
             savedPosts = new Set(saves?.map(s => s.post_id) || []);
+
+            const { data: following } = await supabaseClient
+                .from('ngm_user_followers')
+                .select('following_user_id')
+                .eq('follower_user_id', currentUser.id);
+
+            followingUsers = new Set(following?.map(f => f.following_user_id) || []);
         }
 
         function renderPosts() {
@@ -1075,6 +1249,13 @@
                                 <span class="post-handle">@${username}</span>
                                 <span class="post-dot">·</span>
                                 <span class="post-time">${time}</span>
+                                <button class="post-menu-btn" onclick="openPostMenu(event, '${post.post_id}', '${post.user_id}')">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="5" r="2"/>
+                                        <circle cx="12" cy="12" r="2"/>
+                                        <circle cx="12" cy="19" r="2"/>
+                                    </svg>
+                                </button>
                             </div>
                             ${post.content ? `<div class="post-content">${linkifyText(post.content)}</div>` : ''}
                             ${mediaHTML}
@@ -1108,6 +1289,104 @@
                 </div>
             `;
         }
+
+        function openPostMenu(event, postId, userId) {
+            event.stopPropagation();
+            
+            currentMenuPostId = postId;
+            currentMenuPostUserId = userId;
+
+            const menu = document.getElementById('postMenu');
+            const followBtn = document.getElementById('menuFollow');
+            
+            // Update follow/unfollow text
+            const isFollowing = followingUsers.has(userId);
+            if (userId === currentUser.id) {
+                followBtn.style.display = 'none';
+            } else {
+                followBtn.style.display = 'flex';
+                followBtn.innerHTML = isFollowing 
+                    ? `<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg><span>Unfollow</span>`
+                    : `<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg><span>Follow</span>`;
+            }
+
+            // Position menu
+            const rect = event.target.getBoundingClientRect();
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.right = `${window.innerWidth - rect.right}px`;
+            menu.classList.add('active');
+
+            // Close menu when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', closePostMenu);
+            }, 0);
+        }
+
+        function closePostMenu() {
+            document.getElementById('postMenu').classList.remove('active');
+            document.removeEventListener('click', closePostMenu);
+        }
+
+        // Menu actions
+        document.getElementById('menuFollow').addEventListener('click', async function(e) {
+            e.stopPropagation();
+            if (!currentMenuPostUserId) return;
+
+            try {
+                const isFollowing = followingUsers.has(currentMenuPostUserId);
+                
+                if (isFollowing) {
+                    await supabaseClient
+                        .from('ngm_user_followers')
+                        .delete()
+                        .eq('follower_user_id', currentUser.id)
+                        .eq('following_user_id', currentMenuPostUserId);
+                    followingUsers.delete(currentMenuPostUserId);
+                } else {
+                    await supabaseClient
+                        .from('ngm_user_followers')
+                        .insert({
+                            follower_user_id: currentUser.id,
+                            following_user_id: currentMenuPostUserId
+                        });
+                    followingUsers.add(currentMenuPostUserId);
+                }
+
+                closePostMenu();
+                await loadPosts();
+
+            } catch (error) {
+                console.error('Error toggling follow:', error);
+            }
+        });
+
+        document.getElementById('menuInterested').addEventListener('click', async function(e) {
+            e.stopPropagation();
+            if (!currentMenuPostUserId) return;
+
+            try {
+                await supabaseClient.rpc('increment_user_interest', {
+                    p_user_id: currentUser.id,
+                    p_interest_type: 'user_interaction',
+                    p_interest_value: currentMenuPostUserId,
+                    p_score_increment: 5
+                });
+
+                alert('Your interest has been noted!');
+                closePostMenu();
+
+            } catch (error) {
+                console.error('Error marking interest:', error);
+            }
+        });
+
+        document.getElementById('menuReport').addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!currentMenuPostId) return;
+            
+            window.location.href = `ngm_report.html?post_id=${currentMenuPostId}`;
+            closePostMenu();
+        });
 
         async function toggleLike(postId, event) {
             event.stopPropagation();
@@ -1171,7 +1450,7 @@
 
                 await supabaseClient
                     .from('ngm_user_posts')
-                    .update({ views_count: (post.views_count || 0) + 1 })
+                    .update({ views_count: (post?.views_count || 0) + 1 })
                     .eq('post_id', postId);
             } catch (e) {
                 console.error('Error updating views:', e);
