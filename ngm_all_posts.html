@@ -990,6 +990,10 @@
         let currentMenuPostId = null;
         let currentMenuPostUserId = null;
         let lastScrollY = 0;
+        let isLoadingPosts = false;
+        let hasMorePosts = true;
+        let currentOffset = 0;
+        const POSTS_PER_PAGE = 5;
 
         const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
 
@@ -1015,19 +1019,29 @@
         });
 
         function handleScroll() {
-            const currentScrollY = document.getElementById('postsFeed').scrollTop;
-            const headerPrimary = document.getElementById('headerPrimary');
+            const feedElement = document.getElementById('postsFeed');
+            const currentScrollY = feedElement.scrollTop;
             const headerSecondary = document.getElementById('headerSecondary');
             const footerNav = document.getElementById('footerNav');
 
+            // Scroll direction detection for hide/show
             if (currentScrollY > lastScrollY && currentScrollY > 50) {
-                // Scrolling DOWN - hide everything
+                // Scrolling DOWN - hide secondary header and footer
                 headerSecondary.classList.add('hidden');
                 footerNav.classList.add('hidden');
             } else if (currentScrollY < lastScrollY) {
-                // Scrolling UP - show everything
+                // Scrolling UP - show secondary header and footer
                 headerSecondary.classList.remove('hidden');
                 footerNav.classList.remove('hidden');
+            }
+
+            // Infinite scroll - load more when near bottom
+            const scrollHeight = feedElement.scrollHeight;
+            const clientHeight = feedElement.clientHeight;
+            const scrollTop = feedElement.scrollTop;
+            
+            if (scrollHeight - scrollTop - clientHeight < 300 && !isLoadingPosts && hasMorePosts) {
+                loadMorePosts();
             }
 
             lastScrollY = currentScrollY;
@@ -1087,6 +1101,11 @@
 
         async function loadPosts() {
             try {
+                // Reset pagination
+                currentOffset = 0;
+                posts = [];
+                hasMorePosts = true;
+                
                 if (currentTab === 'following') {
                     await loadFollowingPosts();
                 } else {
@@ -1102,6 +1121,47 @@
             }
         }
 
+        async function loadMorePosts() {
+            if (isLoadingPosts || !hasMorePosts) return;
+            
+            isLoadingPosts = true;
+            showLoadingIndicator();
+
+            try {
+                currentOffset += POSTS_PER_PAGE;
+                
+                if (currentTab === 'following') {
+                    await loadFollowingPosts();
+                } else {
+                    await loadForYouPosts();
+                }
+
+            } catch (error) {
+                console.error('Error loading more posts:', error);
+            } finally {
+                isLoadingPosts = false;
+                hideLoadingIndicator();
+            }
+        }
+
+        function showLoadingIndicator() {
+            const existing = document.querySelector('.loading-more');
+            if (!existing) {
+                const indicator = document.createElement('div');
+                indicator.className = 'loading-more';
+                indicator.innerHTML = '<div class="spinner"></div>';
+                indicator.style.cssText = 'display: flex; justify-content: center; padding: 20px;';
+                document.getElementById('postsFeed').appendChild(indicator);
+            }
+        }
+
+        function hideLoadingIndicator() {
+            const indicator = document.querySelector('.loading-more');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
         async function loadFollowingPosts() {
             const { data: following } = await supabaseClient
                 .from('ngm_user_followers')
@@ -1109,8 +1169,11 @@
                 .eq('follower_user_id', currentUser.id);
 
             if (!following || following.length === 0) {
-                posts = [];
-                renderPosts();
+                if (currentOffset === 0) {
+                    posts = [];
+                    renderPosts();
+                }
+                hasMorePosts = false;
                 return;
             }
 
@@ -1123,10 +1186,20 @@
                 .eq('post_type', 'post')
                 .eq('is_public', true)
                 .order('created_at', { ascending: false })
-                .limit(30);
+                .range(currentOffset, currentOffset + POSTS_PER_PAGE - 1);
 
-            posts = postsData || [];
-            if (posts.length > 0) lastPostId = posts[0].post_id;
+            if (postsData && postsData.length > 0) {
+                posts = [...posts, ...postsData];
+                if (currentOffset === 0 && postsData.length > 0) {
+                    lastPostId = postsData[0].post_id;
+                }
+                if (postsData.length < POSTS_PER_PAGE) {
+                    hasMorePosts = false;
+                }
+            } else {
+                hasMorePosts = false;
+            }
+
             renderPosts();
         }
 
@@ -1134,8 +1207,8 @@
             const { data: postsData } = await supabaseClient
                 .rpc('get_personalized_posts', {
                     p_user_id: currentUser.id,
-                    p_limit: 30,
-                    p_offset: 0
+                    p_limit: POSTS_PER_PAGE,
+                    p_offset: currentOffset
                 });
 
             if (postsData && postsData.length > 0) {
@@ -1145,9 +1218,19 @@
                     .select('*, ngm_users(full_name, username, profile_picture_url, is_verified)')
                     .in('post_id', postIds);
 
-                posts = fullPosts || [];
-                if (posts.length > 0) lastPostId = posts[0].post_id;
+                if (fullPosts && fullPosts.length > 0) {
+                    posts = [...posts, ...fullPosts];
+                    if (currentOffset === 0 && fullPosts.length > 0) {
+                        lastPostId = fullPosts[0].post_id;
+                    }
+                    if (fullPosts.length < POSTS_PER_PAGE) {
+                        hasMorePosts = false;
+                    }
+                } else {
+                    hasMorePosts = false;
+                }
             } else {
+                // Fallback to all public posts
                 const { data: allPosts } = await supabaseClient
                     .from('ngm_user_posts')
                     .select('*, ngm_users(full_name, username, profile_picture_url, is_verified)')
@@ -1155,10 +1238,19 @@
                     .eq('is_public', true)
                     .neq('user_id', currentUser.id)
                     .order('created_at', { ascending: false })
-                    .limit(30);
+                    .range(currentOffset, currentOffset + POSTS_PER_PAGE - 1);
 
-                posts = allPosts || [];
-                if (posts.length > 0) lastPostId = posts[0].post_id;
+                if (allPosts && allPosts.length > 0) {
+                    posts = [...posts, ...allPosts];
+                    if (currentOffset === 0 && allPosts.length > 0) {
+                        lastPostId = allPosts[0].post_id;
+                    }
+                    if (allPosts.length < POSTS_PER_PAGE) {
+                        hasMorePosts = false;
+                    }
+                } else {
+                    hasMorePosts = false;
+                }
             }
 
             renderPosts();
@@ -1244,9 +1336,9 @@
                         ${avatarHTML}
                         <div class="post-main">
                             <div class="post-user-row">
-                                <span class="post-username">${name}</span>
+                                <span class="post-username" onclick="event.stopPropagation(); window.location.href='ngm_profile.html?user_id=${post.user_id}'" style="cursor: pointer;">${name}</span>
                                 ${user.is_verified ? '<svg class="post-verified" viewBox="0 0 22 22"><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"></path></svg>' : ''}
-                                <span class="post-handle">@${username}</span>
+                                <span class="post-handle" onclick="event.stopPropagation(); window.location.href='ngm_profile.html?user_id=${post.user_id}'" style="cursor: pointer;">@${username}</span>
                                 <span class="post-dot">·</span>
                                 <span class="post-time">${time}</span>
                                 <button class="post-menu-btn" onclick="openPostMenu(event, '${post.post_id}', '${post.user_id}')">
@@ -1441,21 +1533,29 @@
         }
 
         async function viewPost(postId) {
+            // Increment view count
             try {
-                const { data: post } = await supabaseClient
+                // First get current count
+                const { data: currentPost } = await supabaseClient
                     .from('ngm_user_posts')
                     .select('views_count')
                     .eq('post_id', postId)
                     .single();
 
+                // Update with incremented count
+                const newCount = (currentPost?.views_count || 0) + 1;
+                
                 await supabaseClient
                     .from('ngm_user_posts')
-                    .update({ views_count: (post?.views_count || 0) + 1 })
+                    .update({ views_count: newCount })
                     .eq('post_id', postId);
+
+                console.log('View count updated:', newCount);
             } catch (e) {
                 console.error('Error updating views:', e);
             }
 
+            // Navigate to post
             window.location.href = `ngm_view_post.html?post_id=${postId}`;
         }
 
@@ -1735,6 +1835,12 @@
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 currentTab = this.dataset.tab;
+                
+                // Reset pagination
+                currentOffset = 0;
+                posts = [];
+                hasMorePosts = true;
+                
                 document.getElementById('postsFeed').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
                 loadPosts();
             });
