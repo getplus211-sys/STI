@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>સ્ટોરીઝ - NGM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-logo {
+            font-size: 28px;
+        }
+
+        /* Stories Container */
+        .stories-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px 0;
+        }
+
+        /* Add Story Section */
+        .add-story-section {
+            background: white;
+            border-radius: 12px;
+            margin: 0 16px 16px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .add-story-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .add-story-btn:active {
+            background: #f5f5f5;
+        }
+
+        .add-story-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .add-story-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .add-icon {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 24px;
+            height: 24px;
+            background: #0095f6;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .add-story-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .add-story-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 2px;
+        }
+
+        .add-story-subtitle {
+            font-size: 13px;
+            color: #8e8e8e;
+        }
+
+        /* Stories List */
+        .stories-list {
+            background: white;
+            border-radius: 12px;
+            margin: 0 16px;
+            padding: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stories-header {
+            padding: 0 16px 12px;
+            border-bottom: 1px solid #efefef;
+        }
+
+        .stories-header-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .story-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .story-item:active {
+            background: #fafafa;
+        }
+
+        /* Story Avatar with Ring */
+        .story-avatar-wrapper {
+            position: relative;
+            width: 56px;
+            height: 56px;
+        }
+
+        .story-ring {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            padding: 3px;
+        }
+
+        /* Unseen story - Orange gradient ring */
+        .story-ring.unseen {
+            background: linear-gradient(45deg, #FF6F00, #FFA000, #FF6F00);
+        }
+
+        /* Seen story - Gray ring */
+        .story-ring.seen {
+            background: #dbdbdb;
+        }
+
+        .story-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: white;
+            padding: 3px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .story-avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            overflow: hidden;
+        }
+
+        .story-avatar-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .story-info {
+            flex: 1;
+        }
+
+        .story-username {
+            font-size: 14px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 2px;
+        }
+
+        .story-time {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        /* Story count badge */
+        .story-count {
+            background: #0095f6;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 8px;
+        }
+
+        .empty-desc {
+            font-size: 14px;
+            color: #8e8e8e;
+            line-height: 1.4;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0095f6;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #8e8e8e;
+        }
+
+        /* Horizontal Stories Scroll (Alternative Layout) */
+        .stories-scroll {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+        }
+
+        .stories-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .story-scroll-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            min-width: 64px;
+        }
+
+        .story-scroll-avatar {
+            width: 64px;
+            height: 64px;
+            position: relative;
+        }
+
+        .story-scroll-username {
+            font-size: 12px;
+            color: #262626;
+            max-width: 64px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #dbdbdb;
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            color: #262626;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+        }
+
+        .nav-item.active {
+            color: #0095f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-logo">📖</div>
+            <div class="header-title">સ્ટોરીઝ</div>
+            <div style="width: 28px;"></div>
+        </div>
+    </div>
+
+    <!-- Horizontal Stories Scroll (WhatsApp Style) -->
+    <div class="stories-scroll" id="storiesScroll">
+        <!-- Add Story -->
+        <div class="story-scroll-item" onclick="addStory()">
+            <div class="story-scroll-avatar">
+                <div class="story-ring" style="background: #dbdbdb;">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner" id="myAvatarScroll">
+                            U
+                        </div>
+                    </div>
+                </div>
+                <div class="add-icon">+</div>
+            </div>
+            <div class="story-scroll-username">તમારી સ્ટોરી</div>
+        </div>
+    </div>
+
+    <!-- Stories Container -->
+    <div class="stories-container">
+        <!-- Add Your Story -->
+        <div class="add-story-section">
+            <button class="add-story-btn" onclick="addStory()">
+                <div class="add-story-avatar" id="myAvatar">
+                    U
+                    <div class="add-icon">+</div>
+                </div>
+                <div class="add-story-text">
+                    <div class="add-story-title">તમારી સ્ટોરી</div>
+                    <div class="add-story-subtitle">નવી સ્ટોરી ઉમેરો</div>
+                </div>
+            </button>
+        </div>
+
+        <!-- All Stories List -->
+        <div class="stories-list">
+            <div class="stories-header">
+                <div class="stories-header-title">બધી સ્ટોરીઝ</div>
+            </div>
+            
+            <div id="storiesList">
+                <!-- Loading state -->
+                <div class="loading" id="loadingState">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">સ્ટોરીઝ લોડ થઈ રહી છે...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="/home.html" class="nav-item">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">હોમ</div>
+        </a>
+        <a href="/search.html" class="nav-item">
+            <div class="nav-icon">🔍</div>
+            <div class="nav-label">શોધો</div>
+        </a>
+        <a href="/ngm_stories.html" class="nav-item active">
+            <div class="nav-icon">📖</div>
+            <div class="nav-label">સ્ટોરીઝ</div>
+        </a>
+        <a href="/notifications.html" class="nav-item">
+            <div class="nav-icon">🔔</div>
+            <div class="nav-label">નોટિફિકેશન</div>
+        </a>
+        <a href="/profile.html" class="nav-item">
+            <div class="nav-icon">👤</div>
+            <div class="nav-label">પ્રોફાઇલ</div>
+        </a>
+    </div>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Authentication
+        let currentUser = null;
+
+        // Check authentication
+        async function checkAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error || !session) {
+                alert('કૃપા કરીને પહેલા લોગિન કરો');
+                window.location.href = '/login.html';
+                return false;
+            }
+            
+            currentUser = session.user;
+            await loadCurrentUserProfile();
+            return true;
+        }
+
+        // Load current user profile
+        async function loadCurrentUserProfile() {
+            const { data, error } = await supabase
+                .from('ngm_users')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+            
+            if (data) {
+                // Update my avatar
+                const avatarLetter = data.full_name ? data.full_name[0].toUpperCase() : 'U';
+                document.getElementById('myAvatar').innerHTML = 
+                    data.profile_picture_url 
+                        ? `<img src="${data.profile_picture_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"><div class="add-icon">+</div>`
+                        : `${avatarLetter}<div class="add-icon">+</div>`;
+                
+                document.getElementById('myAvatarScroll').innerHTML = 
+                    data.profile_picture_url 
+                        ? `<img src="${data.profile_picture_url}">`
+                        : avatarLetter;
+            }
+        }
+
+        // Load all stories
+        async function loadAllStories() {
+            try {
+                // Get all users who have active stories
+                const { data: stories, error } = await supabase
+                    .from('ngm_user_posts')
+                    .select(`
+                        post_id,
+                        user_id,
+                        created_at,
+                        expires_at,
+                        ngm_users!ngm_user_posts_user_id_fkey (
+                            user_id,
+                            full_name,
+                            username,
+                            profile_picture_url
+                        )
+                    `)
+                    .eq('post_type', 'story')
+                    .gte('expires_at', new Date().toISOString())
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Group stories by user
+                const userStories = {};
+                stories.forEach(story => {
+                    const userId = story.user_id;
+                    if (!userStories[userId]) {
+                        userStories[userId] = {
+                            user: story.ngm_users,
+                            stories: [],
+                            latestTime: story.created_at
+                        };
+                    }
+                    userStories[userId].stories.push(story);
+                });
+
+                // Check which stories are seen by current user
+                const { data: viewedStories, error: viewError } = await supabase
+                    .from('ngm_post_views')
+                    .select('post_id')
+                    .eq('user_id', currentUser.id);
+
+                const viewedPostIds = new Set(
+                    (viewedStories || []).map(v => v.post_id)
+                );
+
+                // Render stories
+                renderStories(userStories, viewedPostIds);
+                renderHorizontalStories(userStories, viewedPostIds);
+
+            } catch (error) {
+                console.error('Error loading stories:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-title">ભૂલ થઈ</div>
+                        <div class="empty-desc">સ્ટોરીઝ લોડ કરવામાં સમસ્યા આવી</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Render stories list
+        function renderStories(userStories, viewedPostIds) {
+            const container = document.getElementById('storiesList');
+            const users = Object.values(userStories);
+
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📖</div>
+                        <div class="empty-title">કોઈ સ્ટોરી નથી</div>
+                        <div class="empty-desc">હજુ સુધી કોઈએ સ્ટોરી શેર કરી નથી</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort: unseen first, then by latest time
+            users.sort((a, b) => {
+                const aHasUnseen = a.stories.some(s => !viewedPostIds.has(s.post_id));
+                const bHasUnseen = b.stories.some(s => !viewedPostIds.has(s.post_id));
+                
+                if (aHasUnseen && !bHasUnseen) return -1;
+                if (!aHasUnseen && bHasUnseen) return 1;
+                
+                return new Date(b.latestTime) - new Date(a.latestTime);
+            });
+
+            container.innerHTML = users.map(userData => {
+                const user = userData.user;
+                const hasUnseen = userData.stories.some(s => !viewedPostIds.has(s.post_id));
+                const ringClass = hasUnseen ? 'unseen' : 'seen';
+                const avatarLetter = user.full_name ? user.full_name[0].toUpperCase() : 'U';
+                const relativeTime = getRelativeTime(userData.latestTime);
+
+                return `
+                    <div class="story-item" onclick="viewUserStories('${user.user_id}')">
+                        <div class="story-avatar-wrapper">
+                            <div class="story-ring ${ringClass}">
+                                <div class="story-avatar">
+                                    <div class="story-avatar-inner">
+                                        ${user.profile_picture_url 
+                                            ? `<img src="${user.profile_picture_url}" alt="${user.full_name}">` 
+                                            : avatarLetter
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="story-info">
+                            <div class="story-username">${user.full_name}</div>
+                            <div class="story-time">${relativeTime}</div>
+                        </div>
+                        <div class="story-count">${userData.stories.length}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render horizontal stories scroll
+        function renderHorizontalStories(userStories, viewedPostIds) {
+            const container = document.getElementById('storiesScroll');
+            const users = Object.values(userStories);
+
+            // Sort same as main list
+            users.sort((a, b) => {
+                const aHasUnseen = a.stories.some(s => !viewedPostIds.has(s.post_id));
+                const bHasUnseen = b.stories.some(s => !viewedPostIds.has(s.post_id));
+                
+                if (aHasUnseen && !bHasUnseen) return -1;
+                if (!aHasUnseen && bHasUnseen) return 1;
+                
+                return new Date(b.latestTime) - new Date(a.latestTime);
+            });
+
+            const storiesHTML = users.map(userData => {
+                const user = userData.user;
+                const hasUnseen = userData.stories.some(s => !viewedPostIds.has(s.post_id));
+                const ringClass = hasUnseen ? 'unseen' : 'seen';
+                const avatarLetter = user.full_name ? user.full_name[0].toUpperCase() : 'U';
+                const displayName = user.full_name.length > 10 
+                    ? user.full_name.substring(0, 10) + '...' 
+                    : user.full_name;
+
+                return `
+                    <div class="story-scroll-item" onclick="viewUserStories('${user.user_id}')">
+                        <div class="story-scroll-avatar">
+                            <div class="story-ring ${ringClass}">
+                                <div class="story-avatar">
+                                    <div class="story-avatar-inner">
+                                        ${user.profile_picture_url 
+                                            ? `<img src="${user.profile_picture_url}" alt="${user.full_name}">` 
+                                            : avatarLetter
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="story-scroll-username">${displayName}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Append after "Add Story" item
+            const addStoryItem = container.firstElementChild;
+            container.innerHTML = addStoryItem.outerHTML + storiesHTML;
+        }
+
+        // Get relative time
+        function getRelativeTime(timestamp) {
+            const now = new Date();
+            const then = new Date(timestamp);
+            const diffMs = now - then;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'હમણાં જ';
+            if (diffMins < 60) return `${diffMins} મિનિટ પહેલાં`;
+            if (diffHours < 24) return `${diffHours} કલાક પહેલાં`;
+            return `${diffDays} દિવસ પહેલાં`;
+        }
+
+        // View user stories
+        function viewUserStories(userId) {
+            window.location.href = `/ngm_view_story.html?userId=${userId}`;
+        }
+
+        // Add story
+        function addStory() {
+            window.location.href = '/ngm_create_story.html';
+        }
+
+        // Initialize
+        async function init() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) return;
+
+            await loadAllStories();
+
+            // Refresh stories every 30 seconds
+            setInterval(loadAllStories, 30000);
+        }
+
+        // Start app
+        init();
+    </script>
+</body>
+</html>
