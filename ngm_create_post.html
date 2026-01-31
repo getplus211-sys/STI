@@ -320,6 +320,7 @@
             justify-content: center;
             cursor: pointer;
             color: #FF6F00;
+            position: relative;
         }
 
         .option-btn:active {
@@ -329,6 +330,12 @@
         .option-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* Mobile-friendly file input wrapper */
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
         }
 
         .visibility-select {
@@ -343,6 +350,188 @@
             cursor: pointer;
         }
 
+        /* User Selection Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 480px;
+            max-height: 80vh;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .modal-close:active {
+            background: #f3f4f6;
+        }
+
+        /* Search Box */
+        .search-box {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #FF6F00;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #FF6F00;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #FF6F00;
+        }
+
+        /* User List */
+        .user-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .user-item:active {
+            background: #f9fafb;
+        }
+
+        .user-item-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .user-item-info {
+            flex: 1;
+        }
+
+        .user-item-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .user-item-username {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .user-item-selected {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #FF6F00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-item.selected .user-item-selected {
+            background: #FF6F00;
+        }
+
+        .empty-state {
+            padding: 40px 16px;
+            text-align: center;
+            color: #9ca3af;
+        }
+
         /* Loading */
         .loading-overlay {
             position: fixed;
@@ -351,7 +540,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 1001;
             flex-direction: column;
         }
 
@@ -384,50 +573,6 @@
             font-size: 14px;
         }
 
-        /* Mention Dropdown */
-        .mention-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: none;
-            z-index: 10;
-        }
-
-        .mention-dropdown.active {
-            display: block;
-        }
-
-        .mention-item {
-            padding: 10px 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .mention-item:hover {
-            background: #FFF3E0;
-        }
-
-        .mention-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
         /* Color classes */
         .bg-orange { background: #FF6F00; }
         .bg-deeporange { background: #E64A19; }
@@ -442,6 +587,40 @@
         <div class="spinner"></div>
         <div class="loading-text" id="loadingText">Creating post...</div>
         <div class="progress-text" id="progressText"></div>
+    </div>
+
+    <!-- User Selection Modal -->
+    <div class="modal-overlay" id="userModal" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Select Users</div>
+                <button class="modal-close" onclick="closeUserModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="userSearch" 
+                    placeholder="Search users..."
+                    oninput="searchUsers()"
+                >
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('followers')">Followers</button>
+                <button class="tab" onclick="switchTab('following')">Following</button>
+            </div>
+
+            <div class="user-list" id="userList">
+                <!-- Users will be loaded here -->
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -523,13 +702,24 @@
 
         <!-- Options Bar -->
         <div class="options-bar">
-            <button class="option-btn" onclick="selectPhotos()" id="photoBtn" title="Add photos (max 5)">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21 15 16 10 5 21"/>
-                </svg>
-            </button>
+            <div class="file-input-wrapper">
+                <label for="fileInput" class="option-btn" title="Add photos (max 5)">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                </label>
+                <input 
+                    type="file" 
+                    id="fileInput" 
+                    class="file-input" 
+                    accept="image/*" 
+                    multiple 
+                    onchange="handleFileSelect(event)"
+                    capture="environment"
+                >
+            </div>
             
             <select class="visibility-select" id="visibilitySelect">
                 <option value="public">🌍 Everyone</option>
@@ -538,8 +728,6 @@
             </select>
         </div>
     </div>
-
-    <input type="file" id="fileInput" class="file-input" accept="image/*" multiple onchange="handleFileSelect(event)">
 
     <script>
         const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
@@ -557,6 +745,10 @@
         let selectedFiles = [];
         let mentionedUsers = [];
         let collaborators = [];
+        let allFollowers = [];
+        let allFollowing = [];
+        let currentModalType = 'mention'; // 'mention' or 'collab'
+        let currentTab = 'followers'; // 'followers' or 'following'
         const MAX_PHOTOS = 5;
         const MAX_FILE_SIZE = 500 * 1024; // 500KB
 
@@ -600,7 +792,49 @@
                 }
             }
             
+            // Load followers and following
+            await loadFollowersAndFollowing();
+            
             return user;
+        }
+
+        async function loadFollowersAndFollowing() {
+            try {
+                // Load followers
+                const { data: followersData } = await supabaseClient
+                    .from('ngm_followers')
+                    .select(`
+                        follower_user_id,
+                        ngm_users!ngm_followers_follower_user_id_fkey (
+                            user_id,
+                            username,
+                            full_name,
+                            profile_picture_url
+                        )
+                    `)
+                    .eq('following_user_id', currentUser.id);
+
+                allFollowers = followersData?.map(f => f.ngm_users).filter(Boolean) || [];
+
+                // Load following
+                const { data: followingData } = await supabaseClient
+                    .from('ngm_followers')
+                    .select(`
+                        following_user_id,
+                        ngm_users!ngm_followers_following_user_id_fkey (
+                            user_id,
+                            username,
+                            full_name,
+                            profile_picture_url
+                        )
+                    `)
+                    .eq('follower_user_id', currentUser.id);
+
+                allFollowing = followingData?.map(f => f.ngm_users).filter(Boolean) || [];
+
+            } catch (error) {
+                console.error('Error loading followers/following:', error);
+            }
         }
 
         // Text Formatting Functions
@@ -634,7 +868,6 @@
             const newText = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
             textarea.value = newText;
             
-            // Set cursor position after formatted text
             const newPos = start + formattedText.length;
             textarea.setSelectionRange(newPos, newPos);
             textarea.focus();
@@ -671,51 +904,118 @@
             btn.disabled = !text && selectedFiles.length === 0;
         }
 
-        // Mention Functions
-        async function openMentionDialog() {
-            const username = prompt('Enter username to mention (without @):');
-            if (!username) return;
+        // User Selection Modal Functions
+        function openMentionDialog() {
+            currentModalType = 'mention';
+            document.getElementById('modalTitle').textContent = 'Mention User';
+            currentTab = 'followers';
+            switchTab('followers');
+            document.getElementById('userModal').classList.add('active');
+            renderUserList();
+        }
 
-            // Search for user
-            const { data: users, error } = await supabaseClient
-                .from('ngm_users')
-                .select('user_id, username, full_name')
-                .ilike('username', `%${username}%`)
-                .limit(1);
+        function openCollabDialog() {
+            currentModalType = 'collab';
+            document.getElementById('modalTitle').textContent = 'Add Collaborator';
+            currentTab = 'followers';
+            switchTab('followers');
+            document.getElementById('userModal').classList.add('active');
+            renderUserList();
+        }
 
-            if (error || !users || users.length === 0) {
-                alert('User not found');
-                return;
-            }
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('active');
+            document.getElementById('userSearch').value = '';
+        }
 
-            const user = users[0];
-            if (!mentionedUsers.find(u => u.user_id === user.user_id)) {
-                mentionedUsers.push(user);
-                renderMentionedUsers();
+        function closeModalOnBackdrop(event) {
+            if (event.target.id === 'userModal') {
+                closeUserModal();
             }
         }
 
-        async function openCollabDialog() {
-            const username = prompt('Enter collaborator username (without @):');
-            if (!username) return;
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderUserList();
+        }
 
-            // Search for user
-            const { data: users, error } = await supabaseClient
-                .from('ngm_users')
-                .select('user_id, username, full_name')
-                .ilike('username', `%${username}%`)
-                .limit(1);
+        function searchUsers() {
+            renderUserList();
+        }
 
-            if (error || !users || users.length === 0) {
-                alert('User not found');
+        function renderUserList() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const userList = document.getElementById('userList');
+            
+            let users = currentTab === 'followers' ? allFollowers : allFollowing;
+            
+            // Filter by search
+            if (searchTerm) {
+                users = users.filter(u => 
+                    u.username?.toLowerCase().includes(searchTerm) ||
+                    u.full_name?.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (users.length === 0) {
+                userList.innerHTML = `
+                    <div class="empty-state">
+                        <div>No ${currentTab} found</div>
+                    </div>
+                `;
                 return;
             }
 
-            const user = users[0];
-            if (!collaborators.find(u => u.user_id === user.user_id)) {
-                collaborators.push(user);
-                renderMentionedUsers();
+            let html = '';
+            const selectedList = currentModalType === 'mention' ? mentionedUsers : collaborators;
+
+            users.forEach(user => {
+                const isSelected = selectedList.find(u => u.user_id === user.user_id);
+                const name = user.full_name || user.username || 'User';
+                
+                html += `
+                    <div class="user-item ${isSelected ? 'selected' : ''}" onclick="toggleUserSelection('${user.user_id}', '${user.username}', '${name}')">
+                        <div class="user-item-avatar ${getAvatarColor(name)}" ${user.profile_picture_url ? `style="background-image: url('${user.profile_picture_url}')"` : ''}>
+                            ${!user.profile_picture_url ? getInitial(name) : ''}
+                        </div>
+                        <div class="user-item-info">
+                            <div class="user-item-name">${name}</div>
+                            <div class="user-item-username">@${user.username}</div>
+                        </div>
+                        <div class="user-item-selected">
+                            ${isSelected ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            userList.innerHTML = html;
+        }
+
+        function toggleUserSelection(userId, username, fullName) {
+            const user = {
+                user_id: userId,
+                username: username,
+                full_name: fullName
+            };
+
+            const selectedList = currentModalType === 'mention' ? mentionedUsers : collaborators;
+            const existingIndex = selectedList.findIndex(u => u.user_id === userId);
+
+            if (existingIndex >= 0) {
+                selectedList.splice(existingIndex, 1);
+            } else {
+                selectedList.push(user);
             }
+
+            renderUserList();
+            renderMentionedUsers();
         }
 
         function renderMentionedUsers() {
@@ -752,18 +1052,9 @@
             renderMentionedUsers();
         }
 
-        function selectPhotos() {
-            if (selectedFiles.length >= MAX_PHOTOS) {
-                alert(`Maximum ${MAX_PHOTOS} photos allowed`);
-                return;
-            }
-            document.getElementById('fileInput').click();
-        }
-
         async function handleFileSelect(event) {
             const files = Array.from(event.target.files);
             
-            // Check total count
             if (selectedFiles.length + files.length > MAX_PHOTOS) {
                 alert(`Maximum ${MAX_PHOTOS} photos allowed`);
                 return;
@@ -775,7 +1066,6 @@
                     continue;
                 }
 
-                // Compress image
                 const compressed = await compressImage(file);
                 selectedFiles.push(compressed);
             }
@@ -783,7 +1073,6 @@
             renderPhotos();
             updatePostButton();
             
-            // Clear input
             event.target.value = '';
         }
 
@@ -797,7 +1086,6 @@
                         let width = img.width;
                         let height = img.height;
                         
-                        // Max dimensions 1200x1200
                         const maxDim = 1200;
                         if (width > maxDim || height > maxDim) {
                             if (width > height) {
@@ -815,7 +1103,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Compress to target size (500KB)
                         let quality = 0.8;
                         
                         function tryCompress() {
@@ -854,7 +1141,6 @@
             
             let html = '';
             
-            // Show existing photos
             selectedFiles.forEach((file, index) => {
                 html += `
                     <div class="photo-item has-photo" style="background-image: url('${file.preview}')">
@@ -868,10 +1154,9 @@
                 `;
             });
             
-            // Show add more button if < 5
             if (selectedFiles.length < MAX_PHOTOS) {
                 html += `
-                    <div class="photo-item" onclick="selectPhotos()">
+                    <label for="fileInput" class="photo-item">
                         <div class="photo-placeholder">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="12" y1="5" x2="12" y2="19"/>
@@ -879,7 +1164,7 @@
                             </svg>
                             <div class="photo-placeholder-text">Add photo</div>
                         </div>
-                    </div>
+                    </label>
                 `;
             }
             
@@ -935,7 +1220,6 @@
             const text = document.getElementById('textInput').value.trim();
             const visibility = document.getElementById('visibilitySelect').value;
 
-            // Validate
             if (!text && selectedFiles.length === 0) {
                 alert('Please write something or add photos');
                 return;
@@ -946,7 +1230,6 @@
             document.getElementById('postBtn').disabled = true;
 
             try {
-                // Upload all photos
                 let mediaUrls = [];
                 if (selectedFiles.length > 0) {
                     mediaUrls = await uploadPhotos();
@@ -955,7 +1238,7 @@
                 document.getElementById('loadingText').textContent = 'Posting...';
                 document.getElementById('progressText').textContent = '';
 
-                // Create post with ALL media URLs stored as JSON array
+                // Create post with ALL media URLs
                 const postData = {
                     user_id: currentUser.id,
                     post_type: 'post',
@@ -1021,7 +1304,6 @@
             }
         }
 
-        // Initialize
         window.addEventListener('DOMContentLoaded', async function() {
             initSupabase();
             await checkAuth();
