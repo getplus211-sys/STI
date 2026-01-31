@@ -854,6 +854,46 @@
     <!-- Loading -->
     <div class="loading" id="loading">પ્રકાશિત થઈ રહ્યું છે...</div>
 
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://bhmycvrbucmbbrpzeane.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Check authentication on page load
+        let currentUser = null;
+
+        async function checkAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error || !session) {
+                alert('કૃપા કરીને પહેલા લોગિન કરો');
+                window.location.href = '/login.html';
+                return false;
+            }
+            
+            currentUser = session.user;
+            await loadUserProfile();
+            return true;
+        }
+
+        // Load user profile
+        async function loadUserProfile() {
+            const { data, error } = await supabase
+                .from('ngm_users')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+            
+            if (data) {
+                console.log('User profile loaded:', data);
+            }
+        }
+    </script>
+
     <script>
         // State Management
         let storyData = {
@@ -1151,24 +1191,64 @@
 
             document.getElementById('loading').classList.add('active');
 
-            // Simulate API call
-            setTimeout(() => {
-                console.log('Publishing story:', storyData);
+            try {
+                // Upload image to storage if exists
+                let imageUrl = null;
+                if (storyData.imageFile) {
+                    const fileName = `${currentUser.id}/${Date.now()}_${storyData.imageFile.name}`;
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('story-images')
+                        .upload(fileName, storyData.imageFile);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: urlData } = supabase.storage
+                        .from('story-images')
+                        .getPublicUrl(fileName);
+                    
+                    imageUrl = urlData.publicUrl;
+                }
+
+                // Insert story into database
+                const { data, error } = await supabase
+                    .from('ngm_user_posts')
+                    .insert({
+                        user_id: currentUser.id,
+                        post_type: 'story',
+                        content: storyData.text,
+                        media_url: imageUrl,
+                        media_type: imageUrl ? 'image' : null,
+                        is_public: storyData.privacy === 'public',
+                        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+                    })
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Insert mentions if any
+                if (storyData.mentions && storyData.mentions.length > 0) {
+                    const mentionInserts = storyData.mentions.map(mention => ({
+                        post_id: data.post_id,
+                        mentioned_user_id: mention.id
+                    }));
+
+                    await supabase
+                        .from('ngm_post_mentions')
+                        .insert(mentionInserts);
+                }
+
                 document.getElementById('loading').classList.remove('active');
                 alert('સ્ટોરી સફળતાપૂર્વક પ્રકાશિત થઈ!');
                 
-                // Here you would make actual API call to save story
-                // const formData = new FormData();
-                // formData.append('background', storyData.background);
-                // formData.append('text', storyData.text);
-                // formData.append('mentions', JSON.stringify(storyData.mentions));
-                // formData.append('link', storyData.link);
-                // formData.privacy', storyData.privacy);
-                // if (storyData.imageFile) {
-                //     formData.append('image', storyData.imageFile);
-                // }
-                // fetch('/api/stories', { method: 'POST', body: formData });
-            }, 2000);
+                // Redirect to profile or home
+                window.location.href = '/profile.html';
+
+            } catch (error) {
+                console.error('Publish error:', error);
+                document.getElementById('loading').classList.remove('active');
+                alert('સ્ટોરી પ્રકાશિત કરતી વખતે ભૂલ થઈ: ' + error.message);
+            }
         }
 
         // Close story
@@ -1180,6 +1260,9 @@
 
         // Initialize
         initBackgrounds();
+        
+        // Check authentication
+        checkAuth();
     </script>
 </body>
 </html>
