@@ -82,7 +82,7 @@
         }
 
         .brand {
-            font-size: 28px;
+            font-size: 22px;
             font-weight: 700;
             color: var(--accent-color);
         }
@@ -512,6 +512,229 @@
             display: flex;
         }
 
+        /* Comment Modal - Instagram Style */
+        .comment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .comment-modal.active {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .comment-content {
+            background: var(--bg-primary);
+            border-radius: 16px 16px 0 0;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .comment-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .comment-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .comment-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comment-close:hover {
+            background: var(--bg-hover);
+        }
+
+        .comment-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .comment-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .comment-user {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .comment-user:hover {
+            text-decoration: underline;
+        }
+
+        .comment-text {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 18px;
+            word-break: break-word;
+        }
+
+        .comment-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .comment-time {
+            cursor: default;
+        }
+
+        .comment-reply-btn {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .comment-reply-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .comment-replies {
+            margin-left: 44px;
+            margin-top: 12px;
+        }
+
+        .comment-input-container {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: var(--bg-primary);
+        }
+
+        .replying-to {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .replying-to.active {
+            display: flex;
+        }
+
+        .cancel-reply {
+            color: var(--accent-color);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .comment-send-btn {
+            padding: 8px 20px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .comment-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .comment-send-btn:not(:disabled):hover {
+            background: var(--accent-hover);
+        }
+
+        .no-comments {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
         .share-content {
             background: var(--bg-primary);
             border-radius: 16px;
@@ -935,6 +1158,37 @@
             </div>
         </div>
 
+        <!-- Comment Modal -->
+        <div class="comment-modal" id="commentModal">
+            <div class="comment-content">
+                <div class="comment-header">
+                    <div class="comment-title">Comments</div>
+                    <button class="comment-close" onclick="closeCommentModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="comment-list" id="commentList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+
+                <div class="replying-to" id="replyingTo">
+                    <span>Replying to <strong id="replyingToUser"></strong></span>
+                    <span class="cancel-reply" onclick="cancelReply()">Cancel</span>
+                </div>
+
+                <div class="comment-input-container">
+                    <input type="text" class="comment-input" id="commentInput" placeholder="Add a comment..." />
+                    <button class="comment-send-btn" id="commentSendBtn" onclick="submitComment()" disabled>Post</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer Navigation -->
         <div class="footer-nav" id="footerNav">
             <button class="nav-item active">
@@ -994,6 +1248,10 @@
         let hasMorePosts = true;
         let currentOffset = 0;
         const POSTS_PER_PAGE = 5;
+        let currentCommentPostId = null;
+        let comments = [];
+        let replyToCommentId = null;
+        let replyToUsername = null;
 
         const colors = ['bg-orange', 'bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-teal'];
 
@@ -1026,12 +1284,12 @@
 
             // Scroll direction detection for hide/show
             if (currentScrollY > lastScrollY && currentScrollY > 50) {
-                // Scrolling DOWN - hide secondary header and footer
-                headerSecondary.classList.add('hidden');
+                // Scrolling DOWN - hide footer
                 footerNav.classList.add('hidden');
-            } else if (currentScrollY < lastScrollY) {
-                // Scrolling UP - show secondary header and footer
                 headerSecondary.classList.remove('hidden');
+            } else if (currentScrollY < lastScrollY) {
+                // Scrolling UP - hide secondary header, show footer
+                headerSecondary.classList.add('hidden');
                 footerNav.classList.remove('hidden');
             }
 
@@ -1310,8 +1568,8 @@
             const isSaved = savedPosts.has(post.post_id);
 
             const avatarHTML = user.profile_picture_url
-                ? `<div class="post-avatar" style="background-image: url('${user.profile_picture_url}')"></div>`
-                : `<div class="post-avatar ${getAvatarColor(name)}">${getInitial(name)}</div>`;
+                ? `<div class="post-avatar" onclick="event.stopPropagation(); window.location.href='ngm_profile.html?user_id=${post.user_id}'" style="background-image: url('${user.profile_picture_url}'); cursor: pointer;"></div>`
+                : `<div class="post-avatar ${getAvatarColor(name)}" onclick="event.stopPropagation(); window.location.href='ngm_profile.html?user_id=${post.user_id}'" style="cursor: pointer;">${getInitial(name)}</div>`;
 
             let mediaHTML = '';
             if (post.media_url) {
@@ -1353,7 +1611,7 @@
                             ${mediaHTML}
                             ${statsHTML}
                             <div class="post-actions">
-                                <button class="action-btn" onclick="event.stopPropagation(); viewPost('${post.post_id}')">
+                                <button class="action-btn" onclick="openCommentModal('${post.post_id}', event)">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"/>
                                     </svg>
@@ -1558,6 +1816,192 @@
             // Navigate to post
             window.location.href = `ngm_view_post.html?post_id=${postId}`;
         }
+
+        async function openCommentModal(postId, event) {
+            event.stopPropagation();
+            currentCommentPostId = postId;
+            document.getElementById('commentModal').classList.add('active');
+            await loadComments();
+        }
+
+        function closeCommentModal() {
+            document.getElementById('commentModal').classList.remove('active');
+            currentCommentPostId = null;
+            cancelReply();
+            document.getElementById('commentInput').value = '';
+            comments = [];
+        }
+
+        async function loadComments() {
+            try {
+                document.getElementById('commentList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+                const { data: commentsData } = await supabaseClient
+                    .from('ngm_post_comments')
+                    .select('*, ngm_users(user_id, full_name, username, profile_picture_url)')
+                    .eq('post_id', currentCommentPostId)
+                    .is('reply_to_comment_id', null)
+                    .order('created_at', { ascending: false });
+
+                if (commentsData && commentsData.length > 0) {
+                    comments = commentsData;
+                    
+                    // Load replies for each comment
+                    for (let comment of comments) {
+                        const { data: replies } = await supabaseClient
+                            .from('ngm_post_comments')
+                            .select('*, ngm_users(user_id, full_name, username, profile_picture_url)')
+                            .eq('reply_to_comment_id', comment.comment_id)
+                            .order('created_at', { ascending: true });
+                        
+                        comment.replies = replies || [];
+                    }
+
+                    renderComments();
+                } else {
+                    document.getElementById('commentList').innerHTML = `
+                        <div class="no-comments">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" opacity="0.3">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <p style="margin-top: 12px;">No comments yet</p>
+                            <p style="font-size: 13px; margin-top: 4px;">Be the first to comment!</p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                document.getElementById('commentList').innerHTML = '<div class="no-comments"><p>Failed to load comments</p></div>';
+            }
+        }
+
+        function renderComments() {
+            const html = comments.map(comment => {
+                const user = comment.ngm_users;
+                const name = user.full_name || user.username || 'User';
+                const username = user.username || 'user';
+                
+                const avatarHTML = user.profile_picture_url
+                    ? `<div class="comment-avatar" onclick="window.location.href='ngm_profile.html?user_id=${user.user_id}'" style="background-image: url('${user.profile_picture_url}'); background-size: cover; background-position: center;"></div>`
+                    : `<div class="comment-avatar ${getAvatarColor(name)}" onclick="window.location.href='ngm_profile.html?user_id=${user.user_id}'">${getInitial(name)}</div>`;
+
+                const repliesHTML = comment.replies && comment.replies.length > 0 
+                    ? `<div class="comment-replies">${comment.replies.map(reply => {
+                        const replyUser = reply.ngm_users;
+                        const replyName = replyUser.full_name || replyUser.username || 'User';
+                        const replyUsername = replyUser.username || 'user';
+                        
+                        const replyAvatarHTML = replyUser.profile_picture_url
+                            ? `<div class="comment-avatar" onclick="window.location.href='ngm_profile.html?user_id=${replyUser.user_id}'" style="background-image: url('${replyUser.profile_picture_url}'); background-size: cover; background-position: center;"></div>`
+                            : `<div class="comment-avatar ${getAvatarColor(replyName)}" onclick="window.location.href='ngm_profile.html?user_id=${replyUser.user_id}'">${getInitial(replyName)}</div>`;
+
+                        return `
+                            <div class="comment-item">
+                                ${replyAvatarHTML}
+                                <div class="comment-body">
+                                    <div class="comment-user" onclick="window.location.href='ngm_profile.html?user_id=${replyUser.user_id}'">${replyName}</div>
+                                    <div class="comment-text">${reply.comment_text}</div>
+                                    <div class="comment-meta">
+                                        <span class="comment-time">${formatTime(reply.created_at)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}</div>`
+                    : '';
+
+                return `
+                    <div class="comment-item">
+                        ${avatarHTML}
+                        <div class="comment-body">
+                            <div class="comment-user" onclick="window.location.href='ngm_profile.html?user_id=${user.user_id}'">${name}</div>
+                            <div class="comment-text">${comment.comment_text}</div>
+                            <div class="comment-meta">
+                                <span class="comment-time">${formatTime(comment.created_at)}</span>
+                                <span class="comment-reply-btn" onclick="replyToComment('${comment.comment_id}', '${username}')">Reply</span>
+                            </div>
+                            ${repliesHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('commentList').innerHTML = html;
+        }
+
+        function replyToComment(commentId, username) {
+            replyToCommentId = commentId;
+            replyToUsername = username;
+            document.getElementById('replyingTo').classList.add('active');
+            document.getElementById('replyingToUser').textContent = '@' + username;
+            document.getElementById('commentInput').focus();
+        }
+
+        function cancelReply() {
+            replyToCommentId = null;
+            replyToUsername = null;
+            document.getElementById('replyingTo').classList.remove('active');
+        }
+
+        async function submitComment() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentCommentPostId) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('ngm_post_comments')
+                    .insert({
+                        post_id: currentCommentPostId,
+                        user_id: currentUser.id,
+                        comment_text: text,
+                        reply_to_comment_id: replyToCommentId
+                    });
+
+                if (error) throw error;
+
+                // Update comment count
+                const { data: post } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .select('comments_count')
+                    .eq('post_id', currentCommentPostId)
+                    .single();
+
+                await supabaseClient
+                    .from('ngm_user_posts')
+                    .update({ comments_count: (post?.comments_count || 0) + 1 })
+                    .eq('post_id', currentCommentPostId);
+
+                input.value = '';
+                cancelReply();
+                await loadComments();
+                await loadPosts(); // Refresh to update comment count
+
+            } catch (error) {
+                console.error('Error posting comment:', error);
+                alert('Failed to post comment');
+            }
+        }
+
+        // Enable/disable send button based on input
+        document.addEventListener('DOMContentLoaded', function() {
+            const commentInput = document.getElementById('commentInput');
+            const sendBtn = document.getElementById('commentSendBtn');
+            
+            if (commentInput && sendBtn) {
+                commentInput.addEventListener('input', function() {
+                    sendBtn.disabled = !this.value.trim();
+                });
+
+                commentInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !sendBtn.disabled) {
+                        submitComment();
+                    }
+                });
+            }
+        });
 
         async function openShareModal(postId, event) {
             event.stopPropagation();
@@ -1861,6 +2305,10 @@
         // Close modal on background click
         document.getElementById('shareModal').addEventListener('click', function(e) {
             if (e.target === this) closeShareModal();
+        });
+
+        document.getElementById('commentModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCommentModal();
         });
 
         // Initialize
