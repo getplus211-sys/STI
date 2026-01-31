@@ -253,61 +253,6 @@
             margin-left: 8px;
         }
 
-        /* Footer Navigation */
-        .footer-nav {
-            background: white;
-            border-top: 1px solid #e5e7eb;
-            padding: 8px;
-            display: flex;
-            justify-content: space-around;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            color: #6b7280;
-        }
-
-        .nav-item.active {
-            color: #FF6F00;
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .profile-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #FF6F00;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            background-size: cover;
-            background-position: center;
-        }
 
         /* FAB */
         .fab {
@@ -355,7 +300,58 @@
             font-weight: 700;
             margin-bottom: 16px;
         }
+/* Footer Navigation */
+.footer-nav {
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 4px 8px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-around;
+    height: 35px;
+}
 
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #6b7280;
+}
+
+.nav-icon {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+}
+
+.nav-label {
+    font-size: 9px;
+    font-weight: 500;
+}
+
+.profile-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #FF6F00;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    background-size: cover;
+    background-position: center;
+}
         .media-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
