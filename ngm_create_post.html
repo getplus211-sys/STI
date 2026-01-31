@@ -23,20 +23,27 @@
             margin: 0 auto;
             background: white;
             min-height: 100vh;
+            padding-top: 85px;
         }
 
-        /* Header */
+        /* Header - 85px */
         .header {
             background: white;
             border-bottom: 1px solid #e5e7eb;
             color: #111827;
-            padding: 12px 16px;
+            height: 85px;
+            padding: 0 16px;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
+            padding-bottom: 12px;
             gap: 12px;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
+            max-width: 480px;
+            margin: 0 auto;
         }
 
         .close-btn {
@@ -63,7 +70,7 @@
 
         .post-btn {
             padding: 8px 20px;
-            background: #1d9bf0;
+            background: #FF6F00;
             border: none;
             border-radius: 20px;
             color: white;
@@ -73,7 +80,7 @@
         }
 
         .post-btn:active {
-            background: #1a8cd8;
+            background: #E65100;
         }
 
         .post-btn:disabled {
@@ -107,7 +114,36 @@
             flex: 1;
         }
 
-        /* Text Input */
+        /* Text Input with Formatting */
+        .formatting-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .format-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .format-btn:active,
+        .format-btn.active {
+            background: #FFF3E0;
+            color: #FF6F00;
+        }
+
         .text-input {
             width: 100%;
             min-height: 120px;
@@ -131,11 +167,73 @@
         }
 
         .char-count.warning {
-            color: #f97316;
+            color: #FF6F00;
         }
 
         .char-count.error {
-            color: #ef4444;
+            color: #D84315;
+        }
+
+        /* Mentions & Collaboration */
+        .mentions-section {
+            padding: 0 16px 8px 76px;
+        }
+
+        .mention-input-wrapper {
+            position: relative;
+        }
+
+        .mention-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #FFF3E0;
+            border: 1px solid #FFE0B2;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #FF6F00;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mention-btn:active {
+            background: #FFE0B2;
+        }
+
+        .collab-btn {
+            background: #E8F5E9;
+            border: 1px solid #C8E6C9;
+            color: #2E7D32;
+        }
+
+        .collab-btn:active {
+            background: #C8E6C9;
+        }
+
+        .mentioned-users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .mentioned-user-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: #FFF3E0;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #FF6F00;
+        }
+
+        .remove-mention {
+            cursor: pointer;
+            font-weight: 700;
+            margin-left: 4px;
         }
 
         /* Photo Grid */
@@ -221,11 +319,11 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: #1d9bf0;
+            color: #FF6F00;
         }
 
         .option-btn:active {
-            background: #eff6ff;
+            background: #FFF3E0;
         }
 
         .option-btn:disabled {
@@ -239,7 +337,7 @@
             border: 1px solid #e5e7eb;
             border-radius: 20px;
             font-size: 13px;
-            color: #1d9bf0;
+            color: #FF6F00;
             font-weight: 600;
             background: white;
             cursor: pointer;
@@ -286,13 +384,57 @@
             font-size: 14px;
         }
 
+        /* Mention Dropdown */
+        .mention-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 10;
+        }
+
+        .mention-dropdown.active {
+            display: block;
+        }
+
+        .mention-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mention-item:hover {
+            background: #FFF3E0;
+        }
+
+        .mention-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
         /* Color classes */
-        .bg-blue { background: #3b82f6; }
-        .bg-green { background: #10b981; }
-        .bg-purple { background: #a855f7; }
-        .bg-pink { background: #ec4899; }
-        .bg-indigo { background: #6366f1; }
-        .bg-teal { background: #14b8a6; }
+        .bg-orange { background: #FF6F00; }
+        .bg-deeporange { background: #E64A19; }
+        .bg-amber { background: #FFA000; }
+        .bg-brown { background: #6D4C41; }
+        .bg-teal { background: #00897B; }
+        .bg-cyan { background: #0097A7; }
     </style>
 </head>
 <body>
@@ -303,7 +445,7 @@
     </div>
 
     <div class="container">
-        <!-- Header -->
+        <!-- Header - 85px with content at bottom -->
         <div class="header">
             <button class="close-btn" onclick="handleClose()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -319,14 +461,56 @@
         <div class="user-section">
             <div class="user-avatar" id="userAvatar"></div>
             <div class="compose-area">
+                <!-- Formatting Toolbar -->
+                <div class="formatting-toolbar">
+                    <button class="format-btn" onclick="applyFormat('bold')" title="Bold">
+                        <strong>B</strong>
+                    </button>
+                    <button class="format-btn" onclick="applyFormat('italic')" title="Italic">
+                        <em>I</em>
+                    </button>
+                    <button class="format-btn" onclick="applyFormat('underline')" title="Underline">
+                        <u>U</u>
+                    </button>
+                    <button class="format-btn" onclick="applyFormat('strikethrough')" title="Strikethrough">
+                        <s>S</s>
+                    </button>
+                </div>
+
                 <textarea 
                     class="text-input" 
                     id="textInput" 
                     placeholder="What's happening?"
-                    maxlength="280"
+                    maxlength="800"
                     oninput="updateCharCount()"
                 ></textarea>
-                <div class="char-count" id="charCount">0 / 280</div>
+                <div class="char-count" id="charCount">0 / 800</div>
+            </div>
+        </div>
+
+        <!-- Mentions & Collaboration -->
+        <div class="mentions-section">
+            <button class="mention-btn" onclick="openMentionDialog()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <line x1="19" y1="8" x2="19" y2="14"/>
+                    <line x1="22" y1="11" x2="16" y2="11"/>
+                </svg>
+                Mention User
+            </button>
+            <button class="mention-btn collab-btn" onclick="openCollabDialog()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Collaborate
+            </button>
+            
+            <div class="mentioned-users" id="mentionedUsers">
+                <!-- Mentioned users will appear here -->
             </div>
         </div>
 
@@ -371,10 +555,12 @@
 
         let currentUser = null;
         let selectedFiles = [];
+        let mentionedUsers = [];
+        let collaborators = [];
         const MAX_PHOTOS = 5;
-        const MAX_FILE_SIZE = 100 * 1024; // 100KB
+        const MAX_FILE_SIZE = 500 * 1024; // 500KB
 
-        const colors = ['bg-blue', 'bg-green', 'bg-purple', 'bg-pink', 'bg-indigo', 'bg-teal'];
+        const colors = ['bg-orange', 'bg-deeporange', 'bg-amber', 'bg-brown', 'bg-teal', 'bg-cyan'];
 
         function getAvatarColor(name) {
             if (!name) return colors[0];
@@ -417,20 +603,59 @@
             return user;
         }
 
+        // Text Formatting Functions
+        function applyFormat(format) {
+            const textarea = document.getElementById('textInput');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            if (!selectedText) {
+                alert('Please select text to format');
+                return;
+            }
+
+            let formattedText = '';
+            switch(format) {
+                case 'bold':
+                    formattedText = `**${selectedText}**`;
+                    break;
+                case 'italic':
+                    formattedText = `*${selectedText}*`;
+                    break;
+                case 'underline':
+                    formattedText = `__${selectedText}__`;
+                    break;
+                case 'strikethrough':
+                    formattedText = `~~${selectedText}~~`;
+                    break;
+            }
+
+            const newText = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+            textarea.value = newText;
+            
+            // Set cursor position after formatted text
+            const newPos = start + formattedText.length;
+            textarea.setSelectionRange(newPos, newPos);
+            textarea.focus();
+            
+            updateCharCount();
+        }
+
         function updateCharCount() {
             const text = document.getElementById('textInput').value;
             const count = text.length;
             const countEl = document.getElementById('charCount');
             
-            countEl.textContent = `${count} / 280`;
+            countEl.textContent = `${count} / 800`;
             
-            if (count > 260) {
+            if (count > 750) {
                 countEl.classList.add('warning');
             } else {
                 countEl.classList.remove('warning');
             }
             
-            if (count === 280) {
+            if (count === 800) {
                 countEl.classList.add('error');
             } else {
                 countEl.classList.remove('error');
@@ -444,6 +669,87 @@
             const btn = document.getElementById('postBtn');
             
             btn.disabled = !text && selectedFiles.length === 0;
+        }
+
+        // Mention Functions
+        async function openMentionDialog() {
+            const username = prompt('Enter username to mention (without @):');
+            if (!username) return;
+
+            // Search for user
+            const { data: users, error } = await supabaseClient
+                .from('ngm_users')
+                .select('user_id, username, full_name')
+                .ilike('username', `%${username}%`)
+                .limit(1);
+
+            if (error || !users || users.length === 0) {
+                alert('User not found');
+                return;
+            }
+
+            const user = users[0];
+            if (!mentionedUsers.find(u => u.user_id === user.user_id)) {
+                mentionedUsers.push(user);
+                renderMentionedUsers();
+            }
+        }
+
+        async function openCollabDialog() {
+            const username = prompt('Enter collaborator username (without @):');
+            if (!username) return;
+
+            // Search for user
+            const { data: users, error } = await supabaseClient
+                .from('ngm_users')
+                .select('user_id, username, full_name')
+                .ilike('username', `%${username}%`)
+                .limit(1);
+
+            if (error || !users || users.length === 0) {
+                alert('User not found');
+                return;
+            }
+
+            const user = users[0];
+            if (!collaborators.find(u => u.user_id === user.user_id)) {
+                collaborators.push(user);
+                renderMentionedUsers();
+            }
+        }
+
+        function renderMentionedUsers() {
+            const container = document.getElementById('mentionedUsers');
+            let html = '';
+
+            mentionedUsers.forEach((user, index) => {
+                html += `
+                    <div class="mentioned-user-tag">
+                        @${user.username}
+                        <span class="remove-mention" onclick="removeMention(${index}, 'mention')">×</span>
+                    </div>
+                `;
+            });
+
+            collaborators.forEach((user, index) => {
+                html += `
+                    <div class="mentioned-user-tag" style="background: #E8F5E9; color: #2E7D32;">
+                        👥 ${user.username}
+                        <span class="remove-mention" onclick="removeMention(${index}, 'collab')">×</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function removeMention(index, type) {
+            if (type === 'mention') {
+                mentionedUsers.splice(index, 1);
+            } else {
+                collaborators.splice(index, 1);
+            }
+            renderMentionedUsers();
         }
 
         function selectPhotos() {
@@ -509,8 +815,8 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Compress to target size
-                        let quality = 0.7;
+                        // Compress to target size (500KB)
+                        let quality = 0.8;
                         
                         function tryCompress() {
                             canvas.toBlob((blob) => {
@@ -640,7 +946,7 @@
             document.getElementById('postBtn').disabled = true;
 
             try {
-                // Upload photos
+                // Upload all photos
                 let mediaUrls = [];
                 if (selectedFiles.length > 0) {
                     mediaUrls = await uploadPhotos();
@@ -649,20 +955,48 @@
                 document.getElementById('loadingText').textContent = 'Posting...';
                 document.getElementById('progressText').textContent = '';
 
-                // Create post - store media URLs as JSON array
-                const { error } = await supabaseClient
-                    .from('ngm_user_posts')
-                    .insert({
-                        user_id: currentUser.id,
-                        post_type: 'post',
-                        content: text || null,
-                        media_url: mediaUrls.length > 0 ? mediaUrls[0] : null,
-                        media_type: mediaUrls.length > 0 ? 'image' : null,
-                        thumbnail_url: mediaUrls.length > 0 ? mediaUrls[0] : null,
-                        is_public: visibility === 'public'
-                    });
+                // Create post with ALL media URLs stored as JSON array
+                const postData = {
+                    user_id: currentUser.id,
+                    post_type: 'post',
+                    content: text || null,
+                    media_url: mediaUrls.length > 0 ? JSON.stringify(mediaUrls) : null,
+                    media_type: mediaUrls.length > 0 ? 'image' : null,
+                    thumbnail_url: mediaUrls.length > 0 ? mediaUrls[0] : null,
+                    is_public: visibility === 'public'
+                };
 
-                if (error) throw error;
+                const { data: postResult, error: postError } = await supabaseClient
+                    .from('ngm_user_posts')
+                    .insert(postData)
+                    .select()
+                    .single();
+
+                if (postError) throw postError;
+
+                // Save mentions
+                if (mentionedUsers.length > 0) {
+                    const mentions = mentionedUsers.map(user => ({
+                        post_id: postResult.post_id,
+                        mentioned_user_id: user.user_id
+                    }));
+                    
+                    await supabaseClient
+                        .from('ngm_post_mentions')
+                        .insert(mentions);
+                }
+
+                // Save collaborators
+                if (collaborators.length > 0) {
+                    const collabs = collaborators.map(user => ({
+                        post_id: postResult.post_id,
+                        collaborator_user_id: user.user_id
+                    }));
+                    
+                    await supabaseClient
+                        .from('ngm_post_collaborators')
+                        .insert(collabs);
+                }
 
                 window.location.href = 'ngm_my_posts.html';
 
@@ -678,7 +1012,7 @@
         function handleClose() {
             const text = document.getElementById('textInput').value;
             
-            if (text || selectedFiles.length > 0) {
+            if (text || selectedFiles.length > 0 || mentionedUsers.length > 0 || collaborators.length > 0) {
                 if (confirm('Discard this post?')) {
                     window.history.back();
                 }
