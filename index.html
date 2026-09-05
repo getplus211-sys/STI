@@ -163,6 +163,30 @@
       font-weight: 900;
     }
 
+    .offer {
+      margin: 0 0 16px;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid #abefc6;
+      background: #ecfdf3;
+      color: var(--success);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .preview {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f8fbff;
+      color: var(--blue-dark);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+    }
+
     .center {
       text-align: center;
       color: var(--muted);
@@ -216,20 +240,25 @@
 
       <div id="homeView" class="hidden">
         <div class="center" id="operatorName"></div>
+
         <div class="balance">
           <div class="label">Available Credits</div>
           <div class="value" id="creditBalance">0</div>
         </div>
 
+        <div class="offer">Offer: Every ₹500 gives 100 credits free</div>
+
         <div class="chips">
+          <button class="chip" data-amount="100">₹100</button>
           <button class="chip" data-amount="500">₹500</button>
           <button class="chip" data-amount="1000">₹1000</button>
           <button class="chip" data-amount="2000">₹2000</button>
-          <button class="chip" data-amount="5000">₹5000</button>
         </div>
 
         <label for="amount">Amount</label>
         <input id="amount" type="number" min="1" step="1" value="500">
+
+        <div class="preview" id="creditPreview">Pay ₹500 and get 600 credits</div>
 
         <button id="buyBtn">BUY CREDITS</button>
         <button id="refreshBtn" class="ghost">REFRESH BALANCE</button>
@@ -255,6 +284,32 @@
     const buyBtn = document.getElementById("buyBtn");
     const refreshBtn = document.getElementById("refreshBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+    const amountInput = document.getElementById("amount");
+    const creditPreview = document.getElementById("creditPreview");
+
+    function calculateCredits(amount) {
+      const baseCredits = Math.round(Number(amount) || 0);
+      const freeCredits = Math.floor(baseCredits / 500) * 100;
+      return {
+        baseCredits,
+        freeCredits,
+        totalCredits: baseCredits + freeCredits,
+      };
+    }
+
+    function updateCreditPreview() {
+      const amount = Number(amountInput.value);
+      const credits = calculateCredits(amount);
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        creditPreview.textContent = "Enter amount to see credits";
+        return;
+      }
+
+      creditPreview.textContent = credits.freeCredits > 0
+        ? `Pay ₹${credits.baseCredits} and get ${credits.totalCredits} credits (${credits.freeCredits} free)`
+        : `Pay ₹${credits.baseCredits} and get ${credits.totalCredits} credits`;
+    }
 
     function showMessage(text, type) {
       msg.textContent = text;
@@ -278,6 +333,7 @@
       homeView.classList.remove("hidden");
       document.getElementById("operatorName").textContent = operator.center_name || operator.email || "";
       document.getElementById("creditBalance").textContent = operator.credit_balance ?? 0;
+      updateCreditPreview();
     }
 
     async function loadOperator() {
@@ -291,6 +347,7 @@
         .single();
 
       if (error) throw error;
+
       operator = data;
       showHome();
     }
@@ -298,11 +355,18 @@
     async function login() {
       clearMessage();
       setBusy(true);
+
       try {
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
-        const { data, error } = await client.auth.signInWithPassword({ email, password });
+
+        const { data, error } = await client.auth.signInWithPassword({
+          email,
+          password,
+        });
+
         if (error) throw error;
+
         session = data.session;
         await loadOperator();
       } catch (err) {
@@ -315,6 +379,7 @@
     async function refreshBalance() {
       clearMessage();
       setBusy(true);
+
       try {
         await loadOperator();
         showMessage("Balance refreshed.", "success");
@@ -328,15 +393,20 @@
     async function buyCredits() {
       clearMessage();
       setBusy(true);
+
       try {
-        const amount = Number(document.getElementById("amount").value);
+        const amount = Number(amountInput.value);
+
         if (!Number.isFinite(amount) || amount <= 0) {
           throw new Error("Enter a valid amount");
         }
 
         const { data: currentSession } = await client.auth.getSession();
         session = currentSession.session;
-        if (!session?.access_token) throw new Error("Please login again");
+
+        if (!session?.access_token) {
+          throw new Error("Please login again");
+        }
 
         const res = await fetch(`${SUPABASE_URL}/functions/v1/create-razorpay-order`, {
           method: "POST",
@@ -353,27 +423,40 @@
         });
 
         const order = await res.json();
+
         if (!res.ok || order.error) {
           throw new Error(JSON.stringify(order));
         }
+
+        const credits = calculateCredits(amount);
 
         const checkout = new Razorpay({
           key: order.key_id,
           amount: order.amount,
           currency: order.currency || "INR",
           name: "CBRT Credit",
-          description: "Credit recharge",
+          description: `${credits.totalCredits} credits recharge`,
           order_id: order.order_id,
-          prefill: { email: operator.email || "" },
+          prefill: {
+            email: operator.email || "",
+          },
           notes: {
             operator_id: operator.id,
             amount_rupees: String(amount),
+            base_credits: String(credits.baseCredits),
+            free_credits: String(credits.freeCredits),
+            total_credits: String(credits.totalCredits),
             reference_id: order.reference_id || "",
             source: "cbrt_credit_website",
           },
-          theme: { color: "#1B4F8C" },
+          theme: {
+            color: "#1B4F8C",
+          },
           handler: async function (response) {
-            showMessage(`Payment successful. Updating credits...\nPayment ID: ${response.razorpay_payment_id}`, "success");
+            showMessage(
+              `Payment successful. Updating credits...\nPayment ID: ${response.razorpay_payment_id}`,
+              "success",
+            );
             setTimeout(refreshBalance, 2500);
           },
           modal: {
@@ -407,13 +490,19 @@
 
     document.querySelectorAll(".chip").forEach((chip) => {
       chip.addEventListener("click", () => {
-        document.getElementById("amount").value = chip.dataset.amount;
+        amountInput.value = chip.dataset.amount;
+        updateCreditPreview();
       });
     });
 
+    amountInput.addEventListener("input", updateCreditPreview);
+    updateCreditPreview();
+
     client.auth.getSession().then(async ({ data }) => {
       session = data.session;
+
       if (!session) return;
+
       try {
         await loadOperator();
       } catch (_) {
@@ -423,4 +512,3 @@
   </script>
 </body>
 </html>
-
