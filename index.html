@@ -1,322 +1,426 @@
-<!DOCTYPE html>
-<html lang="gu">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAPiLA Institute - Digital Learning Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background-color: #f3f4f6; font-family: sans-serif; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .tab-button { padding: 12px 24px; border-bottom: 3px solid transparent; font-weight: 600; transition: all 0.3s; }
-        .tab-button.active { color: #2563eb; border-bottom-color: #2563eb; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CBRT Credit</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    :root {
+      --blue: #1b4f8c;
+      --blue-dark: #123b6d;
+      --bg: #eef3f8;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --border: #d9e1ea;
+      --danger: #d92d20;
+      --success: #16803c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(27, 79, 140, 0.14), transparent 32rem),
+        linear-gradient(135deg, #f8fbff 0%, var(--bg) 100%);
+    }
+
+    .page {
+      width: min(100%, 480px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 28px 18px;
+      display: grid;
+      align-items: center;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 26px;
+      box-shadow: 0 18px 45px rgba(16, 24, 40, 0.12);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(27, 79, 140, 0.1);
+      color: var(--blue);
+      font-size: 30px;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      color: var(--blue);
+    }
+
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #344054;
+    }
+
+    input {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 13px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(27, 79, 140, 0.12);
+    }
+
+    button {
+      width: 100%;
+      height: 48px;
+      border: 0;
+      border-radius: 8px;
+      margin-top: 16px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .ghost {
+      background: transparent;
+      color: var(--blue);
+      border: 1px solid var(--border);
+    }
+
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 18px 0 8px;
+    }
+
+    .chip {
+      margin: 0;
+      background: #f6f9fc;
+      color: var(--blue-dark);
+      border: 1px solid var(--border);
+    }
+
+    .balance {
+      text-align: center;
+      padding: 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f8fbff;
+      margin-bottom: 18px;
+    }
+
+    .balance .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .balance .value {
+      margin-top: 4px;
+      color: var(--blue);
+      font-size: 46px;
+      font-weight: 900;
+    }
+
+    .center {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .message {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .error {
+      color: var(--danger);
+      background: #fff1f0;
+      border: 1px solid #ffd0cc;
+    }
+
+    .success {
+      color: var(--success);
+      background: #ecfdf3;
+      border: 1px solid #abefc6;
+    }
+  </style>
 </head>
-<body class="p-4 pb-24">
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="brand">
+        <div class="logo">₹</div>
+        <h1>CBRT Credit</h1>
+        <div class="sub">Login and buy credits for your computer exam center</div>
+      </div>
 
-    <!-- Sticky Header -->
-    <header class="sticky top-0 z-50 flex justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-md border border-gray-100">
-        <div>
-            <h1 class="text-lg font-bold text-orange-600">KAPiLA Institute</h1>
-            <p class="text-[10px] text-orange-500">Digital Learning Platform</p>
-        </div>
-        <div id="authArea" class="flex items-center gap-2">
-            <button id="btnReg" onclick="openAuthModal('register')" class="border border-blue-600 text-blue-600 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Register</button>
-            <button id="btnLogin" onclick="openAuthModal('login')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase shadow-md">Login</button>
-            <div id="userProfile" class="hidden flex items-center gap-2">
-                <span id="userName" class="text-xs font-bold text-gray-700"></span>
-                <button onclick="handleLogout()" class="bg-red-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">Logout</button>
-            </div>
-        </div>
-    </header>
+      <div id="loginView">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" placeholder="operator@example.com">
 
-    <div class="space-y-6">
-        <!-- Main Info Card -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-5 shadow-lg text-white">
-            <h2 class="text-xl font-bold mb-3">📚 અહીંથી આપને મળશે તમામ MCQ Material</h2>
-            <p class="text-sm opacity-90 mb-2">EXAM: GPSC, CCE, PSI, POLICE, TALATI, MPHW, FHW, FOREST GUARD</p>
-            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-3 mt-4">
-                <p class="text-xs">✅ દરરોજ નવી ક્વિઝ અને પ્રેક્ટિસ મટીરિયલ</p>
-                <p class="text-xs mt-1">✅ તમામ સરકારી પરીક્ષાઓ માટે તૈયારી</p>
-            </div>
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Password">
+
+        <button id="loginBtn">LOGIN</button>
+      </div>
+
+      <div id="homeView" class="hidden">
+        <div class="center" id="operatorName"></div>
+        <div class="balance">
+          <div class="label">Available Credits</div>
+          <div class="value" id="creditBalance">0</div>
         </div>
 
-        <!-- Daily Learning Section -->
-        <div>
-            <h3 class="text-lg font-bold text-gray-800 mb-3 px-1">Daily Learning</h3>
-            <div class="grid grid-cols-2 gap-3">
-                <!-- Daily Quiz Card -->
-                <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
-                    <div class="text-3xl mb-2">📝</div>
-                    <h4 class="font-bold text-sm mb-2">Daily QUIZ</h4>
-                    <p class="text-[10px] text-gray-500 mb-3">બધા subjects ની mix quiz, 25 પ્રશ્નો</p>
-                    <button onclick="checkAuthAndProceed('daily-quiz.html')" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold">Start Quiz</button>
-                </div>
-
-                <!-- Daily Maths & Reasoning Card -->
-                <div class="bg-white rounded-xl p-4 shadow-md border border-gray-50">
-                    <div class="text-3xl mb-2">🧮</div>
-                    <h4 class="font-bold text-sm mb-2">Daily MATHS & REASONING</h4>
-                    <p class="text-[10px] text-gray-500 mb-3">રોજ અલગ chapter, 25 marks, CCE તેમજ PSI & LRD માટે ખૂબજ ઉપયોગી</p>
-                    <button onclick="checkAuthAndProceed('maths-test.html')" class="w-full bg-indigo-600 text-white py-2 rounded-lg text-xs font-bold">Start Practice</button>
-                </div>
-            </div>
+        <div class="chips">
+          <button class="chip" data-amount="500">₹500</button>
+          <button class="chip" data-amount="1000">₹1000</button>
+          <button class="chip" data-amount="2000">₹2000</button>
+          <button class="chip" data-amount="5000">₹5000</button>
         </div>
 
-        <!-- Demo Test Card -->
-        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50 text-center">
-            <h2 class="text-lg font-bold">⭐ Demo Test - ફ્રી એક્સેસ</h2>
-            <p class="text-gray-500 text-sm my-3">50 માર્કની ટેસ્ટ | અત્યારે જ આપો</p>
-            <button onclick="checkAuthAndProceed('demo-test-page.html?test=demo_test_sti')" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold">DEMO Test શરૂ કરો</button>
-        </div>
+        <label for="amount">Amount</label>
+        <input id="amount" type="number" min="1" step="1" value="500">
 
-        <!-- Test Series Card -->
-        <div class="bg-white rounded-2xl p-5 shadow-md border border-gray-50">
-            <h2 class="text-lg font-bold">Test Series: GPSC-STI</h2>
-            <div class="flex justify-between items-center my-4">
-                <span class="text-green-600 font-bold text-xl">₹49/-</span>
-                <span class="bg-orange-50 text-orange-600 text-[10px] px-2 py-1 rounded-full font-bold">5 MOCK TESTS</span>
-            </div>
-            <button onclick="checkAuthAndProceed('mock-test-page.html')" class="w-full border-2 border-blue-600 text-blue-600 py-3 rounded-full font-bold">Give Right Now</button>
-        </div>
-    </div>
+        <button id="buyBtn">BUY CREDITS</button>
+        <button id="refreshBtn" class="ghost">REFRESH BALANCE</button>
+        <button id="logoutBtn" class="ghost">LOGOUT</button>
+      </div>
 
-    <!-- Sticky Footer -->
-    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center shadow-lg">
-        <div class="text-[10px] text-orange-500">© 2025 KAPILA Institute</div>
-        <div class="flex gap-2">
-            <a href="https://wa.me/916353511804?text=Hello%20KAPILA%20Institute"
-               target="_blank"
-               class="border border-green-500 text-green-600 px-4 py-2 rounded-full text-xs font-bold">
-               WhatsApp
-            </a>
-            <a href="tel:+916353511804"
-               class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-xs font-bold">
-               Call
-            </a>
-        </div>
-    </footer>
+      <div id="msg" class="message hidden"></div>
+    </section>
+  </main>
 
-    <!-- Unified Auth Modal -->
-    <div id="authModal" class="modal">
-        <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 text-2xl z-10">&times;</button>
-            
-            <!-- Tabs -->
-            <div class="flex border-b">
-                <button id="loginTab" class="tab-button flex-1 active" onclick="switchTab('login')">લોગિન</button>
-                <button id="registerTab" class="tab-button flex-1" onclick="switchTab('register')">રજિસ્ટ્રેશન</button>
-            </div>
+  <script>
+    const SUPABASE_URL = "https://arlvoarkbtteywpobkmb.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFybHZvYXJrYnR0ZXl3cG9ia21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyOTkxNjYsImV4cCI6MjEwMzg3NTE2Nn0.zzf_TEW6VCOy-Rvdk_JTmWomeSkzaaahcIRl8B-o1Do";
 
-            <!-- Login Form -->
-            <div id="loginContent" class="tab-content active p-6">
-                <h3 class="text-xl font-bold mb-5">લોગિન કરો</h3>
-                <input type="email" id="loginEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="password" id="loginPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <div id="loginMessage" class="text-sm text-red-600 mb-3 hidden"></div>
-                <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">લોગિન કરો</button>
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    એકાઉન્ટ નથી? <button onclick="switchTab('register')" class="text-blue-600 font-bold">રજિસ્ટર કરો</button>
-                </p>
-            </div>
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let session = null;
+    let operator = null;
 
-            <!-- Register Form -->
-            <div id="registerContent" class="tab-content p-6">
-                <h3 class="text-xl font-bold mb-5">નવું રજિસ્ટ્રેશન</h3>
-                <input type="text" id="regName" placeholder="પૂરું નામ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="text" id="regMobile" placeholder="મોબાઈલ નંબર" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="email" id="regEmail" placeholder="ઈમેલ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <input type="password" id="regPass" placeholder="પાસવર્ડ" class="w-full bg-gray-50 border p-3 rounded-xl mb-3 outline-none">
-                <div id="registerMessage" class="text-sm text-red-600 mb-3 hidden"></div>
-                <button id="regBtn" onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">સેવ કરો</button>
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    પહેલેથી એકાઉન્ટ છે? <button onclick="switchTab('login')" class="text-blue-600 font-bold">લોગિન કરો</button>
-                </p>
-            </div>
-        </div>
-    </div>
+    const loginView = document.getElementById("loginView");
+    const homeView = document.getElementById("homeView");
+    const msg = document.getElementById("msg");
+    const loginBtn = document.getElementById("loginBtn");
+    const buyBtn = document.getElementById("buyBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-    <script>
-        const supabaseUrl = 'https://bhmycvrbucmbbrpzeane.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobXljdnJidWNtYmJycHplYW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTQwOTYsImV4cCI6MjA4MDI3MDA5Nn0.qQ3bw9cADG0P8hbGwx76Oeg54l-9FbRWxc92nZdSPL4';
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    function showMessage(text, type) {
+      msg.textContent = text;
+      msg.className = `message ${type}`;
+      msg.classList.remove("hidden");
+    }
 
-        let pendingRedirect = null;
+    function clearMessage() {
+      msg.textContent = "";
+      msg.className = "message hidden";
+    }
 
-        window.onload = async () => {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if (user) showUser(user);
-        };
+    function setBusy(isBusy) {
+      loginBtn.disabled = isBusy;
+      buyBtn.disabled = isBusy;
+      refreshBtn.disabled = isBusy;
+    }
 
-        async function showUser(user) {
-            const { data } = await _supabase.from('profiles').select('full_name').eq('id', user.id).single();
-            if (data) {
-                document.getElementById('userName').innerText = data.full_name;
-                document.getElementById('btnReg').classList.add('hidden');
-                document.getElementById('btnLogin').classList.add('hidden');
-                document.getElementById('userProfile').classList.remove('hidden');
-            }
+    function showHome() {
+      loginView.classList.add("hidden");
+      homeView.classList.remove("hidden");
+      document.getElementById("operatorName").textContent = operator.center_name || operator.email || "";
+      document.getElementById("creditBalance").textContent = operator.credit_balance ?? 0;
+    }
+
+    async function loadOperator() {
+      const userId = session?.user?.id;
+      if (!userId) throw new Error("Login session not found");
+
+      const { data, error } = await client
+        .from("cbrt_operators")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+      operator = data;
+      showHome();
+    }
+
+    async function login() {
+      clearMessage();
+      setBusy(true);
+      try {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        session = data.session;
+        await loadOperator();
+      } catch (err) {
+        showMessage(`Login failed: ${err.message || err}`, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function refreshBalance() {
+      clearMessage();
+      setBusy(true);
+      try {
+        await loadOperator();
+        showMessage("Balance refreshed.", "success");
+      } catch (err) {
+        showMessage(`Could not refresh balance: ${err.message || err}`, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function buyCredits() {
+      clearMessage();
+      setBusy(true);
+      try {
+        const amount = Number(document.getElementById("amount").value);
+        if (!Number.isFinite(amount) || amount <= 0) {
+          throw new Error("Enter a valid amount");
         }
 
-        function openAuthModal(tab = 'login') {
-            document.getElementById('authModal').classList.add('active');
-            switchTab(tab);
+        const { data: currentSession } = await client.auth.getSession();
+        session = currentSession.session;
+        if (!session?.access_token) throw new Error("Please login again");
+
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/create-razorpay-order`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+            "apikey": SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({
+            operator_id: operator.id,
+            amount_rupees: amount,
+            payment_method: "checkout",
+          }),
+        });
+
+        const order = await res.json();
+        if (!res.ok || order.error) {
+          throw new Error(JSON.stringify(order));
         }
 
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.remove('active');
-            pendingRedirect = null;
-            clearMessages();
-        }
+        const checkout = new Razorpay({
+          key: order.key_id,
+          amount: order.amount,
+          currency: order.currency || "INR",
+          name: "CBRT Credit",
+          description: "Credit recharge",
+          order_id: order.order_id,
+          prefill: { email: operator.email || "" },
+          notes: {
+            operator_id: operator.id,
+            amount_rupees: String(amount),
+            reference_id: order.reference_id || "",
+            source: "cbrt_credit_website",
+          },
+          theme: { color: "#1B4F8C" },
+          handler: async function (response) {
+            showMessage(`Payment successful. Updating credits...\nPayment ID: ${response.razorpay_payment_id}`, "success");
+            setTimeout(refreshBalance, 2500);
+          },
+          modal: {
+            ondismiss: function () {
+              showMessage("Payment window closed.", "error");
+            },
+          },
+        });
 
-        function switchTab(tab) {
-            clearMessages();
-            document.getElementById('loginTab').classList.toggle('active', tab === 'login');
-            document.getElementById('registerTab').classList.toggle('active', tab === 'register');
-            document.getElementById('loginContent').classList.toggle('active', tab === 'login');
-            document.getElementById('registerContent').classList.toggle('active', tab === 'register');
-        }
+        checkout.open();
+      } catch (err) {
+        showMessage(`Payment could not start: ${err.message || err}`, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
 
-        function clearMessages() {
-            document.getElementById('loginMessage').classList.add('hidden');
-            document.getElementById('registerMessage').classList.add('hidden');
-            document.getElementById('loginMessage').innerText = '';
-            document.getElementById('registerMessage').innerText = '';
-        }
+    async function logout() {
+      await client.auth.signOut();
+      session = null;
+      operator = null;
+      homeView.classList.add("hidden");
+      loginView.classList.remove("hidden");
+      clearMessage();
+    }
 
-        function showMessage(type, message) {
-            const messageDiv = document.getElementById(type + 'Message');
-            messageDiv.innerText = message;
-            messageDiv.classList.remove('hidden');
-        }
+    loginBtn.addEventListener("click", login);
+    buyBtn.addEventListener("click", buyCredits);
+    refreshBtn.addEventListener("click", refreshBalance);
+    logoutBtn.addEventListener("click", logout);
 
-        async function checkAuthAndProceed(url) {
-            const { data: { user } } = await _supabase.auth.getUser();
-            
-            if (user) {
-                location.href = url;
-            } else {
-                pendingRedirect = url;
-                openAuthModal('login');
-            }
-        }
+    document.querySelectorAll(".chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        document.getElementById("amount").value = chip.dataset.amount;
+      });
+    });
 
-        async function handleRegister() {
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPass').value;
-            const fullName = document.getElementById('regName').value.trim();
-            const mobile = document.getElementById('regMobile').value.trim();
-            const btn = document.getElementById('regBtn');
-
-            clearMessages();
-
-            if(!email || !password || !fullName || !mobile) { 
-                showMessage('register', "બધી વિગતો ભરો");
-                return; 
-            }
-
-            btn.disabled = true; 
-            btn.innerText = "સેવ થાય છે...";
-
-            const { data: existingUser } = await _supabase
-                .from('profiles')
-                .select('email')
-                .eq('email', email)
-                .single();
-
-            if (existingUser) {
-                showMessage('register', "તમે પહેલેથી જ રજિસ્ટર છો, કૃપયા લોગિન કરો");
-                btn.disabled = false; 
-                btn.innerText = "સેવ કરો";
-                setTimeout(() => switchTab('login'), 2000);
-                return;
-            }
-
-            const { data, error: authError } = await _supabase.auth.signUp({ email, password });
-
-            if (authError) {
-                showMessage('register', "ભૂલ: " + authError.message);
-                btn.disabled = false; 
-                btn.innerText = "સેવ કરો";
-                return;
-            }
-
-            if (data.user) {
-                const { error: profileError } = await _supabase
-                    .from('profiles')
-                    .upsert({ id: data.user.id, email: email, full_name: fullName, mobile: mobile });
-                
-                if (profileError) {
-                    showMessage('register', "ટેબલ ભૂલ: " + profileError.message);
-                    btn.disabled = false; 
-                    btn.innerText = "સેવ કરો";
-                } else { 
-                    showMessage('register', "સફળ! લોગિન થઈ રહ્યું છે...");
-                    setTimeout(() => {
-                        if (pendingRedirect) {
-                            location.href = pendingRedirect;
-                        } else {
-                            location.reload();
-                        }
-                    }, 1000);
-                }
-            }
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPass').value;
-            const btn = document.getElementById('loginBtn');
-
-            clearMessages();
-
-            if(!email || !password) { 
-                showMessage('login', "ઈમેલ અને પાસવર્ડ ભરો");
-                return; 
-            }
-
-            btn.disabled = true;
-            btn.innerText = "લોગિન થાય છે...";
-
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                if (error.message.includes('Invalid login credentials') || error.message.includes('not found')) {
-                    showMessage('login', "એકાઉન્ટ નથી મળ્યું, કૃપયા પહેલા રજિસ્ટર કરો");
-                    btn.disabled = false;
-                    btn.innerText = "લોગિન કરો";
-                    setTimeout(() => switchTab('register'), 2000);
-                } else {
-                    showMessage('login', "લોગિન ભૂલ: " + error.message);
-                    btn.disabled = false;
-                    btn.innerText = "લોગિન કરો";
-                }
-            } else {
-                showMessage('login', "સફળ! રીડાયરેક્ટ થઈ રહ્યું છે...");
-                setTimeout(() => {
-                    if (pendingRedirect) {
-                        location.href = pendingRedirect;
-                    } else {
-                        location.reload();
-                    }
-                }, 1000);
-            }
-        }
-
-        async function handleLogout() {
-            await _supabase.auth.signOut();
-            location.reload();
-        }
-    </script>
+    client.auth.getSession().then(async ({ data }) => {
+      session = data.session;
+      if (!session) return;
+      try {
+        await loadOperator();
+      } catch (_) {
+        await client.auth.signOut();
+      }
+    });
+  </script>
 </body>
 </html>
-
-
-
-
-
 
